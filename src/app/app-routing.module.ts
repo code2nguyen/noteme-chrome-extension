@@ -2,11 +2,25 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LocationStrategy, HashLocationStrategy, PathLocationStrategy } from '@angular/common';
 import { WelcomePageComponent } from './welcome-page/welcome-page.component';
+import { concat, forkJoin, from } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 
 const appRoutes: Routes = [
   {
     path: 'main-board',
-    loadChildren: () => import('./main-board/main-board.module').then((m) => m.MainBoardModule),
+    loadChildren: () => {
+      return forkJoin([
+        from(import('@cff/webcomponents/components/dashboard-layout/dashboard-layout.component')),
+        from(import('@cff/webcomponents/components/dashboard-item/dashboard-item.component')),
+      ]).pipe(
+        mergeMap((_) => {
+          return from(import('./main-board/main-board.module').then((m) => m.MainBoardModule));
+        })
+      );
+    },
+    data: {
+      animation: 'MainBoard',
+    },
   },
   { path: 'welcome', component: WelcomePageComponent },
   { path: '', redirectTo: 'welcome', pathMatch: 'full' },
