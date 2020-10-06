@@ -8,9 +8,10 @@ import '@material/mwc-list/mwc-list-item';
 import '@cff/webcomponents/components/search-input/search-input.component';
 import '@cff/webcomponents/components/dashboard-layout/dashboard-layout.component';
 import '@cff/webcomponents/components/dashboard-item/dashboard-item.component';
+import { StickySidenavDirective } from './sticky-sidenav.directive';
 
 @NgModule({
-  declarations: [MainBoardComponent],
+  declarations: [MainBoardComponent, StickySidenavDirective],
   imports: [CommonModule, RouterModule.forChild([{ path: '', pathMatch: 'full', component: MainBoardComponent }])],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

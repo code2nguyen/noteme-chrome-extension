@@ -24,27 +24,19 @@ import {
 export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('addButton') addButton!: ElementRef;
   @ViewChild('addMenu') addMenu!: ElementRef;
-  @ViewChild('mainContainer') mainContainer!: ElementRef;
 
   mainContainerOverlap = false;
 
   private mousePressTime = 0;
-  private intersectionObserver?: IntersectionObserver;
 
   constructor(private ngZone: NgZone, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {}
 
-  ngOnDestroy(): void {
-    if (this.intersectionObserver) {
-      this.intersectionObserver.unobserve(this.mainContainer.nativeElement);
-      this.intersectionObserver.disconnect();
-    }
-  }
+  ngOnDestroy(): void {}
 
   ngAfterViewInit(): void {
     this.addMenu.nativeElement.anchor = this.addButton.nativeElement;
-    // this.observeIntersectionNavbar();
   }
 
   onAddButtonMouseDown(): void {
@@ -68,27 +60,8 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   newNote(): void {}
 
-  observeIntersectionNavbar(): void {
-    this.intersectionObserver = new IntersectionObserver((entries) => {
-      this.checkForIntersection(entries);
-    }, {});
-    this.ngZone.runOutsideAngular(() => {
-      this.intersectionObserver.observe(this.mainContainer.nativeElement);
-    });
+  navbarOverlappedHandler(overlapped: boolean): void {
+    this.mainContainerOverlap = overlapped;
+    this.cd.markForCheck();
   }
-
-  private checkForIntersection = (entries: Array<IntersectionObserverEntry>) => {
-    let overlaped: boolean;
-    if ((entries[0] as any).isIntersecting) {
-      overlaped = false;
-    } else {
-      overlaped = true;
-    }
-    if (overlaped !== this.mainContainerOverlap) {
-      this.ngZone.run(() => {
-        this.mainContainerOverlap = overlaped;
-        this.cd.markForCheck();
-      });
-    }
-  };
 }

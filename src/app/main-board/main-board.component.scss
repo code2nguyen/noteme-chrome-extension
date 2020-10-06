@@ -21,8 +21,9 @@
     height: 96px;
     z-index: 1000;
     background-color: #303236;
+    opacity: 1;
+    transition: transform 0.5s ease 0s, opacity 0.5s ease 0.1s;
 
-    transition: background-color 0.5s ease-out;
     .ntm-search-input {
       max-width: 650px;
       min-width: 180px;
@@ -45,6 +46,8 @@
 
     .add-button {
       height: 30px;
+      transition-delay: 30s;
+      transition-property: left;
       // position: relative;
     }
 
@@ -60,10 +63,20 @@
   }
 
   .ntm-navbar.overlaped {
-    // background-color: #303236;
-    // box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translate3d(calc(100% - 64px), 0, 0);
   }
   .main-content {
     padding-top: 96px;
+    min-width: 1px;
+  }
+
+  .intersection-radar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
   }
 }

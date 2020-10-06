@@ -33,7 +33,7 @@
       </g>
     </svg>
   </div>
-  <mwc-menu fixed y="32" x="0" id="menu" #addMenu (action)="onSelectedNoteType($event)">
+  <mwc-menu absolute y="32" x="0" id="menu" #addMenu (action)="onSelectedNoteType($event)">
     <mwc-list-item graphic="icon">
       <span>Text Note</span>
       <mwc-icon slot="graphic">
@@ -124,10 +124,15 @@
   </div>
 </div>
 <!-- main content -->
-<cff-dashboard-layout #mainContainer class="main-content" editable scrollableParentSelector="viewport">
+<div class="intersection-radar" ntmStickyNavbar (overlapped)="navbarOverlappedHandler($event)"></div>
+<cff-dashboard-layout class="main-content" editable scrollableParentSelector="viewport">
   <cff-dashboard-item cols="6" rows="30"> </cff-dashboard-item>
   <cff-dashboard-item> </cff-dashboard-item>
   <cff-dashboard-item> </cff-dashboard-item>
+  <cff-dashboard-item> </cff-dashboard-item><cff-dashboard-item> </cff-dashboard-item
+  ><cff-dashboard-item> </cff-dashboard-item><cff-dashboard-item> </cff-dashboard-item
+  ><cff-dashboard-item> </cff-dashboard-item><cff-dashboard-item> </cff-dashboard-item
+  ><cff-dashboard-item> </cff-dashboard-item><cff-dashboard-item> </cff-dashboard-item>
   <cff-dashboard-item> </cff-dashboard-item>
   <cff-dashboard-item> </cff-dashboard-item>
   <cff-dashboard-item> </cff-dashboard-item>
