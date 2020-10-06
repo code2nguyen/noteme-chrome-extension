@@ -10,8 +10,9 @@ const appRoutes: Routes = [
     path: 'main-board',
     loadChildren: () => {
       return forkJoin([
-        from(import('@cff/webcomponents/components/dashboard-layout/dashboard-layout.component')),
-        from(import('@cff/webcomponents/components/dashboard-item/dashboard-item.component')),
+        from(import('@cff/webcomponents/components/search-input/search-input.component.js')),
+        from(import('@cff/webcomponents/components/dashboard-layout/dashboard-layout.component.js')),
+        from(import('@cff/webcomponents/components/dashboard-item/dashboard-item.component.js')),
       ]).pipe(
         mergeMap((_) => {
           return from(import('./main-board/main-board.module').then((m) => m.MainBoardModule));

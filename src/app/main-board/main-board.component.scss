@@ -1,3 +1,40 @@
-:host {
+.ntm-mainboard {
   display: block;
+  .ntm-navbar {
+    margin: 16px;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+
+    .ntm-search-input {
+      max-width: 450px;
+      min-width: 180px;
+    }
+    .seperator {
+      margin: auto;
+    }
+    .button-icon {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      opacity: 0.8;
+      transition: opacity 0.3s ease-out;
+      cursor: pointer;
+      padding: 0 16px;
+      color: rgb(255, 255, 255, 0.5);
+    }
+    .button-icon:hover {
+      color: #ff726b;
+    }
+
+    .add-button {
+      height: 30px;
+    }
+
+    .ntm-logo:hover {
+      width: 24px;
+      height: 24px;
+      opacity: 1;
+    }
+  }
 }
