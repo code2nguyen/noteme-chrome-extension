@@ -1,13 +1,30 @@
 .ntm-mainboard {
+  // --mdc-menu-min-width: 200px;
+  // --mdc-menu-item-height: 48px;
+  --mdc-theme-surface: #717680;
+  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.8);
+  --mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.8);
+  /* inherits the styles of mwc-list internally */
+  // --mdc-theme-primary: #ff726b;
+  // --mdc-list-vertical-padding: 0px;
+  // --mdc-list-side-padding: 30px;
   display: block;
   .ntm-navbar {
-    margin: 16px;
+    padding: 0px 8px;
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 96px;
+    z-index: 1000;
+    background-color: #303236;
 
+    transition: background-color 0.5s ease-out;
     .ntm-search-input {
-      max-width: 450px;
+      max-width: 650px;
       min-width: 180px;
     }
     .seperator {
@@ -17,10 +34,9 @@
       width: 24px;
       height: 24px;
       flex: 0 0 24px;
-      opacity: 0.8;
-      transition: opacity 0.3s ease-out;
       cursor: pointer;
       padding: 0 16px;
+      transition: color 0.3s ease-out;
       color: rgb(255, 255, 255, 0.5);
     }
     .button-icon:hover {
@@ -29,12 +45,25 @@
 
     .add-button {
       height: 30px;
+      // position: relative;
     }
 
+    .ntm-logo {
+      transition: opacity 0.3s ease-out;
+      opacity: 0.8;
+    }
     .ntm-logo:hover {
       width: 24px;
       height: 24px;
       opacity: 1;
     }
+  }
+
+  .ntm-navbar.overlaped {
+    // background-color: #303236;
+    // box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+  .main-content {
+    padding-top: 96px;
   }
 }
