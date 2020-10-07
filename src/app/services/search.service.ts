@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, of, forkJoin } from 'rxjs';
 import { STORAGE_API, StorageApi, itemDataIndexKey } from './storage.api';
 import { map, take } from 'rxjs/operators';
-import lunr from 'lunr';
+import * as lunr from 'lunr';
 import Fuse from 'fuse.js';
 
 import { Store, select } from '@ngrx/store';
@@ -49,7 +49,7 @@ export class SearchService {
     );
   }
 
-  private _getFuse(): Observable<Fuse<FuseDocument, Fuse.IFuseOptions<FuseDocument>>> {
+  private _getFuse(): Observable<Fuse<FuseDocument>> {
     return this.store.pipe(
       select(selectAllItemDatas),
       map((items) => {

@@ -1,16 +1,20 @@
+import { ExtensionId } from '../../extension-id';
+import { GridPosition } from './grid-position';
 import { ItemLayout } from './item-layout';
 
 export interface ArtBoardItem {
   id: string;
+  extensionId: ExtensionId;
   boardId?: string;
-  layout: ItemLayout;
-  element: string;
+  layout?: ItemLayout;
+  gridPosition: GridPosition;
+  element?: string;
   starred?: boolean;
+  colorIndex: number;
   properties: Partial<{
     category: string;
-    color: number;
+    color: string;
     language: string;
-    zIndex: number;
   }>;
   modifiedDate: string;
   dataModifiedDate?: string;

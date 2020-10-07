@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import without from 'lodash/without';
+import without from 'lodash-es/without';
 import { mergeMap, catchError, switchMap, map, debounceTime, mapTo, withLatestFrom } from 'rxjs/operators';
 import { forkJoin, of, iif, asyncScheduler, EMPTY, from } from 'rxjs';
 

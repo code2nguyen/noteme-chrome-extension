@@ -25,9 +25,12 @@
     "@ngrx/entity": "^10.0.0",
     "@ngrx/store": "^10.0.0",
     "fuse.js": "^6.4.1",
+    "highlight.js": "^10.2.1",
+    "lodash-es": "^4.17.15",
     "lunr": "^2.3.9",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
+    "uuid": "^8.3.1",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
@@ -37,6 +40,7 @@
     "@types/chrome": "0.0.124",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/lunr": "^2.3.3",
     "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
     "husky": "^4.3.0",
