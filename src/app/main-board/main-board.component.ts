@@ -12,13 +12,14 @@ import {
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DataService } from '../services/data.service';
-import { ArtBoardItem, Board, DEFAULT_BOARD_ID } from '../store/models';
+import { ArtBoardItem, Board, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { getCurrentDate, uuid } from '../services/utils';
 import { tap } from 'rxjs/operators';
 import { DEFAULT_EXTENSION_ID, extensionDefaultProperties } from '../extension-config';
 import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../extension-config';
 import cloneDeep from 'lodash-es/cloneDeep';
+import { DataChangeEvent } from '../store/models/data-change-event';
 
 @Component({
   selector: 'ntm-mainboard',
@@ -104,5 +105,12 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   navbarOverlappedHandler(overlapped: boolean): void {
     this.mainContainerOverlap = overlapped;
     this.cd.markForCheck();
+  }
+  getItemData(itemDataId: string): Observable<ItemData> {
+    return this.dataService.getItemData(itemDataId);
+  }
+
+  onItemDataChange(id: string, { data, dataType }: DataChangeEvent): void {
+    this.dataService.updateDataItem(id, data, dataType);
   }
 }

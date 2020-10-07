@@ -136,6 +136,8 @@
       [screenColumn]="item.gridPosition.screenColumns"
       [order]="item.gridPosition.order"
       [ntmExtensionInject]="item.extensionId"
+      [data]="getItemData(item.id) | async"
+      (dataChange)="onItemDataChange(item.id, $event)"
     >
     </cff-dashboard-item>
   </ng-container>

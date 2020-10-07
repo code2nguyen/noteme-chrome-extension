@@ -8,7 +8,6 @@ export interface ExtensionProperty {
 interface ExtensionEvent {
   event: string;
   propertyName: string;
-  dataType: DataType;
 }
 
 export interface ExtensionConfig {
@@ -17,6 +16,7 @@ export interface ExtensionConfig {
   properties: ExtensionProperty[];
   dataChangeEvent: ExtensionEvent;
   dataInputProperty: string;
+  dataType: DataType;
   toolbarComponent:
     | {
         element?: string;

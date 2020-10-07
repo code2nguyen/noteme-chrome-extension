@@ -54,9 +54,9 @@ export const extensionConfigs: {
       },
     ],
     dataInputProperty: 'content',
+    dataType: DataType.DELTA,
     dataChangeEvent: {
       event: 'content-change',
-      dataType: DataType.DELTA,
       propertyName: 'detail.content',
     },
     toolbarComponent: {

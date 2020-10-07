@@ -109,3 +109,11 @@ export function hasProperty(context: any, name: string): boolean {
 
   return false;
 }
+
+export function getObjectPropertyValue(target: any, property: string): any {
+  let currentValue = target;
+  for (const propertyName of property.split('.')) {
+    currentValue = currentValue[propertyName] || {};
+  }
+  return currentValue;
+}

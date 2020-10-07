@@ -3,10 +3,12 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 
 import { ItemDataActions, ItemDataApiActions } from '../actions';
 import { StorageApi, itemDataKey, STORAGE_API } from '../../services/storage.api';
-import { catchError, switchMap, map, debounceTime, mergeMap } from 'rxjs/operators';
+import { catchError, switchMap, map, debounceTime, mergeMap, withLatestFrom, take } from 'rxjs/operators';
 import { of, asyncScheduler } from 'rxjs';
 import { ItemData } from '../models';
 import { createEmptyItemData, getCurrentDate } from '../../services/utils';
+import { select, Store } from '@ngrx/store';
+import { AppState, selectItemDataById } from '../reducers';
 
 @Injectable()
 export class ItemDataEffects {
@@ -51,12 +53,17 @@ export class ItemDataEffects {
       ofType(ItemDataActions.updateItemData),
       debounceTime(debounce, scheduler),
       mergeMap(({ itemData }) => {
-        return this.storageApi
-          .set(itemDataKey(itemData.id), { ...itemData, ...{ modifiedDate: getCurrentDate() } })
-          .pipe(
-            map(() => ItemDataApiActions.updateItemDataSuccess({ itemData })),
-            catchError((error) => of(ItemDataApiActions.createItemDataFailure({ error })))
-          );
+        return this.store.pipe(
+          select(selectItemDataById, { itemDataId: itemData.id }),
+          take(1),
+          mergeMap((oldItemData) => {
+            const updatedDataItem = { ...oldItemData, ...itemData, ...{ modifiedDate: getCurrentDate() } };
+            return this.storageApi.set(itemDataKey(itemData.id), updatedDataItem).pipe(
+              map(() => ItemDataApiActions.updateItemDataSuccess({ itemData: updatedDataItem })),
+              catchError((error) => of(ItemDataApiActions.createItemDataFailure({ error })))
+            );
+          })
+        );
       })
     )
   );
@@ -73,5 +80,9 @@ export class ItemDataEffects {
     )
   );
 
-  constructor(private actions$: Actions, @Inject(STORAGE_API) private storageApi: StorageApi) {}
+  constructor(
+    private store: Store<AppState>,
+    private actions$: Actions,
+    @Inject(STORAGE_API) private storageApi: StorageApi
+  ) {}
 }
