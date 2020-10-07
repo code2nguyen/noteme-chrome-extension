@@ -5,6 +5,7 @@ import {
   EventEmitter,
   Injector,
   Input,
+  NgZone,
   OnChanges,
   OnInit,
   Output,
@@ -18,25 +19,13 @@ import { take } from 'rxjs/operators';
 import { ItemData } from '../store/models';
 import { convertItemData, getObjectPropertyValue } from '../services/utils';
 import { DataChangeEvent } from '../store/models/data-change-event';
+import { DataService } from '../services/data.service';
 
 @Directive({ selector: '[ntmExtensionInject]' })
 export class ExtensionInjectDirective implements OnChanges {
   @Input('ntmExtensionInject') extensiontId?: ExtensionId;
 
-  @Input()
-  private extensionData: ItemData;
-  public get data(): ItemData {
-    return this.extensionData;
-  }
-  public set data(value: ItemData) {
-    this.extensionData = value;
-    if (this.customElements.length > 0 && this.extensionConfig) {
-      this.customElements[0][this.extensionConfig.dataInputProperty] = convertItemData(
-        value,
-        this.extensionConfig.dataType
-      );
-    }
-  }
+  @Input() itemDataId: string;
 
   @Output() dataChange = new EventEmitter<DataChangeEvent>();
   @Output() activate = new EventEmitter<void>();
@@ -45,8 +34,10 @@ export class ExtensionInjectDirective implements OnChanges {
   private customElements?: HTMLElement[] = [];
 
   constructor(
+    private ngZone: NgZone,
     private element: ElementRef,
     private viewContainerRef: ViewContainerRef,
+    private dataService: DataService,
     private injector: Injector,
     private compiler: Compiler
   ) {}
@@ -84,12 +75,7 @@ export class ExtensionInjectDirective implements OnChanges {
         for (const property of this.extensionConfig.properties) {
           customElement[property.name] = property.value;
         }
-        if (this.extensionData) {
-          customElement[this.extensionConfig.dataInputProperty] = convertItemData(
-            this.extensionData,
-            this.extensionConfig.dataType
-          );
-        }
+        this.bindingData();
         customElement.addEventListener(this.extensionConfig.dataChangeEvent.event, this.onDataChangeHandler);
         this.customElements.push(customElement);
         if (this.extensionConfig.toolbarComponent) {
@@ -103,7 +89,25 @@ export class ExtensionInjectDirective implements OnChanges {
       });
   }
   onDataChangeHandler = (event: any): void => {
-    const data = getObjectPropertyValue(event, this.extensionConfig.dataChangeEvent.propertyName);
-    this.dataChange.emit({ data, dataType: this.extensionConfig.dataType });
+    this.ngZone.runOutsideAngular(() => {
+      const data = getObjectPropertyValue(event, this.extensionConfig.dataChangeEvent.propertyName);
+      this.dataChange.emit({ data, dataType: this.extensionConfig.dataType });
+    });
   };
+
+  private bindingData(): void {
+    if (this.itemDataId) {
+      this.dataService
+        .getItemData(this.itemDataId)
+        .pipe(take(1))
+        .subscribe((itemData) => {
+          if (this.customElements.length > 0 && this.extensionConfig) {
+            this.customElements[0][this.extensionConfig.dataInputProperty] = convertItemData(
+              itemData,
+              this.extensionConfig.dataType
+            );
+          }
+        });
+    }
+  }
 }

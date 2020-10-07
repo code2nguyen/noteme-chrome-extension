@@ -106,11 +106,27 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mainContainerOverlap = overlapped;
     this.cd.markForCheck();
   }
+
   getItemData(itemDataId: string): Observable<ItemData> {
     return this.dataService.getItemData(itemDataId);
   }
 
   onItemDataChange(id: string, { data, dataType }: DataChangeEvent): void {
     this.dataService.updateDataItem(id, data, dataType);
+  }
+
+  onChangeLayoutHandle(event: any): void {
+    this.dataService.changeAllArtBoardItemPosition(
+      event.detail.map((item) => {
+        return {
+          artBoardItemId: item.id,
+          gridPosition: {
+            screenColumns: item.screenColumns,
+            row: item.row,
+            order: item.order,
+          },
+        };
+      })
+    );
   }
 }

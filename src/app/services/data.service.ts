@@ -4,8 +4,10 @@ import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { ArtBoardItemActions, ItemDataActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
+import { ArtBoardItemPosition } from '../store/models/art-board-item-position';
 import { DataType } from '../store/models/data-type';
-import { AppState, selectArtBoardItemsByBoardId, selectItemDataById } from '../store/reducers';
+import { GridPosition } from '../store/models/grid-position';
+import { AppState, selectArtBoardItemById, selectArtBoardItemsByBoardId, selectItemDataById } from '../store/reducers';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
@@ -24,9 +26,15 @@ export class DataService {
     );
   }
 
-  getArtBoardItems(boardId: string): Observable<ArtBoardItem[]> {
-    this.store.dispatch(ArtBoardItemActions.loadArtBoardItems({ boardId }));
+  getArtBoardItems(boardId: string, force = true): Observable<ArtBoardItem[]> {
+    if (force) {
+      this.store.dispatch(ArtBoardItemActions.loadArtBoardItems({ boardId }));
+    }
     return this.store.pipe(select(selectArtBoardItemsByBoardId, { boardId }));
+  }
+
+  getArtBoardItemById(artBoardItemId: string): Observable<ArtBoardItem> {
+    return this.store.pipe(select(selectArtBoardItemById, { artBoardItemId }));
   }
 
   addArtBoardItem(artBoardItem: ArtBoardItem): void {
@@ -35,6 +43,18 @@ export class DataService {
 
   toggleArtBoardItemStarState(artBoardItem: ArtBoardItem): void {
     this.updateArtBoardItem({ ...artBoardItem, ...{ starred: !artBoardItem.starred } });
+  }
+
+  changeArtBoardItemPosition(artBoardItemId: string, position: GridPosition): void {
+    this.getArtBoardItemById(artBoardItemId)
+      .pipe(take(1))
+      .subscribe((artBoardItem) => {
+        this.updateArtBoardItem({ ...artBoardItem, ...{ gridPosition: position } });
+      });
+  }
+
+  changeAllArtBoardItemPosition(artBoardItemsPositon: ArtBoardItemPosition[]): void {
+    this.store.dispatch(ArtBoardItemActions.updateAllArtBoardItemLayout({ itemLayouts: artBoardItemsPositon }));
   }
 
   changeArtBoardItemProperties(properties: { [key: string]: any }, artBoardItem: ArtBoardItem): void {

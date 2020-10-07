@@ -21,6 +21,9 @@ export const initialState: State = adapter.getInitialState({
 
 export const reducer = createReducer(
   initialState,
+  on(ArtBoardItemApiActions.updateAllArtBoardItemLayoutSuccess, (state, { artBoardItems }) => {
+    return adapter.upsertMany(artBoardItems, state);
+  }),
   on(ArtBoardItemApiActions.getAllArtBoardItemsSuccess, (state, { artBoardItems }) => {
     const newItems = artBoardItems.filter((item) => item && !state.entities[item.id]);
     return {

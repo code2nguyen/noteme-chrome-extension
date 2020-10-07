@@ -128,15 +128,21 @@
 </div>
 <!-- main content -->
 <div class="intersection-radar" ntmStickyNavbar (overlapped)="navbarOverlappedHandler($event)"></div>
-<cff-dashboard-layout class="main-content" editable scrollableParentSelector="viewport">
+<cff-dashboard-layout
+  (layout-change)="onChangeLayoutHandle($event)"
+  class="main-content"
+  editable
+  scrollableParentSelector="viewport"
+>
   <ng-container *ngFor="let item of items$ | async; trackBy: trackByItemId">
     <cff-dashboard-item
+      [attr.id]="item.id"
       [currentBgColor]="item.colorIndex"
       [rows]="item.gridPosition.row"
       [screenColumn]="item.gridPosition.screenColumns"
       [order]="item.gridPosition.order"
       [ntmExtensionInject]="item.extensionId"
-      [data]="getItemData(item.id) | async"
+      [itemDataId]="item.id"
       (dataChange)="onItemDataChange(item.id, $event)"
     >
     </cff-dashboard-item>

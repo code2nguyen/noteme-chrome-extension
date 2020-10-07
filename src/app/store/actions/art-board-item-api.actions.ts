@@ -87,3 +87,12 @@ export const getAllArtBoardItemsFailure = createAction(
   '[Art Board Item] get all Art Board Items Failure',
   props<{ error: any }>()
 );
+
+export const updateAllArtBoardItemLayoutSuccess = createAction(
+  '[Art Board Item] Update layout of all board items Success',
+  props<{ artBoardItems: ArtBoardItem[] }>()
+);
+export const updateAllArtBoardItemLayoutFailure = createAction(
+  '[Art Board Item] Update layout of all board items Failure',
+  props<{ error: any }>()
+);

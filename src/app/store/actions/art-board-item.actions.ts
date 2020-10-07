@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import { ArtBoardItem } from '../models';
 import { DataType } from '../models/data-type';
+import { ArtBoardItemPosition } from '../models/art-board-item-position';
 
 export const loadArtBoardItems = createAction(
   '[Art Board Item] Retrieve all Art Board Items',
@@ -43,3 +44,8 @@ export const searchArtBoardItems = createAction(
 );
 
 export const getAllArtBoardItems = createAction('[Art Board Item] get all Art Board Items');
+
+export const updateAllArtBoardItemLayout = createAction(
+  '[Art Board Item] Update layout of all board items',
+  props<{ itemLayouts: Array<ArtBoardItemPosition> }>()
+);

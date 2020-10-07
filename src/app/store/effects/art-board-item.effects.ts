@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import without from 'lodash-es/without';
-import { mergeMap, catchError, switchMap, map, debounceTime, mapTo, withLatestFrom } from 'rxjs/operators';
+import { mergeMap, catchError, switchMap, map, debounceTime, mapTo, withLatestFrom, take } from 'rxjs/operators';
 import { forkJoin, of, iif, asyncScheduler, EMPTY, from } from 'rxjs';
 
 import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataActions, ItemDataApiActions } from '../actions';
@@ -17,7 +17,7 @@ import { ArtBoardItem } from '../models';
 import { getCurrentDate, isNotNullOrUndefined, convertItemData } from '../../services/utils';
 import { SearchService } from '../../services/search.service';
 import { Store, select, Action } from '@ngrx/store';
-import { AppState, selectItemDataById, selectIsAllLoadedArtBoardItems } from '../reducers';
+import { AppState, selectItemDataById, selectIsAllLoadedArtBoardItems, selectArtBoardItemById } from '../reducers';
 
 @Injectable()
 export class ArtBoardItemEffects {
@@ -83,6 +83,39 @@ export class ArtBoardItemEffects {
             map(() => ArtBoardItemApiActions.updateArtBoardItemSuccess({ artBoardItem })),
             catchError((error) => of(ArtBoardItemApiActions.updateArtBoardItemFailure({ error })))
           );
+      })
+    )
+  );
+
+  updateAllArtBoardItemLayout$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ArtBoardItemActions.updateAllArtBoardItemLayout),
+      mergeMap(({ itemLayouts }) => {
+        return forkJoin(
+          itemLayouts.map((item) => {
+            return this.store
+              .pipe(select(selectArtBoardItemById, { artBoardItemId: item.artBoardItemId }), take(1))
+              .pipe(
+                mergeMap((artBoardItem) => {
+                  const updatedArtBoardItem: ArtBoardItem = {
+                    ...artBoardItem,
+                    ...{ gridPosition: item.gridPosition },
+                    ...{ modifiedDate: getCurrentDate() },
+                  };
+                  return this.storageApi
+                    .set(artBoardItemKey(artBoardItem.id), updatedArtBoardItem)
+                    .pipe(mapTo(updatedArtBoardItem));
+                })
+              );
+          })
+        ).pipe(
+          map(
+            (artBoardItems) => {
+              return ArtBoardItemApiActions.updateAllArtBoardItemLayoutSuccess({ artBoardItems });
+            },
+            catchError((error) => of(ArtBoardItemApiActions.updateAllArtBoardItemLayoutFailure({ error })))
+          )
+        );
       })
     )
   );
