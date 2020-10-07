@@ -144,6 +144,7 @@
       [ntmExtensionInject]="item.extensionId"
       [itemDataId]="item.id"
       (dataChange)="onItemDataChange(item.id, $event)"
+      (change-background)="onItemChangeBackground(item.id, $event.detail)"
     >
     </cff-dashboard-item>
   </ng-container>

@@ -53,6 +53,14 @@ export class DataService {
       });
   }
 
+  changeArtBoardItemColorIndex(artBoardItemId: string, colorIndex: number): void {
+    this.getArtBoardItemById(artBoardItemId)
+      .pipe(take(1))
+      .subscribe((artBoardItem) => {
+        this.updateArtBoardItem({ ...artBoardItem, ...{ colorIndex } });
+      });
+  }
+
   changeAllArtBoardItemPosition(artBoardItemsPositon: ArtBoardItemPosition[]): void {
     this.store.dispatch(ArtBoardItemActions.updateAllArtBoardItemLayout({ itemLayouts: artBoardItemsPositon }));
   }

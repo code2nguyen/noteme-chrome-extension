@@ -129,4 +129,8 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
   }
+
+  onItemChangeBackground(id: string, colorIndex: number): void {
+    this.dataService.changeArtBoardItemColorIndex(id, colorIndex);
+  }
 }
