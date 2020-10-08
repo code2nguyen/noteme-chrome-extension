@@ -21,6 +21,7 @@ import { NBR_COLORS } from '../extension-config';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DataChangeEvent } from '../store/models/data-change-event';
 import '@cff/webcomponents/components/quill-editor/quill-editor.component.js';
+import { Router } from '@angular/router';
 @Component({
   selector: 'ntm-mainboard',
   templateUrl: './main-board.component.html',
@@ -60,7 +61,13 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
       { attributes: { color: '#ffff00' }, insert: 'but his memory was drowsy and uncertain' },
     ],
   };
-  constructor(private ngZone: NgZone, private cd: ChangeDetectorRef, private dataService: DataService) {
+
+  constructor(
+    private router: Router,
+    private ngZone: NgZone,
+    private cd: ChangeDetectorRef,
+    private dataService: DataService
+  ) {
     this.items$ = dataService.getArtBoardItems(DEFAULT_BOARD_ID).pipe(
       tap((items) => {
         this.minOrder = items.length > 0 ? Math.min(...items.map((item) => item.gridPosition?.order ?? 0)) : 0;
@@ -154,5 +161,9 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   hideArtboardItem(item: ArtBoardItem): void {
     this.dataService.hideArtBoardItem(item);
+  }
+
+  goGoWelcomePage(): void {
+    this.router.navigate(['/']);
   }
 }
