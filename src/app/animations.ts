@@ -28,7 +28,7 @@ export const routeAnimation = trigger('routeAnimations', [
     ]),
     query(':enter', [style({ opacity: 0 })]),
     group([
-      // query(':leave', [animate('300ms ease-out', style({ opacity: 0 }))]),
+      query(':leave', [animate('300ms ease-out', style({ opacity: 0 }))]),
       query(':enter', [animate('300ms ease-out', style({ opacity: 1 }))]),
     ]),
     query(':enter', animateChild()),
