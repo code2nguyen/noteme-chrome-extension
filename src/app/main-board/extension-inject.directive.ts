@@ -1,14 +1,12 @@
 import {
-  Compiler,
+  AfterViewInit,
   Directive,
   ElementRef,
   EventEmitter,
-  Injector,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
-  OnInit,
   Output,
   SimpleChanges,
   ViewContainerRef,
@@ -17,13 +15,14 @@ import { ExtensionConfig } from '../store/models/extension-model';
 import { ExtensionId } from '../extension-id';
 import { extensionConfigs, extensionLoader } from '../extension-config';
 import { take } from 'rxjs/operators';
-import { ItemData } from '../store/models';
-import { convertItemData, getObjectPropertyValue } from '../services/utils';
+import { getObjectPropertyValue } from '../services/utils';
 import { DataChangeEvent } from '../store/models/data-change-event';
 import { DataService } from '../services/data.service';
+import { MainBoardComponent } from './main-board.component';
+import { Subscription } from 'rxjs';
 
 @Directive({ selector: '[ntmExtensionInject]' })
-export class ExtensionInjectDirective implements OnChanges, OnDestroy {
+export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterViewInit {
   @Input('ntmExtensionInject') extensiontId?: ExtensionId;
 
   @Input() itemDataId: string;
@@ -34,14 +33,20 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy {
 
   private extensionConfig?: ExtensionConfig;
   private customElements?: HTMLElement[] = [];
-
+  private highlightSubscription = Subscription.EMPTY;
   constructor(
+    private parent: MainBoardComponent,
     private ngZone: NgZone,
     private element: ElementRef,
     private viewContainerRef: ViewContainerRef,
     private dataService: DataService
   ) {}
 
+  ngAfterViewInit(): void {
+    this.highlightSubscription = this.parent.highlightItem$.subscribe((highlightItemId) => {
+      this.highlight(highlightItemId);
+    });
+  }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.extensiontId) {
       if (!changes.extensiontId.isFirstChange()) {
@@ -66,12 +71,28 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.highlightSubscription.unsubscribe();
     if (this.customElements.length > 0) {
       this.customElements[0].removeEventListener(this.extensionConfig.dataChangeEvent.event, this.onDataChangeHandler);
     }
     this.customElements.forEach((child) => child.remove());
     this.customElements = [];
   }
+
+  highlight(highlightItemId: string): void {
+    if (highlightItemId !== this.itemDataId) {
+      return;
+    }
+    setTimeout(() => {
+      this.element.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    }, 1);
+    this.element.nativeElement.classList.add('blink');
+    this.element.nativeElement.addEventListener('animationend', this.removeBlinkClass);
+  }
+
+  removeBlinkClass = () => {
+    this.element.nativeElement.classList.remove('blink');
+  };
 
   injectCustomElement(): void {
     const loader = extensionLoader[this.extensiontId];
@@ -100,6 +121,7 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy {
         this.bindingData();
       });
   }
+
   onDataChangeHandler = (event: any): void => {
     this.ngZone.runOutsideAngular(() => {
       const data = getObjectPropertyValue(event, this.extensionConfig.dataChangeEvent.propertyName);

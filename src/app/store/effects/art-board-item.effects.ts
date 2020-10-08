@@ -34,7 +34,7 @@ export class ArtBoardItemEffects {
                 .get<ArtBoardItem>(artBoardItemIds.map((artBoardItemId) => artBoardItemKey(artBoardItemId)))
                 .pipe(
                   map((items) => {
-                    return items.map((item) => this.normalizeArtBoardItem(item));
+                    return items.filter(isNotNullOrUndefined).map((item) => this.normalizeArtBoardItem(item));
                   })
                 );
             }
@@ -274,6 +274,7 @@ export class ArtBoardItemEffects {
             if (!artBoardItem || artBoardItem.boardId === boardId) {
               return EMPTY;
             }
+            artBoardItem = this.normalizeArtBoardItem(artBoardItem);
             const showArtBoardItem = {
               ...artBoardItem,
               ...{ boardId, gridPosition: { ...artBoardItem.gridPosition, order } },
@@ -305,7 +306,7 @@ export class ArtBoardItemEffects {
                 .get<ArtBoardItem>(artBoardItemIds.map((artBoardItemId) => artBoardItemKey(artBoardItemId)))
                 .pipe(
                   map((items) => {
-                    return items.map((item) => this.normalizeArtBoardItem(item));
+                    return items.filter(isNotNullOrUndefined).map((item) => this.normalizeArtBoardItem(item));
                   })
                 );
             }
@@ -320,23 +321,28 @@ export class ArtBoardItemEffects {
 
   // convert old version artBoardItem to new Grid ArtBoardItem.
   private normalizeArtBoardItem(artBoardItem: ArtBoardItem): ArtBoardItem {
-    if (!artBoardItem.gridPosition) {
-      artBoardItem.gridPosition = {
-        order: -1,
-        rows: 10,
-        screenColumns: {
-          Large: 3,
-          Medium: 3,
-          Small: 3,
-          XSmall: 1,
-        },
-      };
-      artBoardItem.extensionId = ExtensionId.TextNote;
-      artBoardItem.colorIndex = Math.floor(Math.random() * NBR_COLORS);
+    if (!artBoardItem) {
+      return artBoardItem;
     }
 
+    const defaultPosition = {
+      order: 0,
+      rows: 10,
+      screenColumns: {
+        Large: 3,
+        Medium: 3,
+        Small: 3,
+        XSmall: 1,
+      },
+    };
+    artBoardItem.gridPosition = artBoardItem.gridPosition
+      ? { ...defaultPosition, ...artBoardItem.gridPosition }
+      : { ...defaultPosition };
+    artBoardItem.extensionId = artBoardItem.extensionId ?? ExtensionId.TextNote;
+    artBoardItem.colorIndex = artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS);
     return artBoardItem;
   }
+
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,

@@ -3,14 +3,12 @@ import {
   OnInit,
   ViewEncapsulation,
   ChangeDetectionStrategy,
-  ViewChild,
   AfterViewInit,
-  ElementRef,
   OnDestroy,
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { ArtBoardItem, Board, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { getCurrentDate, uuid } from '../services/utils';
@@ -20,7 +18,6 @@ import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../extension-config';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DataChangeEvent } from '../store/models/data-change-event';
-import '@cff/webcomponents/components/quill-editor/quill-editor.component.js';
 import { Router } from '@angular/router';
 @Component({
   selector: 'ntm-mainboard',
@@ -37,37 +34,12 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   items$: Observable<ArtBoardItem[]>;
   searchItems$: Observable<ArtBoardItem[]>;
   showSearchResults = false;
+  selectingSearchResult = false;
+  highlightItem$ = new ReplaySubject<string>(1);
+
   private minOrder = 0;
 
-  displayBoard: Board = {
-    id: DEFAULT_BOARD_ID,
-    name: 'Default',
-    type: 'ArtBoard',
-  };
-
-  test = {
-    ops: [
-      { insert: 'Minas Tirith' },
-      { attributes: { header: 2 }, insert: '\n' },
-      {
-        insert:
-          '\nPippin looked out from the shelter of Gandalf cloak. He wondered if he was awake or still sleeping, still in the swift-moving dream in which he had been wrapped so long since the great ride began. ',
-      },
-      { attributes: { bold: true }, insert: 'The dark world was rushing by and the wind' },
-      {
-        insert:
-          ' sang loudly in his ears. He could see nothing but the wheeling stars, and away to his right vast shadows against the sky where the mountains of the South marched past. Sleepily he tried to reckon the times and stages of their journey, ',
-      },
-      { attributes: { color: '#ffff00' }, insert: 'but his memory was drowsy and uncertain' },
-    ],
-  };
-
-  constructor(
-    private router: Router,
-    private ngZone: NgZone,
-    private cd: ChangeDetectorRef,
-    private dataService: DataService
-  ) {
+  constructor(private router: Router, private cd: ChangeDetectorRef, private dataService: DataService) {
     this.items$ = dataService.getArtBoardItems(DEFAULT_BOARD_ID).pipe(
       tap((items) => {
         this.minOrder = items.length > 0 ? Math.min(...items.map((item) => item.gridPosition?.order ?? 0)) : 0;
@@ -146,19 +118,18 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   searchInputInactive(event: any): void {
-    setTimeout(() => {
-      this.showSearchResults = false;
-      this.cd.markForCheck();
-    }, 200);
+    this.showSearchResults = this.selectingSearchResult;
   }
+
   onSelectSearchItem(item: ArtBoardItem): void {
+    this.showSearchResults = false;
+    this.selectingSearchResult = false;
     if (!item.boardId) {
       this.dataService.showArtBoardItem(item, this.minOrder - 1);
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 0);
     }
+    this.highlightItem$.next(item.id);
   }
+
   hideArtboardItem(item: ArtBoardItem): void {
     this.dataService.hideArtBoardItem(item);
   }

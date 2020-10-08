@@ -13,7 +13,11 @@
 
       <ng-container *ngIf="showSearchResults && searchItems.length > 0">
         <div class="ntm-search-result-seperator"></div>
-        <div class="ntm-search-result">
+        <div
+          class="ntm-search-result"
+          (mouseenter)="selectingSearchResult = true"
+          (mouseleave)="selectingSearchResult = false"
+        >
           <ng-container *ngFor="let item of searchItems">
             <div
               (click)="onSelectSearchItem(item)"

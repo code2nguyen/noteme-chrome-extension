@@ -24,7 +24,7 @@ module.exports = function (env, argv) {
     },
     output: {
       filename: 'background.js',
-      path: path.resolve(__dirname, 'dist', 'noteme-ext-chrome'),
+      path: path.resolve(__dirname, 'dist', 'noteme-chrome-extension'),
     },
   };
 };
