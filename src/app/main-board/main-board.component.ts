@@ -147,6 +147,9 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   onSelectSearchItem(item: ArtBoardItem): void {
     if (!item.boardId) {
       this.dataService.showArtBoardItem(item, this.minOrder - 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 0);
     }
   }
   hideArtboardItem(item: ArtBoardItem): void {
