@@ -6,9 +6,10 @@ import { StorageApi, itemDataKey, STORAGE_API } from '../../services/storage.api
 import { catchError, switchMap, map, debounceTime, mergeMap, withLatestFrom, take } from 'rxjs/operators';
 import { of, asyncScheduler } from 'rxjs';
 import { ItemData } from '../models';
-import { createEmptyItemData, getCurrentDate } from '../../services/utils';
+import { convertItemData, createEmptyItemData, getCurrentDate } from '../../services/utils';
 import { select, Store } from '@ngrx/store';
 import { AppState, selectItemDataById } from '../reducers';
+import { DataType } from '../models/data-type';
 
 @Injectable()
 export class ItemDataEffects {
@@ -19,6 +20,7 @@ export class ItemDataEffects {
         return this.storageApi.get<ItemData>(itemDataKey(itemDataId)).pipe(
           map((itemData) => {
             if (itemData) {
+              itemData = convertItemData(itemData, DataType.DELTA);
               return ItemDataApiActions.getItemDataSuccess({ itemData });
             }
             return ItemDataApiActions.getItemDataSuccess({ itemData: createEmptyItemData(itemDataId) });

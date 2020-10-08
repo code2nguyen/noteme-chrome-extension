@@ -1,8 +1,8 @@
 import { StorageApi } from './storage.api';
 import { Observable, of } from 'rxjs';
-
+import { devData } from './dev-data';
 export class DevStorageApi implements StorageApi {
-  private data: any = {};
+  private data: any = devData;
 
   set(key: string, value: any): Observable<any> {
     this.data[key] = value;

@@ -52,8 +52,7 @@ export function convertItemData(itemData: ItemData, toType: DataType): ItemData 
       break;
     }
   }
-
-  return { ...itemData, ...{ data } };
+  return { ...itemData, ...{ data, dataType: toType } };
 }
 
 function convertDelta2Text(data: any): string {

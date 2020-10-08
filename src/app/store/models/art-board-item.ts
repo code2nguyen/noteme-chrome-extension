@@ -8,7 +8,6 @@ export interface ArtBoardItem {
   boardId?: string;
   layout?: ItemLayout;
   gridPosition: GridPosition;
-  element?: string;
   starred?: boolean;
   colorIndex: number;
   properties: Partial<{

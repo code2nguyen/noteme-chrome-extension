@@ -9,7 +9,7 @@ export const NBR_COLORS = 13;
 export const DEFAULT_EXTENSION_ID = ExtensionId.TextNote;
 
 type DefaultExtensionProperties = {
-  [extensionId: string]: Pick<ArtBoardItem, 'extensionId' | 'colorIndex' | 'element' | 'gridPosition' | 'properties'>;
+  [extensionId: string]: Pick<ArtBoardItem, 'extensionId' | 'colorIndex' | 'gridPosition' | 'properties'>;
 };
 
 export abstract class Loader<T> {
@@ -80,7 +80,6 @@ export const extensionConfigs: {
 export const extensionDefaultProperties: DefaultExtensionProperties = {
   [ExtensionId.TextNote]: {
     extensionId: ExtensionId.TextNote,
-    element: 'quill-editor',
     gridPosition: {
       order: -1,
       rows: 10,

@@ -18,6 +18,8 @@ import { getCurrentDate, isNotNullOrUndefined, convertItemData } from '../../ser
 import { SearchService } from '../../services/search.service';
 import { Store, select, Action } from '@ngrx/store';
 import { AppState, selectItemDataById, selectIsAllLoadedArtBoardItems, selectArtBoardItemById } from '../reducers';
+import { ExtensionId } from '../../extension-id';
+import { NBR_COLORS } from '../../extension-config';
 
 @Injectable()
 export class ArtBoardItemEffects {
@@ -28,9 +30,13 @@ export class ArtBoardItemEffects {
         return this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)).pipe(
           mergeMap((artBoardItemIds) => {
             if (artBoardItemIds) {
-              return this.storageApi.get<ArtBoardItem>(
-                artBoardItemIds.map((artBoardItemId) => artBoardItemKey(artBoardItemId))
-              );
+              return this.storageApi
+                .get<ArtBoardItem>(artBoardItemIds.map((artBoardItemId) => artBoardItemKey(artBoardItemId)))
+                .pipe(
+                  map((items) => {
+                    return items.map((item) => this.normalizeArtBoardItem(item));
+                  })
+                );
             }
             return of([]);
           }),
@@ -211,7 +217,9 @@ export class ArtBoardItemEffects {
               return this.storageApi.get<ArtBoardItem>(artBoardItemIds.map((id) => artBoardItemKey(id))).pipe(
                 map((artBoardItems) =>
                   ArtBoardItemApiActions.searchArtBoardItemsSuccess({
-                    artBoardItems: artBoardItems.filter(isNotNullOrUndefined),
+                    artBoardItems: artBoardItems
+                      .filter(isNotNullOrUndefined)
+                      .map((item) => this.normalizeArtBoardItem(item)),
                   })
                 )
               );
@@ -293,9 +301,13 @@ export class ArtBoardItemEffects {
         return this.storageApi.get<string[]>(artBoardItemIdsKey()).pipe(
           mergeMap((artBoardItemIds) => {
             if (artBoardItemIds) {
-              return this.storageApi.get<ArtBoardItem>(
-                artBoardItemIds.map((artBoardItemId) => artBoardItemKey(artBoardItemId))
-              );
+              return this.storageApi
+                .get<ArtBoardItem>(artBoardItemIds.map((artBoardItemId) => artBoardItemKey(artBoardItemId)))
+                .pipe(
+                  map((items) => {
+                    return items.map((item) => this.normalizeArtBoardItem(item));
+                  })
+                );
             }
             return of([]);
           }),
@@ -306,6 +318,25 @@ export class ArtBoardItemEffects {
     )
   );
 
+  // convert old version artBoardItem to new Grid ArtBoardItem.
+  private normalizeArtBoardItem(artBoardItem: ArtBoardItem): ArtBoardItem {
+    if (!artBoardItem.gridPosition) {
+      artBoardItem.gridPosition = {
+        order: -1,
+        rows: 10,
+        screenColumns: {
+          Large: 3,
+          Medium: 3,
+          Small: 3,
+          XSmall: 1,
+        },
+      };
+      artBoardItem.extensionId = ExtensionId.TextNote;
+      artBoardItem.colorIndex = Math.floor(Math.random() * NBR_COLORS);
+    }
+
+    return artBoardItem;
+  }
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,
