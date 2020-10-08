@@ -22,5 +22,5 @@ export interface ExtensionConfig {
         element?: string;
       }
     | false;
-  viewComponent: boolean;
+  viewComponent: Omit<Partial<ExtensionConfig>, 'extensionId' | 'dataChangeEvent' | 'toolbarComponent'> | false;
 }

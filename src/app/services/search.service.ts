@@ -29,8 +29,8 @@ export class SearchService {
       fuse: this._getFuse(),
     }).pipe(
       map((searchTools) => {
-        const lunrResults: string[] = searchTools.idx.search(query).map((i) => i.ref);
-        const fuseResults = searchTools.fuse.search(query).map((item: any) => item.item.id);
+        const lunrResults: string[] = searchTools.idx ? searchTools.idx.search(query).map((i) => i.ref) : [];
+        const fuseResults = searchTools.fuse ? searchTools.fuse.search(query).map((item: any) => item.item.id) : [];
         return Array.from(new Set([...lunrResults, ...fuseResults]));
       })
     );
@@ -42,7 +42,9 @@ export class SearchService {
     }
     return this.storageApi.get(itemDataIndexKey()).pipe(
       map((dataIndexed) => {
-        this.idx = lunr.Index.load(dataIndexed);
+        if (dataIndexed) {
+          this.idx = lunr.Index.load(dataIndexed);
+        }
         return this.idx;
       }),
       take(1)

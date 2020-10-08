@@ -35,7 +35,7 @@ export const hideArtBoardItem = createAction(
 
 export const showArtBoardItem = createAction(
   '[Art Board Item] Show Art Board Item',
-  props<{ boardId: string; artBoardItemId: string }>()
+  props<{ boardId: string; artBoardItemId: string; order: number }>()
 );
 
 export const searchArtBoardItems = createAction(

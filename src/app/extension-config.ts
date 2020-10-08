@@ -62,34 +62,28 @@ export const extensionConfigs: {
     toolbarComponent: {
       element: 'cff-quill-editor-toolbar',
     },
-    viewComponent: false,
+    viewComponent: {
+      properties: [
+        {
+          name: 'readonly',
+          value: 'true',
+        },
+        {
+          name: 'format',
+          value: 'object',
+        },
+      ],
+    },
   },
 };
 
 export const extensionDefaultProperties: DefaultExtensionProperties = {
-  [ExtensionId.CodeNote]: {
-    extensionId: ExtensionId.CodeNote,
-    gridPosition: {
-      order: -1,
-      row: 10,
-      screenColumns: {
-        Large: 3,
-        Medium: 3,
-        Small: 3,
-        XSmall: 1,
-      },
-    },
-    colorIndex: 0,
-    properties: {
-      language: 'markdown',
-    },
-  },
   [ExtensionId.TextNote]: {
     extensionId: ExtensionId.TextNote,
     element: 'quill-editor',
     gridPosition: {
       order: -1,
-      row: 10,
+      rows: 10,
       screenColumns: {
         Large: 3,
         Medium: 3,
@@ -101,32 +95,3 @@ export const extensionDefaultProperties: DefaultExtensionProperties = {
     properties: {},
   },
 };
-
-// 'ntm-text-note-element': () =>
-//   from(
-//     import('./text-note/text-note.component').then((cmp) => ({
-//       module: cmp.BlockNoteModule,
-//       component: cmp.TextNoteComponent,
-//     }))
-//   ),
-// 'ntm-text-note-element-view': () =>
-//   from(
-//     import('./text-note/text-note.component').then((cmp) => ({
-//       module: cmp.BlockNoteModule,
-//       component: cmp.TextNoteViewComponent,
-//     }))
-//   ),
-// 'ntm-code-note-element': () =>
-//   from(
-//     import('./code-note/code-note.component').then((cmp) => ({
-//       module: cmp.CodeNoteModule,
-//       component: cmp.CodeNoteComponent,
-//     }))
-//   ),
-// 'ntm-code-note-element-view': () =>
-//   from(
-//     import('./code-note/code-note.component').then((cmp) => ({
-//       module: cmp.CodeNoteModule,
-//       component: cmp.CodeNoteViewComponent,
-//     }))
-//   ),

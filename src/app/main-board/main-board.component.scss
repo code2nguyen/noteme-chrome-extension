@@ -14,19 +14,70 @@
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 96px;
+    height: 80px;
     z-index: 1000;
     background-color: #303236;
     opacity: 1;
-    transition: transform 0.5s ease 0s, opacity 0.5s ease 0.1s;
+    transition: opacity 0.3s ease 0.1s, top 0.3s ease 0.3s;
 
-    .ntm-search-input {
+    .ntm-search-container {
       max-width: 650px;
       min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      position: relative;
+    }
+
+    #ntm-search-input.active.hasResult {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    .ntm-search-result-seperator {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0 14px;
+      z-index: 1;
+    }
+    .ntm-search-result-item-seperator {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0px 14px;
+    }
+    .ntm-search-result {
+      flex: 1;
+      background-color: #595c63;
+      border-radius: 0 0 8px 8px;
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 48px;
+      max-height: 30vh;
+      overflow-y: auto;
+      width: 100%;
+      .ntm-search-item {
+        min-height: 90px;
+        max-height: 180px;
+        padding: 8px 0px;
+        overflow: hidden;
+      }
+      .ntm-search-item:hover {
+        background-color: #656870;
+      }
+      .quill-editor {
+        // max-height: 200px;
+        // min-height: 180px;
+        overflow: hidden;
+        user-select: none;
+        .ql-editor {
+          overflow: hidden;
+        }
+        .ql-editor > * {
+          cursor: default;
+        }
+      }
     }
     .seperator {
       margin: auto;
@@ -63,17 +114,47 @@
   }
 
   .ntm-navbar.overlaped {
-    opacity: 0;
-    transform: translate3d(calc(100% - 64px), 0, 0);
+    // opacity: 0;
+    // transform: translate3d(calc(100% - 64px), 0, 0);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 1);
+    animation: 0.3s overlapedNavbar forwards;
   }
+
+  @keyframes overlapedNavbar {
+    from {
+      top: -80px;
+    }
+    to {
+      top: 0;
+      position: fixed;
+    }
+  }
+
   .main-content {
-    padding-top: 96px;
+    padding-top: 80px;
     min-width: 1px;
+    .dashboard-item-toolbar-icon {
+      color: rgba(var(--dashboard-theme-item-icon-color, 255, 255, 255), 0.5);
+      padding: 0px 8px;
+      cursor: pointer;
+      transition: color 0.3s ease-out 0s;
+      align-self: stretch;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .dashboard-item-toolbar-icon:hover {
+      color: rgb(var(--dashboard-theme-item-icon-color, 255, 255, 255));
+    }
+  }
+
+  .intersection-radar.overlaped {
+    top: 0px;
   }
 
   .intersection-radar {
     position: absolute;
-    top: 8px;
+    top: 80px;
     left: 8px;
     width: 1px;
     height: 1px;

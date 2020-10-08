@@ -199,7 +199,11 @@ export class ArtBoardItemEffects {
       debounceTime(debounce, scheduler),
       switchMap(({ query }) => {
         if (query === '') {
-          return EMPTY;
+          return of(
+            ArtBoardItemApiActions.searchArtBoardItemsSuccess({
+              artBoardItems: [],
+            })
+          );
         }
         return this.searchService.search(query).pipe(
           mergeMap((artBoardItemIds) => {
@@ -212,7 +216,11 @@ export class ArtBoardItemEffects {
                 )
               );
             }
-            return EMPTY;
+            return of(
+              ArtBoardItemApiActions.searchArtBoardItemsSuccess({
+                artBoardItems: [],
+              })
+            );
           })
         );
       })
@@ -248,7 +256,7 @@ export class ArtBoardItemEffects {
   showArtBoardItem$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ArtBoardItemActions.showArtBoardItem),
-      mergeMap(({ boardId, artBoardItemId }) => {
+      mergeMap(({ boardId, artBoardItemId, order }) => {
         return forkJoin([
           this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
           this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
@@ -258,7 +266,10 @@ export class ArtBoardItemEffects {
             if (!artBoardItem || artBoardItem.boardId === boardId) {
               return EMPTY;
             }
-            const showArtBoardItem = { ...artBoardItem, ...{ boardId } };
+            const showArtBoardItem = {
+              ...artBoardItem,
+              ...{ boardId, gridPosition: { ...artBoardItem.gridPosition, order } },
+            };
             return forkJoin([
               this.storageApi.set(artBoardArtBoardItemIdsKey(boardId!), [...artBoardItemIds, artBoardItemId]),
               this.storageApi.set(artBoardItemKey(artBoardItemId), showArtBoardItem),

@@ -7,7 +7,13 @@ import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { ArtBoardItemPosition } from '../store/models/art-board-item-position';
 import { DataType } from '../store/models/data-type';
 import { GridPosition } from '../store/models/grid-position';
-import { AppState, selectArtBoardItemById, selectArtBoardItemsByBoardId, selectItemDataById } from '../store/reducers';
+import {
+  AppState,
+  selectArtBoardItemById,
+  selectArtBoardItemsByBoardId,
+  selectArtBoardItemSearchResults,
+  selectItemDataById,
+} from '../store/reducers';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
@@ -24,6 +30,10 @@ export class DataService {
         itemData: { id: itemDataId, data, empty: false, dataType },
       })
     );
+  }
+
+  getSearchResults(): Observable<ArtBoardItem[]> {
+    return this.store.pipe(select(selectArtBoardItemSearchResults));
   }
 
   getArtBoardItems(boardId: string, force = true): Observable<ArtBoardItem[]> {
@@ -97,5 +107,15 @@ export class DataService {
           );
         }
       });
+  }
+
+  showArtBoardItem(item: ArtBoardItem, order: number): void {
+    this.store.dispatch(
+      ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: item.id, order })
+    );
+  }
+
+  searchArtBoardItem(query: string): void {
+    this.store.dispatch(ArtBoardItemActions.searchArtBoardItems({ query }));
   }
 }

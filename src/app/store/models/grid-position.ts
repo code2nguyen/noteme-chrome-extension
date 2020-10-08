@@ -2,6 +2,6 @@ import { ScreenColumns } from '@cff/webcomponents/shared/models';
 
 export interface GridPosition {
   screenColumns: ScreenColumns;
-  row: number;
+  rows: number;
   order: number;
 }

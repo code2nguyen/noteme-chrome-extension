@@ -7,6 +7,7 @@ import {
   Input,
   NgZone,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   SimpleChanges,
@@ -22,10 +23,11 @@ import { DataChangeEvent } from '../store/models/data-change-event';
 import { DataService } from '../services/data.service';
 
 @Directive({ selector: '[ntmExtensionInject]' })
-export class ExtensionInjectDirective implements OnChanges {
+export class ExtensionInjectDirective implements OnChanges, OnDestroy {
   @Input('ntmExtensionInject') extensiontId?: ExtensionId;
 
   @Input() itemDataId: string;
+  @Input() componentView = false;
 
   @Output() dataChange = new EventEmitter<DataChangeEvent>();
   @Output() activate = new EventEmitter<void>();
@@ -37,9 +39,7 @@ export class ExtensionInjectDirective implements OnChanges {
     private ngZone: NgZone,
     private element: ElementRef,
     private viewContainerRef: ViewContainerRef,
-    private dataService: DataService,
-    private injector: Injector,
-    private compiler: Compiler
+    private dataService: DataService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -55,12 +55,22 @@ export class ExtensionInjectDirective implements OnChanges {
         this.customElements.forEach((child) => child.remove());
         this.customElements = [];
       }
-      this.extensionConfig = extensionConfigs[this.extensiontId];
+      this.extensionConfig = this.componentView
+        ? { ...extensionConfigs[this.extensiontId], ...extensionConfigs[this.extensiontId].viewComponent }
+        : extensionConfigs[this.extensiontId];
 
       if (this.extensionConfig.element) {
         this.injectCustomElement();
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.customElements.length > 0) {
+      this.customElements[0].removeEventListener(this.extensionConfig.dataChangeEvent.event, this.onDataChangeHandler);
+    }
+    this.customElements.forEach((child) => child.remove());
+    this.customElements = [];
   }
 
   injectCustomElement(): void {
@@ -75,10 +85,11 @@ export class ExtensionInjectDirective implements OnChanges {
         for (const property of this.extensionConfig.properties) {
           customElement[property.name] = property.value;
         }
-        this.bindingData();
-        customElement.addEventListener(this.extensionConfig.dataChangeEvent.event, this.onDataChangeHandler);
+        if (!this.componentView) {
+          customElement.addEventListener(this.extensionConfig.dataChangeEvent.event, this.onDataChangeHandler);
+        }
         this.customElements.push(customElement);
-        if (this.extensionConfig.toolbarComponent) {
+        if (!this.componentView && this.extensionConfig.toolbarComponent) {
           const toolbarCustomElement = document.createElement(this.extensionConfig.toolbarComponent.element);
           toolbarCustomElement.slot = 'toolbar';
           this.customElements.push(toolbarCustomElement);
@@ -86,6 +97,7 @@ export class ExtensionInjectDirective implements OnChanges {
         this.customElements.forEach((item) => {
           this.element.nativeElement.appendChild(item);
         });
+        this.bindingData();
       });
   }
   onDataChangeHandler = (event: any): void => {
@@ -102,10 +114,7 @@ export class ExtensionInjectDirective implements OnChanges {
         .pipe(take(1))
         .subscribe((itemData) => {
           if (this.customElements.length > 0 && this.extensionConfig) {
-            this.customElements[0][this.extensionConfig.dataInputProperty] = convertItemData(
-              itemData,
-              this.extensionConfig.dataType
-            );
+            this.customElements[0][this.extensionConfig.dataInputProperty] = itemData.data;
           }
         });
     }

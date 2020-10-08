@@ -35,6 +35,9 @@ export function isNotNullOrUndefined<T>(input: null | undefined | T): input is T
 
 export function convertItemData(itemData: ItemData, toType: DataType): ItemData {
   let data = itemData.data;
+  if (!data) {
+    return itemData;
+  }
   switch (itemData.dataType) {
     case DataType.DELTA: {
       if (toType === DataType.TEXT) {
