@@ -1,8 +1,10 @@
-import { Observable, bindCallback, from, Subject } from 'rxjs';
-import { StorageApi } from './storage.api';
-import { uuid } from './utils';
+import { Observable, from, Subject, Subscription } from 'rxjs';
+import { layoutSyncKey, StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, NgZone, APP_ID } from '@angular/core';
+import { bufferTime, delay, exhaustMap, filter, map, mapTo, takeWhile } from 'rxjs/operators';
+import { interval } from 'rxjs';
+import { until } from 'protractor';
 
 export interface StorageChanges {
   [key: string]: chrome.storage.StorageChange;
@@ -12,26 +14,54 @@ export interface StorageChanges {
 export class ChromeStorageApi implements StorageApi {
   readonly localStorageApi: chrome.storage.StorageArea;
   readonly chromeSyncApi: chrome.storage.StorageArea;
+  remoteDataQueue = new Array<{ key: string | string[]; value?: any; action: 'remove' | 'set' }>();
+  writingToRemoteSubscription?: Subscription;
 
-  readonly onChanged = new Subject<chrome.storage.StorageChange>();
-  readonly ID: string;
-  constructor(private storeSync: StoreSyncService) {
-    this.ID = uuid();
+  constructor(@Inject(APP_ID) private ID: string, private storeSync: StoreSyncService, private ngZone: NgZone) {
     this.localStorageApi = chrome.storage.local;
     this.chromeSyncApi = chrome.storage.sync;
-
-    chrome.storage.onChanged.addListener((changes: StorageChanges) => {
-      for (const key of Object.keys(changes)) {
-        const change = changes[key];
-        const newValue = change.newValue ? JSON.parse(change.newValue) : null;
-        const oldValue = change.oldValue ? JSON.parse(change.oldValue) : null;
-        if (!newValue || (newValue && newValue.sourceId !== this.ID)) {
-          this.storeSync.sync(key, newValue, oldValue);
+    this.ngZone.runOutsideAngular(() => {
+      chrome.storage.onChanged.addListener((changes: StorageChanges) => {
+        for (const key of Object.keys(changes)) {
+          const change = changes[key];
+          const newValue = change.newValue ? JSON.parse(change.newValue) : null;
+          const oldValue = change.oldValue ? JSON.parse(change.oldValue) : null;
+          if (!newValue || newValue.sourceId !== this.ID) {
+            this.storeSync.sync(key, newValue, oldValue);
+          }
         }
-        this.syncLocalToChromeSync(key, change.newValue, change.oldValue);
-      }
-      this.onChanged.next(changes);
+      });
     });
+  }
+
+  syncToRemote(): void {
+    if (this.writingToRemoteSubscription) {
+      return;
+    }
+
+    this.writingToRemoteSubscription = interval(1000)
+      .pipe(
+        takeWhile(() => this.remoteDataQueue.length > 0),
+        map(() => {
+          const item = this.remoteDataQueue.shift();
+          return item;
+        })
+      )
+      .subscribe({
+        next: (item) => {
+          if (!item) {
+            return;
+          }
+          if (item.action === 'remove') {
+            this.chromeSyncApi.remove(item.key);
+          } else {
+            this.chromeSyncApi.set({ [item.key as string]: item.value });
+          }
+        },
+        complete: () => {
+          this.writingToRemoteSubscription = null;
+        },
+      });
   }
 
   set(key: string, value: any): Observable<any> {
@@ -40,11 +70,14 @@ export class ChromeStorageApi implements StorageApi {
         if (!Array.isArray(value)) {
           value = { ...value, ...{ sourceId: this.ID } };
         }
-        this.localStorageApi.set({ [key]: JSON.stringify(value) }, () => {
+        const valueStr = JSON.stringify(value);
+        this.localStorageApi.set({ [key]: valueStr }, () => {
           if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
+            console.error(chrome.runtime.lastError.message);
             return reject(chrome.runtime.lastError);
           }
+          this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
+          this.syncToRemote();
           resolve();
         });
       })
@@ -56,7 +89,7 @@ export class ChromeStorageApi implements StorageApi {
       new Promise((resolve, reject) => {
         this.localStorageApi.get(key, (value) => {
           if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
+            console.error(chrome.runtime.lastError.message);
             return reject(chrome.runtime.lastError);
           }
           if (Array.isArray(key)) {
@@ -74,9 +107,11 @@ export class ChromeStorageApi implements StorageApi {
       new Promise((resolve, reject) => {
         this.localStorageApi.remove(key, () => {
           if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
+            console.error(chrome.runtime.lastError.message);
             return reject(chrome.runtime.lastError);
           }
+          this.remoteDataQueue.push({ key, action: 'remove' });
+          this.syncToRemote();
           resolve(null);
         });
       })
@@ -98,31 +133,5 @@ export class ChromeStorageApi implements StorageApi {
       }
     }
     return null;
-  }
-
-  private syncLocalToChromeSync(key: string, newValue: string, oldValue: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      if (key.startsWith('ART_BOARD_ITEM__') || key.startsWith('ITEM_DATA__')) {
-        if (!newValue) {
-          this.chromeSyncApi.remove(key, () => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              return reject(chrome.runtime.lastError);
-            }
-            resolve(null);
-          });
-        } else {
-          this.chromeSyncApi.set({ [key]: newValue }, () => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              return reject(chrome.runtime.lastError);
-            }
-            resolve();
-          });
-        }
-      } else {
-        resolve();
-      }
-    });
   }
 }

@@ -8,11 +8,11 @@ import {
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { ArtBoardItem, Board, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { getCurrentDate, uuid } from '../services/utils';
-import { tap, timeout } from 'rxjs/operators';
+import { takeUntil, tap, timeout } from 'rxjs/operators';
 import { DEFAULT_EXTENSION_ID, extensionDefaultProperties } from '../extension-config';
 import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../extension-config';
@@ -38,19 +38,25 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   highlightItem$ = new ReplaySubject<string>(1);
 
   private minOrder = 0;
-
+  private destroyed$ = new Subject<void>();
   constructor(private router: Router, private cd: ChangeDetectorRef, private dataService: DataService) {
     this.items$ = dataService.getArtBoardItems(DEFAULT_BOARD_ID).pipe(
       tap((items) => {
         this.minOrder = items.length > 0 ? Math.min(...items.map((item) => item.gridPosition?.order ?? 0)) : 0;
       })
     );
+    // dataService.syncLayout.pipe(takeUntil(this.destroyed$)).subscribe(() => {
+    //   this.cd.detectChanges();
+    // });
     this.searchItems$ = this.dataService.getSearchResults();
   }
 
   ngOnInit(): void {}
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.destroyed$.next();
+    this.destroyed$.complete();
+  }
 
   ngAfterViewInit(): void {}
 

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, APP_ID } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 
 import { ItemDataActions, ItemDataApiActions } from '../actions';
@@ -37,7 +37,10 @@ export class ItemDataEffects {
       mergeMap(({ itemData }) => {
         const currentDate = getCurrentDate();
         return this.storageApi
-          .set(itemDataKey(itemData.id), { ...itemData, ...{ createdDate: currentDate, modifiedDate: currentDate } })
+          .set(itemDataKey(itemData.id), {
+            ...itemData,
+            ...{ createdDate: currentDate, modifiedDate: currentDate, sourceId: this.ID },
+          })
           .pipe(
             map(() => {
               return ItemDataApiActions.createItemDataSuccess({ itemData });
@@ -59,7 +62,11 @@ export class ItemDataEffects {
           select(selectItemDataById, { itemDataId: itemData.id }),
           take(1),
           mergeMap((oldItemData) => {
-            const updatedDataItem = { ...oldItemData, ...itemData, ...{ modifiedDate: getCurrentDate() } };
+            const updatedDataItem = {
+              ...oldItemData,
+              ...itemData,
+              ...{ modifiedDate: getCurrentDate(), sourceId: this.ID },
+            };
             return this.storageApi.set(itemDataKey(itemData.id), updatedDataItem).pipe(
               map(() => ItemDataApiActions.updateItemDataSuccess({ itemData: updatedDataItem })),
               catchError((error) => of(ItemDataApiActions.createItemDataFailure({ error })))
@@ -83,6 +90,7 @@ export class ItemDataEffects {
   );
 
   constructor(
+    @Inject(APP_ID) private ID: string,
     private store: Store<AppState>,
     private actions$: Actions,
     @Inject(STORAGE_API) private storageApi: StorageApi

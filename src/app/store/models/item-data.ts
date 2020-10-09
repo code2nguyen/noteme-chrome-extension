@@ -8,4 +8,5 @@ export interface ItemData {
   createdDate: string;
   dataType: DataType;
   empty: boolean;
+  sourceId?: string;
 }

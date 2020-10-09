@@ -5,8 +5,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:preprod": "ng build --configuration=preprod",
     "build:all": "ng build --prod && webpack --env.production",
-    "build:bg": "webpack --env.production",
+    "build:bg:prod": "webpack --env.production",
+    "build:bg:dev": "webpack --env.development",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

@@ -1,7 +1,7 @@
 {
   "name": "Noteme",
   "description": "Replace new tab page with a personal note application",
-  "permissions": ["storage", "unlimitedStorage", "alarms", "identity"],
+  "permissions": ["storage", "unlimitedStorage"],
   "version": "2.0.0",
   "icons": {
     "16": "assets/icons/noteme-icon-16.png",

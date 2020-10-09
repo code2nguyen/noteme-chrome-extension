@@ -1,7 +1,7 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, APP_ID } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import without from 'lodash-es/without';
-import { mergeMap, catchError, switchMap, map, debounceTime, mapTo, withLatestFrom, take } from 'rxjs/operators';
+import { mergeMap, catchError, switchMap, map, debounceTime, mapTo, withLatestFrom, take, tap } from 'rxjs/operators';
 import { forkJoin, of, iif, asyncScheduler, EMPTY, from } from 'rxjs';
 
 import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataActions, ItemDataApiActions } from '../actions';
@@ -12,6 +12,7 @@ import {
   STORAGE_API,
   artBoardItemIdsKey,
   itemDataKey,
+  layoutSyncKey,
 } from '../../services/storage.api';
 import { ArtBoardItem } from '../models';
 import { getCurrentDate, isNotNullOrUndefined, convertItemData } from '../../services/utils';
@@ -65,7 +66,11 @@ export class ArtBoardItemEffects {
             return forkJoin([
               this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [...artBoardArtBoardItemIds, artBoardItem.id]),
               this.storageApi.set(artBoardItemIdsKey(), [...artBoardItemIds, artBoardItem.id]),
-              this.storageApi.set(artBoardItemKey(artBoardItem.id), artBoardItem),
+              this.storageApi.set(artBoardItemKey(artBoardItem.id), {
+                ...artBoardItem,
+                silent: false,
+                sourceId: this.ID,
+              }),
             ]);
           }),
           map(() => {
@@ -84,7 +89,10 @@ export class ArtBoardItemEffects {
       ofType(ArtBoardItemActions.updateArtBoardItem),
       mergeMap(({ artBoardItem }) => {
         return this.storageApi
-          .set(artBoardItemKey(artBoardItem.id), { ...artBoardItem, ...{ modifiedDate: getCurrentDate() } })
+          .set(artBoardItemKey(artBoardItem.id), {
+            ...artBoardItem,
+            ...{ modifiedDate: getCurrentDate(), silent: false, sourceId: this.ID },
+          })
           .pipe(
             map(() => ArtBoardItemApiActions.updateArtBoardItemSuccess({ artBoardItem })),
             catchError((error) => of(ArtBoardItemApiActions.updateArtBoardItemFailure({ error })))
@@ -107,6 +115,7 @@ export class ArtBoardItemEffects {
                     ...artBoardItem,
                     ...{ gridPosition: item.gridPosition },
                     ...{ modifiedDate: getCurrentDate() },
+                    ...{ silent: true, sourceId: this.ID },
                   };
                   return this.storageApi
                     .set(artBoardItemKey(artBoardItem.id), updatedArtBoardItem)
@@ -115,6 +124,10 @@ export class ArtBoardItemEffects {
               );
           })
         ).pipe(
+          tap(() => {
+            // Notify layout sync
+            this.storageApi.set(layoutSyncKey(), { time: new Date().getTime() });
+          }),
           map(
             (artBoardItems) => {
               return ArtBoardItemApiActions.updateAllArtBoardItemLayoutSuccess({ artBoardItems });
@@ -126,42 +139,42 @@ export class ArtBoardItemEffects {
     )
   );
 
-  changeArtBoardItemType$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ArtBoardItemActions.changeArtBoardItemType),
-      mergeMap(({ artBoardItem, changedDataType }) => {
-        return of(null).pipe(
-          withLatestFrom(this.store.pipe(select(selectItemDataById, { itemDataId: artBoardItem.id }))),
-          mergeMap(([_, itemData]) => {
-            const convertedItemData = itemData ? convertItemData(itemData, changedDataType) : null;
-            return forkJoin([
-              this.storageApi.set(artBoardItemKey(artBoardItem.id), {
-                ...artBoardItem,
-                ...{ modifiedDate: getCurrentDate() },
-              }),
-              iif(
-                () => !!convertedItemData,
-                this.storageApi.set(itemDataKey(convertedItemData!.id), {
-                  ...convertedItemData,
-                  ...{ modifiedDate: getCurrentDate(), dataType: changedDataType },
-                }),
-                of(null)
-              ),
-            ]).pipe(
-              mergeMap(() => {
-                const actions: Action[] = [ArtBoardItemApiActions.changeArtBoardItemTypeSuccess({ artBoardItem })];
-                if (convertedItemData) {
-                  actions.unshift(ItemDataApiActions.updateItemDataSuccess({ itemData: convertedItemData }));
-                }
-                return from(actions);
-              }),
-              catchError((error) => of(ArtBoardItemApiActions.changeArtBoardItemTypeFailure({ error })))
-            );
-          })
-        );
-      })
-    )
-  );
+  // changeArtBoardItemType$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(ArtBoardItemActions.changeArtBoardItemType),
+  //     mergeMap(({ artBoardItem, changedDataType }) => {
+  //       return of(null).pipe(
+  //         withLatestFrom(this.store.pipe(select(selectItemDataById, { itemDataId: artBoardItem.id }))),
+  //         mergeMap(([_, itemData]) => {
+  //           const convertedItemData = itemData ? convertItemData(itemData, changedDataType) : null;
+  //           return forkJoin([
+  //             this.storageApi.set(artBoardItemKey(artBoardItem.id), {
+  //               ...artBoardItem,
+  //               ...{ modifiedDate: getCurrentDate() },
+  //             }),
+  //             iif(
+  //               () => !!convertedItemData,
+  //               this.storageApi.set(itemDataKey(convertedItemData!.id), {
+  //                 ...convertedItemData,
+  //                 ...{ modifiedDate: getCurrentDate(), dataType: changedDataType },
+  //               }),
+  //               of(null)
+  //             ),
+  //           ]).pipe(
+  //             mergeMap(() => {
+  //               const actions: Action[] = [ArtBoardItemApiActions.changeArtBoardItemTypeSuccess({ artBoardItem })];
+  //               if (convertedItemData) {
+  //                 actions.unshift(ItemDataApiActions.updateItemDataSuccess({ itemData: convertedItemData }));
+  //               }
+  //               return from(actions);
+  //             }),
+  //             catchError((error) => of(ArtBoardItemApiActions.changeArtBoardItemTypeFailure({ error })))
+  //           );
+  //         })
+  //       );
+  //     })
+  //   )
+  // );
 
   deleteArtBoardItem$ = createEffect(() =>
     this.actions$.pipe(
@@ -248,7 +261,7 @@ export class ArtBoardItemEffects {
             if (!artBoardItem) {
               return EMPTY;
             }
-            const hidedArtBoardItem = { ...artBoardItem, ...{ boardId: undefined } };
+            const hidedArtBoardItem = { ...artBoardItem, ...{ boardId: undefined, silent: false, sourceId: this.ID } };
             return forkJoin([
               this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), without(artBoardItemIds, artBoardItemId)),
               this.storageApi.set(artBoardItemKey(artBoardItemId), hidedArtBoardItem),
@@ -277,7 +290,7 @@ export class ArtBoardItemEffects {
             artBoardItem = this.normalizeArtBoardItem(artBoardItem);
             const showArtBoardItem = {
               ...artBoardItem,
-              ...{ boardId, gridPosition: { ...artBoardItem.gridPosition, order } },
+              ...{ boardId, gridPosition: { ...artBoardItem.gridPosition, order, silent: false, sourceId: this.ID } },
             };
             return forkJoin([
               this.storageApi.set(artBoardArtBoardItemIdsKey(boardId!), [...artBoardItemIds, artBoardItemId]),
@@ -344,6 +357,7 @@ export class ArtBoardItemEffects {
   }
 
   constructor(
+    @Inject(APP_ID) private ID: string,
     private actions$: Actions,
     private store: Store<AppState>,
     @Inject(STORAGE_API) private storageApi: StorageApi,

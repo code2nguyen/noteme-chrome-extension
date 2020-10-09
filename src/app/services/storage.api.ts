@@ -40,3 +40,7 @@ export function userKey(): string {
 export function itemDataIndexKey(): string {
   return `_ITEM_DATA_INDEX`;
 }
+
+export function layoutSyncKey(): string {
+  return '_LAYOUT_SYNC';
+}

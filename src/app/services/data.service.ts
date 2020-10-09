@@ -14,10 +14,16 @@ import {
   selectArtBoardItemSearchResults,
   selectItemDataById,
 } from '../store/reducers';
+import { StorageApi } from './storage.api';
+import { StoreSyncService } from './store-sync.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
-  constructor(private store: Store<AppState>) {}
+  constructor(private store: Store<AppState>, private storeSync: StoreSyncService) {}
+
+  get syncLayout(): Observable<void> {
+    return this.storeSync.onLayoutChange;
+  }
 
   getItemData(itemDataId: string): Observable<ItemData> {
     this.store.dispatch(ItemDataActions.getItemData({ itemDataId }));

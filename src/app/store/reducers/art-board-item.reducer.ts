@@ -25,20 +25,18 @@ export const reducer = createReducer(
     return adapter.upsertMany(artBoardItems, state);
   }),
   on(ArtBoardItemApiActions.getAllArtBoardItemsSuccess, (state, { artBoardItems }) => {
-    const newItems = artBoardItems.filter((item) => item && !state.entities[item.id]);
     return {
-      ...adapter.addMany(newItems, state),
+      ...adapter.setAll(artBoardItems, state),
       ...{ isAllLoaded: true },
     };
   }),
-  on(
-    ArtBoardItemApiActions.searchArtBoardItemsSuccess,
-    ArtBoardItemApiActions.loadArtBoardItemsSuccess,
-    (state, { artBoardItems }) => {
-      const newItems = artBoardItems.filter((item) => item && !state.entities[item.id]);
-      return adapter.addMany(newItems, state);
-    }
-  ),
+  on(ArtBoardItemApiActions.searchArtBoardItemsSuccess, (state, { artBoardItems }) => {
+    const newItems = artBoardItems.filter((item) => item && !state.entities[item.id]);
+    return adapter.addMany(newItems, state);
+  }),
+  on(ArtBoardItemApiActions.loadArtBoardItemsSuccess, (state, { artBoardItems }) => {
+    return adapter.upsertMany(artBoardItems, state);
+  }),
   on(ArtBoardItemApiActions.createArtBoardItemSuccess, (state, { artBoardItem }) => {
     return adapter.addOne(artBoardItem, state);
   }),

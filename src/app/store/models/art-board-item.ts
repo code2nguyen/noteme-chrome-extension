@@ -17,4 +17,7 @@ export interface ArtBoardItem {
   }>;
   modifiedDate: string;
   dataModifiedDate?: string;
+  sourceId?: string;
+  // On changing layout we set silient is true, to batch the modifications.
+  silent?: boolean;
 }

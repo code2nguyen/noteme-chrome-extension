@@ -1,8 +1,10 @@
 import {
   AfterViewInit,
+  APP_ID,
   Directive,
   ElementRef,
   EventEmitter,
+  Inject,
   Input,
   NgZone,
   OnChanges,
@@ -14,7 +16,7 @@ import {
 import { ExtensionConfig } from '../store/models/extension-model';
 import { ExtensionId } from '../extension-id';
 import { extensionConfigs, extensionLoader } from '../extension-config';
-import { take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { getObjectPropertyValue } from '../services/utils';
 import { DataChangeEvent } from '../store/models/data-change-event';
 import { DataService } from '../services/data.service';
@@ -31,10 +33,12 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterView
   @Output() dataChange = new EventEmitter<DataChangeEvent>();
   @Output() activate = new EventEmitter<void>();
 
+  private firstBindingData = true;
   private extensionConfig?: ExtensionConfig;
   private customElements?: HTMLElement[] = [];
   private highlightSubscription = Subscription.EMPTY;
   constructor(
+    @Inject(APP_ID) private ID: string,
     private parent: MainBoardComponent,
     private ngZone: NgZone,
     private element: ElementRef,
@@ -118,6 +122,7 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterView
         this.customElements.forEach((item) => {
           this.element.nativeElement.appendChild(item);
         });
+        this.firstBindingData = true;
         this.bindingData();
       });
   }
@@ -133,9 +138,10 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterView
     if (this.itemDataId) {
       this.dataService
         .getItemData(this.itemDataId)
-        .pipe(take(1))
+        .pipe(filter((itemData) => this.firstBindingData || itemData.sourceId !== this.ID))
         .subscribe((itemData) => {
           if (this.customElements.length > 0 && this.extensionConfig) {
+            this.firstBindingData = false;
             this.customElements[0][this.extensionConfig.dataInputProperty] = itemData.data;
           }
         });
