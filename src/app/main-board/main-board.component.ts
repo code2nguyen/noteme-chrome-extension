@@ -45,9 +45,6 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.minOrder = items.length > 0 ? Math.min(...items.map((item) => item.gridPosition?.order ?? 0)) : 0;
       })
     );
-    // dataService.syncLayout.pipe(takeUntil(this.destroyed$)).subscribe(() => {
-    //   this.cd.detectChanges();
-    // });
     this.searchItems$ = this.dataService.getSearchResults();
   }
 
@@ -77,6 +74,10 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => {
       window.scrollTo(0, 0);
     }, 0);
+  }
+
+  removeArtBoardItem(item: ArtBoardItem): void {
+    this.dataService.removeArtBoardItem(item);
   }
 
   trackByItemId(index: number, item: ArtBoardItem): string {

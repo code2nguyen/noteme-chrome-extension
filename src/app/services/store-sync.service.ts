@@ -9,12 +9,6 @@ import { Observable, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class StoreSyncService {
-  private layoutChanged = new Subject<void>();
-
-  get onLayoutChange(): Observable<void> {
-    return this.layoutChanged.asObservable();
-  }
-
   constructor(private store: Store<AppState>, private actions$: ActionsSubject, private ngZone: NgZone) {}
 
   sync(key: string, newValue: any, oldValue: any): void {
@@ -61,19 +55,5 @@ export class StoreSyncService {
     this.ngZone.run(() => {
       this.store.dispatch(ArtBoardItemActions.loadArtBoardItems({ boardId: DEFAULT_BOARD_ID }));
     });
-    this.actions$
-      .pipe(
-        filter(
-          (action) =>
-            action.type === ArtBoardItemApiActions.loadArtBoardItemsSuccess.type ||
-            action.type === ArtBoardItemApiActions.loadArtBoardItemsFailure.type
-        ),
-        take(1)
-      )
-      .subscribe((action) => {
-        if (action.type === ArtBoardItemApiActions.loadArtBoardItemsSuccess.type) {
-          this.layoutChanged.next();
-        }
-      });
   }
 }

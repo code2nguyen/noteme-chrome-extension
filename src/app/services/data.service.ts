@@ -21,10 +21,6 @@ import { StoreSyncService } from './store-sync.service';
 export class DataService {
   constructor(private store: Store<AppState>, private storeSync: StoreSyncService) {}
 
-  get syncLayout(): Observable<void> {
-    return this.storeSync.onLayoutChange;
-  }
-
   getItemData(itemDataId: string): Observable<ItemData> {
     this.store.dispatch(ItemDataActions.getItemData({ itemDataId }));
     return this.store.pipe(select(selectItemDataById, { itemDataId })).pipe(filter((data) => !!data));
