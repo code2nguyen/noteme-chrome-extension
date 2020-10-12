@@ -146,6 +146,11 @@
     .dashboard-item-toolbar-icon:hover {
       color: rgb(var(--dashboard-theme-item-icon-color, 255, 255, 255));
     }
+    .dashboard-item-delete-button {
+      margin-top: 3px;
+      margin-right: 16px;
+    }
+
     .blink {
       animation: blinkAnimation 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 3;
     }
