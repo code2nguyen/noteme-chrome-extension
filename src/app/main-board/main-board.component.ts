@@ -10,9 +10,9 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { DataService } from '../services/data.service';
-import { ArtBoardItem, Board, DEFAULT_BOARD_ID, ItemData } from '../store/models';
+import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { getCurrentDate, uuid } from '../services/utils';
 import { map, switchMap, takeUntil, tap, timeout } from 'rxjs/operators';
 import { DEFAULT_EXTENSION_ID, extensionDefaultProperties } from '../extension-config';
@@ -147,8 +147,12 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.highlightItem$.next(item.id);
   }
 
-  hideArtboardItem(item: ArtBoardItem): void {
-    this.dataService.hideArtBoardItem(item);
+  toggleArchiveArtboardItem(item: ArtBoardItem): void {
+    if (this.inNoteTab) {
+      this.dataService.hideArtBoardItem(item);
+    } else {
+      this.dataService.showArtBoardItem(item, item.gridPosition?.order || 0);
+    }
   }
 
   goGoWelcomePage(): void {

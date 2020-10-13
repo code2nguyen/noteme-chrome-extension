@@ -157,14 +157,17 @@
       (dataChange)="onItemDataChange(item.id, $event)"
       (change-background)="onItemChangeBackground(item.id, $event.detail)"
     >
+      <!-- delete -->
       <cff-delete-confirmation
         class="dashboard-item-delete-button"
         slot="toolbar"
         (confirm)="removeArtBoardItem(item)"
       ></cff-delete-confirmation>
 
-      <div slot="toolbar" class="dashboard-item-toolbar-icon" (click)="hideArtboardItem(item)">
+      <!-- archive -->
+      <div slot="toolbar" class="dashboard-item-toolbar-icon" (click)="toggleArchiveArtboardItem(item)">
         <svg
+          *ngIf="inNoteTab"
           xmlns="http://www.w3.org/2000/svg"
           width="12"
           height="12"
@@ -174,11 +177,40 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="feather feather-archive"
+          class="feather feather-sunset"
         >
-          <polyline points="21 8 21 21 3 21 3 8"></polyline>
-          <rect x="1" y="3" width="22" height="5"></rect>
-          <line x1="10" y1="12" x2="14" y2="12"></line>
+          <path d="M17 18a5 5 0 0 0-10 0"></path>
+          <line x1="12" y1="9" x2="12" y2="2"></line>
+          <line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line>
+          <line x1="1" y1="18" x2="3" y2="18"></line>
+          <line x1="21" y1="18" x2="23" y2="18"></line>
+          <line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line>
+          <line x1="23" y1="22" x2="1" y2="22"></line>
+          <polyline points="16 5 12 9 8 5"></polyline>
+        </svg>
+
+        <svg
+          *ngIf="!inNoteTab"
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="feather feather-sun"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
         </svg>
       </div>
     </cff-dashboard-item>
