@@ -9,8 +9,10 @@ import { DataType } from '../store/models/data-type';
 import { GridPosition } from '../store/models/grid-position';
 import {
   AppState,
+  selectArchivedArtBoardItems,
   selectArtBoardItemById,
   selectArtBoardItemsByBoardId,
+  selectArtBoardItemSearchLoading,
   selectArtBoardItemSearchResults,
   selectItemDataById,
 } from '../store/reducers';
@@ -38,11 +40,20 @@ export class DataService {
     return this.store.pipe(select(selectArtBoardItemSearchResults));
   }
 
+  selectArtBoardItemSearchLoading(): Observable<boolean> {
+    return this.store.pipe(select(selectArtBoardItemSearchLoading));
+  }
+
   getArtBoardItems(boardId: string, force = true): Observable<ArtBoardItem[]> {
     if (force) {
       this.store.dispatch(ArtBoardItemActions.loadArtBoardItems({ boardId }));
     }
     return this.store.pipe(select(selectArtBoardItemsByBoardId, { boardId }));
+  }
+
+  getArchivedArtBoardItems(): Observable<ArtBoardItem[]> {
+    this.store.dispatch(ArtBoardItemActions.getAllArtBoardItems());
+    return this.store.pipe(select(selectArchivedArtBoardItems));
   }
 
   getArtBoardItemById(artBoardItemId: string): Observable<ArtBoardItem> {

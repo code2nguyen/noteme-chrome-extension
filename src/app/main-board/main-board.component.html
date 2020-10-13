@@ -5,13 +5,15 @@
     <ng-container *ngIf="searchItems$ | async as searchItems">
       <cff-search-input
         id="ntm-search-input"
-        [ngClass]="{ hasResult: searchItems.length > 0 }"
+        [loading]="isSearching$ | async"
+        [value]="searchQuery$ | async"
+        [ngClass]="{ hasResult: inNoteTab && searchItems.length > 0 }"
         (focus)="searchInputAcitve($event)"
         (blur)="searchInputInactive($event)"
         (change)="searchArtBoardItem($event.detail)"
       ></cff-search-input>
 
-      <ng-container *ngIf="showSearchResults && searchItems.length > 0">
+      <ng-container *ngIf="inNoteTab && showSearchResults && searchItems.length > 0">
         <div class="ntm-search-result-seperator"></div>
         <div
           class="ntm-search-result"
@@ -32,7 +34,7 @@
       </ng-container>
     </ng-container>
   </div>
-  <div class="button-icon add-button" (click)="newNote()">
+  <div class="button-icon add-button" (click)="newNote()" [ngClass]="{ hidden: selectedTab != 'Notes' }">
     <svg xmlns="http://www.w3.org/2000/svg" #addButton viewBox="0 0 22.26 24">
       <defs>
         <style>
@@ -64,6 +66,12 @@
     </svg>
   </div>
   <div class="seperator"></div>
+  <cff-tab-menu
+    class="tab-menu"
+    [items]="['Notes', 'Archive']"
+    [selectedItem]="selectedTab"
+    (tab-change)="changeTab($event.detail)"
+  ></cff-tab-menu>
   <div class="seperator"></div>
   <div class="button-icon ntm-logo" (click)="goGoWelcomePage()">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148.56 148.56">
@@ -131,6 +139,7 @@
   (overlapped)="navbarOverlappedHandler($event)"
 ></div>
 <cff-dashboard-layout
+  #dashboardLayout
   (layout-change)="onChangeLayoutHandle($event)"
   class="main-content"
   editable

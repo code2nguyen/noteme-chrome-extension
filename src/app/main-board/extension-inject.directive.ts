@@ -37,6 +37,7 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterView
   private extensionConfig?: ExtensionConfig;
   private customElements?: HTMLElement[] = [];
   private highlightSubscription = Subscription.EMPTY;
+  private focusSubscription = Subscription.EMPTY;
   constructor(
     @Inject(APP_ID) private ID: string,
     private parent: MainBoardComponent,
@@ -50,7 +51,11 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterView
     this.highlightSubscription = this.parent.highlightItem$.subscribe((highlightItemId) => {
       this.highlight(highlightItemId);
     });
+    this.focusSubscription = this.parent.focusItem$.subscribe((focusItemid) => {
+      this.focus(focusItemid);
+    });
   }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.extensiontId) {
       if (!changes.extensiontId.isFirstChange()) {
@@ -76,11 +81,21 @@ export class ExtensionInjectDirective implements OnChanges, OnDestroy, AfterView
 
   ngOnDestroy(): void {
     this.highlightSubscription.unsubscribe();
+    this.focusSubscription.unsubscribe();
     if (this.customElements.length > 0) {
       this.customElements[0].removeEventListener(this.extensionConfig.dataChangeEvent.event, this.onDataChangeHandler);
     }
     this.customElements.forEach((child) => child.remove());
     this.customElements = [];
+  }
+
+  focus(focusItemId: string): void {
+    if (focusItemId !== this.itemDataId) {
+      return;
+    }
+    if (this.customElements.length > 0 && typeof this.customElements[0].focus === 'function') {
+      this.customElements[0].focus();
+    }
   }
 
   highlight(highlightItemId: string): void {

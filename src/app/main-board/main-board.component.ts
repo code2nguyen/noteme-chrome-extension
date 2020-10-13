@@ -7,18 +7,21 @@ import {
   OnDestroy,
   NgZone,
   ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { ArtBoardItem, Board, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { getCurrentDate, uuid } from '../services/utils';
-import { takeUntil, tap, timeout } from 'rxjs/operators';
+import { map, switchMap, takeUntil, tap, timeout } from 'rxjs/operators';
 import { DEFAULT_EXTENSION_ID, extensionDefaultProperties } from '../extension-config';
 import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../extension-config';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DataChangeEvent } from '../store/models/data-change-event';
 import { Router } from '@angular/router';
+import { EMPTY } from 'rxjs';
 @Component({
   selector: 'ntm-mainboard',
   templateUrl: './main-board.component.html',
@@ -35,20 +38,26 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   searchItems$: Observable<ArtBoardItem[]>;
   showSearchResults = false;
   selectingSearchResult = false;
-  highlightItem$ = new ReplaySubject<string>(1);
+  highlightItem$ = new Subject<string>();
+  focusItem$ = new ReplaySubject<string>(1);
+  selectedTab = 'Notes';
+  searchQuery$ = new BehaviorSubject<string>('');
+  isSearching$: Observable<boolean>;
+  inNoteTab = true;
+  @ViewChild('dashboardLayout', { static: true }) dashboardLayoutRed: ElementRef;
 
   private minOrder = 0;
   private destroyed$ = new Subject<void>();
   constructor(private router: Router, private cd: ChangeDetectorRef, private dataService: DataService) {
-    this.items$ = dataService.getArtBoardItems(DEFAULT_BOARD_ID).pipe(
-      tap((items) => {
-        this.minOrder = items.length > 0 ? Math.min(...items.map((item) => item.gridPosition?.order ?? 0)) : 0;
-      })
-    );
-    this.searchItems$ = this.dataService.getSearchResults();
+    this.setupNotesDataStream();
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.searchQuery$.pipe(takeUntil(this.destroyed$)).subscribe((query) => {
+      this.dataService.searchArtBoardItem(query);
+    });
+    this.isSearching$ = this.dataService.selectArtBoardItemSearchLoading();
+  }
 
   ngOnDestroy(): void {
     this.destroyed$.next();
@@ -73,6 +82,7 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataService.addArtBoardItem(newArtBoardItem);
     setTimeout(() => {
       window.scrollTo(0, 0);
+      this.focusItem$.next(newArtBoardItem.id);
     }, 0);
   }
 
@@ -117,7 +127,7 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   searchArtBoardItem(query: string): void {
-    this.dataService.searchArtBoardItem(query);
+    this.searchQuery$.next(query);
   }
 
   searchInputAcitve(event: any): void {
@@ -143,5 +153,49 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   goGoWelcomePage(): void {
     this.router.navigate(['/']);
+  }
+
+  changeTab(tab: string): void {
+    this.selectedTab = tab;
+    this.searchQuery$.next('');
+    this.dashboardLayoutRed.nativeElement.disableFirstRenderAnimation = true;
+    switch (tab) {
+      case 'Archive':
+        this.inNoteTab = false;
+        this.setupArchiveDataStream();
+
+        break;
+
+      default:
+        this.inNoteTab = true;
+        this.setupNotesDataStream();
+        break;
+    }
+  }
+
+  private setupNotesDataStream(): void {
+    this.items$ = this.dataService.getArtBoardItems(DEFAULT_BOARD_ID).pipe(
+      tap((items) => {
+        this.minOrder = items.length > 0 ? Math.min(...items.map((item) => item.gridPosition?.order ?? 0)) : 0;
+      })
+    );
+    this.searchItems$ = this.dataService.getSearchResults();
+  }
+
+  private setupArchiveDataStream(): void {
+    this.searchItems$ = of([]);
+    this.items$ = this.searchQuery$.pipe(
+      switchMap((query) => {
+        return query
+          ? this.dataService.getSearchResults().pipe(map((items) => items.filter((item) => !item.boardId)))
+          : this.dataService.getArchivedArtBoardItems().pipe(
+              map((items) => {
+                return items.sort((a, b) =>
+                  (a.dataModifiedDate || a.modifiedDate).localeCompare(b.dataModifiedDate || b.modifiedDate)
+                );
+              })
+            );
+      })
+    );
   }
 }

@@ -94,6 +94,10 @@ export const selectArtBoardItemsByBoardId = createSelector(
   }
 );
 
+export const selectArchivedArtBoardItems = createSelector(selectAllArtBoardItems, (artBoardItems: ArtBoardItem[]) => {
+  return artBoardItems.filter((item) => !item.boardId);
+});
+
 export const selectIsAllLoadedArtBoardItems = createSelector(selectArtBoardItemsState, (state) => state.isAllLoaded);
 // -------------------
 // Item Data selectors
@@ -111,6 +115,7 @@ export const selectItemDataById = createSelector(
     return itemDataEntities[props.itemDataId];
   }
 );
+export const selectIsAllLoadedItemDatas = createSelector(selectItemDatasState, (state) => state.isAllLoaded);
 
 // -------------------
 // ArtBoardItemSearch selectors

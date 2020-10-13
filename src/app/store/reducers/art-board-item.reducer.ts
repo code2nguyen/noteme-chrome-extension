@@ -25,8 +25,9 @@ export const reducer = createReducer(
     return adapter.upsertMany(artBoardItems, state);
   }),
   on(ArtBoardItemApiActions.getAllArtBoardItemsSuccess, (state, { artBoardItems }) => {
+    const newItems = artBoardItems.filter((item) => item && !state.entities[item.id]);
     return {
-      ...adapter.setAll(artBoardItems, state),
+      ...adapter.addMany(newItems, state),
       ...{ isAllLoaded: true },
     };
   }),
