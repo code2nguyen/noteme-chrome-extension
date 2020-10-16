@@ -1,4 +1,4 @@
-import { ScreenColumns } from '@cff/webcomponents/shared/models';
+import { ScreenColumns } from '@c2n/webcomponents/shared/models';
 
 export interface GridPosition {
   screenColumns: ScreenColumns;

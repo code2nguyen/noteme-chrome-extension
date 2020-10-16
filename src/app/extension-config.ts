@@ -30,8 +30,8 @@ export const extensionLoader: {
 } = {
   [ExtensionId.TextNote]: new (class TextNoteLoader extends Loader<any> {
     async loadExtension(): Promise<any> {
-      await import('@cff/webcomponents/components/quill-editor/quill-editor.component.js');
-      await import('@cff/webcomponents/components/quill-editor-toolbar/quill-editor-toolbar.component.js');
+      await import('@c2n/webcomponents/components/quill-editor/quill-editor.component.js');
+      await import('@c2n/webcomponents/components/quill-editor-toolbar/quill-editor-toolbar.component.js');
       return true;
     }
   })(),

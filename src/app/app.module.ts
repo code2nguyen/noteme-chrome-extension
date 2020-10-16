@@ -3,7 +3,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import '@cff/webcomponents/components/calendar-clock';
+import '@c2n/webcomponents/components/calendar-clock';
 import { AppComponent } from './app.component';
 import { ROOT_REDUCERS, initialState } from './store/reducers';
 import { ArtBoardItemEffects, ItemDataEffects, UserEffects } from './store/effects';
