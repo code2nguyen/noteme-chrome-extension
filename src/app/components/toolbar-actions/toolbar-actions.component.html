@@ -1,0 +1,30 @@
+<ng-container *ngFor="let item of items">
+  <div class="ntm-toolbar-action-item" #toolbarActionItem>
+    <ng-container *ngTemplateOutlet="item"></ng-container>
+  </div>
+</ng-container>
+<div class="toolbar-more-button" #showMoreButton (click)="showMore()">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="feather feather-more-horizontal"
+  >
+    <circle cx="12" cy="12" r="1"></circle>
+    <circle cx="19" cy="12" r="1"></circle>
+    <circle cx="5" cy="12" r="1"></circle>
+  </svg>
+</div>
+<mwc-menu #menu menuCorner="START" corner="BOTTOM_START" y="0" x="0" fixed id="menu">
+  <ng-container *ngFor="let item of menuItems.toArray() | slice: startMenuItemIndex">
+    <mwc-list-item graphic="icon">
+      <ng-container *ngTemplateOutlet="item"></ng-container>
+    </mwc-list-item>
+  </ng-container>
+</mwc-menu>

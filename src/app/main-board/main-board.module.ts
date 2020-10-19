@@ -11,12 +11,18 @@ import '@c2n/webcomponents/components/dashboard-layout/dashboard-layout.componen
 import '@c2n/webcomponents/components/dashboard-item/dashboard-item.component';
 import '@c2n/webcomponents/components/delete-confirmation/delete-confirmation.component';
 import '@c2n/webcomponents/components/tab-menu/tab-menu.component';
-import { StickySidenavDirective } from './sticky-sidenav.directive';
 import { ExtensionInjectDirective } from './extension-inject.directive';
+import { ToolbarActionsModule } from '../components/toolbar-actions/toolbar-actions.module';
+import { IntersectionObserverModule } from '../components/intersection-observer/intersection-observer.module';
 
 @NgModule({
-  declarations: [MainBoardComponent, StickySidenavDirective, ExtensionInjectDirective],
-  imports: [CommonModule, RouterModule.forChild([{ path: '', pathMatch: 'full', component: MainBoardComponent }])],
+  declarations: [MainBoardComponent, ExtensionInjectDirective],
+  imports: [
+    CommonModule,
+    RouterModule.forChild([{ path: '', pathMatch: 'full', component: MainBoardComponent }]),
+    ToolbarActionsModule,
+    IntersectionObserverModule,
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class MainBoardModule {}

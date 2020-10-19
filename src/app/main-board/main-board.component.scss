@@ -1,10 +1,7 @@
 .ntm-mainboard {
   // --mdc-menu-min-width: 200px;
   // --mdc-menu-item-height: 48px;
-  --mdc-theme-surface: #717680;
-  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.8);
-  --mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.8);
-  --ntm-theme-accent-color: #ff726b;
+
   /* inherits the styles of mwc-list internally */
   // --mdc-theme-primary: #ff726b;
   // --mdc-list-vertical-padding: 0px;
@@ -25,6 +22,11 @@
     opacity: 1;
     transition: opacity 0.3s ease 0.1s, top 0.3s ease 0.3s;
 
+    .tab-menu {
+      flex-grow: 0.5;
+      flex-shrink: 0;
+      flex-basis: auto;
+    }
     .ntm-search-container {
       max-width: 650px;
       min-width: 180px;
@@ -82,35 +84,48 @@
     }
     .seperator {
       margin: auto;
+      min-width: 16px;
     }
-    .button-icon {
-      width: 24px;
-      height: 24px;
-      flex: 0 0 24px;
-      cursor: pointer;
-      padding: 0 16px;
+    .ntm-toolbar-actions {
+      flex: 1;
+      min-width: 120px;
+    }
+    .navbar-button {
+      font-family: 'RedHatDisplay';
+      font-weight: 300;
+      display: flex;
+      align-items: center;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      color: rgb(255, 255, 255, 0.5);
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      svg {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+
+        padding: 0 8px 0 16px;
+      }
+      margin-right: 8px;
     }
-    .button-icon:hover {
-      color: #ff726b;
+
+    .navbar-button:hover {
+      color: rgb(255, 255, 255);
     }
 
     .hidden {
       visibility: hidden;
       opacity: 0;
     }
-    .add-button {
-      height: 30px;
-    }
 
     .ntm-logo {
-      transition: opacity 0.3s ease-out;
-      opacity: 0.8;
-    }
-    .ntm-logo:hover {
       width: 24px;
       height: 24px;
+      flex: 0 0 24px;
+      transition: opacity 0.3s ease-out;
+      opacity: 0.8;
+      cursor: pointer;
+    }
+    .ntm-logo:hover {
       opacity: 1;
     }
     .tab-menu {

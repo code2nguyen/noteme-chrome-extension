@@ -32,6 +32,7 @@
     "highlight.js": "^10.2.1",
     "lodash-es": "^4.17.15",
     "lunr": "^2.3.9",
+    "monaco-editor": "^0.21.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "uuid": "^8.3.1",

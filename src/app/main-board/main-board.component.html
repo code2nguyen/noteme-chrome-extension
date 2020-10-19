@@ -1,6 +1,11 @@
 <!-- navbar -->
 <div class="ntm-navbar" [ngClass]="{ overlaped: mainContainerOverlap }">
-  <div class="seperator"></div>
+  <cff-tab-menu
+    class="tab-menu"
+    [items]="['Notes', 'Archive']"
+    [selectedItem]="selectedTab"
+    (tab-change)="changeTab($event.detail)"
+  ></cff-tab-menu>
   <div class="ntm-search-container">
     <ng-container *ngIf="searchItems$ | async as searchItems">
       <cff-search-input
@@ -34,46 +39,80 @@
       </ng-container>
     </ng-container>
   </div>
-  <div class="button-icon add-button" (click)="newNote()" [ngClass]="{ hidden: selectedTab != 'Notes' }">
-    <svg xmlns="http://www.w3.org/2000/svg" #addButton viewBox="0 0 22.26 24">
-      <defs>
-        <style>
-          .add-button-card {
-            fill: currentColor;
-          }
-          .add-button-plus {
-            fill: #ff726b;
-          }
-        </style>
-      </defs>
-      <g id="Calque_2" data-name="Calque 2">
-        <g id="card">
-          <path
-            class="add-button-card"
-            d="M8.52,4.81V7.53a1.66,1.66,0,0,0,1.62,1.69h3v3.54a1.66,1.66,0,0,0,1.62,1.7h2.15v7.75c0,.43-.27.79-.59.79H1.6c-.33,0-.6-.36-.6-.79V5.61c0-.43.27-.8.6-.8H8.52m1-1H1.6A1.71,1.71,0,0,0,0,5.61v16.6A1.7,1.7,0,0,0,1.6,24H16.35a1.7,1.7,0,0,0,1.59-1.79V13.46H14.79a.66.66,0,0,1-.62-.7V8.22h-4a.66.66,0,0,1-.62-.69V3.81Z"
-          />
-          <rect class="add-button-card" x="2.5" y="10.42" width="4" height="1" />
-          <rect class="add-button-card" x="2.5" y="14.75" width="8" height="1" />
-          <rect class="add-button-card" x="2.5" y="18.85" width="11" height="1" />
+  <ntm-toolbar-actions>
+    <ng-template ntmToolbarActionItem="newNote">
+      <div class="navbar-button" (click)="newNote()" [ngClass]="{ hidden: selectedTab != 'Notes' }">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="feather feather-edit"
+        >
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        <span>Text</span>
+      </div>
+    </ng-template>
+    <ng-template ntmToolbarActionItem="newCode">
+      <div class="navbar-button" (click)="newNote()" [ngClass]="{ hidden: selectedTab != 'Notes' }">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 18.86 16.37"
+        >
+          <g>
+            <g>
+              <path d="M13.55,13.32l4.11-4.1a1.27,1.27,0,0,0,0-1.79L13.55,3.32" />
+              <path d="M4.89,3.32,1.5,6.7a2.3,2.3,0,0,0,0,3.24l3.39,3.38" />
+              <line x1="10.43" y1="0.83" x2="8.3" y2="15.54" />
+            </g>
+          </g>
+        </svg>
+        <span>Code</span>
+      </div>
+    </ng-template>
+
+    <ng-template ntmToolbarActionMenuItem="newText">
+      <div>this is new Text</div>
+    </ng-template>
+    <ng-template ntmToolbarActionMenuItem="newCode">
+      <span>Code</span>
+      <svg
+        slot="graphic"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        stroke="currentColor"
+        width="20"
+        height="20"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 18.86 16.37"
+        style="fill: none; width: 18px; height: 18px"
+      >
+        <g>
+          <g>
+            <path d="M13.55,13.32l4.11-4.1a1.27,1.27,0,0,0,0-1.79L13.55,3.32" />
+            <path d="M4.89,3.32,1.5,6.7a2.3,2.3,0,0,0,0,3.24l3.39,3.38" />
+            <line x1="10.43" y1="0.83" x2="8.3" y2="15.54" />
+          </g>
         </g>
-        <g id="plus">
-          <path
-            class="add-button-plus"
-            d="M22.26,4.24V7a.5.5,0,0,1-.5.5H18.52v3.24a.49.49,0,0,1-.5.49H15.28a.49.49,0,0,1-.49-.49V7.48H11.55a.5.5,0,0,1-.5-.5V4.24a.5.5,0,0,1,.5-.5h3.24V.5a.49.49,0,0,1,.49-.5H18a.5.5,0,0,1,.5.5V3.74h3.24A.5.5,0,0,1,22.26,4.24Z"
-          />
-        </g>
-      </g>
-    </svg>
-  </div>
-  <div class="seperator"></div>
-  <cff-tab-menu
-    class="tab-menu"
-    [items]="['Notes', 'Archive']"
-    [selectedItem]="selectedTab"
-    (tab-change)="changeTab($event.detail)"
-  ></cff-tab-menu>
-  <div class="seperator"></div>
-  <div class="button-icon ntm-logo" (click)="goGoWelcomePage()">
+      </svg>
+    </ng-template>
+  </ntm-toolbar-actions>
+  <!-- <div class="seperator"></div> -->
+  <div class="ntm-logo" (click)="goGoWelcomePage()">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148.56 148.56">
       <defs>
         <style>
@@ -135,7 +174,7 @@
 <div
   class="intersection-radar"
   [ngClass]="{ overlaped: mainContainerOverlap }"
-  ntmStickyNavbar
+  ntmIntersectionObserver
   (overlapped)="navbarOverlappedHandler($event)"
 ></div>
 <cff-dashboard-layout
