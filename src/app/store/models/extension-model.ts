@@ -8,19 +8,21 @@ export interface ExtensionProperty {
 interface ExtensionEvent {
   event: string;
   propertyName: string;
+  dataItemPropertyName: string;
 }
 
 export interface ExtensionConfig {
   extensionId: ExtensionId;
   element?: string;
-  properties: ExtensionProperty[];
-  dataChangeEvent: ExtensionEvent;
-  dataInputProperty: string;
+  staticProperties: ExtensionProperty[];
+  events: ExtensionEvent[];
+  dataBindings: Array<{ propertyName: string; dataItemPropertyName: string }>;
   dataType: DataType;
   toolbarComponent:
     | {
         element?: string;
+        dataBindings?: Array<{ propertyName: string; dataItemPropertyName: string }>;
       }
     | false;
-  viewComponent: Omit<Partial<ExtensionConfig>, 'extensionId' | 'dataChangeEvent' | 'toolbarComponent'> | false;
+  viewComponent: Omit<Partial<ExtensionConfig>, 'extensionId' | 'events' | 'toolbarComponent'> | false;
 }

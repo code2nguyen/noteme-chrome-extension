@@ -61,9 +61,9 @@
       overflow-y: auto;
       width: 100%;
       .ntm-search-item {
-        min-height: 90px;
-        max-height: 180px;
-        padding: 8px 0px;
+        min-height: 160px;
+        max-height: 240px;
+        padding: 16px 0px;
         overflow: hidden;
       }
       .ntm-search-item:hover {
@@ -169,6 +169,10 @@
     .dashboard-item-delete-button {
       margin-top: 3px;
       margin-right: 16px;
+    }
+    .monaco-editor-item {
+      --dashboard-item-content-margin: 8px 0 32px 0;
+      --dashboard-theme-item-bg-color-0: #282c34 !important;
     }
 
     .blink {

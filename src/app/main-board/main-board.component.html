@@ -61,7 +61,11 @@
       </div>
     </ng-template>
     <ng-template ntmToolbarActionItem="newCode">
-      <div class="navbar-button" (click)="newNote()" [ngClass]="{ hidden: selectedTab != 'Notes' }">
+      <div
+        class="navbar-button"
+        (click)="newNote('ntm-code-note-element')"
+        [ngClass]="{ hidden: selectedTab != 'Notes' }"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -193,11 +197,14 @@
       [order]="item.gridPosition.order"
       [ntmExtensionInject]="item.extensionId"
       [itemDataId]="item.id"
-      (dataChange)="onItemDataChange(item.id, $event)"
+      [ngClass]="{ 'monaco-editor-item': item.extensionId === 'ntm-code-note-element' }"
+      (dataChange)="onItemDataChange($event)"
+      (hideToolbar)="deleteButton.close()"
       (change-background)="onItemChangeBackground(item.id, $event.detail)"
     >
       <!-- delete -->
       <cff-delete-confirmation
+        #deleteButton
         class="dashboard-item-delete-button"
         slot="toolbar"
         (confirm)="removeArtBoardItem(item)"

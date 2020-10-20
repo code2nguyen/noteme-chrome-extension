@@ -15,7 +15,7 @@ import {
   layoutSyncKey,
 } from '../../services/storage.api';
 import { ArtBoardItem } from '../models';
-import { getCurrentDate, isNotNullOrUndefined, convertItemData } from '../../services/utils';
+import { getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
 import { SearchService } from '../../services/search.service';
 import { Store, select, Action } from '@ngrx/store';
 import { AppState, selectItemDataById, selectIsAllLoadedArtBoardItems, selectArtBoardItemById } from '../reducers';
@@ -138,43 +138,6 @@ export class ArtBoardItemEffects {
       })
     )
   );
-
-  // changeArtBoardItemType$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(ArtBoardItemActions.changeArtBoardItemType),
-  //     mergeMap(({ artBoardItem, changedDataType }) => {
-  //       return of(null).pipe(
-  //         withLatestFrom(this.store.pipe(select(selectItemDataById, { itemDataId: artBoardItem.id }))),
-  //         mergeMap(([_, itemData]) => {
-  //           const convertedItemData = itemData ? convertItemData(itemData, changedDataType) : null;
-  //           return forkJoin([
-  //             this.storageApi.set(artBoardItemKey(artBoardItem.id), {
-  //               ...artBoardItem,
-  //               ...{ modifiedDate: getCurrentDate() },
-  //             }),
-  //             iif(
-  //               () => !!convertedItemData,
-  //               this.storageApi.set(itemDataKey(convertedItemData!.id), {
-  //                 ...convertedItemData,
-  //                 ...{ modifiedDate: getCurrentDate(), dataType: changedDataType },
-  //               }),
-  //               of(null)
-  //             ),
-  //           ]).pipe(
-  //             mergeMap(() => {
-  //               const actions: Action[] = [ArtBoardItemApiActions.changeArtBoardItemTypeSuccess({ artBoardItem })];
-  //               if (convertedItemData) {
-  //                 actions.unshift(ItemDataApiActions.updateItemDataSuccess({ itemData: convertedItemData }));
-  //               }
-  //               return from(actions);
-  //             }),
-  //             catchError((error) => of(ArtBoardItemApiActions.changeArtBoardItemTypeFailure({ error })))
-  //           );
-  //         })
-  //       );
-  //     })
-  //   )
-  // );
 
   deleteArtBoardItem$ = createEffect(() =>
     this.actions$.pipe(
@@ -351,8 +314,14 @@ export class ArtBoardItemEffects {
     artBoardItem.gridPosition = artBoardItem.gridPosition
       ? { ...defaultPosition, ...artBoardItem.gridPosition }
       : { ...defaultPosition };
-    artBoardItem.extensionId = artBoardItem.extensionId ?? ExtensionId.TextNote;
-    artBoardItem.colorIndex = artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS);
+    let extensionId = artBoardItem.extensionId;
+    if (!extensionId) {
+      extensionId =
+        (artBoardItem as any).element === 'ntm-code-note-element' ? ExtensionId.CodeNote : ExtensionId.TextNote;
+    }
+    artBoardItem.extensionId = extensionId;
+    artBoardItem.colorIndex =
+      extensionId === ExtensionId.CodeNote ? 0 : artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS);
     return artBoardItem;
   }
 

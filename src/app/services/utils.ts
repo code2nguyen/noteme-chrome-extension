@@ -115,7 +115,25 @@ export function hasProperty(context: any, name: string): boolean {
 export function getObjectPropertyValue(target: any, property: string): any {
   let currentValue = target;
   for (const propertyName of property.split('.')) {
-    currentValue = currentValue[propertyName] || {};
+    currentValue = currentValue[propertyName];
+    if (!isNotNullOrUndefined(currentValue)) {
+      break;
+    }
   }
   return currentValue;
+}
+
+export function getOutletObjectValue(value: any, property: string): any {
+  const result: any = {};
+  let currentValue = result;
+  const properties = property.split('.');
+  properties.forEach((propertyName, index) => {
+    if (index < properties.length - 1) {
+      currentValue[propertyName] = {};
+    } else {
+      currentValue[propertyName] = value;
+    }
+    currentValue = currentValue[propertyName];
+  });
+  return result;
 }

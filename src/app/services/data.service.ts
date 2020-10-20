@@ -28,12 +28,8 @@ export class DataService {
     return this.store.pipe(select(selectItemDataById, { itemDataId })).pipe(filter((data) => !!data));
   }
 
-  updateDataItem(itemDataId: string, data: any, dataType: DataType): void {
-    this.store.dispatch(
-      ItemDataActions.updateItemData({
-        itemData: { id: itemDataId, data, empty: false, dataType },
-      })
-    );
+  updateDataItem(itemData: Partial<ItemData>): void {
+    this.store.dispatch(ItemDataActions.updateItemData({ itemData }));
   }
 
   getSearchResults(): Observable<ArtBoardItem[]> {

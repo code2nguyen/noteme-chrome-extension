@@ -10,11 +10,9 @@ export interface ArtBoardItem {
   gridPosition: GridPosition;
   starred?: boolean;
   colorIndex: number;
-  properties: Partial<{
-    category: string;
-    color: string;
-    language: string;
-  }>;
+  properties: {
+    [key: string]: any;
+  };
   modifiedDate: string;
   dataModifiedDate?: string;
   sourceId?: string;

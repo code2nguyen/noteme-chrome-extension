@@ -14,6 +14,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { WelcomePageComponent } from './welcome-page/welcome-page.component';
 import { environment } from '../environments/environment';
 import { DevStorageApi } from './services/dev-storage.api';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent, WelcomePageComponent],
@@ -25,6 +26,7 @@ import { DevStorageApi } from './services/dev-storage.api';
     }),
     EffectsModule.forRoot([ArtBoardItemEffects, ItemDataEffects, UserEffects]),
     AppRoutingModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
     // ChromeBackgroundBoardModule,
   ],
   providers: [

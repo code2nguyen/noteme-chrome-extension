@@ -6,10 +6,10 @@ import { StorageApi, itemDataKey, STORAGE_API, artBoardItemIdsKey } from '../../
 import { catchError, switchMap, map, debounceTime, mergeMap, withLatestFrom, take } from 'rxjs/operators';
 import { of, asyncScheduler } from 'rxjs';
 import { ItemData } from '../models';
-import { convertItemData, createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
+import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
 import { select, Store } from '@ngrx/store';
 import { AppState, selectIsAllLoadedItemDatas, selectItemDataById } from '../reducers';
-import { DataType } from '../models/data-type';
+import merge from 'lodash-es/merge';
 import { EMPTY } from 'rxjs';
 
 @Injectable()
@@ -21,7 +21,6 @@ export class ItemDataEffects {
         return this.storageApi.get<ItemData>(itemDataKey(itemDataId)).pipe(
           map((itemData) => {
             if (itemData) {
-              itemData = convertItemData(itemData, DataType.DELTA);
               return ItemDataApiActions.getItemDataSuccess({ itemData });
             }
             return ItemDataApiActions.getItemDataSuccess({ itemData: createEmptyItemData(itemDataId) });
@@ -63,11 +62,11 @@ export class ItemDataEffects {
           select(selectItemDataById, { itemDataId: itemData.id }),
           take(1),
           mergeMap((oldItemData) => {
-            const updatedDataItem = {
-              ...oldItemData,
-              ...itemData,
-              ...{ modifiedDate: getCurrentDate(), sourceId: this.ID },
-            };
+            const updatedDataItem = merge({}, oldItemData, itemData, {
+              empty: false,
+              modifiedDate: getCurrentDate(),
+              sourceId: this.ID,
+            });
             return this.storageApi.set(itemDataKey(itemData.id), updatedDataItem).pipe(
               map(() => ItemDataApiActions.updateItemDataSuccess({ itemData: updatedDataItem })),
               catchError((error) => of(ItemDataApiActions.createItemDataFailure({ error })))
@@ -103,7 +102,7 @@ export class ItemDataEffects {
             if (itemDataIds) {
               return this.storageApi.get<ItemData>(itemDataIds.map((itemDataId) => itemDataKey(itemDataId))).pipe(
                 map((items) => {
-                  return items.filter(isNotNullOrUndefined).map((item) => convertItemData(item, DataType.DELTA));
+                  return items.filter(isNotNullOrUndefined);
                 })
               );
             }

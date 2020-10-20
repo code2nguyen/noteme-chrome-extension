@@ -19,9 +19,7 @@ import { DEFAULT_EXTENSION_ID, extensionDefaultProperties } from '../extension-c
 import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../extension-config';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { DataChangeEvent } from '../store/models/data-change-event';
 import { Router } from '@angular/router';
-import { EMPTY } from 'rxjs';
 @Component({
   selector: 'ntm-mainboard',
   templateUrl: './main-board.component.html',
@@ -103,8 +101,8 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.dataService.getItemData(itemDataId);
   }
 
-  onItemDataChange(id: string, { data, dataType }: DataChangeEvent): void {
-    this.dataService.updateDataItem(id, data, dataType);
+  onItemDataChange(itemData: Partial<ItemData>): void {
+    this.dataService.updateDataItem(itemData);
   }
 
   onChangeLayoutHandle(event: any): void {

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable, of, forkJoin, combineLatest } from 'rxjs';
 import { STORAGE_API, StorageApi, itemDataIndexKey } from './storage.api';
-import { filter, last, map, shareReplay, startWith, switchMap, take, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, mergeMap, shareReplay, startWith, take } from 'rxjs/operators';
 import * as lunr from 'lunr';
 import Fuse from 'fuse.js';
 
@@ -49,7 +49,7 @@ export class SearchService {
     );
   }
 
-  private _getFuse(): Observable<Fuse<FuseDocument>> {
+  private _getFuseForAllItems(): Observable<Fuse<FuseDocument>> {
     this.store.dispatch(ItemDataActions.getAllItemData());
     return combineLatest([
       this.store.pipe(select(selectAllItemDatas)),
@@ -61,7 +61,7 @@ export class SearchService {
       map(([items, _]) => {
         return items;
       }),
-      take(1),
+      first(),
       map((items) => {
         const docs: FuseDocument[] = items
           .filter((item) => IndexableItemTypes.includes(item.dataType))
@@ -71,7 +71,7 @@ export class SearchService {
           }));
         return new Fuse(docs, this.fuseOptions);
       }),
-      switchMap((fuse) => {
+      mergeMap((fuse) => {
         return this.actionsSubj.pipe(
           startWith({ type: 'initValue' }),
           filter((action) => {
@@ -106,8 +106,10 @@ export class SearchService {
             return fuse;
           })
         );
-      }),
-      shareReplay(1)
+      })
     );
+  }
+  private _getFuse(): Observable<Fuse<FuseDocument>> {
+    return this._getFuseForAllItems().pipe(shareReplay(1));
   }
 }
