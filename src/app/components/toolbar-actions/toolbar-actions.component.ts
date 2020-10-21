@@ -12,6 +12,8 @@ import {
   ChangeDetectorRef,
   ViewChild,
   AfterViewInit,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { ToolbarActionMenuItemDirective } from './toolbar-action-menu-item.directive';
 import { ToolbarActionItemDirective } from './toolbar-action-item.directive';
@@ -41,6 +43,8 @@ export class ToolbarActionsComponent implements OnInit, OnDestroy, AfterViewInit
   @ViewChildren('toolbarActionItem') actionItems: QueryList<ElementRef>;
   @ViewChild('showMoreButton', { static: true }) showMoreButton: ElementRef;
   @ViewChild('menu', { static: true }) menu: ElementRef;
+
+  @Output() actionMenuSelected = new EventEmitter<number>();
 
   startMenuItemIndex = 0;
   private destroyed$ = new Subject<void>();
@@ -99,5 +103,10 @@ export class ToolbarActionsComponent implements OnInit, OnDestroy, AfterViewInit
 
   showMore(): void {
     this.menu.nativeElement.open = true;
+  }
+
+  handleMenuSelected(event: any): void {
+    const index: number = event.detail.index;
+    this.actionMenuSelected.emit(index + this.startMenuItemIndex);
   }
 }

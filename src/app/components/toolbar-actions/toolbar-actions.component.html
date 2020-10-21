@@ -21,7 +21,16 @@
     <circle cx="5" cy="12" r="1"></circle>
   </svg>
 </div>
-<mwc-menu #menu menuCorner="START" corner="BOTTOM_START" y="0" x="0" fixed id="menu">
+<mwc-menu
+  #menu
+  menuCorner="START"
+  corner="BOTTOM_START"
+  y="0"
+  x="0"
+  fixed
+  id="menu"
+  (action)="handleMenuSelected($event)"
+>
   <ng-container *ngFor="let item of menuItems.toArray() | slice: startMenuItemIndex">
     <mwc-list-item graphic="icon">
       <ng-container *ngTemplateOutlet="item"></ng-container>

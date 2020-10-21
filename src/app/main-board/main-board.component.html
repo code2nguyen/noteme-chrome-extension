@@ -39,7 +39,7 @@
       </ng-container>
     </ng-container>
   </div>
-  <ntm-toolbar-actions>
+  <ntm-toolbar-actions (actionMenuSelected)="handleToolbarMenuItemSelected($event)">
     <ng-template ntmToolbarActionItem="newNote">
       <div class="navbar-button" (click)="newNote()" [ngClass]="{ hidden: selectedTab != 'Notes' }">
         <svg

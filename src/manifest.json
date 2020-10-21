@@ -20,6 +20,6 @@
     "client_id": "976699161977-0i4pf34uh3bl39ru4qlscfqdhe7gaktb.apps.googleusercontent.com",
     "scopes": ["https://www.googleapis.com/auth/drive"]
   },
-  "content_security_policy": "script-src 'self' https://apis.google.com/; object-src 'self'",
+  "content_security_policy": "script-src 'self' 'sha256-bx+vgXVTwvZteWVN62I9sa4F+qi54VopbmFiKa7AsEU='; object-src 'self'",
   "manifest_version": 2
 }

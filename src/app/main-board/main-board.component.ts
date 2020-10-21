@@ -84,6 +84,12 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 0);
   }
 
+  handleToolbarMenuItemSelected(index: number): void {
+    if (index === 1) {
+      this.newNote(ExtensionId.CodeNote);
+    }
+  }
+
   removeArtBoardItem(item: ArtBoardItem): void {
     this.dataService.removeArtBoardItem(item);
   }
