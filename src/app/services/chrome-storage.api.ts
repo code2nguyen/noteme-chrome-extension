@@ -68,7 +68,7 @@ export class ChromeStorageApi implements StorageApi {
     return from(
       new Promise((resolve, reject) => {
         if (!Array.isArray(value)) {
-          value = { ...value, ...{ sourceId: this.ID } };
+          value = { ...value, ...{ sourceId: this.ID, trust: 'local' } };
         }
         const valueStr = JSON.stringify(value);
         this.localStorageApi.set({ [key]: valueStr }, () => {
