@@ -87,6 +87,8 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   handleToolbarMenuItemSelected(index: number): void {
     if (index === 1) {
       this.newNote(ExtensionId.CodeNote);
+    } else if (index === 2) {
+      this.newNote(ExtensionId.Vocabulary);
     }
   }
 

@@ -22,6 +22,7 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes, {
       useHash: true,
       initialNavigation: 'enabled',
+      relativeLinkResolution: 'legacy',
     }),
   ],
   exports: [RouterModule],

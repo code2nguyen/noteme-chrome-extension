@@ -68,6 +68,12 @@ html {
   --mdc-menu-min-width: 148px;
   --mdc-menu-item-height: 36px;
   --mdc-theme-primary: #ffffff;
+
+  --slate-lit-text-color: #c2c5cc;
+  --slate-lit-bg-color: transparent;
+  --slate-lit-code-background-color: hsl(220, 11%, 10%);
+  --slate-lit-highlight-color: hsl(60, 100%, 50%);
+  --slate-lit-rich-text-editor-padding: 0px 0px 0px 16px;
 }
 
 body {

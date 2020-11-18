@@ -87,10 +87,10 @@
       </div>
     </ng-template>
 
-    <ng-template ntmToolbarActionItem="newWord">
+    <ng-template ntmToolbarActionItem="vocabulary">
       <div
         class="navbar-button"
-        (click)="newNote('ntm-code-note-element')"
+        (click)="newNote('vocabulary-extension')"
         [ngClass]="{ hidden: selectedTab != 'Notes' }"
       >
         <svg
@@ -122,7 +122,7 @@
             />
           </g>
         </svg>
-        <span>Word</span>
+        <span>Vocabulary</span>
       </div>
     </ng-template>
 
@@ -153,8 +153,8 @@
         </g>
       </svg>
     </ng-template>
-    <ng-template ntmToolbarActionMenuItem="newWord">
-      <span>Word</span>
+    <ng-template ntmToolbarActionMenuItem="vocabulary">
+      <span>Vocabulary</span>
       <svg
         slot="graphic"
         xmlns="http://www.w3.org/2000/svg"

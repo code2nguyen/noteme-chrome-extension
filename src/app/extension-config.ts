@@ -66,6 +66,13 @@ export const extensionLoader: {
       return true;
     }
   })(),
+  [ExtensionId.Vocabulary]: new (class TextNoteLoader extends Loader<any> {
+    async loadExtension(): Promise<any> {
+      await import('@c2n/webcomponents/components/vocabulary/vocabulary.component.js');
+      await import('@c2n/webcomponents/components/vocabulary/vocabulary-item.component.js');
+      return true;
+    }
+  })(),
 };
 
 export const extensionConfigs: {
@@ -144,6 +151,30 @@ export const extensionConfigs: {
       staticProperties: [],
     },
   },
+  [ExtensionId.Vocabulary]: {
+    extensionId: ExtensionId.Vocabulary,
+    element: 'cff-vocabulary',
+    staticProperties: [],
+    dataBindings: [{ propertyName: 'value', dataItemPropertyName: 'data' }],
+    dataType: DataType.JSON,
+    events: [
+      {
+        event: 'value-changed',
+        propertyName: 'detail',
+        dataItemPropertyName: 'data',
+      },
+    ],
+    toolbarComponent: false,
+    viewComponent: {
+      element: 'ntm-monaco-viewer',
+      staticProperties: [
+        {
+          name: 'readonly',
+          value: 'true',
+        },
+      ],
+    },
+  },
 };
 
 export const extensionDefaultProperties: DefaultExtensionProperties = {
@@ -164,6 +195,21 @@ export const extensionDefaultProperties: DefaultExtensionProperties = {
   },
   [ExtensionId.CodeNote]: {
     extensionId: ExtensionId.CodeNote,
+    gridPosition: {
+      order: -1,
+      rows: 20,
+      screenColumns: {
+        Large: 6,
+        Medium: 6,
+        Small: 6,
+        XSmall: 1,
+      },
+    },
+    colorIndex: 0,
+    properties: {},
+  },
+  [ExtensionId.Vocabulary]: {
+    extensionId: ExtensionId.Vocabulary,
     gridPosition: {
       order: -1,
       rows: 20,
