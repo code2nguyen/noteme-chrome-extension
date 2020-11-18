@@ -20,6 +20,7 @@
             "customWebpackConfig": {
               "path": "./extra-webpack.config.js"
             },
+            "preserveSymlinks": true,
             "baseHref": "/index.html",
             "outputPath": "dist/noteme-chrome-extension",
             "allowedCommonJsDependencies": ["lunr"],

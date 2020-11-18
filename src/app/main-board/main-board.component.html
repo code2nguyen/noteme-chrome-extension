@@ -87,6 +87,45 @@
       </div>
     </ng-template>
 
+    <ng-template ntmToolbarActionItem="newWord">
+      <div
+        class="navbar-button"
+        (click)="newNote('ntm-code-note-element')"
+        [ngClass]="{ hidden: selectedTab != 'Notes' }"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          style="width: 16px; height: 16px"
+          width="15.051"
+          height="15.681"
+          viewBox="0 0 15.051 15.681"
+        >
+          <g transform="translate(1.352 1)">
+            <path
+              d="M1402.913,50.794l4.581-8.616,4.581,8.616h0"
+              transform="translate(-1402.913 -37.466)"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+            />
+            <line x2="6" transform="translate(1.61 9.828)" fill="none" stroke="currentColor" stroke-width="2" />
+            <path
+              d="M1417.8,63.007h3.536l-3.536,4.712h3.536"
+              transform="translate(-1408.639 -63.007)"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+            />
+          </g>
+        </svg>
+        <span>Word</span>
+      </div>
+    </ng-template>
+
     <ng-template ntmToolbarActionMenuItem="newText">
       <div>this is new Text</div>
     </ng-template>
@@ -111,6 +150,39 @@
             <path d="M4.89,3.32,1.5,6.7a2.3,2.3,0,0,0,0,3.24l3.39,3.38" />
             <line x1="10.43" y1="0.83" x2="8.3" y2="15.54" />
           </g>
+        </g>
+      </svg>
+    </ng-template>
+    <ng-template ntmToolbarActionMenuItem="newWord">
+      <span>Word</span>
+      <svg
+        slot="graphic"
+        xmlns="http://www.w3.org/2000/svg"
+        style="width: 16px; height: 16px"
+        width="15.051"
+        height="15.681"
+        viewBox="0 0 15.051 15.681"
+      >
+        <g transform="translate(1.352 1)">
+          <path
+            d="M1402.913,50.794l4.581-8.616,4.581,8.616h0"
+            transform="translate(-1402.913 -37.466)"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          />
+          <line x2="6" transform="translate(1.61 9.828)" fill="none" stroke="currentColor" stroke-width="2" />
+          <path
+            d="M1417.8,63.007h3.536l-3.536,4.712h3.536"
+            transform="translate(-1408.639 -63.007)"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          />
         </g>
       </svg>
     </ng-template>

@@ -8,7 +8,7 @@
   // --mdc-list-side-padding: 30px;
   display: block;
   .ntm-navbar {
-    padding: 0px 8px;
+    padding: 0px 16px;
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
@@ -96,7 +96,7 @@
       display: flex;
       align-items: center;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      color: rgba(255, 255, 255, 0.5);
+      color: #808080;
       font-size: 1rem;
       cursor: pointer;
       svg {

@@ -3,13 +3,15 @@
 
 chrome.runtime.onInstalled.addListener(() => {
   // indexDB();
-  syncChromeSyncToLocal();
+  // syncChromeSyncToLocal();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   // indexDB();
-  syncChromeSyncToLocal();
+  // syncChromeSyncToLocal();
 });
+
+syncChromeSyncToLocal();
 
 // function indexDB(): void {
 //   // tslint:disable-next-line: typedef
