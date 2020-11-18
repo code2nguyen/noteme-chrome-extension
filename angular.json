@@ -23,7 +23,7 @@
             "preserveSymlinks": true,
             "baseHref": "/index.html",
             "outputPath": "dist/noteme-chrome-extension",
-            "allowedCommonJsDependencies": ["lunr"],
+            "allowedCommonJsDependencies": ["lunr", "esrever"],
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
