@@ -11,7 +11,6 @@ import {
   artBoardItemKey,
   STORAGE_API,
   artBoardItemIdsKey,
-  itemDataKey,
   layoutSyncKey,
 } from '../../services/storage.api';
 import { ArtBoardItem } from '../models';

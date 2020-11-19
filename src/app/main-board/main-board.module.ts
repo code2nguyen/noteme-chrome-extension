@@ -14,6 +14,7 @@ import '@c2n/webcomponents/components/tab-menu/tab-menu.component';
 import { ExtensionInjectDirective } from './extension-inject.directive';
 import { ToolbarActionsModule } from '../components/toolbar-actions/toolbar-actions.module';
 import { IntersectionObserverModule } from '../components/intersection-observer/intersection-observer.module';
+import '@material/mwc-circular-progress-four-color';
 
 @NgModule({
   declarations: [MainBoardComponent, ExtensionInjectDirective],

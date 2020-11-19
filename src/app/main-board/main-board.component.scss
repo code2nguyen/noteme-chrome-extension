@@ -6,6 +6,8 @@
   // --mdc-theme-primary: #ff726b;
   // --mdc-list-vertical-padding: 0px;
   // --mdc-list-side-padding: 30px;
+  --navbar-button-color: #808080;
+
   display: block;
   .ntm-navbar {
     padding: 0px 16px;
@@ -96,7 +98,7 @@
       display: flex;
       align-items: center;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      color: #808080;
+      color: var(--navbar-button-color);
       font-size: 1rem;
       cursor: pointer;
       svg {
@@ -110,7 +112,7 @@
     }
 
     .navbar-button:hover {
-      color: rgb(255, 255, 255);
+      color: var(--text-color, #ffffff);
     }
 
     .hidden {
@@ -118,9 +120,40 @@
       opacity: 0;
     }
 
+    .synchronizing {
+      padding-right: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      --mdc-circular-progress-bar-color-1: var(--navbar-button-color);
+      --mdc-circular-progress-bar-color-2: var(--navbar-button-color);
+      --mdc-circular-progress-bar-color-3: var(--navbar-button-color);
+      --mdc-circular-progress-bar-color-4: var(--navbar-button-color);
+      .resyncrhonize,
+      .synchronized {
+        width: 24px;
+        height: 24px;
+        color: var(--navbar-button-color);
+        fill: currentColor;
+      }
+      .resyncrhonize {
+        cursor: pointer;
+      }
+      .resyncrhonize:hover {
+        color: var(--text-color, #ffffff);
+      }
+    }
+
     .ntm-logo {
-      width: 24px;
-      height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      svg {
+        width: 24px;
+        height: 24px;
+      }
       flex: 0 0 24px;
       transition: opacity 0.3s ease-out;
       opacity: 0.8;

@@ -10,6 +10,10 @@ export function getCurrentDate(): string {
   return new Date().toISOString();
 }
 
+export function getTime(value: string): number {
+  return new Date(value).getTime();
+}
+
 export function createEmptyItemData(id: string): ItemData {
   return {
     id,

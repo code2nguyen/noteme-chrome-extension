@@ -68,12 +68,23 @@ html {
   --mdc-menu-min-width: 148px;
   --mdc-menu-item-height: 36px;
   --mdc-theme-primary: #ffffff;
-
+  --text-color: #dfe3eb;
   --slate-lit-text-color: #c2c5cc;
   --slate-lit-bg-color: transparent;
   --slate-lit-code-background-color: hsl(220, 11%, 10%);
   --slate-lit-highlight-color: hsl(60, 100%, 50%);
   --slate-lit-rich-text-editor-padding: 0px 0px 0px 16px;
+  --dashboard-theme-item-text-color: 223, 227, 235;
+  --quill-editor-toolbar-button-color-hover: rbg(223, 227, 235);
+  --quill-editor-toolbar-icon-color: 223, 227, 235;
+  --tab-menu-text-color: 223, 227, 235;
+  --delete-confirmation-button-icon-color: 223, 227, 235;
+  --dashboard-theme-item-icon-color: 223, 227, 235;
+  --search-input-text-color: 223, 227, 235;
+  --mdc-circular-progress-bar-color-1: #ff726b;
+  --mdc-circular-progress-bar-color-2: #ff726b;
+  --mdc-circular-progress-bar-color-3: #ff726b;
+  --mdc-circular-progress-bar-color-4: #ff726b;
 }
 
 body {

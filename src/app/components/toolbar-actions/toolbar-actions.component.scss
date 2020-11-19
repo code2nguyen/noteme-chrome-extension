@@ -10,8 +10,8 @@
   height: 100%;
   --mdc-typography-subtitle1-font-size: 1rem;
   --mdc-theme-surface: #717680;
-  --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.8);
-  --mdc-theme-text-icon-on-background: rgba(255, 255, 255, 0.8);
+  --mdc-theme-text-primary-on-background: rgba(223, 227, 235, 0.8);
+  --mdc-theme-text-icon-on-background: rgba(223, 227, 235, 0.8);
   --ntm-theme-accent-color: #ff726b;
 
   .ntm-toolbar-action-item {
@@ -28,7 +28,7 @@
     cursor: pointer;
     transition: color 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
       visibility 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(var(--tab-menu-text-color), 0.5);
     margin-top: 5px;
     svg {
       width: 20px;
@@ -38,6 +38,6 @@
     }
   }
   .toolbar-more-button:hover {
-    color: rgba(255, 255, 255, 1);
+    color: rgba(var(--tab-menu-text-color), 1);
   }
 }

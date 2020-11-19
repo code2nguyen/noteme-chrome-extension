@@ -1,11 +1,10 @@
-import { Observable, from, Subject, Subscription } from 'rxjs';
-import { layoutSyncKey, StorageApi } from './storage.api';
+import { Observable, from, Subscription } from 'rxjs';
+import { StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
 import { Inject, Injectable, NgZone, APP_ID } from '@angular/core';
-import { bufferTime, delay, exhaustMap, filter, map, mapTo, takeWhile } from 'rxjs/operators';
+import { map, takeWhile } from 'rxjs/operators';
 import { interval } from 'rxjs';
-import { until } from 'protractor';
-
+import { getTime } from '../services/utils';
 export interface StorageChanges {
   [key: string]: chrome.storage.StorageChange;
 }
@@ -65,62 +64,78 @@ export class ChromeStorageApi implements StorageApi {
   }
 
   set(key: string, value: any): Observable<any> {
-    return from(
-      new Promise((resolve, reject) => {
-        if (!Array.isArray(value)) {
-          value = { ...value, ...{ sourceId: this.ID, trust: 'local' } };
-        }
-        const valueStr = JSON.stringify(value);
-        this.localStorageApi.set({ [key]: valueStr }, () => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-            return reject(chrome.runtime.lastError);
-          }
-          this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
-          this.syncToRemote();
-          resolve();
-        });
-      })
-    );
+    return from(this.setPromise(key, value));
   }
 
-  get(key: string | string[]): Observable<any> {
-    return from(
-      new Promise((resolve, reject) => {
-        this.localStorageApi.get(key, (value) => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-            return reject(chrome.runtime.lastError);
-          }
-          if (Array.isArray(key)) {
-            resolve(key.map((itemKey) => this.jsonParse(value[itemKey])));
-          } else {
-            resolve(this.jsonParse(value[key]));
-          }
-        });
-      })
-    );
+  setPromise(key: string, value: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!Array.isArray(value)) {
+        value = { ...value, ...{ sourceId: this.ID, trust: 'local' } };
+      }
+      const valueStr = JSON.stringify(value);
+      this.localStorageApi.set({ [key]: valueStr }, () => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError.message);
+          return reject(chrome.runtime.lastError);
+        }
+        this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
+        this.syncToRemote();
+        resolve();
+      });
+    });
+  }
+
+  get(key: string | string[] | null): Observable<any> {
+    return from(this.getPromise(key));
+  }
+
+  getPromise(key: string | string[] | null): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.localStorageApi.get(key, (value) => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError.message);
+          return reject(chrome.runtime.lastError);
+        }
+        if (Array.isArray(key)) {
+          resolve(key.map((itemKey) => this.jsonParse(value[itemKey])));
+        } else {
+          resolve(key ? this.jsonParse(value[key]) : value);
+        }
+      });
+    });
+  }
+
+  getRemote(key: string | string[] | null): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.chromeSyncApi.get(key, (value) => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError.message);
+          return reject(chrome.runtime.lastError);
+        }
+        if (Array.isArray(key)) {
+          resolve(key.map((itemKey) => this.jsonParse(value[itemKey])));
+        } else {
+          resolve(key ? this.jsonParse(value[key]) : value);
+        }
+      });
+    });
   }
 
   remove(key: string | string[]): Observable<any> {
-    return from(
-      new Promise((resolve, reject) => {
-        this.localStorageApi.remove(key, () => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-            return reject(chrome.runtime.lastError);
-          }
-          this.remoteDataQueue.push({ key, action: 'remove' });
-          this.syncToRemote();
-          resolve(null);
-        });
-      })
-    );
+    return from(this.removePromise(key));
   }
 
-  private debug(): void {
-    this.localStorageApi.get(null, (items) => {
-      console.log(items);
+  removePromise(key: string | string[]): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.localStorageApi.remove(key, () => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError.message);
+          return reject(chrome.runtime.lastError);
+        }
+        this.remoteDataQueue.push({ key, action: 'remove' });
+        this.syncToRemote();
+        resolve(null);
+      });
     });
   }
 
@@ -133,5 +148,69 @@ export class ChromeStorageApi implements StorageApi {
       }
     }
     return null;
+  }
+
+  /**
+   * Sync algorithm
+   * Remote => Local
+   *  - Found =>
+   *        remote modifiedDate > local modifieddate =>  update local, set trust = remote
+   *  - Not found => add to local, set trust = remote
+   * Local => Remote
+   *  - Not found => if trust = remote => remove from local
+   *
+   */
+  async syncRemoveToLocal(): Promise<any> {
+    const remoteItems = (await this.getRemote(null)) || {};
+    const localItems = (await this.getPromise(null)) || {};
+    const remoteKeys = Object.keys(remoteItems);
+    const localKeys = Object.keys(localItems);
+    for (const remoteKey of remoteKeys) {
+      if (remoteKey.startsWith('ITEM_DATA__') || remoteKey.startsWith('ART_BOARD_ITEM__')) {
+        const remoteData = this.jsonParse(remoteItems[remoteKey]);
+        if (localKeys.includes(remoteKey)) {
+          // update
+          const localData = this.jsonParse(localItems[remoteKey]);
+          if (
+            remoteData.modifiedDate &&
+            localData.modifiedDate &&
+            getTime(remoteData.modifiedDate) > getTime(localData.modifiedDate)
+          ) {
+            remoteData.trust = 'remote';
+            await this.setPromise(remoteKey, remoteData);
+          }
+        } else {
+          // add
+          if (remoteKey.startsWith('ART_BOARD_ITEM__')) {
+            if (remoteData.boardId) {
+              let artBoardArtBoardItemIds = await this.getPromise(
+                `_ART_BOARD__ART_BOARD_ITEM_IDS__${remoteData.boardId}`
+              );
+              artBoardArtBoardItemIds = artBoardArtBoardItemIds || [];
+              artBoardArtBoardItemIds.push(remoteData.id);
+              await this.setPromise(`_ART_BOARD__ART_BOARD_ITEM_IDS__${remoteData.boardId}`, artBoardArtBoardItemIds);
+            }
+
+            let artBoardItemIds = await this.getPromise(`_ART_BOARD_ITEM__IDS`);
+            artBoardItemIds = artBoardItemIds || [];
+            artBoardItemIds.push(remoteData.id);
+            await this.setPromise(`_ART_BOARD_ITEM__IDS`, artBoardItemIds);
+          }
+          remoteData.trust = 'remote';
+          await this.setPromise(remoteKey, remoteData);
+        }
+      }
+    }
+
+    for (const localKey of localKeys) {
+      if (!remoteKeys.includes(localKey)) {
+        if (localKey.startsWith('ITEM_DATA__') || localKey.startsWith('ART_BOARD_ITEM__')) {
+          const localData = this.jsonParse(localItems[localKey]);
+          if (localData.trust === 'remote') {
+            await this.removePromise(localKey);
+          }
+        }
+      }
+    }
   }
 }

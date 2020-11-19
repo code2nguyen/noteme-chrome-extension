@@ -14,6 +14,7 @@ export interface StorageApi {
   set(key: string, value: any): Observable<void>;
   get<T = any>(key: string): Observable<T | undefined>;
   get<T = any>(key: string[]): Observable<T[]>;
+  syncRemoveToLocal(): Promise<any>;
   remove(key: string | string[]): Observable<void>;
 }
 

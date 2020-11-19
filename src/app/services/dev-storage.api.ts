@@ -14,12 +14,20 @@ export class DevStorageApi implements StorageApi {
     if (Array.isArray(key)) {
       return of(key.map((itemKey) => clone(this.data[itemKey])));
     }
-    return of(clone(this.data[key]));
+    return of(key ? clone(this.data[key]) : clone(this.data));
   }
 
   remove(key: string): Observable<any> {
     delete this.data[key];
     console.log(this.data);
     return of(null);
+  }
+
+  syncRemoveToLocal(): Promise<any> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
   }
 }

@@ -7,5 +7,5 @@
   },
   "files": ["src/main.ts", "src/polyfills.ts"],
   "include": ["src/typings/*.d.ts"],
-  "exclude": ["src/assets/**/*.*"]
+  "exclude": ["src/assets/**/*.*", "src/**/*.worker.ts"]
 }

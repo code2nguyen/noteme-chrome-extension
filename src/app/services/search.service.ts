@@ -1,20 +1,13 @@
 import { Injectable, Inject } from '@angular/core';
-import { Observable, of, forkJoin, combineLatest } from 'rxjs';
-import { STORAGE_API, StorageApi, itemDataIndexKey } from './storage.api';
+import { Observable, combineLatest } from 'rxjs';
+import { STORAGE_API, StorageApi } from './storage.api';
 import { filter, first, map, mergeMap, shareReplay, startWith, take } from 'rxjs/operators';
-import * as lunr from 'lunr';
 import Fuse from 'fuse.js';
 
 import { Store, select, ActionsSubject } from '@ngrx/store';
-import {
-  AppState,
-  selectAllArtBoardItems,
-  selectAllItemDatas,
-  selectIsAllLoadedArtBoardItems,
-  selectIsAllLoadedItemDatas,
-} from '../store/reducers';
+import { AppState, selectAllItemDatas, selectIsAllLoadedItemDatas } from '../store/reducers';
 import { IndexableItemTypes, getText } from './utils';
-import { ArtBoardItemActions, ItemDataActions, ItemDataApiActions } from '../store/actions';
+import { ItemDataActions, ItemDataApiActions } from '../store/actions';
 import { ItemData } from '../store/models';
 
 interface FuseDocument {
@@ -30,11 +23,7 @@ export class SearchService {
     useExtendedSearch: true,
   };
 
-  constructor(
-    @Inject(STORAGE_API) private storageApi: StorageApi,
-    private store: Store<AppState>,
-    private actionsSubj: ActionsSubject
-  ) {}
+  constructor(private store: Store<AppState>, private actionsSubj: ActionsSubject) {}
 
   search(query: string): Observable<string[]> {
     if (!this.fuse$) {

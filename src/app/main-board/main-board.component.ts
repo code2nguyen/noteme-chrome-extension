@@ -20,6 +20,7 @@ import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../extension-config';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Router } from '@angular/router';
+import { DeviceSyncService } from '../services/device-sync.service';
 @Component({
   selector: 'ntm-mainboard',
   templateUrl: './main-board.component.html',
@@ -42,11 +43,17 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   searchQuery$ = new BehaviorSubject<string>('');
   isSearching$: Observable<boolean>;
   inNoteTab = true;
+  synchronizedStatus$: Observable<number>;
   @ViewChild('dashboardLayout', { static: true }) dashboardLayoutRed: ElementRef;
 
   private minOrder = 0;
   private destroyed$ = new Subject<void>();
-  constructor(private router: Router, private cd: ChangeDetectorRef, private dataService: DataService) {
+  constructor(
+    private router: Router,
+    private cd: ChangeDetectorRef,
+    private dataService: DataService,
+    private deviceSync: DeviceSyncService
+  ) {
     this.setupNotesDataStream();
   }
 
@@ -55,6 +62,8 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.dataService.searchArtBoardItem(query);
     });
     this.isSearching$ = this.dataService.selectArtBoardItemSearchLoading();
+    this.synchronizedStatus$ = this.deviceSync.synState$;
+    this.deviceSync.sync();
   }
 
   ngOnDestroy(): void {
@@ -159,6 +168,10 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.dataService.showArtBoardItem(item, item.gridPosition?.order || 0);
     }
+  }
+
+  reDeviceSync(): void {
+    this.deviceSync.sync();
   }
 
   goGoWelcomePage(): void {
