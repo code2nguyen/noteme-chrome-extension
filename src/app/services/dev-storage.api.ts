@@ -23,6 +23,10 @@ export class DevStorageApi implements StorageApi {
     return of(null);
   }
 
+  getRemoteSyncStatus(): Observable<boolean> {
+    return of(true);
+  }
+
   syncRemoveToLocal(): Promise<any> {
     return new Promise((resolve) => {
       setTimeout(() => {

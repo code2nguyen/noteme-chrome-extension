@@ -126,10 +126,8 @@
       justify-content: center;
       align-items: center;
       height: 100%;
-      --mdc-circular-progress-bar-color-1: var(--navbar-button-color);
-      --mdc-circular-progress-bar-color-2: var(--navbar-button-color);
-      --mdc-circular-progress-bar-color-3: var(--navbar-button-color);
-      --mdc-circular-progress-bar-color-4: var(--navbar-button-color);
+
+      .processing,
       .resyncrhonize,
       .synchronized {
         width: 24px;

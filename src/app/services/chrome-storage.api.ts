@@ -1,10 +1,11 @@
-import { Observable, from, Subscription } from 'rxjs';
+import { Observable, from, Subscription, Subject, BehaviorSubject } from 'rxjs';
 import { StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
 import { Inject, Injectable, NgZone, APP_ID } from '@angular/core';
 import { map, takeWhile } from 'rxjs/operators';
 import { interval } from 'rxjs';
 import { getTime } from '../services/utils';
+import { DeviceSyncService } from './device-sync.service';
 export interface StorageChanges {
   [key: string]: chrome.storage.StorageChange;
 }
@@ -15,6 +16,7 @@ export class ChromeStorageApi implements StorageApi {
   readonly chromeSyncApi: chrome.storage.StorageArea;
   remoteDataQueue = new Array<{ key: string | string[]; value?: any; action: 'remove' | 'set' }>();
   writingToRemoteSubscription?: Subscription;
+  remoteSync$ = new BehaviorSubject(false);
 
   constructor(@Inject(APP_ID) private ID: string, private storeSync: StoreSyncService, private ngZone: NgZone) {
     this.localStorageApi = chrome.storage.local;
@@ -33,12 +35,16 @@ export class ChromeStorageApi implements StorageApi {
     });
   }
 
+  getRemoteSyncStatus(): Observable<boolean> {
+    return this.remoteSync$.asObservable();
+  }
+
   syncToRemote(): void {
     if (this.writingToRemoteSubscription) {
       return;
     }
-
-    this.writingToRemoteSubscription = interval(1000)
+    this.remoteSync$.next(false);
+    this.writingToRemoteSubscription = interval(700)
       .pipe(
         takeWhile(() => this.remoteDataQueue.length > 0),
         map(() => {
@@ -59,6 +65,7 @@ export class ChromeStorageApi implements StorageApi {
         },
         complete: () => {
           this.writingToRemoteSubscription = null;
+          this.remoteSync$.next(true);
         },
       });
   }
@@ -77,6 +84,10 @@ export class ChromeStorageApi implements StorageApi {
         if (chrome.runtime.lastError) {
           console.error(chrome.runtime.lastError.message);
           return reject(chrome.runtime.lastError);
+        }
+        const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
+        if (oldActionIndex > -1) {
+          this.remoteDataQueue.splice(oldActionIndex, 1);
         }
         this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
         this.syncToRemote();
@@ -176,8 +187,10 @@ export class ChromeStorageApi implements StorageApi {
             localData.modifiedDate &&
             getTime(remoteData.modifiedDate) > getTime(localData.modifiedDate)
           ) {
+            console.log(getTime(remoteData.modifiedDate), getTime(localData.modifiedDate));
             remoteData.trust = 'remote';
             await this.setPromise(remoteKey, remoteData);
+            this.storeSync.sync(remoteKey, remoteData, localData);
           }
         } else {
           // add
@@ -198,6 +211,7 @@ export class ChromeStorageApi implements StorageApi {
           }
           remoteData.trust = 'remote';
           await this.setPromise(remoteKey, remoteData);
+          this.storeSync.sync(remoteKey, remoteData, null);
         }
       }
     }
@@ -208,6 +222,7 @@ export class ChromeStorageApi implements StorageApi {
           const localData = this.jsonParse(localItems[localKey]);
           if (localData.trust === 'remote') {
             await this.removePromise(localKey);
+            this.storeSync.sync(localKey, null, null);
           }
         }
       }

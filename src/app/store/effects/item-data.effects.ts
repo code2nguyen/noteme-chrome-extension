@@ -9,7 +9,6 @@ import { ItemData } from '../models';
 import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
 import { select, Store } from '@ngrx/store';
 import { AppState, selectIsAllLoadedItemDatas, selectItemDataById } from '../reducers';
-import merge from 'lodash-es/merge';
 import { EMPTY } from 'rxjs';
 
 @Injectable()
@@ -62,7 +61,7 @@ export class ItemDataEffects {
           select(selectItemDataById, { itemDataId: itemData.id }),
           take(1),
           mergeMap((oldItemData) => {
-            const updatedDataItem = merge({}, oldItemData, itemData, {
+            const updatedDataItem = Object.assign({}, oldItemData, itemData, {
               empty: false,
               modifiedDate: getCurrentDate(),
               sourceId: this.ID,

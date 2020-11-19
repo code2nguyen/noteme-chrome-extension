@@ -43,7 +43,7 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
   searchQuery$ = new BehaviorSubject<string>('');
   isSearching$: Observable<boolean>;
   inNoteTab = true;
-  synchronizedStatus$: Observable<number>;
+  synchronizedStatus = 0;
   @ViewChild('dashboardLayout', { static: true }) dashboardLayoutRed: ElementRef;
 
   private minOrder = 0;
@@ -62,7 +62,10 @@ export class MainBoardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.dataService.searchArtBoardItem(query);
     });
     this.isSearching$ = this.dataService.selectArtBoardItemSearchLoading();
-    this.synchronizedStatus$ = this.deviceSync.synState$;
+    this.deviceSync.synState$.pipe(takeUntil(this.destroyed$)).subscribe((value) => {
+      this.synchronizedStatus = value;
+      this.cd.detectChanges();
+    });
     this.deviceSync.sync();
   }
 
