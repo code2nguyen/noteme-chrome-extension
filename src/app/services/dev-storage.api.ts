@@ -19,7 +19,6 @@ export class DevStorageApi implements StorageApi {
 
   remove(key: string): Observable<any> {
     delete this.data[key];
-    console.log(this.data);
     return of(null);
   }
 

@@ -9,7 +9,6 @@ export class DeviceSyncService {
   syncCompleteTimer: any;
   constructor(@Inject(STORAGE_API) private storageApi: StorageApi) {
     this.storageApi.getRemoteSyncStatus().subscribe((status) => {
-      console.log(status);
       if (status) {
         this.setSyncCompleted();
       } else {
@@ -23,7 +22,6 @@ export class DeviceSyncService {
   }
 
   setSyncCompleted(): void {
-    console.log('setSyncCompleted');
     if (this.syncCompleteTimer) {
       clearTimeout(this.syncCompleteTimer);
       this.syncCompleteTimer = null;

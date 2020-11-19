@@ -187,7 +187,6 @@ export class ChromeStorageApi implements StorageApi {
             localData.modifiedDate &&
             getTime(remoteData.modifiedDate) > getTime(localData.modifiedDate)
           ) {
-            console.log(getTime(remoteData.modifiedDate), getTime(localData.modifiedDate));
             remoteData.trust = 'remote';
             await this.setPromise(remoteKey, remoteData);
             this.storeSync.sync(remoteKey, remoteData, localData);
