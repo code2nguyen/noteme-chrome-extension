@@ -4,8 +4,6 @@ import { ActionsSubject, Store } from '@ngrx/store';
 import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataApiActions } from '../store/actions';
 import { layoutSyncKey } from './storage.api';
 import { DEFAULT_BOARD_ID } from '../store/models';
-import { filter, take } from 'rxjs/operators';
-import { Observable, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class StoreSyncService {

@@ -74,10 +74,10 @@ export class ChromeStorageApi implements StorageApi {
     return from(this.setPromise(key, value));
   }
 
-  setPromise(key: string, value: any): Promise<any> {
+  setPromise(key: string, value: any, trust: string = 'local', sourceId?: string): Promise<any> {
     return new Promise((resolve, reject) => {
       if (!Array.isArray(value)) {
-        value = { ...value, ...{ sourceId: this.ID, trust: 'local' } };
+        value = { ...value, ...{ sourceId: sourceId || this.ID, trust } };
       }
       const valueStr = JSON.stringify(value);
       this.localStorageApi.set({ [key]: valueStr }, () => {
@@ -85,12 +85,14 @@ export class ChromeStorageApi implements StorageApi {
           console.error(chrome.runtime.lastError.message);
           return reject(chrome.runtime.lastError);
         }
-        const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
-        if (oldActionIndex > -1) {
-          this.remoteDataQueue.splice(oldActionIndex, 1);
+        if (trust === 'local') {
+          const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
+          if (oldActionIndex > -1) {
+            this.remoteDataQueue.splice(oldActionIndex, 1);
+          }
+          this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
+          this.syncToRemote();
         }
-        this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
-        this.syncToRemote();
         resolve();
       });
     });
@@ -177,41 +179,42 @@ export class ChromeStorageApi implements StorageApi {
     const remoteKeys = Object.keys(remoteItems);
     const localKeys = Object.keys(localItems);
     for (const remoteKey of remoteKeys) {
-      if (remoteKey.startsWith('ITEM_DATA__') || remoteKey.startsWith('ART_BOARD_ITEM__')) {
-        const remoteData = this.jsonParse(remoteItems[remoteKey]);
-        if (localKeys.includes(remoteKey)) {
-          // update
-          const localData = this.jsonParse(localItems[remoteKey]);
-          if (
-            remoteData.modifiedDate &&
-            localData.modifiedDate &&
-            getTime(remoteData.modifiedDate) > getTime(localData.modifiedDate)
-          ) {
-            remoteData.trust = 'remote';
-            await this.setPromise(remoteKey, remoteData);
-            this.storeSync.sync(remoteKey, remoteData, localData);
-          }
-        } else {
-          // add
-          if (remoteKey.startsWith('ART_BOARD_ITEM__')) {
-            if (remoteData.boardId) {
-              let artBoardArtBoardItemIds = await this.getPromise(
-                `_ART_BOARD__ART_BOARD_ITEM_IDS__${remoteData.boardId}`
-              );
-              artBoardArtBoardItemIds = artBoardArtBoardItemIds || [];
-              artBoardArtBoardItemIds.push(remoteData.id);
-              await this.setPromise(`_ART_BOARD__ART_BOARD_ITEM_IDS__${remoteData.boardId}`, artBoardArtBoardItemIds);
-            }
-
-            let artBoardItemIds = await this.getPromise(`_ART_BOARD_ITEM__IDS`);
-            artBoardItemIds = artBoardItemIds || [];
-            artBoardItemIds.push(remoteData.id);
-            await this.setPromise(`_ART_BOARD_ITEM__IDS`, artBoardItemIds);
-          }
-          remoteData.trust = 'remote';
-          await this.setPromise(remoteKey, remoteData);
-          this.storeSync.sync(remoteKey, remoteData, null);
+      if (!remoteKey.startsWith('ITEM_DATA__') && !remoteKey.startsWith('ART_BOARD_ITEM__')) {
+        continue;
+      }
+      const remoteData = this.jsonParse(remoteItems[remoteKey]);
+      // update
+      if (localKeys.includes(remoteKey)) {
+        const localData = this.jsonParse(localItems[remoteKey]);
+        if (
+          remoteData.modifiedDate &&
+          localData.modifiedDate &&
+          getTime(remoteData.modifiedDate) > getTime(localData.modifiedDate)
+        ) {
+          remoteData.silent = false;
+          await this.setPromise(remoteKey, remoteData, 'remote', remoteData.sourceId);
+          this.storeSync.sync(remoteKey, remoteData, localData);
         }
+      } else {
+        // add
+        if (remoteKey.startsWith('ART_BOARD_ITEM__')) {
+          if (remoteData.boardId) {
+            let artBoardArtBoardItemIds = await this.getPromise(
+              `_ART_BOARD__ART_BOARD_ITEM_IDS__${remoteData.boardId}`
+            );
+            artBoardArtBoardItemIds = artBoardArtBoardItemIds || [];
+            artBoardArtBoardItemIds.push(remoteData.id);
+            await this.setPromise(`_ART_BOARD__ART_BOARD_ITEM_IDS__${remoteData.boardId}`, artBoardArtBoardItemIds);
+          }
+
+          let artBoardItemIds = await this.getPromise(`_ART_BOARD_ITEM__IDS`);
+          artBoardItemIds = artBoardItemIds || [];
+          artBoardItemIds.push(remoteData.id);
+          await this.setPromise(`_ART_BOARD_ITEM__IDS`, artBoardItemIds);
+        }
+        remoteData.silent = false;
+        await this.setPromise(remoteKey, remoteData, 'remote', remoteData.sourceId);
+        this.storeSync.sync(remoteKey, remoteData, null);
       }
     }
 
