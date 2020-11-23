@@ -5,7 +5,6 @@ import { Inject, Injectable, NgZone, APP_ID } from '@angular/core';
 import { map, takeWhile } from 'rxjs/operators';
 import { interval } from 'rxjs';
 import { getTime } from '../services/utils';
-import { DeviceSyncService } from './device-sync.service';
 export interface StorageChanges {
   [key: string]: chrome.storage.StorageChange;
 }
