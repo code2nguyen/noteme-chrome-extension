@@ -1,0 +1,51 @@
+@if (isCode()) {
+<c2-code-editor
+  class="note__code"
+  aria-label="Code note"
+  placeholder="New code note..."
+  line-numbers
+  [language]="language()"
+  [value]="value()"
+  (input)="onCodeInput($event)"
+></c2-code-editor>
+} @else {
+<c2-notepad
+  class="note__text"
+  aria-label="Note"
+  placeholder="New note..."
+  paper-picker
+  [attr.paper-color]="paperColor()"
+  [value]="value()"
+  (input)="onTextInput($event)"
+  (paper-change)="onPaperChange($event)"
+></c2-notepad>
+}
+
+<div class="note__toolbar">
+  @if (isCode()) {
+  <c2-select class="note__language" aria-label="Language" [value]="[language()]" (change)="onLanguageChange($event)">
+    @for (option of languages(); track option.id) {
+    <c2-list-item [value]="option.id">{{ option.label }}</c2-list-item>
+    }
+  </c2-select>
+  }
+  <span class="note__spacer"></span>
+  <c2-icon-button
+    [attr.aria-label]="archived() ? 'Restore note' : 'Archive note'"
+    [attr.tooltip]="archived() ? 'Restore' : 'Archive'"
+    (click)="archiveToggle.emit()"
+  >
+    @if (archived()) {
+    <c2-feather-sun></c2-feather-sun>
+    } @else {
+    <c2-feather-sunset></c2-feather-sunset>
+    }
+  </c2-icon-button>
+  <c2-menu placement="top-end" aria-label="Delete note" (menu-select)="onDeleteMenu($event)">
+    <c2-icon-button slot="trigger" aria-label="Delete note" tooltip="Delete">
+      <c2-feather-trash-2></c2-feather-trash-2>
+    </c2-icon-button>
+    <c2-menu-item value="delete" destructive>Delete this note</c2-menu-item>
+    <c2-menu-item value="cancel">Keep it</c2-menu-item>
+  </c2-menu>
+</div>

@@ -6,15 +6,15 @@
  * Master/Detail Entity
  * - MasterDetailIds: key: MASTER_ENTITY_NAME__DETAIL_ENTITY_IDS + Master ID, value: Array of detail IDs
  */
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { InjectionToken } from '@angular/core';
 
 export const STORAGE_API = new InjectionToken<StorageApi>('Storage API Service');
 export interface StorageApi {
-  set(key: string, value: any): Observable<void>;
-  get<T = any>(key: string): Observable<T | undefined>;
-  get<T = any>(key: string[]): Observable<T[]>;
-  syncRemoveToLocal(): Promise<any>;
+  set(key: string, value: unknown): Observable<void>;
+  get<T = unknown>(key: string): Observable<T | undefined>;
+  get<T = unknown>(key: string[]): Observable<T[]>;
+  syncRemoteToLocal(): Promise<void>;
   remove(key: string | string[]): Observable<void>;
   getRemoteSyncStatus(): Observable<boolean>;
 }

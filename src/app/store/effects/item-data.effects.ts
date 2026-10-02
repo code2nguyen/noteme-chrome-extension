@@ -1,33 +1,38 @@
-import { Injectable, Inject, APP_ID } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { asyncScheduler, EMPTY, of } from 'rxjs';
+import { catchError, debounceTime, groupBy, map, mergeMap, switchMap, take, withLatestFrom } from 'rxjs/operators';
 
 import { ItemDataActions, ItemDataApiActions } from '../actions';
-import { StorageApi, itemDataKey, STORAGE_API, artBoardItemIdsKey } from '../../services/storage.api';
-import { catchError, switchMap, map, debounceTime, mergeMap, withLatestFrom, take } from 'rxjs/operators';
-import { of, asyncScheduler } from 'rxjs';
+import { artBoardItemIdsKey, itemDataKey, STORAGE_API } from '../../services/storage.api';
 import { ItemData } from '../models';
 import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
-import { select, Store } from '@ngrx/store';
-import { AppState, selectIsAllLoadedItemDatas, selectItemDataById } from '../reducers';
-import { EMPTY } from 'rxjs';
+import { normalizeItemData } from '../../services/migration';
+import { INSTANCE_ID } from '../../services/instance-id';
+import { selectIsAllLoadedItemDatas, selectItemDataById } from '../reducers';
 
 @Injectable()
 export class ItemDataEffects {
+  private readonly id = inject(INSTANCE_ID);
+  private readonly actions$ = inject(Actions);
+  private readonly store = inject(Store);
+  private readonly storageApi = inject(STORAGE_API);
+
   getItemData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ItemDataActions.getItemData),
-      mergeMap(({ itemDataId }) => {
-        return this.storageApi.get<ItemData>(itemDataKey(itemDataId)).pipe(
-          map((itemData) => {
-            if (itemData) {
-              return ItemDataApiActions.getItemDataSuccess({ itemData });
-            }
-            return ItemDataApiActions.getItemDataSuccess({ itemData: createEmptyItemData(itemDataId) });
-          }),
-          catchError((error) => of(ItemDataApiActions.getItemDataFailure({ error })))
-        );
-      })
-    )
+      mergeMap(({ itemDataId }) =>
+        this.storageApi.get<ItemData>(itemDataKey(itemDataId)).pipe(
+          map((itemData) =>
+            ItemDataApiActions.getItemDataSuccess({
+              itemData: itemData ? normalizeItemData(itemData) : createEmptyItemData(itemDataId),
+            }),
+          ),
+          catchError((error) => of(ItemDataApiActions.getItemDataFailure({ error }))),
+        ),
+      ),
+    ),
   );
 
   createItemData$ = createEffect(() =>
@@ -38,86 +43,82 @@ export class ItemDataEffects {
         return this.storageApi
           .set(itemDataKey(itemData.id), {
             ...itemData,
-            ...{ createdDate: currentDate, modifiedDate: currentDate, sourceId: this.ID },
+            createdDate: currentDate,
+            modifiedDate: currentDate,
+            sourceId: this.id,
           })
           .pipe(
-            map(() => {
-              return ItemDataApiActions.createItemDataSuccess({ itemData });
-            }),
-            catchError((error) => {
-              return of(ItemDataApiActions.createItemDataFailure({ error }));
-            })
+            map(() => ItemDataApiActions.createItemDataSuccess({ itemData })),
+            catchError((error) => of(ItemDataApiActions.createItemDataFailure({ error }))),
           );
-      })
-    )
+      }),
+    ),
   );
 
+  // Debounced per note: one global debounce (as in 2.x) dropped an edit to one note when another was edited
+  // within 300ms.
   updateItemData$ = createEffect(({ debounce = 300, scheduler = asyncScheduler } = {}) =>
     this.actions$.pipe(
       ofType(ItemDataActions.updateItemData),
-      debounceTime(debounce, scheduler),
-      mergeMap(({ itemData }) => {
-        return this.store.pipe(
-          select(selectItemDataById, { itemDataId: itemData.id }),
-          take(1),
-          mergeMap((oldItemData) => {
-            const updatedDataItem = Object.assign({}, oldItemData, itemData, {
-              empty: false,
-              modifiedDate: getCurrentDate(),
-              sourceId: this.ID,
-            });
-            return this.storageApi.set(itemDataKey(itemData.id), updatedDataItem).pipe(
-              map(() => ItemDataApiActions.updateItemDataSuccess({ itemData: updatedDataItem })),
-              catchError((error) => of(ItemDataApiActions.createItemDataFailure({ error })))
-            );
-          })
-        );
-      })
-    )
+      groupBy(({ itemData }) => itemData.id),
+      mergeMap((updates$) =>
+        updates$.pipe(
+          debounceTime(debounce, scheduler),
+          mergeMap(({ itemData }) =>
+            this.store.select(selectItemDataById(itemData.id!)).pipe(
+              take(1),
+              mergeMap((oldItemData) => {
+                const updatedDataItem = {
+                  ...oldItemData,
+                  ...itemData,
+                  empty: false,
+                  modifiedDate: getCurrentDate(),
+                  sourceId: this.id,
+                } as ItemData;
+                return this.storageApi.set(itemDataKey(updatedDataItem.id), updatedDataItem).pipe(
+                  map(() => ItemDataApiActions.updateItemDataSuccess({ itemData: updatedDataItem })),
+                  catchError((error) => of(ItemDataApiActions.updateItemDataFailure({ error }))),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 
   deleteItemData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ItemDataActions.deleteItemData),
-      mergeMap(({ itemDataId }) => {
-        return this.storageApi.remove(itemDataKey(itemDataId)).pipe(
+      mergeMap(({ itemDataId }) =>
+        this.storageApi.remove(itemDataKey(itemDataId)).pipe(
           map(() => ItemDataApiActions.deleteItemDataSuccess({ itemDataId })),
-          catchError((error) => of(ItemDataApiActions.deleteItemDataFailure({ error })))
-        );
-      })
-    )
+          catchError((error) => of(ItemDataApiActions.deleteItemDataFailure({ error }))),
+        ),
+      ),
+    ),
   );
 
   getAllItemDatas$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ItemDataActions.getAllItemData),
-      withLatestFrom(this.store.pipe(select(selectIsAllLoadedItemDatas))),
-      switchMap(([_, isAllLoaded]) => {
+      withLatestFrom(this.store.select(selectIsAllLoadedItemDatas)),
+      switchMap(([, isAllLoaded]) => {
         if (isAllLoaded) {
           return EMPTY;
         }
         return this.storageApi.get<string[]>(artBoardItemIdsKey()).pipe(
-          mergeMap((itemDataIds) => {
-            if (itemDataIds) {
-              return this.storageApi.get<ItemData>(itemDataIds.map((itemDataId) => itemDataKey(itemDataId))).pipe(
-                map((items) => {
-                  return items.filter(isNotNullOrUndefined);
-                })
-              );
-            }
-            return of([]);
-          }),
+          mergeMap((itemDataIds) =>
+            itemDataIds && itemDataIds.length > 0
+              ? this.storageApi
+                  .get<ItemData>(itemDataIds.map((itemDataId) => itemDataKey(itemDataId)))
+                  .pipe(map((items) => items.filter(isNotNullOrUndefined).map(normalizeItemData)))
+              : of([]),
+          ),
           map((itemDatas) => ItemDataApiActions.getAllItemDataSuccess({ itemDatas })),
-          catchError((error) => of(ItemDataApiActions.getAllItemDataFailure({ error })))
+          catchError((error) => of(ItemDataApiActions.getAllItemDataFailure({ error }))),
         );
-      })
-    )
+      }),
+    ),
   );
-
-  constructor(
-    @Inject(APP_ID) private ID: string,
-    private store: Store<AppState>,
-    private actions$: Actions,
-    @Inject(STORAGE_API) private storageApi: StorageApi
-  ) {}
 }

@@ -1,4 +1,4 @@
-import { EntityState, createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
+import { EntityState, createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
 
 import { ItemData } from '../models';
@@ -39,5 +39,5 @@ export const reducer = createReducer(
   }),
   on(ItemDataApiActions.deleteItemDataSuccess, (state, { itemDataId }) => {
     return adapter.removeOne(itemDataId, state);
-  })
+  }),
 );

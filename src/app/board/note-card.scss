@@ -1,0 +1,88 @@
+// The note fills its masonry tile: editor on top, a toolbar row at the bottom (the tile's move handle sits in the
+// top-right corner, so the actions stay clear of it).
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--c2-theme--radius-lg, 8px);
+}
+
+:host(.note--blink) {
+  animation: note-blink 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 3;
+}
+
+@keyframes note-blink {
+  from,
+  to {
+    box-shadow: none;
+  }
+  33% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ntm-accent) 50%, transparent);
+  }
+  66% {
+    box-shadow: 0 0 0 2px var(--ntm-accent);
+  }
+}
+
+.note__text {
+  flex: 1;
+  min-height: 0;
+  --c2-notepad__sheet--min-height: 100%;
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__top--padding-top: 8px;
+  --c2-notepad__margin--inset: 32px;
+}
+
+// Atom One Dark, the palette of the 2.x Monaco code notes.
+.note__code {
+  flex: 1;
+  min-height: 0;
+  --c2-code-editor--min-height: 100%;
+  --c2-code-editor--max-height: none;
+  --c2-code-editor--background: #282c34;
+  --c2-code-editor--color: #abb2bf;
+  --c2-code-editor--border: 1px solid transparent;
+  --c2-code-editor__focus--border: 1px solid transparent;
+  --c2-code-editor__focus--outline: none;
+  --c2-code-editor__gutter--color: #636d83;
+  --c2-code-editor__gutter__active--color: #abb2bf;
+  --c2-code-editor__gutter--border-right: 1px solid #3b4048;
+  --c2-code-editor__active-line--background: rgb(255 255 255 / 4%);
+  --c2-code-editor__selection--background: rgb(97 175 239 / 25%);
+  --c2-code-editor__cursor--color: #528bff;
+  --c2-code-editor__matching-bracket--background: rgb(97 175 239 / 20%);
+  --c2-code-editor__placeholder--color: #5c6370;
+  --c2-code-editor__theme--token-keyword: #c678dd;
+  --c2-code-editor__theme--token-string: #98c379;
+  --c2-code-editor__theme--token-comment: #5c6370;
+  --c2-code-editor__theme--token-constant: #d19a66;
+  --c2-code-editor__theme--token-function: #61afef;
+  --c2-code-editor__theme--token-type: #e5c07b;
+  --c2-code-editor__theme--token-property: #e06c75;
+  --c2-code-editor__theme--token-variable: #abb2bf;
+  --c2-code-editor__theme--token-tag: #e06c75;
+  --c2-code-editor__theme--token-punctuation: #abb2bf;
+  --c2-code-editor__theme--token-link: #56b6c2;
+  --c2-code-editor__theme--token-invalid: #f44747;
+}
+
+.note__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 0;
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+  --c2-icon-button__icon--color: var(--ntm-muted);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #f4f4f5);
+}
+
+.note__language {
+  min-width: 140px;
+  --c2-select__button--min-height: 28px;
+  --c2-select__button--font-size: 12px;
+}
+
+.note__spacer {
+  flex: 1;
+}

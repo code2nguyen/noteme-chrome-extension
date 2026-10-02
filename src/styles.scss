@@ -1,114 +1,74 @@
+@use '@c2n/theme/theme.css';
+
 @font-face {
   font-family: 'RedHatDisplay';
-  src: url('./assets/fonts/RedHatDisplay/RedHatDisplay-Regular.eot');
-  /* IE9 Compat Modes */
-  src: url('./assets/fonts/RedHatDisplay/RedHatDisplay-Regular.eot?#iefix') format('embedded-opentype'),
-    url('./assets/fonts/RedHatDisplay/RedHatDisplay-Regular.woff') format('woff');
-  /* Modern Browsers */
+  src: url('./fonts/RedHatDisplay/RedHatDisplay-Regular.woff2') format('woff2');
   font-style: normal;
   font-weight: 300;
-  text-rendering: optimizeLegibility;
 }
 
 @font-face {
   font-family: 'RedHatDisplay';
-  src: url('./assets/fonts/RedHatDisplay/RedHatDisplay-Medium.eot');
-  /* IE9 Compat Modes */
-  src: url('./assets/fonts/RedHatDisplay/RedHatDisplay-Medium.eot?#iefix') format('embedded-opentype'),
-    url('./assets/fonts/RedHatDisplay/RedHatDisplay-Medium.woff') format('woff');
-  /* Modern Browsers */
+  src: url('./fonts/RedHatDisplay/RedHatDisplay-Medium.woff2') format('woff2');
   font-style: normal;
-  font-weight: 400;
-  text-rendering: optimizeLegibility;
+  font-weight: 400 500;
 }
 
 @font-face {
   font-family: 'RedHatDisplay';
-  src: url('./assets/fonts/RedHatDisplay/RedHatDisplay-Bold.eot');
-  /* IE9 Compat Modes */
-  src: url('./assets/fonts/RedHatDisplay/RedHatDisplay-Bold.eot?#iefix') format('embedded-opentype'),
-    url('./assets/fonts/RedHatDisplay/RedHatDisplay-Bold.woff') format('woff');
-  /* Modern Browsers */
+  src: url('./fonts/RedHatDisplay/RedHatDisplay-Bold.woff2') format('woff2');
   font-style: normal;
-  font-weight: 700;
-  text-rendering: optimizeLegibility;
+  font-weight: 600 700;
 }
 
-@font-face {
-  font-family: 'RedHatText';
-  src: url('./assets/fonts/RedHatText/RedHatText-Regular.eot');
-  /* IE9 Compat Modes */
-  src: url('./assets/fonts/RedHatText/RedHatText-Regular.eot?#iefix') format('embedded-opentype'),
-    url('./assets/fonts/RedHatText/RedHatText-Regular.woff') format('woff');
-  /* Modern Browsers */
-  font-style: normal;
-  font-weight: 400;
-  text-rendering: optimizeLegibility;
+// Noteme is a dark app (index.html sets data-theme="dark"). The 2.x palette is mapped onto the @c2n/theme tokens,
+// which every c2 component follows; component variables are only set where a note needs its own look.
+:root[data-theme='dark'] {
+  --c2-theme--color-primary: #ff726b;
+  --c2-theme--color-primary-hover: #ff8a84;
+  --c2-theme--color-primary-active: #f25b53;
+  --c2-theme--color-on-primary: #1d1d1f;
+  --c2-theme--color-surface: #303236;
+  --c2-theme--color-surface-container-low: #36393e;
+  --c2-theme--color-surface-container: #3d4046;
+  --c2-theme--color-on-surface: #dfe3eb;
+  --c2-theme--color-on-surface-variant: #a3a8b3;
+
+  // App-level values used by app-owned styles.
+  --ntm-accent: var(--c2-theme--color-primary);
+  --ntm-muted: #808389;
 }
 
-@font-face {
-  font-family: 'RedHatText';
-  src: url('./assets/fonts/RedHatText/RedHatText-Medium.eot');
-  /* IE9 Compat Modes */
-  src: url('./assets/fonts/RedHatText/RedHatText-Medium.eot?#iefix') format('embedded-opentype'),
-    url('./assets/fonts/RedHatText/RedHatText-Medium.woff') format('woff');
-  /* Modern Browsers */
-  font-style: normal;
-  font-weight: 700;
-  text-rendering: optimizeLegibility;
-}
 html {
   scroll-behavior: smooth;
-  --bg-color: #303236;
-
-  --mdc-theme-surface: #313640;
-  --mdc-typography-subtitle1-font-size: 0.8rem;
-  --mdc-theme-text-primary-on-background: #ffffff;
-  --mdc-menu-max-height: 250px;
-  --mdc-menu-min-width: 148px;
-  --mdc-menu-item-height: 36px;
-  --mdc-theme-primary: #ffffff;
-  --text-color: #dfe3eb;
-  --slate-lit-text-color: #c2c5cc;
-  --slate-lit-bg-color: transparent;
-  --slate-lit-code-background-color: hsl(220, 11%, 10%);
-  --slate-lit-highlight-color: hsl(60, 100%, 50%);
-  --slate-lit-rich-text-editor-padding: 0px 0px 0px 16px;
-  --dashboard-theme-item-text-color: 223, 227, 235;
-  --quill-editor-toolbar-button-color-hover: rbg(223, 227, 235);
-  --quill-editor-toolbar-icon-color: 223, 227, 235;
-  --tab-menu-text-color: 223, 227, 235;
-  --delete-confirmation-button-icon-color: 223, 227, 235;
-  --dashboard-theme-item-icon-color: 223, 227, 235;
-  --search-input-text-color: 223, 227, 235;
-  --mdc-circular-progress-bar-color-1: #ff726b;
-  --mdc-circular-progress-bar-color-2: #ff726b;
-  --mdc-circular-progress-bar-color-3: #ff726b;
-  --mdc-circular-progress-bar-color-4: #ff726b;
 }
 
 body {
   margin: 0;
-  padding: 0;
-  overflow: auto;
-  background-color: var(--bg-color);
+  font-family: 'RedHatDisplay', system-ui, sans-serif;
+  color: var(--c2-theme--color-on-surface);
+  background-color: var(--c2-theme--color-surface);
 }
 
-// scrollbar
-::-webkit-scrollbar {
-  height: 8px;
-  overflow: auto;
-  width: 8px;
+// Keep unregistered tags from flashing unstyled content before their module upgrades them.
+:not(:defined) {
+  visibility: hidden;
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(245, 245, 245, 0.2);
+  background-color: rgb(245 245 245 / 20%);
   border-radius: 20px;
-}
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(245, 245, 245, 0.4);
+  &:hover {
+    background-color: rgb(245 245 245 / 40%);
+  }
 }

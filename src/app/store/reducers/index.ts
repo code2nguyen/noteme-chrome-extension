@@ -1,14 +1,12 @@
-import { ActionReducer, ActionReducerMap, createFeatureSelector, createSelector, Action } from '@ngrx/store';
+import { Action, ActionReducerMap, createFeatureSelector, createSelector } from '@ngrx/store';
+import { InjectionToken } from '@angular/core';
 
 import * as fromBoard from './board.reducer';
 import * as fromArtBoardItem from './art-board-item.reducer';
 import * as fromItemData from './item-data.reducer';
 import * as fromArtBoardItemSearch from './art-board-item-search.reducer';
 import * as fromUser from './user.reducer';
-
-import { InjectionToken } from '@angular/core';
-import { Dictionary } from '@ngrx/entity';
-import { Board, ArtBoardItem, ItemData } from '../models';
+import { ArtBoardItem } from '../models';
 
 export interface AppState {
   [fromBoard.boardsFeatureKey]: fromBoard.State;
@@ -28,17 +26,15 @@ export const ROOT_REDUCERS = new InjectionToken<ActionReducerMap<AppState, Actio
   }),
 });
 
-export const selectBoardsState = createFeatureSelector<AppState, fromBoard.State>(fromBoard.boardsFeatureKey);
-export const selectArtBoardItemsState = createFeatureSelector<AppState, fromArtBoardItem.State>(
-  fromArtBoardItem.boardItemsFeatureKey
+export const selectBoardsState = createFeatureSelector<fromBoard.State>(fromBoard.boardsFeatureKey);
+export const selectArtBoardItemsState = createFeatureSelector<fromArtBoardItem.State>(
+  fromArtBoardItem.boardItemsFeatureKey,
 );
-export const selectItemDatasState = createFeatureSelector<AppState, fromItemData.State>(
-  fromItemData.dataItemsFeatureKey
+export const selectItemDatasState = createFeatureSelector<fromItemData.State>(fromItemData.dataItemsFeatureKey);
+export const selectArtBoardItemsSearchState = createFeatureSelector<fromArtBoardItemSearch.State>(
+  fromArtBoardItemSearch.artBoardItemSearchsFeatureKey,
 );
-export const selectArtBoardItemsSearchState = createFeatureSelector<AppState, fromArtBoardItemSearch.State>(
-  fromArtBoardItemSearch.artBoardItemSearchsFeatureKey
-);
-export const selectUser = createFeatureSelector<AppState, fromUser.State>(fromUser.userFeatureKey);
+export const selectUser = createFeatureSelector<fromUser.State>(fromUser.userFeatureKey);
 
 export const initialState = {
   boards: fromBoard.adapter.getInitialState({
@@ -47,7 +43,7 @@ export const initialState = {
       defaultArtBoard: {
         id: 'defaultArtBoard',
         name: 'Default',
-        type: 'ArtBoard',
+        type: 'ArtBoard' as const,
       },
     },
   }),
@@ -62,12 +58,8 @@ export const {
   selectTotal: selectTotalBoards,
 } = fromBoard.adapter.getSelectors(selectBoardsState);
 
-export const selectBoardById = createSelector(
-  selectBoardEntities,
-  (boardEntities: Dictionary<Board>, props: { boardId: string }) => {
-    return boardEntities[props.boardId];
-  }
-);
+export const selectBoardById = (boardId: string) =>
+  createSelector(selectBoardEntities, (boardEntities) => boardEntities[boardId]);
 
 // -------------------
 // Art Board Item selectors
@@ -80,23 +72,15 @@ export const {
   selectTotal: selectTotalArtBoardItems,
 } = fromArtBoardItem.adapter.getSelectors(selectArtBoardItemsState);
 
-export const selectArtBoardItemById = createSelector(
-  selectArtBoardItemEntities,
-  (artBoardItemEntities: Dictionary<ArtBoardItem>, props: { artBoardItemId: string }) => {
-    return artBoardItemEntities[props.artBoardItemId];
-  }
-);
+export const selectArtBoardItemById = (artBoardItemId: string) =>
+  createSelector(selectArtBoardItemEntities, (entities) => entities[artBoardItemId]);
 
-export const selectArtBoardItemsByBoardId = createSelector(
-  selectAllArtBoardItems,
-  (artBoardItems: ArtBoardItem[], props: { boardId: string }) => {
-    return artBoardItems.filter((item) => item.boardId === props.boardId);
-  }
-);
+export const selectArtBoardItemsByBoardId = (boardId: string) =>
+  createSelector(selectAllArtBoardItems, (artBoardItems) => artBoardItems.filter((item) => item.boardId === boardId));
 
-export const selectArchivedArtBoardItems = createSelector(selectAllArtBoardItems, (artBoardItems: ArtBoardItem[]) => {
-  return artBoardItems.filter((item) => !item.boardId);
-});
+export const selectArchivedArtBoardItems = createSelector(selectAllArtBoardItems, (artBoardItems) =>
+  artBoardItems.filter((item) => !item.boardId),
+);
 
 export const selectIsAllLoadedArtBoardItems = createSelector(selectArtBoardItemsState, (state) => state.isAllLoaded);
 // -------------------
@@ -109,12 +93,9 @@ export const {
   selectTotal: selectTotalItemDatas,
 } = fromItemData.adapter.getSelectors(selectItemDatasState);
 
-export const selectItemDataById = createSelector(
-  selectItemDataEntities,
-  (itemDataEntities: Dictionary<ItemData>, props: { itemDataId: string }) => {
-    return itemDataEntities[props.itemDataId];
-  }
-);
+export const selectItemDataById = (itemDataId: string) =>
+  createSelector(selectItemDataEntities, (entities) => entities[itemDataId]);
+
 export const selectIsAllLoadedItemDatas = createSelector(selectItemDatasState, (state) => state.isAllLoaded);
 
 // -------------------
@@ -122,27 +103,26 @@ export const selectIsAllLoadedItemDatas = createSelector(selectItemDatasState, (
 // -------------------
 export const selectArtBoardItemSearchIds = createSelector(
   selectArtBoardItemsSearchState,
-  fromArtBoardItemSearch.getIds
+  fromArtBoardItemSearch.getIds,
 );
 export const selectArtBoardItemSearchQuery = createSelector(
   selectArtBoardItemsSearchState,
-  fromArtBoardItemSearch.getQuery
+  fromArtBoardItemSearch.getQuery,
 );
 export const selectArtBoardItemSearchLoading = createSelector(
   selectArtBoardItemsSearchState,
-  fromArtBoardItemSearch.getLoading
+  fromArtBoardItemSearch.getLoading,
 );
 export const selectArtBoardItemSearchError = createSelector(
   selectArtBoardItemsSearchState,
-  fromArtBoardItemSearch.getError
+  fromArtBoardItemSearch.getError,
 );
 
 export const selectArtBoardItemSearchResults = createSelector(
   selectArtBoardItemEntities,
   selectArtBoardItemSearchIds,
-  (artBoardItems, searchIds) => {
-    return searchIds
+  (artBoardItems, searchIds) =>
+    searchIds
       .map((id) => artBoardItems[id])
-      .filter((artBoardItem): artBoardItem is ArtBoardItem => artBoardItem != null);
-  }
+      .filter((artBoardItem): artBoardItem is ArtBoardItem => artBoardItem != null),
 );

@@ -1,13 +1,20 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { StorageApi, STORAGE_API } from './storage.api';
+import { STORAGE_API } from './storage.api';
+
+export enum SyncState {
+  Syncing = 0,
+  Synced = 1,
+  Idle = 2,
+}
 
 @Injectable({ providedIn: 'root' })
 export class DeviceSyncService {
-  synState$ = new BehaviorSubject<number>(0);
+  private readonly storageApi = inject(STORAGE_API);
+  readonly syncState$ = new BehaviorSubject<SyncState>(SyncState.Syncing);
+  private syncCompleteTimer?: ReturnType<typeof setTimeout>;
 
-  syncCompleteTimer: any;
-  constructor(@Inject(STORAGE_API) private storageApi: StorageApi) {
+  constructor() {
     this.storageApi.getRemoteSyncStatus().subscribe((status) => {
       if (status) {
         this.setSyncCompleted();
@@ -18,24 +25,17 @@ export class DeviceSyncService {
   }
 
   startSync(): void {
-    this.synState$.next(0);
+    this.syncState$.next(SyncState.Syncing);
   }
 
   setSyncCompleted(): void {
-    if (this.syncCompleteTimer) {
-      clearTimeout(this.syncCompleteTimer);
-      this.syncCompleteTimer = null;
-    }
-    this.synState$.next(1);
-    this.syncCompleteTimer = setTimeout(() => {
-      this.synState$.next(2);
-    }, 2000);
+    clearTimeout(this.syncCompleteTimer);
+    this.syncState$.next(SyncState.Synced);
+    this.syncCompleteTimer = setTimeout(() => this.syncState$.next(SyncState.Idle), 2000);
   }
 
   sync(): void {
     this.startSync();
-    this.storageApi.syncRemoveToLocal().then(() => {
-      this.setSyncCompleted();
-    });
+    this.storageApi.syncRemoteToLocal().then(() => this.setSyncCompleted());
   }
 }

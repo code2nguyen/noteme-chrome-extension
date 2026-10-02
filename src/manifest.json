@@ -1,8 +1,9 @@
 {
+  "manifest_version": 3,
   "name": "Noteme",
   "description": "Replace new tab page with a personal note application",
+  "version": "3.0.0",
   "permissions": ["storage", "unlimitedStorage"],
-  "version": "2.2.5",
   "icons": {
     "16": "assets/icons/noteme-icon-16.png",
     "32": "assets/icons/noteme-icon-32.png",
@@ -11,11 +12,5 @@
   },
   "chrome_url_overrides": {
     "newtab": "index.html"
-  },
-  "oauth2": {
-    "client_id": "976699161977-0i4pf34uh3bl39ru4qlscfqdhe7gaktb.apps.googleusercontent.com",
-    "scopes": ["https://www.googleapis.com/auth/drive"]
-  },
-  "content_security_policy": "script-src 'self' 'sha256-bx+vgXVTwvZteWVN62I9sa4F+qi54VopbmFiKa7AsEU='; object-src 'self'",
-  "manifest_version": 2
+  }
 }

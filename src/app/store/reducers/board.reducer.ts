@@ -1,4 +1,4 @@
-import { EntityState, createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
+import { EntityState, createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
 
 import { Board } from '../models';
@@ -6,7 +6,7 @@ import { BoardApiActions } from '../actions';
 
 export const boardsFeatureKey = 'boards';
 
-export interface State extends EntityState<Board> {}
+export type State = EntityState<Board>;
 
 export const adapter: EntityAdapter<Board> = createEntityAdapter<Board>({
   selectId: (item: Board) => item.id,
@@ -28,5 +28,5 @@ export const reducer = createReducer(
   }),
   on(BoardApiActions.deleteBoardSuccess, (state, { boardId }) => {
     return adapter.removeOne(boardId, state);
-  })
+  }),
 );
