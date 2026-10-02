@@ -1,4 +1,4 @@
-import { EntityState, createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
+import { EntityState, createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
 
 import { ItemData } from '../models';
@@ -31,13 +31,14 @@ export const reducer = createReducer(
   on(ItemDataApiActions.getItemDataSuccess, (state, { itemData }) => {
     return adapter.upsertOne(itemData, state);
   }),
+  // Upsert: a note synced from another device can render (and load an empty placeholder) before its data lands.
   on(ItemDataApiActions.createItemDataSuccess, (state, { itemData }) => {
-    return adapter.addOne(itemData, state);
+    return adapter.upsertOne(itemData, state);
   }),
   on(ItemDataApiActions.updateItemDataSuccess, (state, { itemData }) => {
     return adapter.upsertOne(itemData, state);
   }),
   on(ItemDataApiActions.deleteItemDataSuccess, (state, { itemDataId }) => {
     return adapter.removeOne(itemDataId, state);
-  })
+  }),
 );

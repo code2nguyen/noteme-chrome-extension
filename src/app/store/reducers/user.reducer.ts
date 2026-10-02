@@ -12,5 +12,5 @@ export const reducer = createReducer(
   initialState,
   on(UserApiActions.getUserSuccess, UserApiActions.updateUserSuccess, (state, { user }) => {
     return user;
-  })
+  }),
 );

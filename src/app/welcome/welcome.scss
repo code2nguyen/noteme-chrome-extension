@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  height: 100vh;
+  background:
+    var(--ntm-welcome-background) center / cover no-repeat,
+    var(--c2-theme--color-surface, #18181b);
+}
+
+.welcome {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 55%);
+  background: linear-gradient(rgb(0 0 0 / 15%), rgb(0 0 0 / 35%));
+
+  &:focus-visible {
+    outline: var(--c2-theme--focus-ring, 2px solid #2563eb);
+    outline-offset: -8px;
+  }
+}
+
+.welcome__time {
+  font-size: clamp(64px, 14vw, 160px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.welcome__date {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.welcome__hint {
+  margin-top: 24px;
+  font-size: 14px;
+  opacity: 0.75;
+}

@@ -1,4 +1,4 @@
-import { EntityState, createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
+import { EntityState, createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
 
 import { ArtBoardItem } from '../models';
@@ -51,6 +51,6 @@ export const reducer = createReducer(
     ArtBoardItemApiActions.showArtBoardItemSuccess,
     (state, { artBoardItem }) => {
       return adapter.upsertOne(artBoardItem, state);
-    }
-  )
+    },
+  ),
 );

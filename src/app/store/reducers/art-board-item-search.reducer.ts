@@ -43,8 +43,8 @@ export const reducer = createReducer(
   on(ArtBoardItemApiActions.searchArtBoardItemsFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error,
-  }))
+    error: String(error),
+  })),
 );
 
 export const getIds = (state: State) => state.ids;

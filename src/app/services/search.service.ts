@@ -1,12 +1,11 @@
-import { Injectable, Inject } from '@angular/core';
-import { Observable, combineLatest } from 'rxjs';
-import { STORAGE_API, StorageApi } from './storage.api';
+import { inject, Injectable } from '@angular/core';
+import { ActionsSubject, Store } from '@ngrx/store';
+import Fuse, { type IFuseOptions } from 'fuse.js';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, mergeMap, shareReplay, startWith, take } from 'rxjs/operators';
-import Fuse from 'fuse.js';
 
-import { Store, select, ActionsSubject } from '@ngrx/store';
-import { AppState, selectAllItemDatas, selectIsAllLoadedItemDatas } from '../store/reducers';
-import { IndexableItemTypes, getText } from './utils';
+import { selectAllItemDatas, selectIsAllLoadedItemDatas } from '../store/reducers';
+import { getText, IndexableItemTypes } from './utils';
 import { ItemDataActions, ItemDataApiActions } from '../store/actions';
 import { ItemData } from '../store/models';
 
@@ -15,90 +14,56 @@ interface FuseDocument {
   text: string;
 }
 
+const toDocument = (item: ItemData): FuseDocument => ({ id: item.id, text: getText(item.data, item.dataType) });
+
 @Injectable({ providedIn: 'root' })
 export class SearchService {
-  private fuse$: Observable<Fuse<FuseDocument>>;
-  private readonly fuseOptions: Fuse.IFuseOptions<FuseDocument> = {
+  private readonly store = inject(Store);
+  private readonly actions$ = inject(ActionsSubject);
+  private fuse$?: Observable<Fuse<FuseDocument>>;
+  private readonly fuseOptions: IFuseOptions<FuseDocument> = {
     keys: ['text'],
     useExtendedSearch: true,
   };
 
-  constructor(private store: Store<AppState>, private actionsSubj: ActionsSubject) {}
-
   search(query: string): Observable<string[]> {
-    if (!this.fuse$) {
-      this.fuse$ = this._getFuse();
-    }
-
+    this.fuse$ ??= this.createIndex().pipe(shareReplay(1));
     return this.fuse$.pipe(
-      map((fuse) => {
-        return fuse.search(query).map((item: any) => item.item.id);
-      }),
-      take(1)
+      map((fuse) => fuse.search(query).map((result) => result.item.id)),
+      take(1),
     );
   }
 
-  private _getFuseForAllItems(): Observable<Fuse<FuseDocument>> {
+  private createIndex(): Observable<Fuse<FuseDocument>> {
     this.store.dispatch(ItemDataActions.getAllItemData());
-    return combineLatest([
-      this.store.pipe(select(selectAllItemDatas)),
-      this.store.pipe(select(selectIsAllLoadedItemDatas)),
-    ]).pipe(
-      filter(([_, isAllLoaded]) => {
-        return isAllLoaded;
-      }),
-      map(([items, _]) => {
-        return items;
-      }),
+    return combineLatest([this.store.select(selectAllItemDatas), this.store.select(selectIsAllLoadedItemDatas)]).pipe(
+      filter(([, isAllLoaded]) => isAllLoaded),
       first(),
-      map((items) => {
-        const docs: FuseDocument[] = items
-          .filter((item) => IndexableItemTypes.includes(item.dataType))
-          .map((item) => ({
-            id: item.id,
-            text: getText(item.data, item.dataType),
-          }));
-        return new Fuse(docs, this.fuseOptions);
-      }),
-      mergeMap((fuse) => {
-        return this.actionsSubj.pipe(
+      map(
+        ([items]) =>
+          new Fuse(
+            items.filter((item) => IndexableItemTypes.includes(item.dataType)).map(toDocument),
+            this.fuseOptions,
+          ),
+      ),
+      mergeMap((fuse) =>
+        this.actions$.pipe(
           startWith({ type: 'initValue' }),
-          filter((action) => {
-            return (
-              action.type === 'initValue' ||
-              action.type === ItemDataApiActions.createItemDataSuccess.type ||
-              action.type === ItemDataApiActions.deleteItemDataSuccess.type ||
-              action.type === ItemDataApiActions.updateItemDataSuccess.type
-            );
-          }),
           map((action) => {
             if (action.type === ItemDataApiActions.createItemDataSuccess.type) {
-              const item = (action as any).itemData as ItemData;
-              fuse.add({
-                id: item.id,
-                text: getText(item.data, item.dataType),
-              });
+              fuse.add(toDocument((action as ReturnType<typeof ItemDataApiActions.createItemDataSuccess>).itemData));
+            } else if (action.type === ItemDataApiActions.deleteItemDataSuccess.type) {
+              const { itemDataId } = action as ReturnType<typeof ItemDataApiActions.deleteItemDataSuccess>;
+              fuse.remove((doc) => doc?.id === itemDataId);
+            } else if (action.type === ItemDataApiActions.updateItemDataSuccess.type) {
+              const { itemData } = action as ReturnType<typeof ItemDataApiActions.updateItemDataSuccess>;
+              fuse.remove((doc) => doc?.id === itemData.id);
+              fuse.add(toDocument(itemData));
             }
-            if (action.type === ItemDataApiActions.deleteItemDataSuccess.type) {
-              const deleteItemId = (action as any).itemDataId as string;
-              fuse.remove((item) => item && item.id === deleteItemId);
-            }
-            if (action.type === ItemDataApiActions.updateItemDataSuccess.type) {
-              const updatedItem = (action as any).itemData as ItemData;
-              fuse.remove((item) => item.id === updatedItem.id);
-              fuse.add({
-                id: updatedItem.id,
-                text: getText(updatedItem.data, updatedItem.dataType),
-              });
-            }
-
             return fuse;
-          })
-        );
-      })
+          }),
+        ),
+      ),
     );
-  }
-  private _getFuse(): Observable<Fuse<FuseDocument>> {
-    return this._getFuseForAllItems().pipe(shareReplay(1));
   }
 }
