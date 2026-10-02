@@ -11,7 +11,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/autocomplete';
-import type { MasonryLayoutChangeDetail } from '@c2n/masonry';
+import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/masonry';
 import type { TabsSelectionChangeEventDetail } from '@c2n/tabs';
 import { combineLatest, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -123,6 +123,24 @@ export class Board {
     ),
     { initialValue: [] as SearchSuggestion[] },
   );
+
+  /**
+   * The order and spans of the tiles. c2-masonry keeps its own order once it has seen a tile and appends tiles it has
+   * not seen, so without this a new note (order = min - 1, first in the DOM) would show up last.
+   */
+  readonly layout = computed<MasonryLayoutSnapshot>(() => ({
+    version: 1,
+    items: this.items().map((item) => ({
+      id: item.id,
+      rows: item.gridPosition.rows,
+      columns: {
+        xs: item.gridPosition.screenColumns.XSmall,
+        sm: item.gridPosition.screenColumns.Small,
+        md: item.gridPosition.screenColumns.Medium,
+        lg: item.gridPosition.screenColumns.Large,
+      },
+    })),
+  }));
 
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
   readonly matchAll = () => true;

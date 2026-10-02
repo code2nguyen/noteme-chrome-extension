@@ -64,6 +64,8 @@ export class NoteCard {
   private readonly itemId = computed(() => this.item().id);
   readonly isCode = computed(() => this.item().extensionId === ExtensionId.CodeNote);
   readonly paperColor = computed(() => paperColorFor(this.item().colorIndex));
+  readonly pad = computed(() => (this.item().properties['pad'] as string | undefined) ?? 'notebook');
+  readonly paper = computed(() => (this.item().properties['paper'] as string | undefined) ?? 'lined');
   readonly languages = computed(() => {
     const current = this.language();
     return CODE_LANGUAGES.some((language) => language.id === current)
@@ -90,13 +92,30 @@ export class NoteCard {
 
     effect(() => {
       if (this.autofocus()) {
-        afterNextRender(() => this.focus(), { injector: this.injector });
+        afterNextRender(() => void this.focus(), { injector: this.injector });
       }
     });
   }
 
-  focus(): void {
-    this.host.nativeElement.querySelector<HTMLElement>('c2-notepad, c2-code-editor')?.focus();
+  /** Focus the editor once it can take focus: the notepad after its first update, the code editor once mounted. */
+  async focus(): Promise<void> {
+    const editor = this.host.nativeElement.querySelector<Notepad | CodeEditor>('c2-notepad, c2-code-editor');
+    if (!editor) {
+      return;
+    }
+    await customElements.whenDefined(editor.localName);
+    await editor.updateComplete;
+    if ('ready' in editor) {
+      await editor.ready;
+    }
+    // c2-masonry slots a new tile a frame or two after it is added; until then the tile is not rendered and focus()
+    // is a silent no-op, so keep trying for a few frames.
+    for (let frame = 0; frame < 30 && document.activeElement !== editor; frame++) {
+      editor.focus();
+      if (document.activeElement !== editor) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    }
   }
 
   /** Scroll the note into view and blink its outline, after picking it from the search results. */
@@ -114,6 +133,17 @@ export class NoteCard {
   onTextInput(event: Event): void {
     const value = (event.target as Notepad).value;
     this.dataService.updateDataItem({ id: this.item().id, data: value, dataType: DataType.MARKDOWN });
+  }
+
+  /**
+   * @c2n/code-editor 0.0.20 creates CodeMirror with the value and language it had when the (async) engine import
+   * started, and drops a change made while the import is in flight. chrome.storage answers asynchronously, so the
+   * stored code usually arrives in that window: re-apply both once the engine is live.
+   */
+  onCodeEditorReady(event: Event): void {
+    const editor = event.target as CodeEditor;
+    editor.requestUpdate('value', undefined);
+    editor.requestUpdate('language', undefined);
   }
 
   onCodeInput(event: Event): void {
@@ -135,9 +165,15 @@ export class NoteCard {
     this.dataService.updateDataItem({ id: this.item().id, dataType: DataType.TEXT, properties: { language } });
   }
 
+  /** The paper picker sets pad, ruling and colour together; the colour keeps living in `colorIndex` as in 2.x. */
   onPaperChange(event: Event): void {
-    const { paperColor } = (event as CustomEvent<NotepadPaperChangeEventDetail>).detail;
-    this.dataService.changeArtBoardItemColorIndex(this.item().id, colorIndexFor(paperColor));
+    const { pad, paper, paperColor } = (event as CustomEvent<NotepadPaperChangeEventDetail>).detail;
+    const item = this.item();
+    this.dataService.updateArtBoardItem({
+      ...item,
+      colorIndex: colorIndexFor(paperColor),
+      properties: { ...item.properties, pad, paper },
+    });
   }
 
   onDeleteMenu(event: Event): void {

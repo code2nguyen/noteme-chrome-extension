@@ -25,44 +25,48 @@
   >
     <c2-feather-search slot="prefix-icon"></c2-feather-search>
     @if (searching()) {
-    <c2-spinner slot="suffix-icon" class="navbar__searching" label="Searching"></c2-spinner>
+      <c2-spinner slot="suffix-icon" class="navbar__searching" label="Searching"></c2-spinner>
     }
   </c2-autocomplete>
 
   @if (inNoteTab()) {
-  <c2-button-group class="navbar__new" aria-label="New note">
-    <c2-button (click)="newNote(ExtensionId.TextNote)">
-      <c2-feather-edit slot="prefix-icon"></c2-feather-edit>
-      Text
-    </c2-button>
-    <c2-button (click)="newNote(ExtensionId.CodeNote)">
-      <c2-feather-code slot="prefix-icon"></c2-feather-code>
-      Code
-    </c2-button>
-  </c2-button-group>
-  <c2-icon-button
-    toggle
-    aria-label="Arrange notes"
-    tooltip="Move and resize notes"
-    [selected]="arranging()"
-    (click)="arranging.set(!arranging())"
-  >
-    <c2-feather-move></c2-feather-move>
-  </c2-icon-button>
+    <c2-button-group class="navbar__new" aria-label="New note">
+      <c2-button (click)="newNote(ExtensionId.TextNote)">
+        <c2-feather-edit slot="prefix-icon"></c2-feather-edit>
+        Text
+      </c2-button>
+      <c2-button (click)="newNote(ExtensionId.CodeNote)">
+        <c2-feather-code slot="prefix-icon"></c2-feather-code>
+        Code
+      </c2-button>
+    </c2-button-group>
+    <c2-icon-button
+      toggle
+      aria-label="Arrange notes"
+      tooltip="Move and resize notes"
+      [selected]="arranging()"
+      (click)="arranging.set(!arranging())"
+    >
+      <c2-feather-move></c2-feather-move>
+    </c2-icon-button>
   }
 
   <span class="navbar__spacer"></span>
 
   <div class="navbar__sync">
-    @switch (syncState()) { @case (SyncState.Syncing) {
-    <c2-spinner class="navbar__sync-spinner" label="Synchronizing"></c2-spinner>
-    } @case (SyncState.Synced) {
-    <c2-feather-check class="navbar__synced" role="img" aria-label="Synchronized"></c2-feather-check>
-    } @default {
-    <c2-icon-button aria-label="Synchronize again" tooltip="Synchronize again" (click)="resync()">
-      <c2-feather-refresh-cw></c2-feather-refresh-cw>
-    </c2-icon-button>
-    } }
+    @switch (syncState()) {
+      @case (SyncState.Syncing) {
+        <c2-spinner class="navbar__sync-spinner" label="Synchronizing"></c2-spinner>
+      }
+      @case (SyncState.Synced) {
+        <c2-feather-check class="navbar__synced" role="img" aria-label="Synchronized"></c2-feather-check>
+      }
+      @default {
+        <c2-icon-button aria-label="Synchronize again" tooltip="Synchronize again" (click)="resync()">
+          <c2-feather-refresh-cw></c2-feather-refresh-cw>
+        </c2-icon-button>
+      }
+    }
   </div>
 
   <c2-icon-button class="navbar__logo" aria-label="Back to the clock" tooltip="Home" (click)="goHome()">
@@ -80,31 +84,44 @@
 
 <main class="board">
   @if (items().length === 0) {
-  <p class="board__empty">
-    {{ inNoteTab() ? 'No notes yet. Start one with Text or Code.' : searchQuery() ? 'Nothing archived matches.' : 'The
-    archive is empty.' }}
-  </p>
+    <p class="board__empty">
+      {{
+        inNoteTab()
+          ? 'No notes yet. Start one with Text or Code.'
+          : searchQuery()
+            ? 'Nothing archived matches.'
+            : 'The
+    archive is empty.'
+      }}
+    </p>
   }
-  <c2-masonry class="board__grid" save-layout="false" [editable]="arranging()" (layout-change)="onLayoutChange($event)">
+  <c2-masonry
+    class="board__grid"
+    [class.board__grid--arranging]="arranging()"
+    save-layout="false"
+    [layout]="layout()"
+    [editable]="arranging()"
+    (layout-change)="onLayoutChange($event)"
+  >
     @for (item of items(); track item.id) {
-    <c2-masonry-item
-      [attr.item-id]="item.id"
-      [attr.label]="item.extensionId === ExtensionId.CodeNote ? 'Code note' : 'Note'"
-      [rows]="item.gridPosition.rows"
-      [cols]="item.gridPosition.screenColumns.Large"
-      [colsLg]="item.gridPosition.screenColumns.Large"
-      [colsMd]="item.gridPosition.screenColumns.Medium"
-      [colsSm]="item.gridPosition.screenColumns.Small"
-      [colsXs]="item.gridPosition.screenColumns.XSmall"
-    >
-      <ntm-note-card
-        [item]="item"
-        [archived]="!inNoteTab()"
-        [autofocus]="item.id === focusItemId()"
-        (archiveToggle)="toggleArchive(item)"
-        (remove)="removeNote(item)"
-      />
-    </c2-masonry-item>
+      <c2-masonry-item
+        [attr.item-id]="item.id"
+        [attr.label]="item.extensionId === ExtensionId.CodeNote ? 'Code note' : 'Note'"
+        [rows]="item.gridPosition.rows"
+        [cols]="item.gridPosition.screenColumns.Large"
+        [colsLg]="item.gridPosition.screenColumns.Large"
+        [colsMd]="item.gridPosition.screenColumns.Medium"
+        [colsSm]="item.gridPosition.screenColumns.Small"
+        [colsXs]="item.gridPosition.screenColumns.XSmall"
+      >
+        <ntm-note-card
+          [item]="item"
+          [archived]="!inNoteTab()"
+          [autofocus]="item.id === focusItemId()"
+          (archiveToggle)="toggleArchive(item)"
+          (remove)="removeNote(item)"
+        />
+      </c2-masonry-item>
     }
   </c2-masonry>
 </main>

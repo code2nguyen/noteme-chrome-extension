@@ -45,14 +45,11 @@ html {
 
 body {
   margin: 0;
+  // Chrome gives extension pages `body { font-size: 75% }`; without this every inherited size is 12px.
+  font-size: 16px;
   font-family: 'RedHatDisplay', system-ui, sans-serif;
   color: var(--c2-theme--color-on-surface);
   background-color: var(--c2-theme--color-surface);
-}
-
-// Keep unregistered tags from flashing unstyled content before their module upgrades them.
-:not(:defined) {
-  visibility: hidden;
 }
 
 ::-webkit-scrollbar {

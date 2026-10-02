@@ -27,10 +27,14 @@ npm start          # http://localhost:4200, notes are kept in localStorage inste
 npm run watch      # rebuild dist/ on change, for loading as an unpacked extension
 npm run build      # production build in dist/noteme-chrome-extension
 npm test           # unit tests (vitest)
+npm run e2e        # build, then Playwright: the web build and the unpacked extension (real chrome.storage)
 npm run lint
 npm run type-check
 npm run format:check
 ```
+
+The Playwright suites (`e2e/`) write screenshots of every verified state to `test-results/screenshots/`. Set
+`CHROMIUM_PATH` to use an installed Chromium instead of Playwright's download (`npx playwright install chromium`).
 
 Load the extension: `chrome://extensions` → Developer mode → **Load unpacked** → `dist/noteme-chrome-extension`.
 

@@ -24,10 +24,17 @@
   }
 }
 
-.note__text {
+.note__body {
   flex: 1;
   min-height: 0;
-  --c2-notepad__sheet--min-height: 100%;
+  overflow: auto;
+  // The notepad sizes its sheet with a min-height only, so the body is a size container it can fill.
+  container-type: size;
+}
+
+.note__text {
+  // 12px is the pad's own space above the sheet.
+  --c2-notepad__sheet--min-height: calc(100cqh - 12px);
   --c2-notepad__spiral--display: none;
   --c2-notepad__top--padding-top: 8px;
   --c2-notepad__margin--inset: 32px;
@@ -35,9 +42,8 @@
 
 // Atom One Dark, the palette of the 2.x Monaco code notes.
 .note__code {
-  flex: 1;
-  min-height: 0;
-  --c2-code-editor--min-height: 100%;
+  height: 100%;
+  --c2-code-editor--min-height: 0px;
   --c2-code-editor--max-height: none;
   --c2-code-editor--background: #282c34;
   --c2-code-editor--color: #abb2bf;

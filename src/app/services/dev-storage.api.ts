@@ -34,8 +34,9 @@ export class DevStorageApi implements StorageApi {
     return new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
+  // A missing key reads as null, as it does in ChromeStorageApi, so both storages exercise the same code paths.
   private read(key: string): unknown {
     const value = localStorage.getItem(PREFIX + key);
-    return value ? JSON.parse(value) : undefined;
+    return value ? JSON.parse(value) : null;
   }
 }

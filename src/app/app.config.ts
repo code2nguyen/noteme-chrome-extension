@@ -5,7 +5,7 @@ import { provideEffects } from '@ngrx/effects';
 
 import { routes } from './app.routes';
 import { initialState, ROOT_REDUCERS } from './store/reducers';
-import { ArtBoardItemEffects, ItemDataEffects, UserEffects } from './store/effects';
+import { ArtBoardItemEffects, FailureEffects, ItemDataEffects, UserEffects } from './store/effects';
 import { STORAGE_API } from './services/storage.api';
 import { ChromeStorageApi } from './services/chrome-storage.api';
 import { DevStorageApi } from './services/dev-storage.api';
@@ -20,7 +20,7 @@ export const appConfig: ApplicationConfig = {
     // The new tab page is index.html; a hash keeps routing working without a server.
     provideRouter(routes, withHashLocation()),
     provideStore(ROOT_REDUCERS, { initialState }),
-    provideEffects(ArtBoardItemEffects, ItemDataEffects, UserEffects),
+    provideEffects(ArtBoardItemEffects, ItemDataEffects, UserEffects, FailureEffects),
     { provide: STORAGE_API, useClass: hasChromeStorage ? ChromeStorageApi : DevStorageApi },
   ],
 };

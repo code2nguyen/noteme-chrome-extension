@@ -52,10 +52,13 @@ export class ArtBoardItemEffects {
           this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
           this.storageApi.get<string[]>(artBoardItemIdsKey()),
         ]).pipe(
-          mergeMap(([artBoardArtBoardItemIds = [], artBoardItemIds = []]) =>
+          mergeMap(([artBoardArtBoardItemIds, artBoardItemIds]) =>
             forkJoin([
-              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [...artBoardArtBoardItemIds, artBoardItem.id]),
-              this.storageApi.set(artBoardItemIdsKey(), [...artBoardItemIds, artBoardItem.id]),
+              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [
+                ...(artBoardArtBoardItemIds ?? []),
+                artBoardItem.id,
+              ]),
+              this.storageApi.set(artBoardItemIdsKey(), [...(artBoardItemIds ?? []), artBoardItem.id]),
               this.storageApi.set(artBoardItemKey(artBoardItem.id), {
                 ...artBoardItem,
                 silent: false,
@@ -136,17 +139,17 @@ export class ArtBoardItemEffects {
           iif(() => !!boardId, this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId!)), of([])),
           this.storageApi.get<string[]>(artBoardItemIdsKey()),
         ]).pipe(
-          mergeMap(([artBoardArtBoardItemIds = [], artBoardItemIds = []]) =>
+          mergeMap(([artBoardArtBoardItemIds, artBoardItemIds]) =>
             forkJoin([
               iif(
                 () => !!boardId,
                 this.storageApi.set(
                   artBoardArtBoardItemIdsKey(boardId!),
-                  without(artBoardArtBoardItemIds, artBoardItemId),
+                  without(artBoardArtBoardItemIds ?? [], artBoardItemId),
                 ),
                 of(null),
               ),
-              this.storageApi.set(artBoardItemIdsKey(), without(artBoardItemIds, artBoardItemId)),
+              this.storageApi.set(artBoardItemIdsKey(), without(artBoardItemIds ?? [], artBoardItemId)),
               this.storageApi.remove(artBoardItemKey(artBoardItemId)),
             ]),
           ),
@@ -189,7 +192,7 @@ export class ArtBoardItemEffects {
           this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
           this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
         ]).pipe(
-          mergeMap(([artBoardItemIds = [], artBoardItem]) => {
+          mergeMap(([artBoardItemIds, artBoardItem]) => {
             if (!artBoardItem) {
               return EMPTY;
             }
@@ -200,7 +203,7 @@ export class ArtBoardItemEffects {
               sourceId: this.id,
             };
             return forkJoin([
-              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), without(artBoardItemIds, artBoardItemId)),
+              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), without(artBoardItemIds ?? [], artBoardItemId)),
               this.storageApi.set(artBoardItemKey(artBoardItemId), hiddenArtBoardItem),
             ]).pipe(map(() => hiddenArtBoardItem));
           }),
@@ -219,7 +222,7 @@ export class ArtBoardItemEffects {
           this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
           this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
         ]).pipe(
-          mergeMap(([artBoardItemIds = [], storedItem]) => {
+          mergeMap(([artBoardItemIds, storedItem]) => {
             if (!storedItem || storedItem.boardId === boardId) {
               return EMPTY;
             }
@@ -232,7 +235,7 @@ export class ArtBoardItemEffects {
               sourceId: this.id,
             };
             return forkJoin([
-              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [...artBoardItemIds, artBoardItemId]),
+              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [...(artBoardItemIds ?? []), artBoardItemId]),
               this.storageApi.set(artBoardItemKey(artBoardItemId), shownArtBoardItem),
             ]).pipe(map(() => shownArtBoardItem));
           }),
