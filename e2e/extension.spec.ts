@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, codeSurface, mockPhotoSources, newNote, notepadSurface, openBoard, shot } from './helpers';
+import { card, mockPhotoSources, newNote, notepadSurface, openBoard, pageSurface, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -163,7 +163,8 @@ test('2.x notes open migrated, and are only rewritten when edited', async ({ new
   await seed(page, 'local', legacyData);
   await page.reload();
   await openBoard(page);
-  await expect(page.locator('ntm-note-card')).toHaveCount(4);
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+  await expect(page.locator('ntm-page-card')).toHaveCount(2);
   // Board order: quill (0), the 1.x note (default order 0), code (1), vocabulary (2).
 
   // Quill text note → notepad markdown: heading as bold, checklist as tasks, bold kept, colour dropped.
@@ -173,22 +174,28 @@ test('2.x notes open migrated, and are only rewritten when edited', async ({ new
   await expect(notepadSurface(quill)).toContainText('Remember the coupon!');
   await expect(quill.locator('c2-notepad [data-checked="true"], c2-notepad .task.checked').first()).toBeAttached();
 
-  // Code note keeps its value and language.
-  const code = card(page, 2);
-  await expect(code.locator('c2-code-editor')).toHaveAttribute('language', 'javascript');
-  await expect(codeSurface(code)).toContainText('return `Hello ${name}`;');
-
-  // Removed vocabulary note → JSON code note.
-  const vocab = card(page, 3);
-  await expect(vocab.locator('c2-code-editor')).toHaveAttribute('language', 'json');
-  await expect(codeSurface(vocab)).toContainText('"word": "bonjour"');
-
   // 1.x record without a note type → text note with a default grid position.
   await expect(notepadSurface(card(page, 1))).toHaveText('A note from 2019');
+  // Code note → a page holding its code; removed vocabulary note → a page holding the JSON.
+  const pages = page.locator('ntm-page-card');
+  await expect(pages.nth(0).locator('.page-card__excerpt')).toContainText('function greet(name)');
+  await expect(pages.nth(1).locator('.page-card__excerpt')).toContainText('"word": "bonjour"');
   await shot(page, '11-extension-migrated-2x-data');
 
   // Nothing was written back yet.
   expect((await stored(page, 'local', 'ITEM_DATA__quill')).dataType).toBe('delta');
+  expect((await stored(page, 'local', 'ITEM_DATA__code')).dataType).toBe('text');
+
+  // The code opens as a JavaScript code block, and editing the page saves it as a page.
+  await pages.nth(0).click();
+  await expect(pageSurface(page).locator('pre')).toContainText('return `Hello ${name}`;');
+  await page.locator('ntm-page-view c2-text-field').click();
+  await page.keyboard.type('Greeting helper');
+  await expect.poll(async () => (await stored(page, 'local', 'ITEM_DATA__code')).dataType).toBe('page');
+  const code = await stored(page, 'local', 'ITEM_DATA__code');
+  expect(code.properties.title).toBe('Greeting helper');
+  expect(code.data).toBe('```javascript\nfunction greet(name) {\n  return `Hello ${name}`;\n}\n```');
+  await page.locator('.page-bar__back').click();
 
   // Editing saves the migrated value.
   await notepadSurface(quill).click();
@@ -203,7 +210,7 @@ test('2.x notes open migrated, and are only rewritten when edited', async ({ new
 test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ newTab }) => {
   const page = await newTab();
   await openBoard(page);
-  await newNote(page, 'Text');
+  await newNote(page);
   await page.keyboard.type('Synced across devices');
   const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
 
@@ -243,7 +250,7 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
 test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
   const first = await newTab();
   await openBoard(first);
-  await newNote(first, 'Text');
+  await newNote(first);
   await first.keyboard.type('Draft');
   await first.waitForTimeout(500);
 
@@ -257,7 +264,7 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
   await first.keyboard.type(' v2');
   await expect(notepadSurface(card(second))).toHaveText('Draft v2');
 
-  await newNote(first, 'Code');
+  await newNote(first);
   await expect(second.locator('ntm-note-card')).toHaveCount(2);
 });
 

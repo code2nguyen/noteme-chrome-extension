@@ -12,6 +12,7 @@ import {
   selectArtBoardItemsByBoardId,
   selectArtBoardItemSearchLoading,
   selectArtBoardItemSearchResults,
+  selectIsAllLoadedArtBoardItems,
   selectItemDataById,
 } from '../store/reducers';
 import { isNotNullOrUndefined } from './utils';
@@ -42,6 +43,15 @@ export class DataService {
       this.store.dispatch(ArtBoardItemActions.loadArtBoardItems({ boardId }));
     }
     return this.store.select(selectArtBoardItemsByBoardId(boardId));
+  }
+
+  /** Read every note, on the board or not (a page opened by its link, or from the search). */
+  loadAllArtBoardItems(): void {
+    this.store.dispatch(ArtBoardItemActions.getAllArtBoardItems());
+  }
+
+  isAllArtBoardItemsLoaded(): Observable<boolean> {
+    return this.store.select(selectIsAllLoadedArtBoardItems);
   }
 
   getArchivedArtBoardItems(): Observable<ArtBoardItem[]> {

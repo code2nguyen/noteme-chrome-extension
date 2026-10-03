@@ -6,6 +6,8 @@ export enum DataType {
   DELTA = 'delta',
   /** The c2-notepad markdown dialect, written by Noteme 3.x text notes. */
   MARKDOWN = 'markdown',
+  /** GitHub-flavoured markdown written by c2-page-editor; the page title is in `properties.title`. */
+  PAGE = 'page',
   BLOB = 'blob',
   NA = 'NA',
 }

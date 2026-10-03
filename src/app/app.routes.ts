@@ -4,6 +4,7 @@ import { Home } from './home/home';
 export const routes: Routes = [
   { path: '', component: Home, pathMatch: 'full' },
   { path: 'main-board', loadComponent: () => import('./board/board').then((m) => m.Board) },
+  { path: 'page/:id', loadComponent: () => import('./page/page-view').then((m) => m.PageView) },
   // 3.0 opened on #/welcome; a bookmark or a restored tab still lands on Home.
   { path: '**', redirectTo: '' },
 ];

@@ -14,7 +14,10 @@ interface FuseDocument {
   text: string;
 }
 
-const toDocument = (item: ItemData): FuseDocument => ({ id: item.id, text: getText(item.data, item.dataType) });
+const toDocument = (item: ItemData): FuseDocument => ({
+  id: item.id,
+  text: getText(item.data, item.dataType, item.properties),
+});
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {

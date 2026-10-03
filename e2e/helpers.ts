@@ -16,8 +16,14 @@ export function notepadSurface(note: Locator): Locator {
   return note.locator('c2-notepad .ProseMirror');
 }
 
-export function codeSurface(note: Locator): Locator {
-  return note.locator('c2-code-editor .cm-content');
+/** The ProseMirror surface of the page being edited. */
+export function pageSurface(page: Page): Locator {
+  return page.locator('ntm-page-view c2-page-editor .ProseMirror');
+}
+
+/** The cards on the board (notes and pages), in board order. */
+export function tiles(page: Page): Locator {
+  return page.locator('c2-masonry-item');
 }
 
 /** Go from Home to the board (a reload of the board stays on the board). */
@@ -66,12 +72,24 @@ export function focusedTag(page: Page): Promise<string | undefined> {
   return page.evaluate(() => document.activeElement?.localName);
 }
 
-export async function newNote(page: Page, kind: 'Text' | 'Code'): Promise<Locator> {
+async function chooseNew(page: Page, value: 'note' | 'page'): Promise<void> {
+  await page.locator('.navbar__new-button').click();
+  await page.locator(`.navbar__new c2-menu-item[value="${value}"]`).click();
+}
+
+export async function newNote(page: Page): Promise<Locator> {
   const before = await page.locator('ntm-note-card').count();
-  await page.locator('c2-button-group c2-button', { hasText: kind }).click();
+  await chooseNew(page, 'note');
   await expect(page.locator('ntm-note-card')).toHaveCount(before + 1);
   // New notes go first, and take focus so the user can type right away.
   const note = card(page, 0);
-  await expect.poll(() => focusedTag(page)).toBe(kind === 'Text' ? 'c2-notepad' : 'c2-code-editor');
+  await expect.poll(() => focusedTag(page)).toBe('c2-notepad');
   return note;
+}
+
+/** New → Page: the page opens full screen with its title focused. */
+export async function newPage(page: Page): Promise<void> {
+  await chooseNew(page, 'page');
+  await expect(page).toHaveURL(/#\/page\/[\w-]+\?new=1$/);
+  await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
 }

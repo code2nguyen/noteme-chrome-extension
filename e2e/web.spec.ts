@@ -1,5 +1,16 @@
 import { expect, test as base } from '@playwright/test';
-import { card, codeSurface, mockPhotoSources, newNote, notepadSurface, openBoard, shot } from './helpers';
+import {
+  card,
+  focusedTag,
+  mockPhotoSources,
+  newNote,
+  newPage,
+  notepadSurface,
+  openBoard,
+  pageSurface,
+  shot,
+  tiles,
+} from './helpers';
 
 // The production build served as a web page: storage is localStorage (DevStorageApi). Every test fails on an
 // uncaught error or a console error.
@@ -37,13 +48,13 @@ test('home shows the clock, the photo of the day and the quote, and opens the bo
   await shot(page, '01-home');
   await openBoard(page);
   await expect(page).toHaveURL(/#\/main-board$/);
-  await expect(page.locator('.board__empty')).toHaveText('No notes yet. Start one with Text or Code.');
+  await expect(page.locator('.board__empty')).toHaveText('Nothing here yet. Press N for a note or P for a page.');
   await shot(page, '02-board-empty');
 });
 
-test('a text note is focused on creation, saved and restored after a reload', async ({ page }) => {
+test('a note is focused on creation, saved and restored after a reload', async ({ page }) => {
   await openBoard(page);
-  const note = await newNote(page, 'Text');
+  const note = await newNote(page);
   // Typing right away must land in the new note (spaces included), not on the button that created it.
   await page.keyboard.type('Buy milk and bread');
   await expect(notepadSurface(note)).toHaveText('Buy milk and bread');
@@ -58,7 +69,7 @@ test('a text note is focused on creation, saved and restored after a reload', as
 
 test('notepad formatting is stored as markdown', async ({ page }) => {
   await openBoard(page);
-  const note = await newNote(page, 'Text');
+  const note = await newNote(page);
   await page.keyboard.type('plain ');
   await page.keyboard.press('Control+b');
   await page.keyboard.type('bold');
@@ -73,48 +84,86 @@ test('notepad formatting is stored as markdown', async ({ page }) => {
   await expect(note.locator('c2-notepad strong')).toHaveText('bold');
 });
 
-test('a code note highlights code and remembers its language', async ({ page }) => {
+test('a page is written full screen, with markdown and code, and shows as a card', async ({ page }) => {
   await openBoard(page);
-  const note = await newNote(page, 'Code');
-  await expect(codeSurface(note)).toBeVisible(); // CodeMirror mounted, not the plain textarea fallback
-  await page.keyboard.type('const answer = { value: 42 };');
-  await expect(codeSurface(note)).toHaveText('const answer = { value: 42 };');
+  await newPage(page);
+  await page.keyboard.type('Setting up the new laptop');
+  await page.keyboard.press('Enter'); // from the title to the page
+  await expect.poll(() => focusedTag(page)).toBe('c2-page-editor');
+  await page.keyboard.type('## Install');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('[] Back up the old laptop');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('```sh');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('brew install node git');
+  const surface = pageSurface(page);
+  await expect(surface.locator('h2')).toHaveText('Install');
+  await expect(surface.locator('pre')).toContainText('brew install node git');
+  await expect(page.locator('.page-bar__status')).toHaveText(/^Saved/);
+  await shot(page, '04-page');
 
-  await note.locator('c2-select').click();
-  await note.locator('c2-list-item[value="javascript"]').click();
-  await expect(note.locator('c2-code-editor')).toHaveAttribute('language', 'javascript');
-  // The keyword is a highlighted token once the JavaScript grammar applies.
-  await expect(codeSurface(note).locator('span', { hasText: /^const$/ })).toBeVisible();
-  await expect(note.locator('.note__toolbar')).toBeInViewport();
-  await page.waitForTimeout(500);
-  await shot(page, '04-code-note');
+  const stored = await page.evaluate(() =>
+    Object.entries(localStorage)
+      .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+      .map(([, value]) => JSON.parse(value)),
+  );
+  expect(stored).toHaveLength(1);
+  expect(stored[0]).toMatchObject({ dataType: 'page', properties: { title: 'Setting up the new laptop' } });
+  expect(stored[0].data).toContain('## Install');
+  expect(stored[0].data).toContain('- [ ] Back up the old laptop');
+  expect(stored[0].data).toContain('```sh\nbrew install node git\n```');
 
+  // Reloading the page keeps it; back on the board it is a card that opens it again.
   await page.reload();
-  await openBoard(page);
-  await expect(card(page).locator('c2-code-editor')).toHaveAttribute('language', 'javascript');
-  await expect(codeSurface(card(page))).toHaveText('const answer = { value: 42 };');
+  await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Setting up the new laptop');
+  await expect(pageSurface(page).locator('h2')).toHaveText('Install');
+  await page.locator('.page-bar__back').click();
+  const pageCard = page.locator('ntm-page-card');
+  await expect(pageCard.locator('.page-card__title')).toHaveText('Setting up the new laptop');
+  await expect(pageCard.locator('.page-card__excerpt')).toContainText('Install · Back up the old laptop');
+  await shot(page, '05-board-with-page');
+  await pageCard.click();
+  await expect(pageSurface(page)).toContainText('Back up the old laptop');
 });
 
-test('archive, restore and delete a note', async ({ page }) => {
+test('a page left empty is not kept, and a page can be deleted', async ({ page }) => {
   await openBoard(page);
-  await newNote(page, 'Text');
-  await page.keyboard.type('Keep me for later');
+  await newPage(page);
+  await page.locator('.page-bar__back').click();
+  await expect(page.locator('.board__empty')).toBeVisible();
+  await expect(tiles(page)).toHaveCount(0);
+
+  await newPage(page);
+  await page.keyboard.type('Short-lived');
+  await page.locator('ntm-page-view c2-icon-button[aria-label="Page actions"]').click();
+  await page.locator('ntm-page-view c2-menu-item[value="delete"]').click();
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await expect(tiles(page)).toHaveCount(0);
+  const keys = await page.evaluate(() => Object.keys(localStorage).filter((key) => key.includes('ITEM_DATA__')));
+  expect(keys).toEqual([]);
+});
+
+test('N and P start a note or a page from the keyboard', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('n');
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect.poll(() => focusedTag(page)).toBe('c2-notepad');
+  // Typing in a note never starts another one.
+  await page.keyboard.type('no new pages');
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await page.locator('c2-masonry').click({ position: { x: 5, y: 5 }, force: true });
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('p');
+  await expect(page).toHaveURL(/#\/page\//);
+});
+
+test('delete a note', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Delete me');
   await page.waitForTimeout(500);
-
-  await card(page).getByRole('button', { name: 'Archive note' }).click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(0);
-
-  await page.locator('c2-tab[for="archive"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(1);
-  await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
-  await expect(page.locator('c2-button-group')).toHaveCount(0); // no "new note" on the archive
-  await shot(page, '05-archive');
-
-  await card(page).getByRole('button', { name: 'Restore note' }).click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(0);
-  await page.locator('c2-tab[for="notes"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(1);
-
   await card(page).getByRole('button', { name: 'Delete note' }).click();
   await expect(card(page).locator('c2-menu-item[value="delete"]')).toBeVisible();
   await shot(page, '06-delete-confirm');
@@ -124,21 +173,18 @@ test('archive, restore and delete a note', async ({ page }) => {
   expect(keys).toEqual([]);
 });
 
-test('archiving an empty note deletes it', async ({ page }) => {
-  await openBoard(page);
-  await newNote(page, 'Text');
-  await card(page).getByRole('button', { name: 'Archive note' }).click();
-  await page.locator('c2-tab[for="archive"]').click();
-  await expect(page.locator('.board__empty')).toHaveText('The archive is empty.');
-});
-
-test('search finds a note and highlights it', async ({ page }) => {
+test('search finds a note and highlights it, and opens a page', async ({ page }) => {
   await openBoard(page);
   for (const text of ['Groceries: apples, pears', 'Meeting with Linh on Friday', 'Release checklist']) {
-    await newNote(page, 'Text');
+    await newNote(page);
     await page.keyboard.type(text);
   }
+  await newPage(page);
+  await page.keyboard.type('Trip to Da Lat');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('The bus leaves Friday at 22:00');
   await page.waitForTimeout(500);
+  await page.locator('.page-bar__back').click();
 
   const search = page.locator('c2-autocomplete input');
   await search.click();
@@ -152,27 +198,43 @@ test('search finds a note and highlights it', async ({ page }) => {
   await expect(search).toHaveValue('');
   await expect(page.locator('ntm-note-card.note--blink')).toHaveCount(1);
   await expect(notepadSurface(page.locator('ntm-note-card.note--blink'))).toHaveText('Meeting with Linh on Friday');
+
+  // Words inside a page find it too, and choosing it opens it.
+  await search.click();
+  await search.pressSequentially('bus leaves');
+  const pageResult = page.locator('c2-autocomplete c2-list-item', { hasText: 'Trip to Da Lat' });
+  await expect(pageResult).toContainText('Page ·');
+  await pageResult.click();
+  await expect(pageSurface(page)).toHaveText('The bus leaves Friday at 22:00');
 });
 
-test('search on the archive filters the archived notes', async ({ page }) => {
+test('a note archived by an older version is found by the search and comes back', async ({ page }) => {
+  await page.evaluate(() => {
+    const set = (key: string, value: unknown) => localStorage.setItem(`noteme-dev:${key}`, JSON.stringify(value));
+    const dates = { createdDate: '2024-03-01T10:00:00.000Z', modifiedDate: '2024-03-01T10:00:00.000Z' };
+    set('_ART_BOARD_ITEM__IDS', ['old']);
+    set('ART_BOARD_ITEM__old', {
+      id: 'old',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 1,
+      gridPosition: { order: 0, rows: 10, screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 } },
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    });
+    set('ITEM_DATA__old', { id: 'old', dataType: 'markdown', empty: false, data: 'Recipe for lemon tart', ...dates });
+  });
+  await page.reload();
   await openBoard(page);
-  for (const text of ['Recipe for lemon tart', 'Bike repair checklist']) {
-    await newNote(page, 'Text');
-    await page.keyboard.type(text);
-    await page.waitForTimeout(400);
-    await card(page).getByRole('button', { name: 'Archive note' }).click();
-    await expect(page.locator('ntm-note-card')).toHaveCount(0);
-  }
-  await page.locator('c2-tab[for="archive"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
   await page.locator('c2-autocomplete input').pressSequentially('lemon');
+  await page.locator('c2-autocomplete c2-list-item', { hasText: 'Recipe for lemon tart' }).click();
   await expect(page.locator('ntm-note-card')).toHaveCount(1);
   await expect(notepadSurface(card(page))).toHaveText('Recipe for lemon tart');
 });
 
 test('changing the paper colour is saved on the note', async ({ page }) => {
   await openBoard(page);
-  const note = await newNote(page, 'Text');
+  const note = await newNote(page);
   await page.keyboard.type('Colourful');
   const notepad = note.locator('c2-notepad');
   await notepad.getByRole('button', { name: /paper/i }).first().click();
@@ -188,48 +250,14 @@ test('changing the paper colour is saved on the note', async ({ page }) => {
   await expect(card(page).locator('c2-notepad')).toHaveAttribute('pad', 'legal');
 });
 
-test('arrange mode shows move handles and a keyboard move is saved', async ({ page }) => {
-  await openBoard(page);
-  await newNote(page, 'Text');
-  await page.keyboard.type('Second');
-  await newNote(page, 'Text');
-  await page.keyboard.type('First');
-  await page.waitForTimeout(400);
-
-  await page.getByRole('button', { name: 'Arrange notes' }).click();
-  const handles = page.locator('c2-masonry-item').getByRole('button', { name: /^Move / });
-  await expect(handles).toHaveCount(2);
-  await expect(page.locator('c2-masonry')).toHaveClass(/board__grid--arranging/);
-  await shot(page, '09-arrange');
-
-  // The newest note comes first.
-  await expect(notepadSurface(card(page, 0))).toHaveText('First');
-  const firstTile = page.locator('c2-masonry-item').nth(0);
-  const secondTile = page.locator('c2-masonry-item').nth(1);
-  expect((await firstTile.boundingBox())!.x).toBeLessThan((await secondTile.boundingBox())!.x);
-
-  // Move the first tile one step right with the keyboard: Enter, ArrowRight, Enter.
-  await handles.first().focus();
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(400);
-
-  await page.reload();
-  await openBoard(page);
-  await expect(notepadSurface(card(page, 0))).toHaveText('Second');
-  await expect(notepadSurface(card(page, 1))).toHaveText('First');
-});
-
 test('phone width: one column, no horizontal scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openBoard(page);
-  await newNote(page, 'Text');
+  await newNote(page);
   await page.keyboard.type('On the go');
-  await newNote(page, 'Code');
-  await page.keyboard.type('npm run build');
-  const tiles = page.locator('c2-masonry-item');
-  const [first, second] = [await tiles.nth(0).boundingBox(), await tiles.nth(1).boundingBox()];
+  await newNote(page);
+  await page.keyboard.type('Second thought');
+  const [first, second] = [await tiles(page).nth(0).boundingBox(), await tiles(page).nth(1).boundingBox()];
   expect(first!.x).toBe(second!.x); // stacked
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await shot(page, '13-phone');

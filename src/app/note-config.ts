@@ -18,18 +18,6 @@ export function colorIndexFor(color: string): number {
   return index === -1 ? 0 : index;
 }
 
-/** Languages c2-code-editor highlights out of the box; anything else is shown as plain text. */
-export const CODE_LANGUAGES: ReadonlyArray<{ id: string; label: string }> = [
-  { id: 'plaintext', label: 'Plain text' },
-  { id: 'javascript', label: 'JavaScript' },
-  { id: 'typescript', label: 'TypeScript' },
-  { id: 'jsx', label: 'JSX' },
-  { id: 'tsx', label: 'TSX' },
-  { id: 'html', label: 'HTML' },
-  { id: 'css', label: 'CSS' },
-  { id: 'json', label: 'JSON' },
-];
-
 type DefaultNoteProperties = Pick<ArtBoardItem, 'extensionId' | 'colorIndex' | 'gridPosition' | 'properties'>;
 
 export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> = {
@@ -43,12 +31,13 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
     colorIndex: 0,
     properties: {},
   },
-  [ExtensionId.CodeNote]: {
-    extensionId: ExtensionId.CodeNote,
+  // A page shows as a small card on the board (title and first lines) and opens full screen.
+  [ExtensionId.Page]: {
+    extensionId: ExtensionId.Page,
     gridPosition: {
       order: -1,
-      rows: 20,
-      screenColumns: { Large: 6, Medium: 6, Small: 6, XSmall: 1 },
+      rows: 6,
+      screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
     },
     colorIndex: 0,
     properties: {},
