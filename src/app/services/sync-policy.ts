@@ -16,5 +16,9 @@ export function syncsWithChromeProfile(key: string, value: unknown): boolean {
     // with the first word typed.
     return !record.empty && (record.dataType === DataType.MARKDOWN || record.dataType === DataType.DELTA);
   }
+  // Plans stay on the device for now, with pages and flows; Google Drive sync will carry them.
+  if (key.startsWith('PLAN__')) {
+    return false;
+  }
   return true;
 }

@@ -567,3 +567,96 @@ test.describe('flow', () => {
     await expect(page.locator('ntm-flow-card')).toHaveCount(0);
   });
 });
+
+test.describe('plan', () => {
+  const stored = (page: Page) =>
+    page.evaluate(() => JSON.parse(localStorage.getItem('noteme-dev:PLAN__ITEMS') ?? '{"items":[]}').items);
+  const dialog = (page: Page) => page.locator('c2-modal.plan__dialog');
+
+  test('week: click an empty hour, type, Enter; the plan is kept, edited and deleted', async ({ page }) => {
+    await page.goto('/#/plan?view=week&date=2026-10-15');
+    const planner = page.locator('c2-week-planner');
+    await expect(planner.locator('.day')).toHaveCount(7);
+    // Thursday is the fourth column of a week starting on Monday; aim at about 10:00.
+    const thursday = (await planner.locator('.day').nth(3).boundingBox())!;
+    const firstHour = (await planner.locator('.hour-label').first().boundingBox())!;
+    const hourHeight = 48;
+    await page.mouse.click(thursday.x + thursday.width / 2, firstHour.y + (10 - 7) * hourHeight + 10);
+    await expect(dialog(page)).toHaveJSProperty('open', true);
+    await expect(dialog(page).locator('.plan__dialog-when')).toContainText('15');
+    await page.keyboard.type('Dentist');
+    await page.keyboard.press('Enter');
+    await expect(dialog(page)).toHaveJSProperty('open', false);
+    await expect(planner.getByRole('button', { name: /^Dentist/ })).toBeVisible();
+    await page.waitForTimeout(400); // the dialog's closing fade
+    expect(await stored(page)).toEqual([
+      expect.objectContaining({ title: 'Dentist', date: '2026-10-15', start: '10:00', end: '11:00' }),
+    ]);
+    await shot(page, '16-plan-week');
+
+    await page.reload();
+    await planner.getByRole('button', { name: /^Dentist/ }).click();
+    await expect(dialog(page)).toHaveJSProperty('open', true);
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('Dentist, bring the card');
+    await page.keyboard.press('Enter');
+    await expect(planner.getByRole('button', { name: /^Dentist, bring the card/ })).toBeVisible();
+    await planner.getByRole('button', { name: /^Dentist/ }).click();
+    await dialog(page).locator('.plan__dialog-delete').click();
+    await expect(planner.getByRole('button', { name: /^Dentist/ })).toHaveCount(0);
+    expect(await stored(page)).toEqual([]);
+  });
+
+  test('month: click a day to add, with or without a time; drag across days for a longer plan', async ({ page }) => {
+    await page.goto('/#/plan?view=month&date=2026-10-01');
+    const planner = page.locator('c2-month-planner');
+    await planner.locator('.day[data-date="2026-10-15"]').click();
+    const sheet = page.locator('c2-sheet.plan__day');
+    await expect(sheet).toHaveJSProperty('open', true);
+    await expect(sheet).toContainText('Nothing planned yet.');
+    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await page.keyboard.type('Dinner with Linh 19:00');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Pack');
+    await page.keyboard.press('Enter');
+    await expect(sheet.locator('.plan__day-item')).toHaveText([/all day\s*Pack/, /19:00 – 20:00\s*Dinner with Linh/]);
+    await shot(page, '17-plan-day');
+    await page.keyboard.press('Escape');
+    await expect(sheet).toHaveJSProperty('open', false);
+    await expect(planner.locator('.event', { hasText: '19:00 Dinner with Linh' })).toBeVisible();
+
+    // Drag from the 20th to the 22nd: one plan over three days.
+    const from = (await planner.locator('.day[data-date="2026-10-20"]').boundingBox())!;
+    const to = (await planner.locator('.day[data-date="2026-10-22"]').boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height - 8);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height - 8, { steps: 8 });
+    await page.mouse.up();
+    await expect(dialog(page)).toHaveJSProperty('open', true);
+    await expect(dialog(page).locator('.plan__dialog-when')).toContainText('20');
+    await expect(dialog(page).locator('.plan__dialog-when')).toContainText('22');
+    await page.keyboard.type('Đà Lạt');
+    await page.keyboard.press('Enter');
+    await expect(planner.locator('.event', { hasText: 'Đà Lạt' }).first()).toBeVisible();
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(400); // the dialog's closing fade
+    await shot(page, '18-plan-month');
+    expect(await stored(page)).toEqual(
+      expect.arrayContaining([expect.objectContaining({ title: 'Đà Lạt', date: '2026-10-20', endDate: '2026-10-22' })]),
+    );
+
+    // The week of the 15th shows the timed plan in its grid and the all-day one above it.
+    await page.locator('.plan-bar__views c2-button', { hasText: 'Week' }).click();
+    await page.goto('/#/plan?view=week&date=2026-10-15');
+    await expect(page.locator('c2-week-planner').getByRole('button', { name: /^Dinner with Linh/ })).toBeVisible();
+    await expect(page.locator('.plan__all-day .plan__chip')).toHaveText([/Pack/]);
+  });
+
+  test('Plan is one click from Home and from the notes', async ({ page }) => {
+    await page.locator('ntm-home .home__link', { hasText: 'Plan' }).click();
+    await expect(page.locator('c2-week-planner')).toBeVisible();
+    await page.locator('.plan-bar__back').click();
+    await page.locator('ntm-board .navbar__link', { hasText: 'Plan' }).click();
+    await expect(page).toHaveURL(/#\/plan/);
+  });
+});

@@ -15,6 +15,7 @@ describe('syncsWithChromeProfile', () => {
     expect(syncsWithChromeProfile('ART_BOARD_ITEM__f', { extensionId: ExtensionId.Flow })).toBe(false);
     expect(syncsWithChromeProfile('ITEM_DATA__f', { dataType: DataType.FLOW, empty: false })).toBe(false);
     expect(syncsWithChromeProfile('ART_BOARD_ITEM__p', { extensionId: ExtensionId.Page })).toBe(false);
+    expect(syncsWithChromeProfile('PLAN__ITEMS', { items: [] })).toBe(false);
     expect(syncsWithChromeProfile('ITEM_DATA__p', { dataType: DataType.PAGE, empty: false })).toBe(false);
   });
 

@@ -12,7 +12,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/autocomplete';
@@ -59,7 +59,7 @@ const FULL_SCREEN: Partial<Record<ExtensionId, string>> = { [ExtensionId.Page]: 
   selector: 'ntm-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [NoteCard, PageCard, FlowCard],
+  imports: [NoteCard, PageCard, FlowCard, RouterLink],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {

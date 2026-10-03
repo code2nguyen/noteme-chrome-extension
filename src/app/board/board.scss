@@ -26,6 +26,19 @@
   font-weight: 600;
 }
 
+.navbar__link {
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+
+  &:hover {
+    background: var(--c2-theme--color-surface-container);
+  }
+}
+
 .navbar__search {
   flex: 1;
   min-width: 180px;

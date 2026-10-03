@@ -138,6 +138,21 @@ async function seed(page: Page, theme: 'light' | 'dark'): Promise<void> {
         });
       });
       localStorage.setItem('noteme-settings', JSON.stringify({ theme }));
+      const today = new Date();
+      const day = (offset: number) => {
+        const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      };
+      set('PLAN__ITEMS', {
+        items: [
+          { id: 'p1', title: 'Standup', date: day(0), start: '09:30', end: '10:00' },
+          { id: 'p2', title: 'Dentist', date: day(1), start: '11:00', end: '12:00' },
+          { id: 'p3', title: 'Dinner with Linh', date: day(1), start: '19:00', end: '21:00' },
+          { id: 'p4', title: 'Pack for Đà Lạt', date: day(2) },
+          { id: 'p5', title: 'Đà Lạt', date: day(3), endDate: day(5) },
+          { id: 'p6', title: 'Gym', date: day(-1), start: '07:30', end: '08:30' },
+        ],
+      });
     },
     {
       theme,
@@ -225,6 +240,16 @@ for (const theme of ['light', 'dark'] as const) {
       await page.waitForTimeout(300);
       await shoot(page, name('7-page-slash-menu'));
       await page.keyboard.press('Escape');
+
+      // Plan: the week, then the month.
+      await page.goto('/#/plan');
+      await expect(page.locator('c2-week-planner')).toBeVisible();
+      await page.waitForTimeout(400);
+      await shoot(page, name('9-plan-week'));
+      await page.goto('/#/plan?view=month');
+      await expect(page.locator('c2-month-planner')).toBeVisible();
+      await page.waitForTimeout(400);
+      await shoot(page, name('10-plan-month'));
     });
   }
 }
