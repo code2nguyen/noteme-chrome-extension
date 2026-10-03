@@ -102,7 +102,7 @@ export function getText(data: unknown, type: string, properties?: ItemData['prop
   }
 }
 
-export const IndexableItemTypes: string[] = [DataType.TEXT, DataType.HTML, DataType.MARKDOWN, DataType.PAGE];
+export const IndexableItemTypes: string[] = [DataType.HTML, DataType.MARKDOWN, DataType.PAGE];
 
 export function without<T>(values: T[], value: T): T[] {
   return values.filter((item) => item !== value);

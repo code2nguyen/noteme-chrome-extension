@@ -67,7 +67,7 @@ export class ItemDataEffects {
   );
 
   // Debounced per note, and every partial update made within the window is merged: keeping only the last one would
-  // drop the code typed just before a language change (and, with one debounce for all notes as in 2.x, an edit to
+  // drop the page text typed just before a title change (and, with one debounce for all notes as in 2.x, an edit to
   // one note made within 300ms of an edit to another).
   updateItemData$ = createEffect(({ debounce = 300, scheduler = asyncScheduler } = {}) =>
     this.actions$.pipe(

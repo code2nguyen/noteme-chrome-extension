@@ -4,7 +4,7 @@
  * Nothing is rewritten in storage here: a note keeps its stored form until the user edits it, at which point the
  * migrated value is saved. That keeps a migration bug from destroying data that was never touched.
  */
-import { ExtensionId, LEGACY_CODE_NOTE_EXTENSION_ID, LEGACY_VOCABULARY_EXTENSION_ID } from '../extension-id';
+import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../note-config';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
@@ -122,33 +122,18 @@ export function deltaToMarkdown(delta: Delta): string {
   return lines.join('\n');
 }
 
-/** A code block in page markdown, fenced with more backticks than the code itself contains. */
-export function codeBlock(code: string, language = ''): string {
-  const longest = Math.max(2, ...(code.match(/`+/g) ?? []).map((run) => run.length));
-  const fence = '`'.repeat(longest + 1);
-  const lang = language === 'plaintext' ? '' : language;
-  return `${fence}${lang}\n${code.replace(/\n$/, '')}\n${fence}`;
-}
-
-/** Bring a stored item data to the form the editors read: notes as notepad markdown, everything else as a page. */
+/** Bring a stored item data to the form the editors read: 2.x Quill notes become notepad markdown. */
 export function normalizeItemData(itemData: ItemData): ItemData {
   const raw: unknown = itemData.data;
   if (itemData.dataType === DataType.DELTA) {
     return { ...itemData, data: isDelta(raw) ? deltaToMarkdown(raw) : '', dataType: DataType.MARKDOWN };
   }
-  if (itemData.dataType === DataType.JSON || itemData.dataType === DataType.TEXT) {
-    // Code notes (TEXT) and 2.x vocabulary notes (JSON) become a page holding one code block.
-    const json = itemData.dataType === DataType.JSON;
-    const code = raw == null ? '' : typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
-    const language = json ? 'json' : (itemData.properties?.language ?? '');
-    return {
-      ...itemData,
-      data: code.trim() ? codeBlock(code, language) : '',
-      dataType: DataType.PAGE,
-      properties: { ...itemData.properties, title: itemData.properties?.title ?? '' },
-    };
-  }
   return itemData;
+}
+
+/** Notes and pages; 2.x code and vocabulary notes are not carried over and stay out of the app. */
+export function isSupportedNote(artBoardItem: ArtBoardItem): boolean {
+  return artBoardItem.extensionId === ExtensionId.TextNote || artBoardItem.extensionId === ExtensionId.Page;
 }
 
 const DEFAULT_POSITION = {
@@ -157,19 +142,18 @@ const DEFAULT_POSITION = {
   screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
 };
 
-/** Fill in what older board items lack: a grid position, a note type and a colour. Code notes become pages. */
+/** Fill in what older board items lack: a grid position, a note type and a colour. */
 export function normalizeArtBoardItem(artBoardItem: ArtBoardItem): ArtBoardItem {
   if (!artBoardItem) {
     return artBoardItem;
   }
   const legacy = artBoardItem as ArtBoardItem & { element?: string };
   const gridPosition = { ...DEFAULT_POSITION, ...artBoardItem.gridPosition };
-  const stored = (artBoardItem.extensionId as string | undefined) ?? legacy.element;
-  const extensionId =
-    stored === ExtensionId.Page || stored === LEGACY_CODE_NOTE_EXTENSION_ID || stored === LEGACY_VOCABULARY_EXTENSION_ID
-      ? ExtensionId.Page
-      : ExtensionId.TextNote;
+  // 1.x items name their kind in `element`; anything without a kind is a text note.
+  const extensionId = (artBoardItem.extensionId ?? legacy.element ?? ExtensionId.TextNote) as ExtensionId;
   const colorIndex =
-    extensionId === ExtensionId.Page ? 0 : (artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS));
+    extensionId === ExtensionId.TextNote
+      ? (artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS))
+      : (artBoardItem.colorIndex ?? 0);
   return { ...artBoardItem, gridPosition, extensionId, colorIndex };
 }

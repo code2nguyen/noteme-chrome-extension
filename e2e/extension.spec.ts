@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, mockPhotoSources, newNote, notepadSurface, openBoard, pageSurface, shot } from './helpers';
+import { card, mockPhotoSources, newNote, notepadSurface, openBoard, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -158,14 +158,14 @@ test('the extension replaces the new tab page', async ({ newTab }) => {
   await shot(page, '10-extension-new-tab');
 });
 
-test('2.x notes open migrated, and are only rewritten when edited', async ({ newTab }) => {
+test('2.x text notes open migrated, and are only rewritten when edited', async ({ newTab }) => {
   const page = await newTab();
   await seed(page, 'local', legacyData);
   await page.reload();
   await openBoard(page);
+  // Code and vocabulary notes are not carried over: only the two text notes show.
   await expect(page.locator('ntm-note-card')).toHaveCount(2);
-  await expect(page.locator('ntm-page-card')).toHaveCount(2);
-  // Board order: quill (0), the 1.x note (default order 0), code (1), vocabulary (2).
+  await expect(page.locator('ntm-page-card')).toHaveCount(0);
 
   // Quill text note → notepad markdown: heading as bold, checklist as tasks, bold kept, colour dropped.
   const quill = card(page, 0);
@@ -176,26 +176,10 @@ test('2.x notes open migrated, and are only rewritten when edited', async ({ new
 
   // 1.x record without a note type → text note with a default grid position.
   await expect(notepadSurface(card(page, 1))).toHaveText('A note from 2019');
-  // Code note → a page holding its code; removed vocabulary note → a page holding the JSON.
-  const pages = page.locator('ntm-page-card');
-  await expect(pages.nth(0).locator('.page-card__excerpt')).toContainText('function greet(name)');
-  await expect(pages.nth(1).locator('.page-card__excerpt')).toContainText('"word": "bonjour"');
   await shot(page, '11-extension-migrated-2x-data');
 
   // Nothing was written back yet.
   expect((await stored(page, 'local', 'ITEM_DATA__quill')).dataType).toBe('delta');
-  expect((await stored(page, 'local', 'ITEM_DATA__code')).dataType).toBe('text');
-
-  // The code opens as a JavaScript code block, and editing the page saves it as a page.
-  await pages.nth(0).click();
-  await expect(pageSurface(page).locator('pre')).toContainText('return `Hello ${name}`;');
-  await page.locator('ntm-page-view c2-text-field').click();
-  await page.keyboard.type('Greeting helper');
-  await expect.poll(async () => (await stored(page, 'local', 'ITEM_DATA__code')).dataType).toBe('page');
-  const code = await stored(page, 'local', 'ITEM_DATA__code');
-  expect(code.properties.title).toBe('Greeting helper');
-  expect(code.data).toBe('```javascript\nfunction greet(name) {\n  return `Hello ${name}`;\n}\n```');
-  await page.locator('.page-bar__back').click();
 
   // Editing saves the migrated value.
   await notepadSurface(quill).click();
