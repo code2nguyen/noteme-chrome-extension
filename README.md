@@ -38,6 +38,42 @@ The Playwright suites (`e2e/`) write screenshots of every verified state to `tes
 
 Load the extension: `chrome://extensions` → Developer mode → **Load unpacked** → `dist/noteme-chrome-extension`.
 
+## Release
+
+CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the production build and both
+Playwright suites on every pull request and push to `master`, and keeps the packaged zip as the `extension` artifact.
+
+To release, bump the version and push the tag:
+
+```sh
+npm version patch        # or minor / major: updates package.json and src/manifest.json, commits, tags v<version>
+git push --follow-tags
+```
+
+The tag runs `.github/workflows/release.yml`: the same checks, then `npm run package` (`dist/noteme-<version>.zip`,
+refused if package.json, the manifest and the tag disagree), an upload through the Chrome Web Store API v2, a
+submission for review, and a GitHub release with the zip attached. **Run workflow** in the Actions tab starts it by
+hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run.
+
+### One-time setup
+
+The workflow signs in as a Google Cloud service account that the store lets publish.
+
+1. In a Google Cloud project, enable the **Chrome Web Store API** and create a service account (no roles needed).
+2. In the [developer dashboard](https://chrome.google.com/webstore/devconsole), **Account** → service accounts:
+   add the service account's email. Note the **publisher ID** shown there and the extension's **item ID**.
+3. On GitHub, **Settings → Environments → New environment** `chrome-web-store`, with:
+   - variables `CWS_PUBLISHER_ID` and `CWS_ITEM_ID`;
+   - either a JSON key of the service account as the secret `CWS_SERVICE_ACCOUNT_KEY`,
+   - or, keyless, a Workload Identity Federation provider for this repository as the variable
+     `GCP_WORKLOAD_IDENTITY_PROVIDER` (`projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>`)
+     and the service account's email as `CWS_SERVICE_ACCOUNT`. Grant the pool's principal for this repository
+     _Service Account Token Creator_ on the service account, and enable the IAM Service Account Credentials API.
+   - Optionally, required reviewers, so each release waits for a click before anything reaches the store.
+
+Check an item by hand with the same script:
+`CWS_ACCESS_TOKEN=$(gcloud auth print-access-token --scopes=https://www.googleapis.com/auth/chromewebstore) CWS_PUBLISHER_ID=… CWS_ITEM_ID=… node scripts/chrome-web-store.ts status`.
+
 ## Upgrading from 2.x
 
 Version 3 is a Manifest V3 extension and reads the data 2.x stored, unchanged:

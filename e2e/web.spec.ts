@@ -270,7 +270,8 @@ test('phone width: one column, no horizontal scroll', async ({ page }) => {
 
 test.describe('home', () => {
   test('falls back to a bundled photo when Commons is unreachable', async ({ page, errors }) => {
-    await page.unrouteAll();
+    // Layered over the online mocks (the latest route wins): removing those first would let a download the first
+    // page started reach the real network.
     await mockPhotoSources(page, { offline: true });
     await page.evaluate(() => localStorage.removeItem('noteme-background'));
     await page.reload();
@@ -286,7 +287,6 @@ test.describe('home', () => {
     await expect.poll(async () => (await backgroundState(page)).queue.length, { timeout: 15_000 }).toBe(3);
 
     // A new tab, offline: the photo still comes from the cache.
-    await page.unrouteAll();
     const requests = await mockPhotoSources(page, { offline: true });
     await nextDay(page);
     const queued = (await backgroundState(page)).queue[0].id;
@@ -322,7 +322,7 @@ test.describe('home', () => {
   });
 
   test('the photo themes chosen in settings are what is searched', async ({ page }) => {
-    await page.unrouteAll();
+    // A fresh count, layered over the first mocks (the latest route wins).
     const requests = await mockPhotoSources(page);
     await page.goto('/#/?settings=1');
     const themes = page.locator('ntm-settings-panel c2-select[aria-labelledby="settings-themes"]');

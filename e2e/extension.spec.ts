@@ -10,6 +10,8 @@ const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> 
     const extension = join(import.meta.dirname, '..', 'dist', 'noteme-chrome-extension');
     const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'noteme-')), {
       executablePath: process.env['CHROMIUM_PATH'] || undefined,
+      // Playwright's default headless shell cannot load extensions; the full Chromium build in new headless mode can.
+      channel: process.env['CHROMIUM_PATH'] ? undefined : 'chromium',
       headless: true,
       viewport: { width: 1440, height: 900 },
       args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`],

@@ -17,7 +17,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "e2e": "ng build && playwright test"
+    "e2e": "ng build && playwright test",
+    "package": "node scripts/package-extension.ts",
+    "version": "node scripts/package-extension.ts --sync && git add src/manifest.json"
   },
   "dependencies": {
     "@angular/common": "22.2.1",
