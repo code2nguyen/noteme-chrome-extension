@@ -19,7 +19,8 @@
     "prepare": "husky",
     "e2e": "ng build && playwright test",
     "package": "node scripts/package-extension.ts",
-    "version": "node scripts/package-extension.ts --sync && git add src/manifest.json"
+    "changelog": "node scripts/changelog.ts",
+    "version": "node scripts/package-extension.ts --sync && node scripts/changelog.ts --next && git add src/manifest.json CHANGELOG.md"
   },
   "dependencies": {
     "@angular/common": "22.2.1",

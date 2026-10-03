@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the changelog is built from the whole history
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -29,19 +31,21 @@ jobs:
       - run: npm run format:check
       - run: npm run type-check
       - run: npm test
+      - name: CHANGELOG.md is up to date
+        run: npm run --silent changelog -- --check
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      # Against the production build: the web page and the unpacked extension.
+      # Chromium only, against the production build: the web page and the unpacked extension.
       - run: npx playwright test
       - name: Package the extension
         id: package
         run: echo "zip=$(npm run --silent package)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: extension
           path: ${{ steps.package.outputs.zip }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: test-results

@@ -40,8 +40,8 @@ Load the extension: `chrome://extensions` → Developer mode → **Load unpacked
 
 ## Release
 
-CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the production build and both
-Playwright suites on every pull request and push to `master`, and keeps the packaged zip as the `extension` artifact.
+CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the changelog check, the production
+build and both Playwright suites (Chromium only) on every pull request and push to `master`, and keeps the packaged zip as the `extension` artifact.
 
 To release, bump the version and push the tag:
 
@@ -54,6 +54,22 @@ The tag runs `.github/workflows/release.yml`: the same checks, then `npm run pac
 refused if package.json, the manifest and the tag disagree), an upload through the Chrome Web Store API v2, a
 submission for review, and a GitHub release with the zip attached. **Run workflow** in the Actions tab starts it by
 hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run.
+
+The first 3.x release keeps the version package.json already has: `npm version 3.0.0 --allow-same-version`.
+
+### Changelog
+
+`CHANGELOG.md` and the release notes are generated from the commit history (`scripts/changelog.ts`), so write commit
+subjects as [Conventional Commits](https://www.conventionalcommits.org) with the area as scope, in words a user
+understands: `feat(plan): drag an event to another day`. `feat`, `fix` and `perf` commits and breaking changes
+(`feat!:`) are listed; `chore`, `ci`, `test`, `docs`, `refactor` and the like are not. A `Changelog: <text>` line in
+the commit body words the entry differently, and `Changelog: skip` leaves the commit out.
+
+- `npm version` files the commits since the last release under the new version and commits `CHANGELOG.md` with it;
+  CI fails when the file is stale.
+- The release workflow puts that version's notes in the GitHub release, and a plain-text copy in the run's summary,
+  ready to paste into the store listing (the store's API takes no release notes).
+- Preview the next release: `npm run changelog -- --store 3.1.0` (or `--notes` for markdown).
 
 ### One-time setup
 

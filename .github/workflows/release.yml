@@ -45,13 +45,33 @@ jobs:
       id-token: write # Workload Identity Federation
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the release notes come from the history
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: extension
           path: release
+
+      # The store's API takes no release notes: the plain-text version goes in the run summary, ready to paste into
+      # the listing's description in the developer dashboard.
+      - name: Release notes
+        run: |
+          version=$(node -p "require('./package.json').version")
+          node scripts/changelog.ts --notes "$version" > release/notes.md
+          {
+            echo "## Noteme $version"
+            echo
+            cat release/notes.md
+            echo
+            echo "### For the Chrome Web Store description"
+            echo
+            echo '```text'
+            node scripts/changelog.ts --store "$version"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # A service account the store's Account page lists. Either keyless through Workload Identity Federation
       # (vars.GCP_WORKLOAD_IDENTITY_PROVIDER) or with a JSON key (secrets.CWS_SERVICE_ACCOUNT_KEY).
@@ -94,4 +114,6 @@ jobs:
         if: ${{ github.ref_type == 'tag' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release/*.zip --title "Noteme ${GITHUB_REF_NAME#v}" --generate-notes --verify-tag
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/*.zip --title "Noteme ${GITHUB_REF_NAME#v}" \
+            --notes-file release/notes.md --verify-tag
