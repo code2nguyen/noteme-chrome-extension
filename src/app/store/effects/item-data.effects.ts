@@ -6,15 +6,17 @@ import {
   buffer,
   catchError,
   debounceTime,
+  filter,
   groupBy,
   map,
   mergeMap,
   switchMap,
   take,
+  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ItemDataActions, ItemDataApiActions } from '../actions';
+import { ArtBoardItemActions, ItemDataActions, ItemDataApiActions } from '../actions';
 import { artBoardItemIdsKey, itemDataKey, STORAGE_API } from '../../services/storage.api';
 import { ItemData } from '../models';
 import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
@@ -29,6 +31,17 @@ export class ItemDataEffects {
   private readonly actions$ = inject(Actions);
   private readonly store = inject(Store);
   private readonly storageApi = inject(STORAGE_API);
+  /** Items deleted in this tab. Ids are never reused, so a save still waiting for one of them is dropped. */
+  private readonly deleted = new Set<string>();
+
+  trackDeletions$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ArtBoardItemActions.deleteArtBoardItem, ItemDataActions.deleteItemData),
+        tap((action) => this.deleted.add('artBoardItemId' in action ? action.artBoardItemId : action.itemDataId)),
+      ),
+    { dispatch: false },
+  );
 
   getItemData$ = createEffect(() =>
     this.actions$.pipe(
@@ -77,6 +90,8 @@ export class ItemDataEffects {
       mergeMap((updates$) =>
         updates$.pipe(
           buffer(updates$.pipe(debounceTime(debounce, scheduler))),
+          // Typed just before Delete: writing it now would bring the deleted item's data back.
+          filter(() => !updates$.key || !this.deleted.has(updates$.key)),
           map(mergeItemDataUpdates),
           mergeMap((itemData) =>
             this.store.select(selectItemDataById(itemData.id!)).pipe(
