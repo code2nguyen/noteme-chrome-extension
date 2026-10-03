@@ -39,32 +39,53 @@ export async function openBoard(page: Page): Promise<void> {
 
 const photo = readFileSync(join(import.meta.dirname, '..', 'src', 'assets', 'bg', 'bg-3-small.jpg'));
 
-// Trimmed from a real api.wikimedia.org featured-feed answer.
-export const wikimediaFeed = {
-  image: {
-    title: 'File:Lake Bled.jpg',
-    thumbnail: {
-      source: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lake_Bled.jpg/640px-Lake_Bled.jpg',
-      width: 640,
-      height: 427,
-    },
-    image: { source: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Lake_Bled.jpg', width: 6000, height: 4000 },
-    file_page: 'https://commons.wikimedia.org/wiki/File:Lake_Bled.jpg',
-    artist: { text: 'Jane Doe' },
-  },
-};
+/** A Commons search answer: four usable photos, and a portrait, a small and an SVG file that must be skipped. */
+export const commonsSearch = JSON.parse(
+  readFileSync(join(import.meta.dirname, 'fixtures', 'commons-search.json'), 'utf8'),
+);
+export const commonsCredits = [
+  'Photo by Jane Doe · CC BY-SA 4.0',
+  'Photo by Peter & Anna Smith · CC BY 3.0',
+  'Wikimedia Commons · Public domain',
+  'Photo by Lena Berg · CC BY-SA 4.0',
+];
+
+export interface PhotoRequests {
+  searches: string[];
+  images: number;
+}
+
+// Commons answers both with CORS headers, which the app's fetch needs.
+const cors = { 'access-control-allow-origin': '*' };
 
 /**
- * The photo sources are third-party services (and unreachable from CI sandboxes): answer them with a recorded feed and
- * a local image, or fail them (`offline`) to check the fallback to the bundled photos.
+ * Commons is a third-party service (and unreachable from CI sandboxes): answer its search API with a recorded answer and
+ * its images with a local photo, or fail both (`offline`) to check the fallback to the bundled photos. Returns what was
+ * requested.
  */
-export async function mockPhotoSources(target: Page | BrowserContext, { offline = false } = {}): Promise<void> {
-  await target.route(/^https:\/\/(api\.wikimedia\.org|api\.nasa\.gov)\//, (route) =>
-    offline ? route.abort('internetdisconnected') : route.fulfill({ json: wikimediaFeed }),
-  );
-  await target.route(/^https:\/\/upload\.wikimedia\.org\//, (route) =>
-    route.fulfill({ body: photo, contentType: 'image/jpeg' }),
-  );
+export async function mockPhotoSources(
+  target: Page | BrowserContext,
+  { offline = false } = {},
+): Promise<PhotoRequests> {
+  const requests: PhotoRequests = { searches: [], images: 0 };
+  await target.route(/^https:\/\/commons\.wikimedia\.org\/w\/api\.php/, (route) => {
+    requests.searches.push(new URL(route.request().url()).searchParams.get('gsrsearch') ?? '');
+    return offline ? route.abort('internetdisconnected') : route.fulfill({ json: commonsSearch, headers: cors });
+  });
+  await target.route(/^https:\/\/upload\.wikimedia\.org\//, (route) => {
+    requests.images += 1;
+    return offline
+      ? route.abort('internetdisconnected')
+      : route.fulfill({ body: photo, contentType: 'image/jpeg', headers: cors });
+  });
+  return requests;
+}
+
+/** The background state the app keeps: the photo on screen and the ones downloaded ahead. */
+export function backgroundState(
+  page: Page,
+): Promise<{ current: { id: string; theme: string } | null; queue: { id: string; theme: string }[] }> {
+  return page.evaluate(() => JSON.parse(localStorage.getItem('noteme-background') ?? '{"current":null,"queue":[]}'));
 }
 
 /** The tag of the element holding focus, through shadow roots' hosts. */

@@ -1,6 +1,8 @@
 import { expect, test as base } from '@playwright/test';
 import {
+  backgroundState,
   card,
+  commonsCredits,
   focusedTag,
   mockPhotoSources,
   newNote,
@@ -29,19 +31,19 @@ const test = base.extend<{ errors: string[] }>({
   ],
 });
 
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 test.beforeEach(async ({ page }) => {
   await mockPhotoSources(page);
   await page.goto('/');
 });
 
-test('home shows the clock, the photo of the day and the quote, and opens the board', async ({ page }) => {
+test('home shows the clock, a photo and the quote, and opens the board', async ({ page }) => {
   await expect(page.locator('.home__time')).toHaveText(/^\d{2}:\d{2}$/);
   await expect(page.locator('.home__date')).toContainText(String(new Date().getFullYear()));
-  await expect(page.locator('.home__photo')).toHaveAttribute(
-    'src',
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lake_Bled.jpg/1920px-Lake_Bled.jpg',
-  );
-  await expect(page.locator('.home__credit a')).toHaveText('Photo by Jane Doe · Wikimedia Commons');
+  // A bundled photo stands in on the very first tab, then the first downloaded one takes over.
+  await expect(page.locator('.home__credit a')).toHaveText(new RegExp(commonsCredits.map(escape).join('|')));
+  await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
   await expect(page.locator('.home__quote blockquote')).not.toBeEmpty();
   // Site shortcuts need chrome.topSites: nothing to show in a plain web page.
   await expect(page.locator('.home__sites, .home__ask')).toHaveCount(0);
@@ -264,17 +266,82 @@ test('phone width: one column, no horizontal scroll', async ({ page }) => {
 });
 
 test.describe('home', () => {
-  test('falls back to a bundled photo when the photo source is unreachable', async ({ page, errors }) => {
+  test('falls back to a bundled photo when Commons is unreachable', async ({ page, errors }) => {
     await page.unrouteAll();
     await mockPhotoSources(page, { offline: true });
-    await page.evaluate(() => localStorage.removeItem('noteme-photo'));
+    await page.evaluate(() => localStorage.removeItem('noteme-background'));
     await page.reload();
     await expect(page.locator('.home__photo')).toHaveAttribute('src', /^assets\/bg\/bg-\d+-small\.jpg$/);
     await expect(page.locator('.home__credit')).toHaveText('Photo from Noteme');
-    // Chrome logs the failed request itself; that one is expected.
-    const expected = errors.filter((error) => /ERR_INTERNET_DISCONNECTED/.test(error));
-    expect(expected.length).toBeGreaterThan(0);
-    errors.splice(0, errors.length, ...errors.filter((error) => !expected.includes(error)));
+    // Chrome logs the failed requests itself; those are expected.
+    await expect.poll(() => errors.some((error) => /ERR_INTERNET_DISCONNECTED/.test(error))).toBe(true);
+    errors.splice(0, errors.length, ...errors.filter((error) => !/ERR_INTERNET_DISCONNECTED/.test(error)));
+  });
+
+  test('photos are downloaded ahead, so a new tab shows one without the network', async ({ page, errors }) => {
+    // The first tab fills the queue in the background.
+    await expect.poll(async () => (await backgroundState(page)).queue.length, { timeout: 15_000 }).toBe(3);
+
+    // A new tab, offline: the photo still comes from the cache.
+    await page.unrouteAll();
+    const requests = await mockPhotoSources(page, { offline: true });
+    await page.evaluate(() => {
+      const settings = JSON.parse(localStorage.getItem('noteme-settings') ?? '{}');
+      localStorage.setItem('noteme-settings', JSON.stringify({ ...settings, photoChange: 'tab' }));
+    });
+    const queued = (await backgroundState(page)).queue[0].id;
+    await page.reload();
+    await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
+    await expect(page.locator('.home__photo')).toHaveClass(/home__photo--shown/);
+    await expect(page.locator('.home__credit a')).toHaveText(new RegExp(commonsCredits.map(escape).join('|')));
+    expect((await backgroundState(page)).current?.id).toBe(queued);
+    expect(requests.images).toBe(0); // shown from the cache, before any download was even tried
+    await page.waitForTimeout(1500); // the refill runs (and fails, offline) after the page is up
+    errors.splice(0, errors.length, ...errors.filter((error) => !/ERR_INTERNET_DISCONNECTED/.test(error)));
+  });
+
+  test('with "Each tab" every new tab shows another photo; "Change now" too', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('noteme-settings', JSON.stringify({ photoChange: 'tab' })));
+    await page.reload();
+    await expect.poll(async () => (await backgroundState(page)).queue.length, { timeout: 15_000 }).toBe(3);
+    const seen = new Set<string>();
+    for (let i = 0; i < 3; i++) {
+      await page.reload();
+      await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
+      seen.add((await backgroundState(page)).current!.id);
+    }
+    expect(seen.size).toBe(3);
+
+    await page.goto('/#/?settings=1');
+    const before = await page.locator('.home__credit').textContent();
+    const shownBefore = (await backgroundState(page)).current!.id;
+    await page.locator('ntm-settings-panel c2-button', { hasText: 'Change now' }).click();
+    await expect.poll(async () => (await backgroundState(page)).current!.id).not.toBe(shownBefore);
+    expect(before).toBeTruthy();
+  });
+
+  test('the photo themes chosen in settings are what is searched', async ({ page }) => {
+    await page.unrouteAll();
+    const requests = await mockPhotoSources(page);
+    await page.goto('/#/?settings=1');
+    const themes = page.locator('ntm-settings-panel c2-select[aria-labelledby="settings-themes"]');
+    await themes.click();
+    // Keep only "Night sky and space": tick it, then untick the defaults (one theme always stays chosen).
+    await page.locator('c2-list-item', { hasText: 'Night sky and space' }).click();
+    for (const label of ['Nature', 'Mountains', 'Sea and coast']) {
+      await page.locator('c2-list-item', { hasText: label }).first().click();
+    }
+    await page.keyboard.press('Escape');
+    await expect
+      .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('noteme-settings') ?? '{}').photoThemes))
+      .toEqual(['space']);
+    await expect
+      .poll(() => requests.searches.some((search) => search.includes('astronomy')), { timeout: 15_000 })
+      .toBe(true);
+    // The queue is filled again for the new theme only.
+    await expect
+      .poll(async () => (await backgroundState(page)).queue.map((photo) => photo.theme), { timeout: 15_000 })
+      .toEqual(['space', 'space', 'space']);
   });
 
   test('settings change the clock, the theme and the quote, and survive a reload', async ({ page }) => {

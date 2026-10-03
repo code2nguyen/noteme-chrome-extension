@@ -1,5 +1,11 @@
 @if (photo(); as current) {
-  <img class="home__photo" [src]="current.url" alt="" />
+  <img
+    class="home__photo"
+    [src]="current.src"
+    alt=""
+    (load)="photoLoaded.set(current.src)"
+    [class.home__photo--shown]="photoLoaded() === current.src"
+  />
 }
 <div class="home__scrim"></div>
 

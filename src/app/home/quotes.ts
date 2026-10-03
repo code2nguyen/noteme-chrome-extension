@@ -1,4 +1,4 @@
-import { dayOfYear } from './daily-photo';
+import { dayOfYear } from './background';
 
 export interface Quote {
   text: string;

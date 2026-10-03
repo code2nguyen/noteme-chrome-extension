@@ -150,7 +150,7 @@ test('the extension replaces the new tab page', async ({ newTab }) => {
   const page = await newTab();
   expect(page.url()).toMatch(/^chrome-extension:\/\/[a-p]{32}\/index\.html#\/$/);
   await expect(page.locator('.home__time')).toBeVisible();
-  await expect(page.locator('.home__photo')).toHaveAttribute('src', /1920px-Lake_Bled/);
+  await expect(page.locator('.home__photo')).toHaveAttribute('src', /^(blob:|assets\/bg\/)/);
   // Shortcuts are an optional permission: Home offers them instead of asking Chrome on its own.
   await expect(page.locator('.home__ask c2-button', { hasText: 'Show my most visited sites' })).toBeVisible();
   // Chrome's extension-page stylesheet shrinks body text to 75%; the app sets it back.

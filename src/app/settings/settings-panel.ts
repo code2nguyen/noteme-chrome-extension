@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, inp
 import './settings-elements';
 import type { Select } from '@c2n/select';
 import type { Switch } from '@c2n/switch';
-import { DailyPhoto } from '../home/daily-photo';
+import { PHOTO_THEMES, PhotoTheme } from '../home/background';
+import type { ShownPhoto } from '../home/background.service';
 import { TopSitesService } from '../home/top-sites.service';
 import { formatDate, Settings } from './settings';
 import { SettingsService } from './settings.service';
@@ -23,12 +24,13 @@ export class SettingsPanel {
   private readonly topSites = inject(TopSitesService);
 
   readonly open = input(false);
-  readonly photo = input<DailyPhoto | null>(null);
+  readonly photo = input<ShownPhoto | null>(null);
   readonly closed = output<void>();
   readonly changePhoto = output<void>();
 
   readonly settings = this.service.settings;
   readonly shortcutsSupported = this.topSites.supported;
+  readonly themes = PHOTO_THEMES;
   /** Each date format, shown with today's date. */
   readonly dateFormats = (['long', 'short', 'numeric'] as const).map((format) => ({
     format,
@@ -49,7 +51,18 @@ export class SettingsPanel {
     }
   }
 
-  toggle(key: 'quote', event: Event): void {
+  /** At least one theme stays chosen: unticking the last one puts it back. */
+  chooseThemes(event: Event): void {
+    const control = event.target as Select;
+    const themes = control.value as PhotoTheme[];
+    if (themes.length === 0) {
+      control.value = [...this.settings().photoThemes];
+      return;
+    }
+    this.service.update({ photoThemes: themes });
+  }
+
+  toggle(key: 'quote' | 'photos', event: Event): void {
     this.service.update({ [key]: (event.target as Switch).checked });
   }
 

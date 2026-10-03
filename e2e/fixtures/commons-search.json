@@ -1,0 +1,117 @@
+{
+  "batchcomplete": true,
+  "query": {
+    "pages": [
+      {
+        "pageid": 1,
+        "ns": 6,
+        "title": "File:Lake Bled at dawn.jpg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lake_Bled_at_dawn.jpg/1920px-Lake_Bled_at_dawn.jpg",
+            "width": 6000,
+            "height": 4000,
+            "mime": "image/jpeg",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Lake_Bled_at_dawn.jpg",
+            "extmetadata": {
+              "Artist": {
+                "value": "<a href=\"//commons.wikimedia.org/wiki/User:Jane\" title=\"User:Jane\">Jane Doe</a>"
+              },
+              "LicenseShortName": { "value": "CC BY-SA 4.0" }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 2,
+        "ns": 6,
+        "title": "File:Matterhorn from Zermatt.jpg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Matterhorn_from_Zermatt.jpg/1920px-Matterhorn_from_Zermatt.jpg",
+            "width": 5472,
+            "height": 3648,
+            "mime": "image/jpeg",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Matterhorn_from_Zermatt.jpg",
+            "extmetadata": {
+              "Artist": { "value": "Peter &amp; Anna Smith" },
+              "LicenseShortName": { "value": "CC BY 3.0" }
+            }
+          }
+        ]
+      },
+      {
+        "pageid": 3,
+        "ns": 6,
+        "title": "File:Coast at Étretat.jpg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Coast_at_Etretat.jpg/1920px-Coast_at_Etretat.jpg",
+            "width": 4200,
+            "height": 2800,
+            "mime": "image/jpeg",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Coast_at_Etretat.jpg",
+            "extmetadata": { "LicenseShortName": { "value": "Public domain" } }
+          }
+        ]
+      },
+      {
+        "pageid": 4,
+        "ns": 6,
+        "title": "File:Pine forest in fog.jpg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Pine_forest_in_fog.jpg/1920px-Pine_forest_in_fog.jpg",
+            "width": 5000,
+            "height": 3333,
+            "mime": "image/jpeg",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Pine_forest_in_fog.jpg",
+            "extmetadata": { "Artist": { "value": "Lena Berg" }, "LicenseShortName": { "value": "CC BY-SA 4.0" } }
+          }
+        ]
+      },
+      {
+        "pageid": 5,
+        "ns": 6,
+        "title": "File:Tall waterfall portrait.jpg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Tall_waterfall.jpg/1920px-Tall_waterfall.jpg",
+            "width": 3000,
+            "height": 4500,
+            "mime": "image/jpeg",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Tall_waterfall_portrait.jpg"
+          }
+        ]
+      },
+      {
+        "pageid": 6,
+        "ns": 6,
+        "title": "File:Small meadow.jpg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Small_meadow.jpg",
+            "width": 1200,
+            "height": 800,
+            "mime": "image/jpeg",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Small_meadow.jpg"
+          }
+        ]
+      },
+      {
+        "pageid": 7,
+        "ns": 6,
+        "title": "File:Map of the valley.svg",
+        "imageinfo": [
+          {
+            "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Map.svg/1920px-Map.svg.png",
+            "width": 4000,
+            "height": 2000,
+            "mime": "image/svg+xml",
+            "descriptionurl": "https://commons.wikimedia.org/wiki/File:Map_of_the_valley.svg"
+          }
+        ]
+      }
+    ]
+  }
+}

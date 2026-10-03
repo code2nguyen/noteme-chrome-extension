@@ -49,27 +49,6 @@
         }
       </c2-select>
     </div>
-    <div class="settings__row">
-      <span id="settings-photo">Photo of the day</span>
-      <c2-select
-        class="settings__select"
-        aria-labelledby="settings-photo"
-        [value]="[settings().photoSource]"
-        (change)="select('photoSource', $event)"
-      >
-        <c2-list-item value="wikimedia">Wikimedia picture of the day</c2-list-item>
-        <c2-list-item value="nasa">NASA astronomy picture</c2-list-item>
-        <c2-list-item value="noteme">Noteme photos</c2-list-item>
-        <c2-list-item value="none">No photo</c2-list-item>
-      </c2-select>
-    </div>
-    @if (photo(); as current) {
-      <div class="settings__photo">
-        <img [src]="current.url" alt="Today's photo" />
-        <span>{{ current.credit }}</span>
-        <c2-button (click)="changePhoto.emit()">Change now</c2-button>
-      </div>
-    }
     <c2-switch class="settings__switch" [checked]="settings().quote" (change)="toggle('quote', $event)">
       Quote of the day
       <span slot="description">A short quote under the clock, a new one each day</span>
@@ -79,6 +58,54 @@
         Site shortcuts
         <span slot="description">Your most visited sites, one click away</span>
       </c2-switch>
+    }
+  </section>
+
+  <section class="settings__group" aria-labelledby="settings-background">
+    <h2 id="settings-background" class="settings__heading">Background</h2>
+    <c2-switch class="settings__switch" [checked]="settings().photos" (change)="toggle('photos', $event)">
+      Photo behind Home
+      <span slot="description"
+        >Featured pictures from Wikimedia Commons, downloaded ahead so a new tab opens at once</span
+      >
+    </c2-switch>
+    @if (settings().photos) {
+      <div class="settings__row">
+        <span id="settings-themes">Themes</span>
+        <c2-select
+          class="settings__select"
+          multiple
+          aria-labelledby="settings-themes"
+          [value]="settings().photoThemes"
+          (change)="chooseThemes($event)"
+        >
+          @for (theme of themes; track theme.id) {
+            <c2-list-item [value]="theme.id">{{ theme.label }}</c2-list-item>
+          }
+        </c2-select>
+      </div>
+      <div class="settings__row">
+        <span id="settings-change">New photo</span>
+        <c2-button-group
+          selection="single"
+          appearance="segmented"
+          size="s"
+          aria-labelledby="settings-change"
+          [value]="settings().photoChange"
+          (change)="choose('photoChange', $event)"
+        >
+          <c2-button value="tab">Each tab</c2-button>
+          <c2-button value="hour">Hourly</c2-button>
+          <c2-button value="day">Daily</c2-button>
+        </c2-button-group>
+      </div>
+      @if (photo(); as current) {
+        <div class="settings__photo">
+          <img [src]="current.src" alt="The photo on Home" />
+          <span>{{ current.credit }}</span>
+          <c2-button (click)="changePhoto.emit()">Change now</c2-button>
+        </div>
+      }
     }
   </section>
 

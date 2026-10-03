@@ -16,8 +16,7 @@ import { map } from 'rxjs/operators';
 import { formatDate, formatTime } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
-import { DailyPhoto } from './daily-photo';
-import { DailyPhotoService } from './daily-photo.service';
+import { BackgroundOptions, BackgroundService, ShownPhoto } from './background.service';
 import { quoteOfTheDay } from './quotes';
 import { Site, TopSitesService } from './top-sites.service';
 
@@ -40,7 +39,7 @@ type ShortcutsState = 'hidden' | 'ask' | 'shown';
 })
 export class Home {
   private readonly settingsService = inject(SettingsService);
-  private readonly photos = inject(DailyPhotoService);
+  private readonly backgrounds = inject(BackgroundService);
   private readonly topSites = inject(TopSitesService);
   private readonly router = inject(Router);
   private readonly now = signal(new Date());
@@ -50,7 +49,16 @@ export class Home {
   readonly date = computed(() => formatDate(this.now(), this.settings().dateFormat));
   readonly quote = computed(() => (this.settings().quote ? quoteOfTheDay(this.now()) : null));
 
-  readonly photo = signal<DailyPhoto | null>(this.photos.immediate(this.settings().photoSource));
+  readonly photo = signal<ShownPhoto | null>(null);
+  /** The photo fades in once decoded, rather than painting top to bottom. */
+  readonly photoLoaded = signal<string | null>(null);
+  private readonly photoOptions = computed<BackgroundOptions>(
+    () => {
+      const settings = this.settings();
+      return { themes: settings.photos ? settings.photoThemes : [], change: settings.photoChange };
+    },
+    { equal: (a, b) => a.change === b.change && a.themes.join() === b.themes.join() },
+  );
   readonly sites = signal<Site[]>([]);
   readonly shortcuts = signal<ShortcutsState>('hidden');
 
@@ -62,13 +70,11 @@ export class Home {
     const timer = setInterval(() => this.now.set(new Date()), 1000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
 
-    // Reload the photo when its source changes (and once at start-up).
+    // The photo shows from the cache at once (at start-up, and when the themes change); the next ones download
+    // once the page is up, so opening a tab never waits on the network.
     effect(() => {
-      const source = this.settings().photoSource;
-      untracked(() => {
-        this.photo.set(this.photos.immediate(source));
-        void this.photos.load(source).then((photo) => this.photo.set(photo));
-      });
+      const options = this.photoOptions();
+      untracked(() => void this.showPhoto(options));
     });
 
     effect(() => {
@@ -101,7 +107,31 @@ export class Home {
   }
 
   async changePhoto(): Promise<void> {
-    this.photo.set(await this.photos.load(this.settings().photoSource, true));
+    const options = this.photoOptions();
+    this.photo.set(await this.backgrounds.next(options));
+    void this.backgrounds.refill(options);
+  }
+
+  private async showPhoto(options: BackgroundOptions): Promise<void> {
+    const shown = await this.backgrounds.current(options);
+    this.photo.set(shown);
+    if (options.themes.length === 0) {
+      return;
+    }
+    afterIdle(async () => {
+      await this.backgrounds.refill(options);
+      // Nothing was downloaded yet for these themes (first run, or themes just changed): a bundled photo stood in.
+      // Move on to the first real one as soon as it is ready.
+      const standIn = shown?.bundled && !options.themes.includes('noteme');
+      if (standIn && this.photo() === shown && this.photoOptions() === options) {
+        const next = await this.backgrounds.next(options);
+        if (next && !next.bundled) {
+          this.photo.set(next);
+        }
+        // That one came out of the queue: top it up again.
+        await this.backgrounds.refill(options);
+      }
+    });
   }
 
   openSettings(): void {
@@ -117,5 +147,14 @@ export class Home {
       event.preventDefault();
       this.router.navigate(['/main-board'], { queryParams: { search: 1 } });
     }
+  }
+}
+
+/** After the page has settled: the downloads never compete with the first paint. */
+function afterIdle(task: () => unknown): void {
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(task, { timeout: 2000 });
+  } else {
+    setTimeout(task, 500);
   }
 }
