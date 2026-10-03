@@ -11,24 +11,7 @@ describe('parseSettings', () => {
     expect(parseSettings({ photoThemes: ['space', 'bogus', 'birds'] }).photoThemes).toEqual(['birds', 'space']);
     expect(parseSettings({ photoThemes: [] }).photoThemes).toEqual(DEFAULT_SETTINGS.photoThemes);
     expect(parseSettings({ photoChange: 'hour' }).photoChange).toBe('hour');
-    expect(parseSettings({ photoChange: 'tab' }).photoChange).toBe('day'); // "each tab" was removed: daily
     expect(parseSettings({ photoChange: 'weekly' }).photoChange).toBe(DEFAULT_SETTINGS.photoChange);
-  });
-
-  it("reads 3.0's photo-of-the-day source into the new photo settings", () => {
-    expect(parseSettings({ photoSource: 'none' })).toMatchObject({ photos: false });
-    expect(parseSettings({ photoSource: 'nasa' })).toMatchObject({
-      photos: true,
-      photoThemes: ['space'],
-      photoChange: 'day',
-    });
-    expect(parseSettings({ photoSource: 'noteme' }).photoThemes).toEqual(['noteme']);
-    expect(parseSettings({ photoSource: 'wikimedia' })).toMatchObject({
-      photoThemes: DEFAULT_SETTINGS.photoThemes,
-      photoChange: 'day',
-    });
-    // Once the new settings are saved, the old field no longer applies.
-    expect(parseSettings({ photoSource: 'none', photos: true }).photos).toBe(true);
   });
 
   it('keeps valid values and drops bad or unknown ones', () => {

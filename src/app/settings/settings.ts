@@ -59,25 +59,7 @@ export function parseSettings(raw: unknown): Settings {
     ? PHOTO_THEME_IDS.filter((id) => (stored['photoThemes'] as unknown[]).includes(id))
     : [];
   result.photoThemes = themes.length > 0 ? themes : [...DEFAULT_SETTINGS.photoThemes];
-  migratePhotoSource(stored, result);
   return result;
-}
-
-/** 3.0's single "photo of the day" source, read once into the photo settings that replaced it. */
-function migratePhotoSource(stored: Record<string, unknown>, result: Settings): void {
-  const source = stored['photoSource'];
-  if (source === undefined || 'photos' in stored || 'photoThemes' in stored) {
-    return;
-  }
-  if (source === 'none') {
-    result.photos = false;
-  } else if (source === 'nasa') {
-    result.photoThemes = ['space'];
-  } else if (source === 'noteme') {
-    result.photoThemes = ['noteme'];
-  }
-  // "Photo of the day" kept one photo a day.
-  result.photoChange = 'day';
 }
 
 export function formatTime(date: Date, clock: ClockSetting, locale?: string): string {
