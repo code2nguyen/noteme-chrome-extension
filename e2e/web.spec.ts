@@ -431,7 +431,7 @@ test('a note shows its delete button only while hovered or written in', async ({
   await openBoard(page);
   const note = await newNote(page);
   await page.keyboard.type('Hover me');
-  const toolbar = note.locator('.note__toolbar');
+  const toolbar = note.locator('c2-notepad .controls');
   const opacity = () => toolbar.evaluate((element) => getComputedStyle(element).opacity);
   await expect.poll(opacity).toBe('1'); // focused: being written in
   await page.locator('.navbar__title').click();
@@ -448,7 +448,7 @@ test.describe('touch screen', () => {
     await openBoard(page);
     const note = await newNote(page);
     await page.keyboard.type('On the go');
-    const opacity = () => note.locator('.note__toolbar').evaluate((element) => getComputedStyle(element).opacity);
+    const opacity = () => note.locator('c2-notepad .controls').evaluate((element) => getComputedStyle(element).opacity);
     await page.locator('.navbar__title').tap();
     await expect.poll(opacity).toBe('0');
     await note.locator('c2-notepad .ProseMirror').tap();

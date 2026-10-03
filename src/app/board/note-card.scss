@@ -1,5 +1,4 @@
-// The note fills its masonry tile; its delete button sits in the paper's bottom-right corner, shown on the note you
-// are on.
+// The note fills its masonry tile.
 :host {
   position: relative;
   display: flex;
@@ -39,22 +38,14 @@
   --c2-notepad__spiral--display: none;
   --c2-notepad__top--padding-top: 8px;
   --c2-notepad__margin--inset: 32px;
+  // The Paper button and the delete button show only on the note being pointed at or written in (on a touch screen,
+  // once tapped), so the board stays calm.
+  --c2-notepad__controls--opacity: 0;
 }
 
-.note__toolbar {
-  position: absolute;
-  right: 6px;
-  bottom: 6px;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.15s ease;
+.note__delete {
   --c2-icon-button__icon--width: 16px;
   --c2-icon-button__icon--height: 16px;
   --c2-icon-button__icon--color: var(--ntm-muted);
   --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
-}
-
-.note__toolbar--shown,
-.note__toolbar:focus-within {
-  opacity: 1;
 }
