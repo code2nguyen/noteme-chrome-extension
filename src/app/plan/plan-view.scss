@@ -51,6 +51,9 @@
   display: block;
   --c2-week-planner--background: var(--c2-theme--color-surface-container-low);
   --c2-month-planner--background: var(--c2-theme--color-surface-container-low);
+  // The resize grip sits on the bar, which is the primary here: it takes on-primary, not the theme's on-fill (white in
+  // both themes, for fills other than the primary), which would vanish on the dark theme's light coral.
+  --c2-month-planner__handle--color: var(--c2-theme--color-on-primary);
 }
 
 .plan__all-day {
