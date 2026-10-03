@@ -14,7 +14,7 @@ const grid = (order: number, rows = 10) => ({
 
 interface Seed {
   id: string;
-  kind: 'note' | 'page';
+  kind: 'note' | 'page' | 'flow';
   data: string;
   title?: string;
   colorIndex?: number;
@@ -79,6 +79,27 @@ const seeds: Seed[] = [
     minutes: 60 * 24 * 9,
   },
   {
+    id: 'weekend',
+    kind: 'flow',
+    title: 'Long weekend in Đà Lạt?',
+    data: JSON.stringify({
+      nodes: [
+        { id: 'w1', label: 'Long weekend', position: { x: 0, y: 120 } },
+        { id: 'w2', label: 'Weather ok?', position: { x: 260, y: 120 } },
+        { id: 'w3', label: 'Book the night bus', position: { x: 520, y: 40 } },
+        { id: 'w4', label: 'Stay home, cook phở', position: { x: 520, y: 200 } },
+        { id: 'w5', label: 'Pack, ask Linh', position: { x: 780, y: 40 } },
+      ],
+      edges: [
+        { source: 'w1', target: 'w2' },
+        { source: 'w2', target: 'w3' },
+        { source: 'w2', target: 'w4' },
+        { source: 'w3', target: 'w5' },
+      ],
+    }),
+    minutes: 60 * 24 * 2,
+  },
+  {
     id: 'wifi',
     kind: 'note',
     data: 'Wifi at the café: `hoa-sua-2026`',
@@ -100,7 +121,7 @@ async function seed(page: Page, theme: 'light' | 'dark'): Promise<void> {
         set(`ART_BOARD_ITEM__${s.id}`, {
           id: s.id,
           boardId: 'defaultArtBoard',
-          extensionId: s.kind === 'page' ? 'ntm-page' : 'ntm-text-note-element',
+          extensionId: { note: 'ntm-text-note-element', page: 'ntm-page', flow: 'ntm-flow' }[s.kind],
           colorIndex: s.colorIndex ?? 0,
           gridPosition: s.grid ?? null,
           properties: s.pad ? { pad: s.pad } : {},
@@ -108,7 +129,7 @@ async function seed(page: Page, theme: 'light' | 'dark'): Promise<void> {
         });
         set(`ITEM_DATA__${s.id}`, {
           id: s.id,
-          dataType: s.kind === 'page' ? 'page' : 'markdown',
+          dataType: { note: 'markdown', page: 'page', flow: 'flow' }[s.kind],
           empty: false,
           data: s.data,
           properties: s.title ? { title: s.title } : {},
@@ -123,7 +144,7 @@ async function seed(page: Page, theme: 'light' | 'dark'): Promise<void> {
       seeds: seeds.map((s, index) => ({
         ...s,
         date: ago(s.minutes),
-        grid: grid(index, s.kind === 'page' ? 6 : 10),
+        grid: grid(index, { note: 10, page: 6, flow: 4 }[s.kind]),
       })),
     },
   );
@@ -161,6 +182,7 @@ for (const theme of ['light', 'dark'] as const) {
       await page.locator('ntm-home .home__link', { hasText: 'Notes' }).click();
       await expect(page.locator('ntm-page-card')).toHaveCount(3);
       await expect(page.locator('ntm-note-card')).toHaveCount(4);
+      await expect(page.locator('ntm-flow-card')).toHaveCount(1);
       await page.waitForTimeout(600);
       await shoot(page, name('3-board'));
 
@@ -186,6 +208,14 @@ for (const theme of ['light', 'dark'] as const) {
       await expect(page.locator('ntm-page-view c2-page-editor pre')).toContainText('brew install');
       await page.waitForTimeout(800); // syntax colours load on demand
       await shoot(page, name('6-page'));
+
+      // A flow.
+      await page.goto('/#/flow/weekend');
+      await expect(page.locator('c2-flow .node')).toHaveCount(5);
+      await page.waitForTimeout(600);
+      await shoot(page, name('8-flow'));
+      await page.goBack();
+      await expect(page.locator('ntm-page-view c2-page-editor pre')).toContainText('brew install');
 
       // The slash menu.
       await page.locator('ntm-page-view c2-page-editor .ProseMirror p').last().click();

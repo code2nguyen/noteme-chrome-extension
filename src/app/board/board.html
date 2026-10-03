@@ -68,6 +68,12 @@
       <span slot="description">A full page: headings, lists, code</span>
       <span slot="shortcut">P</span>
     </c2-menu-item>
+    <c2-menu-item value="flow">
+      <c2-feather-share-2 slot="prefix-icon"></c2-feather-share-2>
+      Flow
+      <span slot="description">Boxes and arrows</span>
+      <span slot="shortcut">F</span>
+    </c2-menu-item>
   </c2-menu>
 
   <c2-icon-button aria-label="Settings" tooltip="Settings" (click)="openSettings()">
@@ -77,13 +83,15 @@
 
 <main class="board">
   @if (items().length === 0) {
-    <p class="board__empty">Nothing here yet. Press N for a note or P for a page.</p>
+    <p class="board__empty">Nothing here yet. Press N for a note, P for a page or F for a flow.</p>
   }
   <c2-masonry class="board__grid" save-layout="false" [layout]="layout()">
     @for (item of items(); track item.id) {
       <c2-masonry-item
         [attr.item-id]="item.id"
-        [attr.label]="item.extensionId === ExtensionId.Page ? 'Page' : 'Note'"
+        [attr.label]="
+          item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note'
+        "
         [rows]="rowsOf(item)"
         [cols]="item.gridPosition.screenColumns.Large"
         [colsLg]="item.gridPosition.screenColumns.Large"
@@ -93,6 +101,8 @@
       >
         @if (item.extensionId === ExtensionId.Page) {
           <ntm-page-card [item]="item" />
+        } @else if (item.extensionId === ExtensionId.Flow) {
+          <ntm-flow-card [item]="item" />
         } @else {
           <ntm-note-card [item]="item" [autofocus]="item.id === focusItemId()" (remove)="removeNote(item)" />
         }

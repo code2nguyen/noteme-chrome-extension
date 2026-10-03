@@ -1,3 +1,4 @@
+import { flowText, parseFlow } from '../flow/flow-doc';
 import { ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
 
@@ -83,6 +84,10 @@ export function editedLabel(value: string | undefined, now = new Date()): string
 }
 
 export function getText(data: unknown, type: string, properties?: ItemData['properties']): string {
+  if (type === DataType.FLOW) {
+    const labels = typeof data === 'string' ? flowText(parseFlow(data)) : '';
+    return [properties?.title?.trim(), labels].filter(Boolean).join('\n');
+  }
   if (type === DataType.PAGE) {
     const body = typeof data === 'string' ? pageMarkdownToText(data) : '';
     return [properties?.title?.trim(), body].filter(Boolean).join('\n');
@@ -102,7 +107,7 @@ export function getText(data: unknown, type: string, properties?: ItemData['prop
   }
 }
 
-export const IndexableItemTypes: string[] = [DataType.HTML, DataType.MARKDOWN, DataType.PAGE];
+export const IndexableItemTypes: string[] = [DataType.HTML, DataType.MARKDOWN, DataType.PAGE, DataType.FLOW];
 
 export function without<T>(values: T[], value: T): T[] {
   return values.filter((item) => item !== value);

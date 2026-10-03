@@ -1,0 +1,68 @@
+<header class="flow-bar">
+  <a class="flow-bar__back" routerLink="/main-board">
+    <c2-feather-arrow-left aria-hidden="true"></c2-feather-arrow-left>
+    Notes
+  </a>
+  <span class="flow-bar__status" role="status">{{ status() }}</span>
+  <span class="flow-bar__spacer"></span>
+  <c2-icon-button aria-label="Show the whole flow" tooltip="Fit to screen" (click)="fit()">
+    <c2-feather-maximize></c2-feather-maximize>
+  </c2-icon-button>
+  <c2-menu placement="bottom-end" aria-label="Flow actions" (menu-select)="onMenu($event)">
+    <c2-icon-button slot="trigger" aria-label="Flow actions" tooltip="More">
+      <c2-feather-more-horizontal></c2-feather-more-horizontal>
+    </c2-icon-button>
+    <c2-menu-item value="delete" destructive>
+      <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+      Delete this flow
+    </c2-menu-item>
+  </c2-menu>
+</header>
+
+@if (found() === false) {
+  <main class="flow flow--missing">
+    <p>This flow no longer exists.</p>
+    <a routerLink="/main-board">Back to your notes</a>
+  </main>
+} @else {
+  <main class="flow">
+    <c2-text-field
+      #titleField
+      class="flow__title"
+      aria-label="Title"
+      placeholder="Untitled flow"
+      [value]="title()"
+      (input)="onTitleInput($event)"
+      (keydown)="onTitleKeydown($event)"
+    ></c2-text-field>
+    <div class="flow__canvas">
+      <c2-flow
+        #flow
+        class="flow__flow"
+        editable
+        no-card
+        aria-label="Flow"
+        [nodes]="nodes()"
+        [edges]="edges()"
+        [renderNode]="renderBox"
+        (node-add)="onNodeAdd($event)"
+        (node-edit)="onNodeEdit($event)"
+        (node-delete)="onNodeDelete($event)"
+        (edge-add)="onEdgeAdd($event)"
+        (edge-delete)="onEdgeDelete($event)"
+        (layout-change)="onLayoutChange($event)"
+      ></c2-flow>
+      <p class="flow__hint">
+        @if (empty()) {
+          <span class="flow__hint-pointer">Double-click anywhere to add a box, or press N</span>
+          <span class="flow__hint-touch">Double-tap anywhere to add a box</span>
+        } @else {
+          <span class="flow__hint-pointer">
+            Double-click to add a box · drag from a box's edge to connect · Delete removes the selection
+          </span>
+          <span class="flow__hint-touch">Double-tap to add a box · drag from a box's edge to connect</span>
+        }
+      </p>
+    </div>
+  </main>
+}

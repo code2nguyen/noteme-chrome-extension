@@ -31,6 +31,7 @@ import { ArtBoardItemApiActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID } from '../store/models';
 import { selectItemDataEntities } from '../store/reducers';
 import { NoteCard } from './note-card';
+import { FlowCard } from './flow-card';
 import { PAGE_EXCERPT_LENGTH, PageCard } from './page-card';
 
 interface SearchSuggestion {
@@ -45,7 +46,10 @@ const MAX_PAGE_ROWS = 6;
 const CHARS_PER_ROW = 70;
 
 /** Keys that start something new from anywhere on the board, as shown in the New menu. */
-const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page };
+const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page, f: ExtensionId.Flow };
+
+/** The notes that open full screen, and their route. */
+const FULL_SCREEN: Partial<Record<ExtensionId, string>> = { [ExtensionId.Page]: '/page', [ExtensionId.Flow]: '/flow' };
 
 /**
  * Every note in one place, newest first. Quick notes are written right on their card; pages show their title and
@@ -55,7 +59,7 @@ const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: Exte
   selector: 'ntm-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [NoteCard, PageCard],
+  imports: [NoteCard, PageCard, FlowCard],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {
@@ -111,8 +115,9 @@ export class Board {
           const itemData = data[item.id];
           const text = itemData ? getText(itemData.data, itemData.dataType, itemData.properties) : '';
           const firstLine = text.split('\n').find((line) => line.trim()) ?? '';
-          const label = firstLine || (item.extensionId === ExtensionId.Page ? 'Untitled page' : 'Empty note');
-          const kind = item.extensionId === ExtensionId.Page ? 'Page' : 'Note';
+          const kind =
+            item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note';
+          const label = firstLine || (kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`);
           const edited = editedLabel(itemData?.modifiedDate ?? item.dataModifiedDate ?? item.modifiedDate);
           return {
             id: item.id,
@@ -147,6 +152,9 @@ export class Board {
 
   /** Notes keep their stored height; a page card is as tall as its excerpt, so a short page is a short card. */
   rowsOf(item: ArtBoardItem): number {
+    if (item.extensionId === ExtensionId.Flow) {
+      return item.gridPosition.rows;
+    }
     if (item.extensionId !== ExtensionId.Page) {
       return item.gridPosition.rows;
     }
@@ -198,8 +206,9 @@ export class Board {
     if (!found) {
       return;
     }
-    if (found.extensionId === ExtensionId.Page) {
-      this.router.navigate(['/page', id]);
+    const route = FULL_SCREEN[found.extensionId];
+    if (route) {
+      this.router.navigate([route, id]);
       return;
     }
     // A note archived by an older version comes back to the board, first.
@@ -211,7 +220,7 @@ export class Board {
 
   onNewMenu(event: Event): void {
     const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
-    this.create(value === 'page' ? ExtensionId.Page : ExtensionId.TextNote);
+    this.create(value === 'page' ? ExtensionId.Page : value === 'flow' ? ExtensionId.Flow : ExtensionId.TextNote);
   }
 
   /** N for a note, P for a page, when the keyboard is not busy in a field or an editor. */
@@ -239,12 +248,13 @@ export class Board {
       gridPosition: { ...defaults.gridPosition, order: this.minOrder() - 1 },
     };
     this.dataService.addArtBoardItem(item);
-    if (kind === ExtensionId.Page) {
-      // Open the page once it is stored, so the page view finds it.
+    const route = FULL_SCREEN[kind];
+    if (route) {
+      // Open it once it is stored, so its view finds it.
       this.dataService
         .getArtBoardItemById(item.id)
         .pipe(filter(Boolean), take(1))
-        .subscribe(() => this.router.navigate(['/page', item.id], { queryParams: { new: 1 } }));
+        .subscribe(() => this.router.navigate([route, item.id], { queryParams: { new: 1 } }));
       return;
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });

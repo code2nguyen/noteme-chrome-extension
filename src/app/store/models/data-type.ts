@@ -8,6 +8,8 @@ export enum DataType {
   MARKDOWN = 'markdown',
   /** GitHub-flavoured markdown written by c2-page-editor; the page title is in `properties.title`. */
   PAGE = 'page',
+  /** A flow note: `{ nodes, edges }` as JSON; the title is in `properties.title`. */
+  FLOW = 'flow',
   BLOB = 'blob',
   NA = 'NA',
 }

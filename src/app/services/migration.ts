@@ -133,7 +133,11 @@ export function normalizeItemData(itemData: ItemData): ItemData {
 
 /** Notes and pages; 2.x code and vocabulary notes are not carried over and stay out of the app. */
 export function isSupportedNote(artBoardItem: ArtBoardItem): boolean {
-  return artBoardItem.extensionId === ExtensionId.TextNote || artBoardItem.extensionId === ExtensionId.Page;
+  return (
+    artBoardItem.extensionId === ExtensionId.TextNote ||
+    artBoardItem.extensionId === ExtensionId.Page ||
+    artBoardItem.extensionId === ExtensionId.Flow
+  );
 }
 
 const DEFAULT_POSITION = {

@@ -1,4 +1,4 @@
-import { expect, test as base } from '@playwright/test';
+import { expect, type Page, test as base } from '@playwright/test';
 import {
   backgroundState,
   nextDay,
@@ -51,7 +51,9 @@ test('home shows the clock, a photo and the quote, and opens the board', async (
   await shot(page, '01-home');
   await openBoard(page);
   await expect(page).toHaveURL(/#\/main-board$/);
-  await expect(page.locator('.board__empty')).toHaveText('Nothing here yet. Press N for a note or P for a page.');
+  await expect(page.locator('.board__empty')).toHaveText(
+    'Nothing here yet. Press N for a note, P for a page or F for a flow.',
+  );
   await shot(page, '02-board-empty');
 });
 
@@ -453,5 +455,115 @@ test.describe('touch screen', () => {
     await expect.poll(opacity).toBe('0');
     await note.locator('c2-notepad .ProseMirror').tap();
     await expect.poll(opacity).toBe('1');
+  });
+});
+
+test.describe('flow', () => {
+  // By accessible name: a box's text also holds the names of the boxes it connects to (its hidden description).
+  const box = (page: Page, label: string) => page.locator(`c2-flow .node[aria-label^="${label},"]`);
+  const editor = (page: Page) => page.locator('c2-flow .label-editor');
+  const storedFlow = (page: Page) =>
+    page.evaluate(() =>
+      Object.entries(localStorage)
+        .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+        .map(([, value]) => JSON.parse(value))
+        .find((data) => data.dataType === 'flow'),
+    );
+
+  /** Double-click an empty spot of the canvas: low on the stage, at a given fraction across. */
+  async function addBoxAt(page: Page, across: number, label: string): Promise<void> {
+    const stage = (await page.locator('c2-flow .stage').boundingBox())!;
+    await page.mouse.dblclick(stage.x + stage.width * across, stage.y + stage.height - 80);
+    await expect(editor(page)).toBeVisible();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type(label);
+    await page.keyboard.press('Enter');
+    await expect(box(page, label)).toBeVisible();
+  }
+
+  test('a flow is drawn with boxes and arrows, saved, and shown on the board', async ({ page }) => {
+    await openBoard(page);
+    await page.keyboard.press('f');
+    await expect(page).toHaveURL(/#\/flow\/[\w-]+\?new=1$/);
+    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await page.keyboard.type('Long weekend in Da Lat?');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.flow__hint')).toContainText('Double-click anywhere to add a box');
+
+    await addBoxAt(page, 0.25, 'Weather ok?');
+    await addBoxAt(page, 0.6, 'Book the night bus');
+
+    // Connect the two by dragging from the first box's handle onto the second.
+    const first = box(page, 'Weather ok?');
+    await first.hover();
+    const handle = first.locator('.connector');
+    await expect(handle).toHaveCSS('opacity', '1');
+    const from = (await handle.boundingBox())!;
+    const to = (await box(page, 'Book the night bus').boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+    await page.mouse.up();
+    await expect
+      .poll(async () => (await storedFlow(page))?.data && JSON.parse((await storedFlow(page)).data).edges.length)
+      .toBe(1);
+    await expect(page.locator('.flow-bar__status')).toHaveText(/^Saved/);
+    await shot(page, '14-flow');
+
+    const stored = await storedFlow(page);
+    expect(stored.properties.title).toBe('Long weekend in Da Lat?');
+    const doc = JSON.parse(stored.data);
+    expect(doc.nodes.map((node: { label: string }) => node.label)).toEqual(['Weather ok?', 'Book the night bus']);
+    expect(doc.nodes.every((node: { position?: unknown }) => node.position)).toBe(true);
+
+    // After a reload the boxes come back where they were on the canvas (the view itself re-fits), with their arrow.
+    const saved = Object.fromEntries(
+      doc.nodes.map((node: { id: string; position: { x: number; y: number } }) => [node.id, node.position]),
+    );
+    await page.reload();
+    await expect(box(page, 'Book the night bus')).toBeVisible();
+    await expect(page.locator('c2-flow .edge')).toHaveCount(1);
+    expect(
+      await page.locator('c2-flow').evaluate((flow) => (flow as unknown as { getLayout(): unknown }).getLayout()),
+    ).toEqual(saved);
+
+    // On the board: a card with the title and the boxes; search finds a box and opens the flow.
+    await page.locator('.flow-bar__back').click();
+    const card = page.locator('ntm-flow-card');
+    await expect(card.locator('.flow-card__title')).toHaveText('Long weekend in Da Lat?');
+    await expect(card.locator('.flow-card__box')).toHaveText(['Weather ok?', 'Book the night bus']);
+    await shot(page, '15-board-with-flow');
+    await page.locator('c2-autocomplete input').pressSequentially('night bus');
+    await page.locator('c2-autocomplete c2-list-item', { hasText: 'Long weekend' }).click();
+    await expect(page).toHaveURL(/#\/flow\//);
+  });
+
+  test('renaming and deleting boxes are saved; an empty flow is not kept', async ({ page }) => {
+    await openBoard(page);
+    await page.keyboard.press('f');
+    await page.keyboard.press('Enter');
+    await addBoxAt(page, 0.3, 'Pack');
+    await addBoxAt(page, 0.7, 'Ask Linh');
+    await box(page, 'Pack').dblclick();
+    await expect(editor(page)).toBeVisible();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('Pack the bags');
+    await page.keyboard.press('Enter');
+    await box(page, 'Ask Linh').click();
+    await page.keyboard.press('Delete');
+    await expect(box(page, 'Ask Linh')).toHaveCount(0);
+    await expect
+      .poll(async () =>
+        JSON.parse((await storedFlow(page))?.data ?? '{"nodes":[]}').nodes.map((n: { label: string }) => n.label),
+      )
+      .toEqual(['Pack the bags']);
+
+    // A flow with no title and no box disappears when you leave it.
+    await box(page, 'Pack the bags').click();
+    await page.keyboard.press('Delete');
+    await expect(box(page, 'Pack the bags')).toHaveCount(0);
+    await page.waitForTimeout(500);
+    await page.locator('.flow-bar__back').click();
+    await expect(page.locator('ntm-flow-card')).toHaveCount(0);
   });
 });

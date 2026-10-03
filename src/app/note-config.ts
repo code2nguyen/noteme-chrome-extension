@@ -31,6 +31,16 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
     colorIndex: 0,
     properties: {},
   },
+  [ExtensionId.Flow]: {
+    extensionId: ExtensionId.Flow,
+    gridPosition: {
+      order: -1,
+      rows: 4,
+      screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
+    },
+    colorIndex: 0,
+    properties: {},
+  },
   // A page shows as a small card on the board (title and first lines) and opens full screen.
   [ExtensionId.Page]: {
     extensionId: ExtensionId.Page,
