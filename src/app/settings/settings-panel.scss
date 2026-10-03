@@ -67,6 +67,13 @@
   --c2-switch__container--justify-content: space-between;
 }
 
+.settings__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
 .settings__footer {
   margin: 0;
   font-size: 13px;

@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, mockPhotoSources, newNote, notepadSurface, openBoard, shot } from './helpers';
+import { card, mockPhotoSources, newNote, newPage, notepadSurface, openBoard, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -265,4 +265,29 @@ test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
       ),
     )
     .toBe('sunday');
+});
+
+test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {
+  const page = await newTab();
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Synced note');
+  const noteId = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
+  await newPage(page);
+  await page.keyboard.type('Long page');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('Pages are written locally only.');
+  const pageId = page.url().match(/page\/([\w-]+)/)![1];
+
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${noteId}`))?.data, { timeout: 15_000 })
+    .toBe('Synced note');
+  await expect
+    .poll(async () => (await stored(page, 'local', `ITEM_DATA__${pageId}`))?.properties?.title)
+    .toBe('Long page');
+  // Give the sync queue (one write every 700ms) time to have sent anything it was going to send.
+  await page.waitForTimeout(3000);
+  expect(await stored(page, 'sync', `ITEM_DATA__${pageId}`)).toBeUndefined();
+  expect(await stored(page, 'sync', `ART_BOARD_ITEM__${pageId}`)).toBeUndefined();
+  expect(await stored(page, 'sync', `ART_BOARD_ITEM__${noteId}`)).toBeDefined();
 });

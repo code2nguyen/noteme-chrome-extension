@@ -4,6 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
 import { INSTANCE_ID } from './instance-id';
+import { syncsWithChromeProfile } from './sync-policy';
 import { getTime } from './utils';
 
 type StoredRecord = Record<string, unknown> & { sourceId?: string; trust?: string; modifiedDate?: string };
@@ -74,7 +75,7 @@ export class ChromeStorageApi implements StorageApi {
     }
     const valueStr = JSON.stringify(value);
     await this.localStorageApi.set({ [key]: valueStr });
-    if (trust === 'local') {
+    if (trust === 'local' && syncsWithChromeProfile(key, value)) {
       const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
       if (oldActionIndex > -1) {
         this.remoteDataQueue.splice(oldActionIndex, 1);
