@@ -13,8 +13,14 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { MenuSelectEventDetail } from '@c2n/menu';
-// Registered here rather than in c2-elements.ts: the editor (ProseMirror, shiki on demand) loads with the page route.
+// The c2 elements of a page, loaded with its route: the editor (ProseMirror, shiki on demand) never loads on Home.
+import '@c2n/menu';
+import '@c2n/menu/menu-item.js';
 import '@c2n/page-editor';
+import '@c2n/text-field';
+import '@c2n/feather-icons/icons/arrow-left.js';
+import '@c2n/feather-icons/icons/more-horizontal.js';
+import '@c2n/feather-icons/icons/trash-2.js';
 import type { PageEditor } from '@c2n/page-editor';
 import type { TextField } from '@c2n/text-field';
 import { combineLatest, interval } from 'rxjs';

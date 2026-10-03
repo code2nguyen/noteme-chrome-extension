@@ -21,6 +21,7 @@ import type { MenuSelectEventDetail } from '@c2n/menu';
 import { combineLatest, ReplaySubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
+import './board-elements';
 import { ExtensionId } from '../extension-id';
 import { noteDefaultProperties } from '../note-config';
 import { DataService } from '../services/data.service';

@@ -83,9 +83,12 @@
   </footer>
 </div>
 
-<ntm-settings-panel
-  [open]="settingsOpen()"
-  [photo]="photo()"
-  (closed)="closeSettings()"
-  (changePhoto)="changePhoto()"
-/>
+<!-- The sheet and its controls load the first time settings open, not with every new tab. -->
+@defer (when settingsOpen()) {
+  <ntm-settings-panel
+    [open]="settingsOpen()"
+    [photo]="photo()"
+    (closed)="closeSettings()"
+    (changePhoto)="changePhoto()"
+  />
+}

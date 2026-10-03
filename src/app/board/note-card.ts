@@ -58,7 +58,10 @@ export class NoteCard {
   readonly blinking = signal(false);
   readonly hovered = signal(false);
   readonly focused = signal(false);
-  /** The notepad's Paper button and the delete button show on the note you are on, so the board stays calm. */
+  /**
+   * The notepad's Paper button and the delete button show only on the note being pointed at or written in, so the
+   * board stays calm. A touch screen has no hover: tapping into the note to write shows them.
+   */
   readonly active = computed(() => this.hovered() || this.focused());
 
   private readonly itemId = computed(() => this.item().id);

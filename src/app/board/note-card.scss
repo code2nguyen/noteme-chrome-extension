@@ -54,14 +54,7 @@
   --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
 }
 
-// Touch screens have no hover: keep the action in view there.
 .note__toolbar--shown,
 .note__toolbar:focus-within {
   opacity: 1;
-}
-
-@media (hover: none) {
-  .note__toolbar {
-    opacity: 1;
-  }
 }

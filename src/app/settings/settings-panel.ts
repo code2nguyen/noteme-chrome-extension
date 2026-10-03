@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, input, output } from '@angular/core';
+import './settings-elements';
 import type { Select } from '@c2n/select';
 import type { Switch } from '@c2n/switch';
 import { DailyPhoto } from '../home/daily-photo';

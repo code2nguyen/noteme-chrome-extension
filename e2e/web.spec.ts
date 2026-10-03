@@ -345,3 +345,47 @@ test('search finds a word far down a long page', async ({ page }) => {
   await page.locator('c2-autocomplete input').pressSequentially('lighthouses');
   await expect(page.locator('c2-autocomplete c2-list-item', { hasText: 'Reading list' })).toBeVisible();
 });
+
+test('Home loads only its own components; the board, settings and pages load theirs', async ({ page }) => {
+  const defined = (tag: string) => page.evaluate((name) => !!customElements.get(name), tag);
+  await expect(page.locator('.home__time')).toBeVisible();
+  expect(await defined('c2-icon-button')).toBe(true);
+  for (const tag of ['c2-notepad', 'c2-masonry', 'c2-autocomplete', 'c2-sheet', 'c2-page-editor']) {
+    expect(await defined(tag), `${tag} on Home`).toBe(false);
+  }
+  await page.locator('ntm-home c2-icon-button[aria-label="Settings"]').click();
+  await expect.poll(() => defined('c2-sheet')).toBe(true);
+  await page.keyboard.press('Escape');
+  await openBoard(page);
+  expect(await defined('c2-notepad')).toBe(true);
+  expect(await defined('c2-page-editor')).toBe(false);
+});
+
+test('a note shows its delete button only while hovered or written in', async ({ page }) => {
+  await openBoard(page);
+  const note = await newNote(page);
+  await page.keyboard.type('Hover me');
+  const toolbar = note.locator('.note__toolbar');
+  const opacity = () => toolbar.evaluate((element) => getComputedStyle(element).opacity);
+  await expect.poll(opacity).toBe('1'); // focused: being written in
+  await page.locator('.navbar__title').click();
+  await page.mouse.move(5, 300);
+  await expect.poll(opacity).toBe('0');
+  await note.hover();
+  await expect.poll(opacity).toBe('1');
+});
+
+test.describe('touch screen', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+
+  test('the delete button shows once the note is tapped to write in it', async ({ page }) => {
+    await openBoard(page);
+    const note = await newNote(page);
+    await page.keyboard.type('On the go');
+    const opacity = () => note.locator('.note__toolbar').evaluate((element) => getComputedStyle(element).opacity);
+    await page.locator('.navbar__title').tap();
+    await expect.poll(opacity).toBe('0');
+    await note.locator('c2-notepad .ProseMirror').tap();
+    await expect.poll(opacity).toBe('1');
+  });
+});
