@@ -10,7 +10,8 @@ describe('parseSettings', () => {
   it('keeps the chosen photo themes, known ones only, and never none', () => {
     expect(parseSettings({ photoThemes: ['space', 'bogus', 'birds'] }).photoThemes).toEqual(['birds', 'space']);
     expect(parseSettings({ photoThemes: [] }).photoThemes).toEqual(DEFAULT_SETTINGS.photoThemes);
-    expect(parseSettings({ photoChange: 'tab' }).photoChange).toBe('tab');
+    expect(parseSettings({ photoChange: 'hour' }).photoChange).toBe('hour');
+    expect(parseSettings({ photoChange: 'tab' }).photoChange).toBe('day'); // "each tab" was removed: daily
     expect(parseSettings({ photoChange: 'weekly' }).photoChange).toBe(DEFAULT_SETTINGS.photoChange);
   });
 

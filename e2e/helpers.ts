@@ -114,3 +114,11 @@ export async function newPage(page: Page): Promise<void> {
   await expect(page).toHaveURL(/#\/page\/[\w-]+\?new=1$/);
   await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
 }
+
+/** Make the photo on screen two days old, so the next tab is a new day and gets the next photo. */
+export function nextDay(page: Page): Promise<void> {
+  return page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem('noteme-background') ?? '{}');
+    localStorage.setItem('noteme-background', JSON.stringify({ ...state, shownAt: Date.now() - 2 * 86_400_000 }));
+  });
+}

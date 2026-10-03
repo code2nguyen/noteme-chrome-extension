@@ -94,9 +94,8 @@
           [value]="settings().photoChange"
           (change)="choose('photoChange', $event)"
         >
-          <c2-button value="tab">Each tab</c2-button>
-          <c2-button value="hour">Hourly</c2-button>
           <c2-button value="day">Daily</c2-button>
+          <c2-button value="hour">Hourly</c2-button>
         </c2-button-group>
       </div>
       @if (photo(); as current) {

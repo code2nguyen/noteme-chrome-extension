@@ -10,7 +10,8 @@
 export type PhotoTheme =
   'nature' | 'mountains' | 'sea' | 'animals' | 'birds' | 'flowers' | 'space' | 'cities' | 'architecture' | 'noteme';
 
-export type PhotoChange = 'tab' | 'hour' | 'day';
+/** When the photo changes. A new photo on every tab was too busy for a page opened dozens of times a day. */
+export type PhotoChange = 'hour' | 'day';
 
 export interface PhotoThemeInfo {
   id: PhotoTheme;
@@ -75,8 +76,6 @@ export function bundledPhoto(index: number): BackgroundPhoto {
 /** Whether the photo shown since `shownAt` is due for a change. */
 export function isDue(shownAt: number, change: PhotoChange, now = Date.now()): boolean {
   switch (change) {
-    case 'tab':
-      return true;
     case 'hour':
       return now - shownAt >= 3_600_000;
     case 'day':

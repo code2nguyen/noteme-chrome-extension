@@ -27,7 +27,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dateFormat: 'long',
   photos: true,
   photoThemes: ['nature', 'mountains', 'sea'],
-  photoChange: 'hour',
+  photoChange: 'day',
   quote: true,
   shortcuts: true,
   weekStart: 'monday',
@@ -37,7 +37,7 @@ const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   theme: ['auto', 'light', 'dark'],
   clock: ['24h', '12h'],
   dateFormat: ['long', 'short', 'numeric'],
-  photoChange: ['tab', 'hour', 'day'],
+  photoChange: ['day', 'hour'],
   weekStart: ['monday', 'sunday'],
 };
 

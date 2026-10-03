@@ -23,8 +23,8 @@ describe('days', () => {
 describe('isDue', () => {
   const shown = new Date(2026, 9, 3, 9, 15).getTime();
 
-  it('changes on every tab, every hour or every day', () => {
-    expect(isDue(shown, 'tab', shown)).toBe(true);
+  it('changes every hour or every day', () => {
+    expect(isDue(shown, 'day', shown)).toBe(false);
     expect(isDue(shown, 'hour', shown + 59 * 60_000)).toBe(false);
     expect(isDue(shown, 'hour', shown + 60 * 60_000)).toBe(true);
     expect(isDue(shown, 'day', new Date(2026, 9, 3, 23, 59).getTime())).toBe(false);

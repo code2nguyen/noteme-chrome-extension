@@ -1,6 +1,7 @@
 import { expect, test as base } from '@playwright/test';
 import {
   backgroundState,
+  nextDay,
   card,
   commonsCredits,
   focusedTag,
@@ -285,10 +286,7 @@ test.describe('home', () => {
     // A new tab, offline: the photo still comes from the cache.
     await page.unrouteAll();
     const requests = await mockPhotoSources(page, { offline: true });
-    await page.evaluate(() => {
-      const settings = JSON.parse(localStorage.getItem('noteme-settings') ?? '{}');
-      localStorage.setItem('noteme-settings', JSON.stringify({ ...settings, photoChange: 'tab' }));
-    });
+    await nextDay(page);
     const queued = (await backgroundState(page)).queue[0].id;
     await page.reload();
     await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
@@ -300,17 +298,18 @@ test.describe('home', () => {
     errors.splice(0, errors.length, ...errors.filter((error) => !/ERR_INTERNET_DISCONNECTED/.test(error)));
   });
 
-  test('with "Each tab" every new tab shows another photo; "Change now" too', async ({ page }) => {
-    await page.evaluate(() => localStorage.setItem('noteme-settings', JSON.stringify({ photoChange: 'tab' })));
-    await page.reload();
+  test('the photo stays the same all day, and the next day brings another; "Change now" too', async ({ page }) => {
     await expect.poll(async () => (await backgroundState(page)).queue.length, { timeout: 15_000 }).toBe(3);
-    const seen = new Set<string>();
-    for (let i = 0; i < 3; i++) {
+    const today = (await backgroundState(page)).current!.id;
+    for (let i = 0; i < 2; i++) {
       await page.reload();
-      await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
-      seen.add((await backgroundState(page)).current!.id);
+      await expect(page.locator('.home__photo')).toHaveClass(/home__photo--shown/);
+      expect((await backgroundState(page)).current!.id).toBe(today);
     }
-    expect(seen.size).toBe(3);
+    await nextDay(page);
+    await page.reload();
+    await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
+    expect((await backgroundState(page)).current!.id).not.toBe(today);
 
     await page.goto('/#/?settings=1');
     const before = await page.locator('.home__credit').textContent();
