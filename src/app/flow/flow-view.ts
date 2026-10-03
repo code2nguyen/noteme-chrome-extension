@@ -7,6 +7,8 @@ import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 import '@c2n/feather-icons/icons/maximize.js';
+import '@c2n/feather-icons/icons/plus.js';
+import '@c2n/feather-icons/icons/layout.js';
 
 import {
   afterNextRender,
@@ -25,13 +27,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type {
   Flow,
+  FlowEdgeEditDetail,
   FlowEdgeEventDetail,
   FlowLayoutChangeDetail,
   FlowNode,
   FlowNodeAddDetail,
   FlowNodeDeleteDetail,
   FlowNodeEditDetail,
-  FlowRenderer,
 } from '@c2n/flow';
 import type { MenuSelectEventDetail } from '@c2n/menu';
 import type { TextField } from '@c2n/text-field';
@@ -50,6 +52,7 @@ import {
   disconnect,
   EMPTY_FLOW,
   FlowDoc,
+  labelArrow,
   parseFlow,
   placeBoxes,
   renameBox,
@@ -97,11 +100,6 @@ export class FlowView {
     this.doc().nodes.map(({ id, label, position }) => ({ id, label, ...(position ? { position } : {}) })),
   );
   readonly edges = computed(() => this.doc().edges);
-  /**
-   * A box is its label only: c2-flow's default body adds a status marker (pending, running…), which belongs to
-   * pipelines, not to notes.
-   */
-  readonly renderBox: FlowRenderer = ({ node }) => node.label;
   readonly empty = computed(() => this.doc().nodes.length === 0);
 
   readonly status = computed(() => {
@@ -198,8 +196,23 @@ export class FlowView {
     this.change(disconnect(this.doc(), source, target));
   }
 
+  onEdgeEdit(event: Event): void {
+    const { source, target, label } = (event as CustomEvent<FlowEdgeEditDetail>).detail;
+    this.change(labelArrow(this.doc(), source, target, label));
+  }
+
   onLayoutChange(event: Event): void {
     this.change(placeBoxes(this.doc(), (event as CustomEvent<FlowLayoutChangeDetail>).detail.positions));
+  }
+
+  /** A box connected after the selected one, or in a free spot of the view; named straight away (onNodeAdd). */
+  addBox(): void {
+    this.flow()?.nativeElement.addNode();
+  }
+
+  /** Back to the automatic layout: the flow fires layout-change without positions, which forgets them. */
+  tidy(): void {
+    this.flow()?.nativeElement.resetLayout();
   }
 
   fit(): void {

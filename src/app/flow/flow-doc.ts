@@ -13,6 +13,8 @@ export interface FlowBox {
 export interface FlowArrow {
   source: string;
   target: string;
+  /** Text halfway along the arrow, such as the "yes" and "no" of a decision. */
+  label?: string;
 }
 
 export interface FlowDoc {
@@ -43,9 +45,13 @@ export function parseFlow(data: string | null | undefined): FlowDoc {
     return [{ id: node.id, label: node.label, ...(position ? { position } : {}) }];
   });
   const ids = new Set(nodes.map((node) => node.id));
-  const edges = (Array.isArray(doc.edges) ? doc.edges : []).filter(
-    (edge): edge is FlowArrow => !!edge && ids.has(edge.source) && ids.has(edge.target) && edge.source !== edge.target,
-  );
+  const edges = (Array.isArray(doc.edges) ? doc.edges : []).flatMap((edge): FlowArrow[] => {
+    if (!edge || !ids.has(edge.source) || !ids.has(edge.target) || edge.source === edge.target) {
+      return [];
+    }
+    const label = typeof edge.label === 'string' ? edge.label.trim() : '';
+    return [{ source: edge.source, target: edge.target, ...(label ? { label } : {}) }];
+  });
   return { nodes, edges };
 }
 
@@ -93,7 +99,23 @@ export function placeBoxes(doc: FlowDoc, positions: Record<string, { x: number; 
   };
 }
 
-/** The words of a flow, for search and the card: its box labels in order. */
+/** Names the arrow from `source` to `target`; an empty label removes it. */
+export function labelArrow(doc: FlowDoc, source: string, target: string, label: string): FlowDoc {
+  const text = label.trim();
+  const index = doc.edges.findIndex((edge) => edge.source === source && edge.target === target);
+  const edge = doc.edges[index];
+  if (!edge || (edge.label ?? '') === text) {
+    return doc;
+  }
+  const edges = [...doc.edges];
+  edges[index] = { source, target, ...(text ? { label: text } : {}) };
+  return { ...doc, edges };
+}
+
+/** The words of a flow, for search and the card: its box labels in order, then the arrows' labels. */
 export function flowText(doc: FlowDoc): string {
-  return doc.nodes.map((node) => node.label).join('\n');
+  return [
+    ...doc.nodes.map((node) => node.label),
+    ...doc.edges.flatMap((edge) => (edge.label ? [edge.label] : [])),
+  ].join('\n');
 }

@@ -92,8 +92,8 @@ const seeds: Seed[] = [
       ],
       edges: [
         { source: 'w1', target: 'w2' },
-        { source: 'w2', target: 'w3' },
-        { source: 'w2', target: 'w4' },
+        { source: 'w2', target: 'w3', label: 'sunny' },
+        { source: 'w2', target: 'w4', label: 'rain' },
         { source: 'w3', target: 'w5' },
       ],
     }),

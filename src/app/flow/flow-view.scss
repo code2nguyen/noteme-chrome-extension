@@ -106,7 +106,15 @@
   --c2-flow--border-radius: 12px;
   --c2-flow__node--background-color: var(--c2-theme--color-surface-container-low);
   --c2-flow__connector--background-color: var(--c2-theme--color-primary);
+  // The arrows and their heads in the secondary text colour: the default grey fades into either canvas.
+  --c2-flow__edge--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-flow__edge-label--border: 1px solid var(--ntm-line);
   --c2-flow__editor--background-color: var(--c2-theme--color-surface-container-low);
+  // A box is its label only: the status marker (pending, running…) belongs to pipelines, not to notes.
+  --c2-flow__marker--display: none;
+  --c2-flow__actions--align: flex-end;
 }
 
 .flow__hint {

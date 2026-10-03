@@ -29,6 +29,8 @@
   --c2-theme--color-primary-hover: #b53d35;
   --c2-theme--color-primary-active: #a1352e;
   --c2-theme--color-on-primary: #ffffff;
+  // Text and marks on a saturated fill (the month planner's resize grip): Noteme's fills are its primary.
+  --c2-theme--color-on-fill: var(--c2-theme--color-on-primary);
   --c2-theme--color-surface: #f5f3ef;
   --c2-theme--color-surface-container-low: #fbfaf8;
   --c2-theme--color-surface-container: #ece9e3;

@@ -469,6 +469,9 @@ test.describe('flow', () => {
         .map(([, value]) => JSON.parse(value))
         .find((data) => data.dataType === 'flow'),
     );
+  /** The boxes saved so far: none until the first save lands. */
+  const storedBoxes = async (page: Page): Promise<{ label: string; position?: unknown }[]> =>
+    JSON.parse((await storedFlow(page))?.data ?? '{"nodes":[]}').nodes;
 
   /** Double-click an empty spot of the canvas: low on the stage, at a given fraction across. */
   async function addBoxAt(page: Page, across: number, label: string): Promise<void> {
@@ -507,6 +510,20 @@ test.describe('flow', () => {
     await expect
       .poll(async () => (await storedFlow(page))?.data && JSON.parse((await storedFlow(page)).data).edges.length)
       .toBe(1);
+    // The arrow ends in an arrowhead; a box is its label only, without the pipeline status marker.
+    await expect(page.locator('c2-flow .arrow')).toHaveCount(1);
+    await expect(page.locator('c2-flow .arrow')).toBeVisible();
+    await expect(first.locator('.status')).toBeHidden();
+
+    // Name the arrow: double-click it, type, Enter.
+    await page.locator('c2-flow .edge-hit').dblclick();
+    await expect(page.locator('c2-flow .label-editor--edge')).toBeVisible();
+    await page.keyboard.type('if it is sunny');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('c2-flow .edge-label')).toHaveText('if it is sunny');
+    await expect
+      .poll(async () => JSON.parse((await storedFlow(page)).data).edges.map((edge: { label?: string }) => edge.label))
+      .toEqual(['if it is sunny']);
     await expect(page.locator('.flow-bar__status')).toHaveText(/^Saved/);
     await shot(page, '14-flow');
 
@@ -523,17 +540,18 @@ test.describe('flow', () => {
     await page.reload();
     await expect(box(page, 'Book the night bus')).toBeVisible();
     await expect(page.locator('c2-flow .edge')).toHaveCount(1);
+    await expect(page.locator('c2-flow .edge-label')).toHaveText('if it is sunny');
     expect(
       await page.locator('c2-flow').evaluate((flow) => (flow as unknown as { getLayout(): unknown }).getLayout()),
     ).toEqual(saved);
 
-    // On the board: a card with the title and the boxes; search finds a box and opens the flow.
+    // On the board: a card with the title and the boxes; search finds an arrow's label and opens the flow.
     await page.locator('.flow-bar__back').click();
     const card = page.locator('ntm-flow-card');
     await expect(card.locator('.flow-card__title')).toHaveText('Long weekend in Da Lat?');
     await expect(card.locator('.flow-card__box')).toHaveText(['Weather ok?', 'Book the night bus']);
     await shot(page, '15-board-with-flow');
-    await page.locator('c2-autocomplete input').pressSequentially('night bus');
+    await page.locator('c2-autocomplete input').pressSequentially('sunny');
     await page.locator('c2-autocomplete c2-list-item', { hasText: 'Long weekend' }).click();
     await expect(page).toHaveURL(/#\/flow\//);
   });
@@ -543,7 +561,19 @@ test.describe('flow', () => {
     await page.keyboard.press('f');
     await page.keyboard.press('Enter');
     await addBoxAt(page, 0.3, 'Pack');
-    await addBoxAt(page, 0.7, 'Ask Linh');
+    // The toolbar over the canvas adds a box too, named straight away.
+    await page.locator('c2-flow c2-icon-button[aria-label="Add a box"]').click();
+    await expect(editor(page)).toBeVisible();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('Ask Linh');
+    await page.keyboard.press('Enter');
+    await expect(box(page, 'Ask Linh')).toBeVisible();
+    // Tidy up forgets where the boxes were dropped: the automatic layout places them again.
+    await expect
+      .poll(async () => (await storedBoxes(page)).filter((n) => n.position).map((n) => n.label))
+      .toEqual(['Pack', 'Ask Linh']);
+    await page.locator('c2-flow c2-icon-button[aria-label="Tidy up"]').click();
+    await expect.poll(async () => (await storedBoxes(page)).filter((n) => n.position).length).toBe(0);
     await box(page, 'Pack').dblclick();
     await expect(editor(page)).toBeVisible();
     await page.keyboard.press('ControlOrMeta+a');

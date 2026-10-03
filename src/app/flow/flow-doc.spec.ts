@@ -6,6 +6,7 @@ import {
   disconnect,
   EMPTY_FLOW,
   flowText,
+  labelArrow,
   NEW_BOX_LABEL,
   parseFlow,
   placeBoxes,
@@ -27,7 +28,8 @@ describe('flow document', () => {
           { id: 3 },
         ],
         edges: [
-          { source: 'a', target: 'b' },
+          { source: 'a', target: 'b', label: ' yes ' },
+          { source: 'b', target: 'a', label: 42 },
           { source: 'a', target: 'gone' },
           { source: 'a', target: 'a' },
         ],
@@ -38,7 +40,10 @@ describe('flow document', () => {
         { id: 'a', label: 'A', position: { x: 1, y: 2 } },
         { id: 'b', label: 'B' },
       ],
-      edges: [{ source: 'a', target: 'b' }],
+      edges: [
+        { source: 'a', target: 'b', label: 'yes' },
+        { source: 'b', target: 'a' },
+      ],
     });
     expect(parseFlow(serializeFlow(doc))).toEqual(doc);
   });
@@ -79,7 +84,20 @@ describe('flow document', () => {
     ]);
   });
 
-  it('gives its labels as text', () => {
-    expect(flowText(renameBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'a', 'Pack'))).toBe('Pack');
+  it('labels an arrow, and an empty label removes it', () => {
+    const doc = connect(addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0)), 'a', 'b');
+    const labelled = labelArrow(doc, 'a', 'b', '  yes ');
+    expect(labelled.edges).toEqual([{ source: 'a', target: 'b', label: 'yes' }]);
+    expect(labelArrow(labelled, 'a', 'b', 'yes')).toBe(labelled);
+    expect(labelArrow(labelled, 'a', 'b', ' ').edges).toEqual([{ source: 'a', target: 'b' }]);
+    expect(labelArrow(doc, 'b', 'a', 'no')).toBe(doc);
+    // A box deleted takes its labelled arrows with it.
+    expect(deleteBox(labelled, 'b').edges).toEqual([]);
+  });
+
+  it('gives its labels as text, the arrows after the boxes', () => {
+    const doc = connect(renameBox(addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0)), 'a', 'Pack'), 'a', 'b');
+    expect(flowText(doc)).toBe(`Pack\n${NEW_BOX_LABEL}`);
+    expect(flowText(labelArrow(doc, 'a', 'b', 'if it rains'))).toBe(`Pack\n${NEW_BOX_LABEL}\nif it rains`);
   });
 });
