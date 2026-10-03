@@ -36,6 +36,10 @@ import { DataType } from '../store/models/data-type';
     class: 'note',
     '[class.note--blink]': 'blinking()',
     '(animationend)': 'onAnimationEnd($event)',
+    '(mouseenter)': 'hovered.set(true)',
+    '(mouseleave)': 'hovered.set(false)',
+    '(focusin)': 'focused.set(true)',
+    '(focusout)': 'onFocusOut($event)',
   },
 })
 export class NoteCard {
@@ -52,6 +56,10 @@ export class NoteCard {
 
   readonly value = signal('');
   readonly blinking = signal(false);
+  readonly hovered = signal(false);
+  readonly focused = signal(false);
+  /** The notepad's Paper button and the delete button show on the note you are on, so the board stays calm. */
+  readonly active = computed(() => this.hovered() || this.focused());
 
   private readonly itemId = computed(() => this.item().id);
   readonly paperColor = computed(() => paperColorFor(this.item().colorIndex));
@@ -102,6 +110,13 @@ export class NoteCard {
   highlight(): void {
     this.host.nativeElement.closest('c2-masonry-item')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     this.blinking.set(true);
+  }
+
+  onFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as Node | null;
+    if (!next || !this.host.nativeElement.contains(next)) {
+      this.focused.set(false);
+    }
   }
 
   onAnimationEnd(event: AnimationEvent): void {

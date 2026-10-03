@@ -24,15 +24,18 @@
 
 .settings__row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   min-height: 52px;
   font-size: 15px;
 }
 
 .settings__select {
-  min-width: 220px;
+  // Next to its label when there is room, on a line of its own in a narrow sheet.
+  flex: 0 1 240px;
+  min-width: min(100%, 200px);
 }
 
 .settings__photo {

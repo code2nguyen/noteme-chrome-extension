@@ -3,7 +3,7 @@
     class="note__text"
     aria-label="Note"
     placeholder="New note..."
-    paper-picker
+    [attr.paper-picker]="active() ? '' : null"
     [attr.pad]="pad()"
     [attr.paper]="paper()"
     [attr.paper-color]="paperColor()"
@@ -13,8 +13,7 @@
   ></c2-notepad>
 </div>
 
-<div class="note__toolbar">
-  <span class="note__spacer"></span>
+<div class="note__toolbar" [class.note__toolbar--shown]="active()">
   <c2-menu placement="top-end" aria-label="Delete note" (menu-select)="onDeleteMenu($event)">
     <c2-icon-button slot="trigger" aria-label="Delete note" tooltip="Delete">
       <c2-feather-trash-2></c2-feather-trash-2>

@@ -7,7 +7,7 @@ import { DataService } from '../services/data.service';
 import { editedLabel, pageMarkdownToText } from '../services/utils';
 import { ArtBoardItem } from '../store/models';
 
-const EXCERPT_LENGTH = 220;
+export const PAGE_EXCERPT_LENGTH = 220;
 
 /** A page on the board: its title and first lines. The whole card opens the page. */
 @Component({
@@ -43,7 +43,7 @@ export class PageCard {
       .map((line) => line.trim())
       .filter(Boolean)
       .join(' · ');
-    return text.length > EXCERPT_LENGTH ? text.slice(0, EXCERPT_LENGTH) + '…' : text;
+    return text.length > PAGE_EXCERPT_LENGTH ? text.slice(0, PAGE_EXCERPT_LENGTH) + '…' : text;
   });
   readonly edited = computed(() => {
     const item = this.item();

@@ -27,6 +27,10 @@ export class SearchService {
   private readonly fuseOptions: IFuseOptions<FuseDocument> = {
     keys: ['text'],
     useExtendedSearch: true,
+    // A page is long: a word must match wherever it is, not only near the start (Fuse's default `distance` of 100
+    // characters from `location` 0 misses everything further down). The tighter threshold keeps fuzzy noise out.
+    ignoreLocation: true,
+    threshold: 0.3,
   };
 
   search(query: string): Observable<string[]> {

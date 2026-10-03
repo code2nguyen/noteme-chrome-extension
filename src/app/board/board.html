@@ -84,7 +84,7 @@
       <c2-masonry-item
         [attr.item-id]="item.id"
         [attr.label]="item.extensionId === ExtensionId.Page ? 'Page' : 'Note'"
-        [rows]="item.gridPosition.rows"
+        [rows]="rowsOf(item)"
         [cols]="item.gridPosition.screenColumns.Large"
         [colsLg]="item.gridPosition.screenColumns.Large"
         [colsMd]="item.gridPosition.screenColumns.Medium"

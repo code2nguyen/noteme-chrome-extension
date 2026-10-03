@@ -25,12 +25,12 @@ import { ExtensionId } from '../extension-id';
 import { noteDefaultProperties } from '../note-config';
 import { DataService } from '../services/data.service';
 import { DeviceSyncService, SyncState } from '../services/device-sync.service';
-import { editedLabel, getCurrentDate, getText, uuid } from '../services/utils';
+import { editedLabel, getCurrentDate, getText, pageMarkdownToText, uuid } from '../services/utils';
 import { ArtBoardItemApiActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID } from '../store/models';
 import { selectItemDataEntities } from '../store/reducers';
 import { NoteCard } from './note-card';
-import { PageCard } from './page-card';
+import { PAGE_EXCERPT_LENGTH, PageCard } from './page-card';
 
 interface SearchSuggestion {
   id: string;
@@ -39,6 +39,9 @@ interface SearchSuggestion {
 }
 
 const PREVIEW_LENGTH = 80;
+const MIN_PAGE_ROWS = 3;
+const MAX_PAGE_ROWS = 6;
+const CHARS_PER_ROW = 70;
 
 /** Keys that start something new from anywhere on the board, as shown in the New menu. */
 const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page };
@@ -129,7 +132,7 @@ export class Board {
     version: 1,
     items: this.items().map((item) => ({
       id: item.id,
-      rows: item.gridPosition.rows,
+      rows: this.rowsOf(item),
       columns: {
         xs: item.gridPosition.screenColumns.XSmall,
         sm: item.gridPosition.screenColumns.Small,
@@ -138,6 +141,18 @@ export class Board {
       },
     })),
   }));
+
+  private readonly itemData = toSignal(this.store.select(selectItemDataEntities), { requireSync: true });
+
+  /** Notes keep their stored height; a page card is as tall as its excerpt, so a short page is a short card. */
+  rowsOf(item: ArtBoardItem): number {
+    if (item.extensionId !== ExtensionId.Page) {
+      return item.gridPosition.rows;
+    }
+    const data = this.itemData()[item.id];
+    const length = data ? pageMarkdownToText(data.data ?? '').length : 0;
+    return Math.min(MAX_PAGE_ROWS, MIN_PAGE_ROWS + Math.ceil(Math.min(length, PAGE_EXCERPT_LENGTH) / CHARS_PER_ROW));
+  }
 
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
   readonly matchAll = () => true;

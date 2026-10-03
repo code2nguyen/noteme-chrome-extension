@@ -1,6 +1,7 @@
-// The note fills its masonry tile: editor on top, a toolbar row at the bottom (the tile's move handle sits in the
-// top-right corner, so the actions stay clear of it).
+// The note fills its masonry tile; its delete button sits in the paper's bottom-right corner, shown on the note you
+// are on.
 :host {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -41,16 +42,26 @@
 }
 
 .note__toolbar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 4px 0;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
   --c2-icon-button__icon--width: 16px;
   --c2-icon-button__icon--height: 16px;
   --c2-icon-button__icon--color: var(--ntm-muted);
-  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #f4f4f5);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
 }
 
-.note__spacer {
-  flex: 1;
+// Touch screens have no hover: keep the action in view there.
+.note__toolbar--shown,
+.note__toolbar:focus-within {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .note__toolbar {
+    opacity: 1;
+  }
 }

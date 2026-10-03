@@ -330,3 +330,18 @@ test.describe('home', () => {
     await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-autocomplete');
   });
 });
+
+test('search finds a word far down a long page', async ({ page }) => {
+  await openBoard(page);
+  await newPage(page);
+  await page.keyboard.type('Reading list');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type(
+    'Books people recommended over the summer, with a line on why each one is worth the time it takes to read. ' +
+      'Near the end of the list sits the one about lighthouses.',
+  );
+  await page.waitForTimeout(500);
+  await page.locator('.page-bar__back').click();
+  await page.locator('c2-autocomplete input').pressSequentially('lighthouses');
+  await expect(page.locator('c2-autocomplete c2-list-item', { hasText: 'Reading list' })).toBeVisible();
+});
