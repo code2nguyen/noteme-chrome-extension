@@ -10,6 +10,7 @@
   </c2-tabs>
 
   <c2-autocomplete
+    #searchField
     class="navbar__search"
     aria-label="Search notes"
     [attr.placeholder]="inNoteTab() ? 'Search notes' : 'Search the archive'"
@@ -69,7 +70,10 @@
     }
   </div>
 
-  <c2-icon-button class="navbar__logo" aria-label="Back to the clock" tooltip="Home" (click)="goHome()">
+  <c2-icon-button aria-label="Settings" tooltip="Settings" (click)="openSettings()">
+    <c2-feather-settings></c2-feather-settings>
+  </c2-icon-button>
+  <c2-icon-button class="navbar__logo" aria-label="Home" tooltip="Home" (click)="goHome()">
     <svg viewBox="0 0 148.56 148.56" aria-hidden="true">
       <path fill="#3498db" d="M60,0H36A36,36,0,0,0,0,36V60A12,12,0,0,0,12,72H72V12A12,12,0,0,0,60,0Z" />
       <path fill="#efc94c" d="M112.56,0h-24a12,12,0,0,0-12,12V72h60a12,12,0,0,0,12-12V36A36,36,0,0,0,112.56,0Z" />

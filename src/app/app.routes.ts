@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { Welcome } from './welcome/welcome';
+import { Home } from './home/home';
 
 export const routes: Routes = [
+  { path: '', component: Home, pathMatch: 'full' },
   { path: 'main-board', loadComponent: () => import('./board/board').then((m) => m.Board) },
-  { path: 'welcome', component: Welcome },
-  { path: '', redirectTo: 'welcome', pathMatch: 'full' },
-  { path: '**', redirectTo: 'welcome' },
+  // 3.0 opened on #/welcome; a bookmark or a restored tab still lands on Home.
+  { path: '**', redirectTo: '' },
 ];

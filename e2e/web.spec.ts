@@ -1,5 +1,5 @@
 import { expect, test as base } from '@playwright/test';
-import { card, codeSurface, newNote, notepadSurface, openBoard, shot } from './helpers';
+import { card, codeSurface, mockPhotoSources, newNote, notepadSurface, openBoard, shot } from './helpers';
 
 // The production build served as a web page: storage is localStorage (DevStorageApi). Every test fails on an
 // uncaught error or a console error.
@@ -19,13 +19,22 @@ const test = base.extend<{ errors: string[] }>({
 });
 
 test.beforeEach(async ({ page }) => {
+  await mockPhotoSources(page);
   await page.goto('/');
 });
 
-test('welcome page shows the clock and opens the board', async ({ page }) => {
-  await expect(page.locator('.welcome__time')).toHaveText(/\d{1,2}:\d{2}/);
-  await expect(page.locator('.welcome__date')).toContainText(String(new Date().getFullYear()));
-  await shot(page, '01-welcome');
+test('home shows the clock, the photo of the day and the quote, and opens the board', async ({ page }) => {
+  await expect(page.locator('.home__time')).toHaveText(/^\d{2}:\d{2}$/);
+  await expect(page.locator('.home__date')).toContainText(String(new Date().getFullYear()));
+  await expect(page.locator('.home__photo')).toHaveAttribute(
+    'src',
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lake_Bled.jpg/1920px-Lake_Bled.jpg',
+  );
+  await expect(page.locator('.home__credit a')).toHaveText('Photo by Jane Doe · Wikimedia Commons');
+  await expect(page.locator('.home__quote blockquote')).not.toBeEmpty();
+  // Site shortcuts need chrome.topSites: nothing to show in a plain web page.
+  await expect(page.locator('.home__sites, .home__ask')).toHaveCount(0);
+  await shot(page, '01-home');
   await openBoard(page);
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(page.locator('.board__empty')).toHaveText('No notes yet. Start one with Text or Code.');
@@ -224,4 +233,72 @@ test('phone width: one column, no horizontal scroll', async ({ page }) => {
   expect(first!.x).toBe(second!.x); // stacked
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await shot(page, '13-phone');
+});
+
+test.describe('home', () => {
+  test('falls back to a bundled photo when the photo source is unreachable', async ({ page, errors }) => {
+    await page.unrouteAll();
+    await mockPhotoSources(page, { offline: true });
+    await page.evaluate(() => localStorage.removeItem('noteme-photo'));
+    await page.reload();
+    await expect(page.locator('.home__photo')).toHaveAttribute('src', /^assets\/bg\/bg-\d+-small\.jpg$/);
+    await expect(page.locator('.home__credit')).toHaveText('Photo from Noteme');
+    // Chrome logs the failed request itself; that one is expected.
+    const expected = errors.filter((error) => /ERR_INTERNET_DISCONNECTED/.test(error));
+    expect(expected.length).toBeGreaterThan(0);
+    errors.splice(0, errors.length, ...errors.filter((error) => !expected.includes(error)));
+  });
+
+  test('settings change the clock, the theme and the quote, and survive a reload', async ({ page }) => {
+    await page.locator('ntm-home c2-icon-button[aria-label="Settings"]').click();
+    await expect(page).toHaveURL(/settings=1/);
+    const sheet = page.locator('ntm-settings-panel c2-sheet');
+    await expect(sheet).toHaveJSProperty('open', true);
+    await shot(page, '03-settings');
+
+    await sheet.locator('c2-button', { hasText: '12 h' }).click();
+    await expect(page.locator('.home__time')).toHaveText(/^\d{1,2}:\d{2}\s?(AM|PM)$/i);
+
+    await sheet.locator('c2-button', { hasText: 'Dark' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    await sheet.locator('c2-switch', { hasText: 'Quote of the day' }).click();
+    await expect(page.locator('.home__quote')).toHaveCount(0);
+    await shot(page, '04-settings-dark');
+
+    await page.keyboard.press('Escape');
+    await expect(page).not.toHaveURL(/settings=1/);
+    await shot(page, '05-home-dark');
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('.home__time')).toHaveText(/(AM|PM)$/i);
+    await expect(page.locator('.home__quote')).toHaveCount(0);
+  });
+
+  test('light theme follows the setting', async ({ page }) => {
+    await page.goto('/#/?settings=1');
+    await page.locator('ntm-settings-panel c2-button', { hasText: 'Light' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.keyboard.press('Escape');
+    await shot(page, '06-home-light');
+  });
+
+  test('"+ Note" opens the board with a new note ready for typing', async ({ page }) => {
+    await page.locator('.home__glass-button', { hasText: 'Note' }).click();
+    await expect(page.locator('ntm-note-card')).toHaveCount(1);
+    await expect(page).toHaveURL(/#\/main-board$/);
+    await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-notepad');
+    await page.keyboard.type('From home');
+    await expect(page.locator('ntm-note-card c2-notepad .ProseMirror')).toHaveText('From home');
+  });
+
+  test('Ctrl K and the search pill open the board with the search focused', async ({ page }) => {
+    await page.keyboard.press('Control+k');
+    await expect(page).toHaveURL(/#\/main-board$/);
+    await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-autocomplete');
+    await page.locator('ntm-board c2-icon-button[aria-label="Home"]').click();
+    await page.locator('.home__search').click();
+    await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-autocomplete');
+  });
 });

@@ -1,0 +1,71 @@
+.settings {
+  --c2-sheet--size: 460px;
+  --c2-sheet--background: var(--c2-theme--color-surface-container-low);
+  --c2-sheet--color: var(--c2-theme--color-on-surface);
+}
+
+.settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 20px;
+}
+
+.settings__heading {
+  margin: 0 0 6px;
+  font:
+    600 12px 'RedHatDisplay',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  font-size: 15px;
+}
+
+.settings__select {
+  min-width: 220px;
+}
+
+.settings__photo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 12px;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+
+  img {
+    width: 96px;
+    height: 60px;
+    flex: none;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  span {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.settings__switch {
+  min-height: 52px;
+  font-size: 15px;
+  --c2-switch__container--flex-direction: row-reverse;
+  --c2-switch__container--justify-content: space-between;
+}
+
+.settings__footer {
+  margin: 0;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+}

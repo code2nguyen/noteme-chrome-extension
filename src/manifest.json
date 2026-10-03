@@ -4,6 +4,7 @@
   "description": "Replace new tab page with a personal note application",
   "version": "3.0.0",
   "permissions": ["storage", "unlimitedStorage"],
+  "optional_permissions": ["topSites", "favicon"],
   "icons": {
     "16": "assets/icons/noteme-icon-16.png",
     "32": "assets/icons/noteme-icon-32.png",

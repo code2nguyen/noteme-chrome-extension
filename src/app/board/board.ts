@@ -1,20 +1,24 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
+  ElementRef,
   inject,
   signal,
+  viewChild,
   viewChildren,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/autocomplete';
 import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/masonry';
 import type { TabsSelectionChangeEventDetail } from '@c2n/tabs';
 import { combineLatest, of } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
 
 import { ExtensionId } from '../extension-id';
 import { DEFAULT_EXTENSION_ID, noteDefaultProperties } from '../note-config';
@@ -24,6 +28,7 @@ import { getCurrentDate, getText, uuid } from '../services/utils';
 import { Dictionary } from '@ngrx/entity';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { selectItemDataEntities } from '../store/reducers';
+import { ArtBoardItemApiActions } from '../store/actions';
 import { NoteCard } from './note-card';
 
 type BoardTab = 'notes' | 'archive';
@@ -53,6 +58,7 @@ export class Board {
   private readonly dataService = inject(DataService);
   private readonly deviceSync = inject(DeviceSyncService);
   private readonly cards = viewChildren(NoteCard);
+  private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
 
   readonly ExtensionId = ExtensionId;
   readonly SyncState = SyncState;
@@ -153,6 +159,27 @@ export class Board {
   constructor() {
     toObservable(this.searchQuery).subscribe((query) => this.dataService.searchArtBoardItem(query));
     this.deviceSync.sync();
+    this.handleHomeActions();
+  }
+
+  /** Home links here with `?new=note` (write a note) or `?search=1` (search); each runs once, then leaves the URL. */
+  private handleHomeActions(): void {
+    const params = inject(ActivatedRoute).snapshot.queryParamMap;
+    if (params.has('new')) {
+      // The new note goes before the first one, so wait until the board has read its notes.
+      inject(Actions)
+        .pipe(
+          ofType(ArtBoardItemApiActions.loadArtBoardItemsSuccess, ArtBoardItemApiActions.loadArtBoardItemsFailure),
+          take(1),
+        )
+        .subscribe(() => setTimeout(() => this.newNote()));
+    }
+    if (params.has('search')) {
+      afterNextRender(() => this.searchField()?.nativeElement.focus());
+    }
+    if (params.has('new') || params.has('search')) {
+      this.router.navigate([], { queryParams: {}, replaceUrl: true });
+    }
   }
 
   changeTab(event: Event): void {
@@ -232,6 +259,10 @@ export class Board {
 
   goHome(): void {
     this.router.navigate(['/']);
+  }
+
+  openSettings(): void {
+    this.router.navigate(['/'], { queryParams: { settings: 1 } });
   }
 
   private findSearchResult(id: string): ArtBoardItem | undefined {

@@ -1,0 +1,104 @@
+<c2-sheet class="settings" side="right" [open]="open()" (close)="closed.emit()">
+  <span slot="title">Settings</span>
+
+  <section class="settings__group" aria-labelledby="settings-look">
+    <h2 id="settings-look" class="settings__heading">Look</h2>
+    <div class="settings__row">
+      <span id="settings-theme">Theme</span>
+      <c2-button-group
+        selection="single"
+        appearance="segmented"
+        size="s"
+        aria-labelledby="settings-theme"
+        [value]="settings().theme"
+        (change)="choose('theme', $event)"
+      >
+        <c2-button value="light">Light</c2-button>
+        <c2-button value="dark">Dark</c2-button>
+        <c2-button value="auto">Auto</c2-button>
+      </c2-button-group>
+    </div>
+  </section>
+
+  <section class="settings__group" aria-labelledby="settings-home">
+    <h2 id="settings-home" class="settings__heading">Home</h2>
+    <div class="settings__row">
+      <span id="settings-clock">Clock</span>
+      <c2-button-group
+        selection="single"
+        appearance="segmented"
+        size="s"
+        aria-labelledby="settings-clock"
+        [value]="settings().clock"
+        (change)="choose('clock', $event)"
+      >
+        <c2-button value="24h">24 h</c2-button>
+        <c2-button value="12h">12 h</c2-button>
+      </c2-button-group>
+    </div>
+    <div class="settings__row">
+      <span id="settings-date">Date</span>
+      <c2-select
+        class="settings__select"
+        aria-labelledby="settings-date"
+        [value]="[settings().dateFormat]"
+        (change)="select('dateFormat', $event)"
+      >
+        @for (option of dateFormats; track option.format) {
+          <c2-list-item [value]="option.format">{{ option.label }}</c2-list-item>
+        }
+      </c2-select>
+    </div>
+    <div class="settings__row">
+      <span id="settings-photo">Photo of the day</span>
+      <c2-select
+        class="settings__select"
+        aria-labelledby="settings-photo"
+        [value]="[settings().photoSource]"
+        (change)="select('photoSource', $event)"
+      >
+        <c2-list-item value="wikimedia">Wikimedia picture of the day</c2-list-item>
+        <c2-list-item value="nasa">NASA astronomy picture</c2-list-item>
+        <c2-list-item value="noteme">Noteme photos</c2-list-item>
+        <c2-list-item value="none">No photo</c2-list-item>
+      </c2-select>
+    </div>
+    @if (photo(); as current) {
+      <div class="settings__photo">
+        <img [src]="current.url" alt="Today's photo" />
+        <span>{{ current.credit }}</span>
+        <c2-button (click)="changePhoto.emit()">Change now</c2-button>
+      </div>
+    }
+    <c2-switch class="settings__switch" [checked]="settings().quote" (change)="toggle('quote', $event)">
+      Quote of the day
+      <span slot="description">A short quote under the clock, a new one each day</span>
+    </c2-switch>
+    @if (shortcutsSupported) {
+      <c2-switch class="settings__switch" [checked]="settings().shortcuts" (change)="toggleShortcuts($event)">
+        Site shortcuts
+        <span slot="description">Your most visited sites, one click away</span>
+      </c2-switch>
+    }
+  </section>
+
+  <section class="settings__group" aria-labelledby="settings-plan">
+    <h2 id="settings-plan" class="settings__heading">Plan</h2>
+    <div class="settings__row">
+      <span id="settings-week">Week starts on</span>
+      <c2-button-group
+        selection="single"
+        appearance="segmented"
+        size="s"
+        aria-labelledby="settings-week"
+        [value]="settings().weekStart"
+        (change)="choose('weekStart', $event)"
+      >
+        <c2-button value="monday">Monday</c2-button>
+        <c2-button value="sunday">Sunday</c2-button>
+      </c2-button-group>
+    </div>
+  </section>
+
+  <p slot="footer" class="settings__footer">Changes save by themselves.</p>
+</c2-sheet>

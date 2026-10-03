@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, codeSurface, newNote, notepadSurface, openBoard, shot } from './helpers';
+import { card, codeSurface, mockPhotoSources, newNote, notepadSurface, openBoard, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -14,6 +14,7 @@ const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> 
       viewport: { width: 1440, height: 900 },
       args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`],
     });
+    await mockPhotoSources(context);
     await use(context);
     await context.close();
   },
@@ -147,8 +148,11 @@ const legacyData = {
 
 test('the extension replaces the new tab page', async ({ newTab }) => {
   const page = await newTab();
-  expect(page.url()).toMatch(/^chrome-extension:\/\/[a-p]{32}\/index\.html#\/welcome$/);
-  await expect(page.locator('.welcome__time')).toBeVisible();
+  expect(page.url()).toMatch(/^chrome-extension:\/\/[a-p]{32}\/index\.html#\/$/);
+  await expect(page.locator('.home__time')).toBeVisible();
+  await expect(page.locator('.home__photo')).toHaveAttribute('src', /1920px-Lake_Bled/);
+  // Shortcuts are an optional permission: Home offers them instead of asking Chrome on its own.
+  await expect(page.locator('.home__ask c2-button', { hasText: 'Show my most visited sites' })).toBeVisible();
   // Chrome's extension-page stylesheet shrinks body text to 75%; the app sets it back.
   expect(await page.evaluate(() => getComputedStyle(document.body).fontSize)).toBe('16px');
   await shot(page, '10-extension-new-tab');
@@ -255,4 +259,19 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
 
   await newNote(first, 'Code');
   await expect(second.locator('ntm-note-card')).toHaveCount(2);
+});
+
+test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
+  const page = await newTab();
+  await page.goto(page.url() + '?settings=1');
+  await page.locator('ntm-settings-panel c2-button', { hasText: 'Sunday' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        chrome.storage.sync
+          .get('NOTEME_SETTINGS')
+          .then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}')).weekStart),
+      ),
+    )
+    .toBe('sunday');
 });
