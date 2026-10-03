@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { changelogMarkdown, classify, releaseMarkdown, releases, releaseText, releaseVersion } from './changelog';
+import {
+  changelogMarkdown,
+  classify,
+  releaseMarkdown,
+  releases,
+  releaseText,
+  releaseVersion,
+  storeText,
+} from './changelog';
 
 const commits = (...subjects: string[]) => subjects.map((subject) => ({ subject }));
 
@@ -78,6 +86,20 @@ describe('changelog', () => {
       "What's new in 2.0.0\n\nBreaking changes:\n• New storage\n\nNew:\n• Home: photos\n\nFixes:\n• Crash\n",
     );
     expect(releaseText({ version: '2.0.1', changes: [] })).toContain('Small fixes and improvements.');
+  });
+
+  it('gives the store the release and the ones before it, not the whole history', () => {
+    // 1.0.0 … 1.0.11, each with one fix, and 1.0.12 with nothing to say.
+    const history = Array.from({ length: 12 }, (_, n) => [`fix: bug ${n}`, `1.0.${n}`]).flat();
+    const all = releases(commits(...history, 'chore: deps', '1.0.12'));
+    const versions = (text: string) => [...text.matchAll(/What's new in (\S+)/g)].map((match) => match[1]);
+
+    expect(versions(storeText(all, '1.0.11'))).toEqual(Array.from({ length: 10 }, (_, n) => `1.0.${11 - n}`));
+    expect(versions(storeText(all, '1.0.11', 3))).toEqual(['1.0.11', '1.0.10', '1.0.9']);
+    // An older release starts from itself; a newer one with nothing to say still heads the text.
+    expect(versions(storeText(all, '1.0.1'))).toEqual(['1.0.1', '1.0.0']);
+    expect(versions(storeText(all, '1.0.12', 2))).toEqual(['1.0.12', '1.0.11']);
+    expect(() => storeText(all, '9.9.9')).toThrow('No release 9.9.9');
   });
 
   it('leaves releases with nothing to say out of the file', () => {

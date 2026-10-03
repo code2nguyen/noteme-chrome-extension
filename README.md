@@ -67,9 +67,10 @@ the commit body words the entry differently, and `Changelog: skip` leaves the co
 
 - `npm version` files the commits since the last release under the new version and commits `CHANGELOG.md` with it;
   CI fails when the file is stale.
-- The release workflow puts that version's notes in the GitHub release, and a plain-text copy in the run's summary,
-  ready to paste into the store listing (the store's API takes no release notes).
-- Preview the next release: `npm run changelog -- --store 3.1.0` (or `--notes` for markdown).
+- The release workflow puts that version's notes in the GitHub release. For the store listing it writes, in the run's
+  summary, a plain-text "What's new" of that release and the ones before it, the last 10 releases at most rather than
+  the whole history, ready to paste (the store's API takes no release notes).
+- Preview the next release: `npm run changelog -- --store 3.1.0` (`--releases 5` for fewer; `--notes` for markdown).
 
 ### One-time setup
 

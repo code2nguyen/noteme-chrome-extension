@@ -55,8 +55,8 @@ jobs:
           name: extension
           path: release
 
-      # The store's API takes no release notes: the plain-text version goes in the run summary, ready to paste into
-      # the listing's description in the developer dashboard.
+      # The store's API takes no release notes: a plain-text "What's new" of the last 10 releases (not the whole
+      # history) goes in the run summary, ready to paste into the listing's description in the developer dashboard.
       - name: Release notes
         run: |
           version=$(node -p "require('./package.json').version")
@@ -66,7 +66,7 @@ jobs:
             echo
             cat release/notes.md
             echo
-            echo "### For the Chrome Web Store description"
+            echo "### For the Chrome Web Store description (last 10 releases)"
             echo
             echo '```text'
             node scripts/changelog.ts --store "$version"

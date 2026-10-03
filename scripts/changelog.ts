@@ -6,7 +6,9 @@
 //                                                   one in package.json); the npm `version` script runs this
 //   node scripts/changelog.ts --check            -> fails when CHANGELOG.md is not up to date
 //   node scripts/changelog.ts --notes <version>  -> that release's notes, as markdown (the GitHub release)
-//   node scripts/changelog.ts --store <version>  -> the same as plain text, for the Chrome Web Store listing
+//   node scripts/changelog.ts --store <version> [--releases 10]
+//                                                -> plain text for the Chrome Web Store listing: that release and the
+//                                                   ones before it, 10 at most, not the whole history
 //
 // Kept: Conventional Commits of type feat, fix and perf, and breaking changes (`feat!:`). Dropped: chore, ci, test,
 // docs, refactor, style, build, revert, and the free-form subjects from before 3.0. The subject is the line users read
@@ -122,6 +124,25 @@ export function releaseText(release: Release): string {
   return `${lines.join('\n')}\n`;
 }
 
+/** How many releases the store listing shows. */
+export const STORE_RELEASES = 10;
+
+/**
+ * The store listing's text: `version` and the releases before it, newest first, at most `count` of them. Releases
+ * with nothing to say are skipped and do not count.
+ */
+export function storeText(all: Release[], version: string, count = STORE_RELEASES): string {
+  const start = all.findIndex((release) => release.version === version);
+  if (start === -1) {
+    throw new Error(`No release ${version} in the history`);
+  }
+  const shown = all
+    .slice(start)
+    .filter((release, index) => index === 0 || release.changes.length > 0)
+    .slice(0, count);
+  return shown.map(releaseText).join('\n');
+}
+
 export function changelogMarkdown(all: Release[]): string {
   const body = all
     // A release without one user-facing change says nothing in the file.
@@ -165,11 +186,20 @@ function main(args: string[]): void {
   if (notes !== undefined) {
     const version = notes || packageVersion();
     // The release being made may not have its version commit yet (a dry run): file the pending commits under it.
-    const release = releases(gitCommits(root), version).find((candidate) => candidate.version === version);
+    const all = releases(gitCommits(root), version);
+    if (args.includes('--store')) {
+      const count = Number(option('--releases') || STORE_RELEASES);
+      if (!Number.isInteger(count) || count < 1) {
+        throw new Error('--releases takes a whole number of releases, 1 or more');
+      }
+      process.stdout.write(storeText(all, version, count));
+      return;
+    }
+    const release = all.find((candidate) => candidate.version === version);
     if (!release) {
       throw new Error(`No release ${version} in the history`);
     }
-    process.stdout.write(args.includes('--store') ? releaseText(release) : releaseMarkdown(release));
+    process.stdout.write(releaseMarkdown(release));
     return;
   }
 
