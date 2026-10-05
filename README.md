@@ -56,7 +56,13 @@ submission for review, and a GitHub release with the zip attached. **Run workflo
 hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run. A
 run started by hand sends package.json's version to the store but creates no GitHub release (that step needs a tag
 ref). Release through the tag to get both; pushing the tag after a run by hand would upload the same version again, so
-create that GitHub release by hand instead (`gh release create v<version> --notes-file …`).
+create that GitHub release by hand instead, with the zip attached as the tag run does:
+
+```sh
+npm run build && npm run package                   # dist/noteme-<version>.zip
+node scripts/changelog.ts --notes <version> > notes.md
+gh release create v<version> dist/noteme-<version>.zip --title "Noteme <version>" --notes-file notes.md
+```
 
 `npm run package` zips with the system's `zip` command, which Linux, macOS and the workflow's Ubuntu runners have; on
 Windows, run it from WSL or install a `zip` on the PATH.
