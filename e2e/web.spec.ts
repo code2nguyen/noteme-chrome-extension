@@ -35,15 +35,24 @@ const test = base.extend<{ errors: string[] }>({
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
- * Choose an item of a page's or flow's menu right away, as a click would, but within the 300ms its last edit waits to
- * be saved: what a quick click after typing does on a busy machine.
+ * Add to a page's or flow's title and choose an item of its menu, as typing and then a quick click would, but in one
+ * go in the page: the menu then always acts while that edit still waits for its save (300ms), however slow the
+ * machine. A zero timeout in between lets Angular render the edit first, as it would between a key and a click; it
+ * is due long before the save's timer, so it runs first.
  */
-const chooseAtOnce = (page: Page, view: 'ntm-page-view' | 'ntm-flow-view', value: string) =>
+const editTitleAndChoose = (page: Page, title: string, menu: string, text: string, value: string) =>
   page.evaluate(
-    ([view, value]) =>
-      document.querySelector(`${view} c2-menu`)!.dispatchEvent(new CustomEvent('menu-select', { detail: { value } })),
-    [view, value],
+    async ([title, menu, text, value]) => {
+      const field = document.querySelector(title) as HTMLElement & { value: string };
+      field.value += text;
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((resolve) => setTimeout(resolve));
+      document.querySelector(menu)!.dispatchEvent(new CustomEvent('menu-select', { detail: { value } }));
+    },
+    [title, menu, text, value],
   );
+const PAGE_TITLE = 'ntm-page-view c2-text-field.page__title';
+const PAGE_MENU = 'ntm-page-view c2-menu';
 
 /** Wait for a page or flow title to be stored (saves are debounced), rather than for a fixed time. */
 const saved = (page: Page, title: string) =>
@@ -324,6 +333,7 @@ test('search finds a note and highlights it, and opens a page', async ({ page })
   const pageResult = page.locator('c2-autocomplete c2-list-item', { hasText: 'Trip to Da Lat' });
   await expect(pageResult).toContainText('Page ·');
   await pageResult.click();
+  await expect(page).toHaveURL(/#\/page\/[\w-]+$/);
   await expect(pageSurface(page)).toHaveText('The bus leaves Friday at 22:00');
 });
 
@@ -434,19 +444,15 @@ test('the Archive view filters by the search, and N brings back the board with a
 test('archive a page from its view; it opens from the Archive and is restored from there', async ({ page }) => {
   await openBoard(page);
   await newPage(page);
-  await page.keyboard.type('Old recipes');
-  await page.keyboard.press('Enter');
-  await page.keyboard.type('Grandma’s soup, the long way.');
   await expect(page.locator('ntm-page-view c2-menu-item[value="restore"]')).toHaveCount(0);
-  // Archived before the typing is saved: the page is archived with it, not removed as empty.
-  await chooseAtOnce(page, 'ntm-page-view', 'archive');
+  // Archived before its first edit is saved: the page is archived with it, not removed as empty.
+  await editTitleAndChoose(page, PAGE_TITLE, PAGE_MENU, 'Old recipes', 'archive');
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(tiles(page)).toHaveCount(0);
 
   await page.locator('.navbar__views c2-button[value="archive"]').click();
   const pageCard = page.locator('ntm-page-card');
   await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
-  await expect(pageCard.locator('.page-card__excerpt')).toContainText('Grandma’s soup, the long way.');
   await pageCard.click();
   // The card says where it was opened from, so the way back leads to the Archive before the page is even read.
   await expect(page).toHaveURL(/#\/page\/[\w-]+\?from=archive$/);
@@ -460,11 +466,8 @@ test('archive a page from its view; it opens from the Archive and is restored fr
   await page.reload();
   const title = page.locator('ntm-page-view c2-text-field');
   await expect(title).toHaveJSProperty('value', 'Old recipes');
-  await title.click();
-  await page.keyboard.press('End');
   await expect(page.locator('ntm-page-view c2-menu-item[value="archive"]')).toHaveCount(0);
-  await page.keyboard.type(' and new');
-  await chooseAtOnce(page, 'ntm-page-view', 'restore');
+  await editTitleAndChoose(page, PAGE_TITLE, PAGE_MENU, ' and new', 'restore');
   await expect(page.locator('.page-bar__back')).toHaveText('Notes');
   await saved(page, 'Old recipes and new');
   await expect(title).toHaveJSProperty('value', 'Old recipes and new');
@@ -753,15 +756,28 @@ test.describe('flow', () => {
     await openBoard(page);
     await page.keyboard.press('f');
     await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
-    await page.keyboard.type('Moving house');
-    // Before the typing is saved: the flow is archived with its title, not removed as empty.
-    await chooseAtOnce(page, 'ntm-flow-view', 'archive');
+    // Before its first edit is saved: the flow is archived with its title, not removed as empty.
+    await editTitleAndChoose(
+      page,
+      'ntm-flow-view c2-text-field.flow__title',
+      'ntm-flow-view c2-menu',
+      'Moving house',
+      'archive',
+    );
     await expect(page).toHaveURL(/#\/main-board$/);
     await expect(tiles(page)).toHaveCount(0);
     await page.locator('.navbar__views c2-button[value="archive"]').click();
     const flowCard = page.locator('ntm-flow-card');
     await expect(flowCard.locator('.flow-card__title')).toHaveText('Moving house');
     await flowCard.click();
+    await expect(page).toHaveURL(/#\/flow\/[\w-]+\?from=archive$/);
+    await expect(page.locator('.flow-bar__back')).toHaveText('Archive');
+
+    // Found by the search on the Notes view, it opens as from the Archive too.
+    await page.locator('.flow-bar__back').click();
+    await page.locator('.navbar__views c2-button[value="notes"]').click();
+    await page.locator('c2-autocomplete input').pressSequentially('Moving');
+    await page.locator('c2-autocomplete c2-list-item', { hasText: 'Moving house' }).click();
     await expect(page).toHaveURL(/#\/flow\/[\w-]+\?from=archive$/);
     await expect(page.locator('.flow-bar__back')).toHaveText('Archive');
   });

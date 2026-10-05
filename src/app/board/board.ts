@@ -269,7 +269,8 @@ export class Board {
     }
     const route = FULL_SCREEN[found.extensionId];
     if (route) {
-      this.router.navigate([route, id]);
+      // An archived one says so before it is read, as when it is opened from the Archive.
+      this.router.navigate([route, id], found.boardId ? {} : { queryParams: { from: 'archive' } });
       return;
     }
     // An archived note comes back to the board, first.
