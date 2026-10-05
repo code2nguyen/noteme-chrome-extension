@@ -53,7 +53,13 @@ git push --follow-tags
 The tag runs `.github/workflows/release.yml`: the same checks, then `npm run package` (`dist/noteme-<version>.zip`,
 refused if package.json, the manifest and the tag disagree), an upload through the Chrome Web Store API v2, a
 submission for review, and a GitHub release with the zip attached. **Run workflow** in the Actions tab starts it by
-hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run.
+hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run. A
+run started by hand sends package.json's version to the store but creates no GitHub release (that step needs a tag
+ref). Release through the tag to get both; pushing the tag after a run by hand would upload the same version again, so
+create that GitHub release by hand instead (`gh release create v<version> --notes-file …`).
+
+`npm run package` zips with the system's `zip` command, which Linux, macOS and the workflow's Ubuntu runners have; on
+Windows, run it from WSL or install a `zip` on the PATH.
 
 The first 3.x release keeps the version package.json already has: `npm version 3.0.0 --allow-same-version`.
 
@@ -70,7 +76,9 @@ the commit body words the entry differently, and `Changelog: skip` leaves the co
 - The release workflow puts that version's notes in the GitHub release. For the store listing it writes, in the run's
   summary, a plain-text "What's new" of that release and the ones before it, the last 10 releases at most rather than
   the whole history, ready to paste (the store's API takes no release notes).
-- Preview the next release: `npm run changelog -- --store 3.1.0` (`--releases 5` for fewer; `--notes` for markdown).
+- Preview a release's notes, by version: `npm run changelog -- --notes 3.1.0` (markdown, as in the GitHub release)
+  or `npm run changelog -- --store 3.1.0` (the store text; `--releases 5` for fewer). An unreleased version gets the
+  commits since the last release.
 
 ### One-time setup
 

@@ -5,7 +5,7 @@
 //   node scripts/package-extension.ts --sync     -> copies package.json's version into src/manifest.json
 //                                                   (the npm `version` script, so `npm version patch` bumps both)
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -33,6 +33,12 @@ if (process.argv.includes('--sync')) {
   const tag = process.env['GITHUB_REF_TYPE'] === 'tag' ? process.env['GITHUB_REF_NAME'] : undefined;
   if (tag && tag !== `v${version}`) {
     throw new Error(`Tag ${tag} does not match version ${version}`);
+  }
+  // The host's zip, which Linux and macOS have (GitHub's ubuntu runners included) and Windows does not.
+  if (spawnSync('zip', ['-v'], { stdio: 'ignore' }).error) {
+    throw new Error(
+      'Packaging needs the zip command on the PATH (Linux, macOS, or WSL / Git Bash with zip on Windows)',
+    );
   }
   const zip = resolve(root, `dist/noteme-${version}.zip`);
   rmSync(zip, { force: true });
