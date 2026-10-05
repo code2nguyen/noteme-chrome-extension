@@ -50,63 +50,88 @@ const EMPTY: State = { current: null, shownAt: 0, queue: [], themes: '', seen: [
 @Injectable({ providedIn: 'root' })
 export class BackgroundService {
   private objectUrl: string | null = null;
+  /** The refill running or queued last, and the themes it fills for. */
   private refilling: Promise<void> | null = null;
+  private refillingKey = '';
+  /** Choosing the photo reads the state, awaits the cache, then writes: one choice at a time, in call order. */
+  private choosing: Promise<unknown> = Promise.resolve();
 
   /** The photo to show now: the current one while it is not due, else the next one ready in the queue. */
-  async current(options: BackgroundOptions, now = Date.now()): Promise<ShownPhoto | null> {
-    if (options.themes.length === 0) {
-      return null;
-    }
-    const state = this.readState();
-    const key = themesKey(options.themes);
-    const themesChanged = state.themes !== key;
-    if (themesChanged) {
-      state.queue = [];
-      state.themes = key;
-    }
-    const keep =
-      state.current &&
-      !themesChanged &&
-      options.themes.includes(state.current.theme) &&
-      !isDue(state.shownAt, options.change, now);
-    if (keep) {
-      const shown = await this.show(state.current!);
-      if (shown) {
-        this.writeState(state);
-        return shown;
+  current(options: BackgroundOptions, now = Date.now()): Promise<ShownPhoto | null> {
+    return this.serialize(async () => {
+      if (options.themes.length === 0) {
+        return null;
       }
-    }
-    return this.advance(state, options, now);
+      const state = this.readState();
+      // New themes bring a new photo at once, even when the one on screen is among them.
+      const keep =
+        state.current &&
+        state.themes === themesKey(options.themes) &&
+        options.themes.includes(state.current.theme) &&
+        !isDue(state.shownAt, options.change, now);
+      if (keep) {
+        const shown = await this.show(state.current!);
+        if (shown) {
+          return shown;
+        }
+      }
+      return this.advance(options, now);
+    });
   }
 
   /** "Change now": the next photo in the queue. */
-  async next(options: BackgroundOptions, now = Date.now()): Promise<ShownPhoto | null> {
-    if (options.themes.length === 0) {
-      return null;
-    }
-    return this.advance(this.readState(), options, now);
+  next(options: BackgroundOptions, now = Date.now()): Promise<ShownPhoto | null> {
+    return this.serialize(async () => (options.themes.length === 0 ? null : this.advance(options, now)));
   }
 
-  /** Download photos until the queue is full again; safe to call often (one refill runs at a time). */
+  /**
+   * Download photos until the queue is full again; safe to call often (one refill runs at a time). A refill for other
+   * themes waits for the running one, which stops early once the themes changed, so the new queue is filled too.
+   */
   refill(options: BackgroundOptions): Promise<void> {
-    this.refilling ??= this.fill(options).finally(() => (this.refilling = null));
-    return this.refilling;
+    const key = themesKey(options.themes);
+    if (this.refilling && this.refillingKey === key) {
+      return this.refilling;
+    }
+    const task: Promise<void> = (this.refilling ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(() => this.fill(options))
+      .finally(() => {
+        if (this.refilling === task) {
+          this.refilling = null;
+        }
+      });
+    this.refilling = task;
+    this.refillingKey = key;
+    return task;
   }
 
-  private async advance(state: State, options: BackgroundOptions, now: number): Promise<ShownPhoto | null> {
-    while (state.queue.length > 0) {
-      const candidate = state.queue.shift()!;
-      if (!options.themes.includes(candidate.theme)) {
-        continue;
+  private serialize<T>(task: () => Promise<T>): Promise<T> {
+    const run = this.choosing.then(task, task);
+    this.choosing = run.catch(() => undefined);
+    return run;
+  }
+
+  private async advance(options: BackgroundOptions, now: number): Promise<ShownPhoto | null> {
+    for (;;) {
+      const candidate = this.readState(options).queue[0];
+      if (!candidate) {
+        break;
       }
       const shown = await this.show(candidate);
+      // Read again after the cache: another tab may have shown or queued photos meanwhile.
+      const state = this.readState(options);
+      state.queue = state.queue.filter((photo) => photo.id !== candidate.id);
       if (shown) {
         this.setCurrent(state, candidate, now);
         return shown;
       }
+      this.writeState(state);
     }
     // Nothing ready yet (first run, offline, new themes): a bundled photo, never the same as the one on screen.
+    const state = this.readState(options);
     const photo = this.pickBundled(state);
+    markSeen(state, photo.id);
     this.setCurrent(state, photo, now);
     return this.show(photo);
   }
@@ -135,8 +160,11 @@ export class BackgroundService {
       if (latest.themes !== key) {
         break;
       }
+      if (latest.current?.id === photo.id || latest.queue.some((queued) => queued.id === photo.id)) {
+        continue;
+      }
       latest.queue.push(photo);
-      latest.seen = [...latest.seen.filter((id) => id !== photo.id), photo.id].slice(-SEEN_MAX);
+      markSeen(latest, photo.id);
       this.writeState(latest);
     }
     await this.prune();
@@ -208,29 +236,48 @@ export class BackgroundService {
     }
   }
 
+  /** A bundled photo that is neither on screen nor queued, preferring the one not shown for the longest time. */
   private pickBundled(state: State): BackgroundPhoto {
     const taken = new Set([state.current?.id, ...state.queue.map((photo) => photo.id)]);
     const start = Math.floor(Math.random() * BUNDLED_PHOTO_COUNT);
+    // -1 for a photo never seen, so those come first.
+    const lastSeen = (photo: BackgroundPhoto) => state.seen.indexOf(photo.id);
+    let best: BackgroundPhoto | null = null;
     for (let i = 0; i < BUNDLED_PHOTO_COUNT; i++) {
       const photo = bundledPhoto(start + i);
-      if (!taken.has(photo.id)) {
-        return photo;
+      if (!taken.has(photo.id) && (!best || lastSeen(photo) < lastSeen(best))) {
+        best = photo;
       }
     }
-    return bundledPhoto(start);
+    return best ?? bundledPhoto(start);
   }
 
-  private readState(): State {
+  /**
+   * The stored state; with options, made to match their themes: a queue filled for other themes is dropped, so the
+   * refill for these starts at once.
+   */
+  private readState(options?: BackgroundOptions): State {
+    let state: State;
     try {
-      return { ...EMPTY, ...JSON.parse(localStorage.getItem(STATE_KEY) ?? 'null') };
+      state = { ...EMPTY, ...JSON.parse(localStorage.getItem(STATE_KEY) ?? 'null') };
     } catch {
-      return { ...EMPTY };
+      state = { ...EMPTY };
     }
+    const key = options && themesKey(options.themes);
+    if (key !== undefined && state.themes !== key) {
+      state.queue = [];
+      state.themes = key;
+    }
+    return state;
   }
 
   private writeState(state: State): void {
     localStorage.setItem(STATE_KEY, JSON.stringify(state));
   }
+}
+
+function markSeen(state: State, id: string): void {
+  state.seen = [...state.seen.filter((seen) => seen !== id), id].slice(-SEEN_MAX);
 }
 
 function themesKey(themes: readonly PhotoTheme[]): string {
