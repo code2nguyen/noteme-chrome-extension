@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, formatDate, formatTime, parseSettings } from './settings';
+import { startupSettingsAction } from './settings.service';
 
 describe('parseSettings', () => {
   it('gives the defaults for nothing stored', () => {
@@ -41,5 +42,17 @@ describe('formatDate', () => {
     expect(formatDate(day, 'long', 'en-GB')).toBe('Saturday, 3 October 2026');
     expect(formatDate(day, 'short', 'en-GB')).toBe('Sat 3 Oct');
     expect(formatDate(day, 'numeric', 'en-GB')).toBe('03/10/2026');
+  });
+});
+
+describe('startupSettingsAction', () => {
+  it('adopts the synced settings, if any', () => {
+    expect(startupSettingsAction('{"theme":"dark"}', false)).toBe('adopt');
+    expect(startupSettingsAction(undefined, false)).toBe('keep');
+  });
+
+  it('pushes the mirror when its last change never reached the sync', () => {
+    expect(startupSettingsAction('{"theme":"dark"}', true)).toBe('push');
+    expect(startupSettingsAction(undefined, true)).toBe('push');
   });
 });
