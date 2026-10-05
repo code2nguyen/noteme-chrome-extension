@@ -61,6 +61,8 @@ export class Home {
   );
   readonly sites = signal<Site[]>([]);
   readonly shortcuts = signal<ShortcutsState>('hidden');
+  /** Bumped by every refresh, so a slower earlier one cannot publish over the latest. */
+  private shortcutsRun = 0;
 
   readonly settingsOpen = toSignal(inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,
@@ -84,15 +86,24 @@ export class Home {
   }
 
   async refreshShortcuts(wanted = this.settings().shortcuts): Promise<void> {
+    const run = ++this.shortcutsRun;
     if (!wanted || !this.topSites.supported) {
       this.shortcuts.set('hidden');
       return;
     }
-    if (!(await this.topSites.granted())) {
+    const granted = await this.topSites.granted();
+    if (run !== this.shortcutsRun) {
+      return;
+    }
+    if (!granted) {
       this.shortcuts.set('ask');
       return;
     }
-    this.sites.set(await this.topSites.sites());
+    const sites = await this.topSites.sites();
+    if (run !== this.shortcutsRun) {
+      return;
+    }
+    this.sites.set(sites);
     this.shortcuts.set('shown');
   }
 
@@ -108,24 +119,39 @@ export class Home {
 
   async changePhoto(): Promise<void> {
     const options = this.photoOptions();
-    this.photo.set(await this.backgrounds.next(options));
-    void this.backgrounds.refill(options);
+    await this.present(this.backgrounds.next(options), options, (task) => void task());
   }
 
-  private async showPhoto(options: BackgroundOptions): Promise<void> {
-    const shown = await this.backgrounds.current(options);
+  private showPhoto(options: BackgroundOptions): Promise<void> {
+    return this.present(this.backgrounds.current(options), options, afterIdle);
+  }
+
+  /**
+   * Show a photo chosen for `options`, unless the settings changed while it loaded (the call for the new ones shows
+   * the right photo), then top the queue up when `schedule` says.
+   */
+  private async present(
+    photo: Promise<ShownPhoto | null>,
+    options: BackgroundOptions,
+    schedule: (task: () => Promise<void>) => void,
+  ): Promise<void> {
+    const shown = await photo;
+    const current = () => this.photoOptions() === options;
+    if (!current()) {
+      return;
+    }
     this.photo.set(shown);
     if (options.themes.length === 0) {
       return;
     }
-    afterIdle(async () => {
+    schedule(async () => {
       await this.backgrounds.refill(options);
-      // Nothing was downloaded yet for these themes (first run, or themes just changed): a bundled photo stood in.
-      // Move on to the first real one as soon as it is ready.
+      // Nothing was downloaded yet for these themes (first run, themes just changed, or "Change now" ran the queue
+      // dry): a bundled photo stood in. Move on to the first real one as soon as it is ready.
       const standIn = shown?.bundled && !options.themes.includes('noteme');
-      if (standIn && this.photo() === shown && this.photoOptions() === options) {
+      if (standIn && this.photo() === shown && current()) {
         const next = await this.backgrounds.next(options);
-        if (next && !next.bundled) {
+        if (next && !next.bundled && this.photo() === shown && current()) {
           this.photo.set(next);
         }
         // That one came out of the queue: top it up again.
