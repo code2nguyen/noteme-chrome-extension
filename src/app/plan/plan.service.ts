@@ -10,7 +10,8 @@ export const PLAN_KEY = 'PLAN__ITEMS';
 /**
  * The plans, as a signal. Each change writes the whole list (a few KB at most); another tab's change arrives through
  * chrome.storage's change event and replaces the list. A change made before the stored list has been read shows at
- * once and is replayed onto that list when it arrives, so the first write never drops what is stored.
+ * once and is replayed onto that list when it arrives, so the first write never drops what is stored; if that read
+ * failed, the next change reads again.
  */
 @Injectable({ providedIn: 'root' })
 export class PlanService {
@@ -20,19 +21,10 @@ export class PlanService {
   readonly items = this.state.asReadonly();
   readonly loaded = signal(false);
   private pending: ((items: PlanItem[]) => PlanItem[])[] = [];
+  private reading = false;
 
   constructor() {
-    this.storage.get(PLAN_KEY).subscribe((raw) => {
-      const changes = this.pending;
-      this.pending = [];
-      this.loaded.set(true);
-      const items = changes.reduce((list, change) => change(list), parsePlans(raw));
-      if (changes.length > 0) {
-        this.write(items);
-      } else {
-        this.state.set(items);
-      }
-    });
+    this.read();
     if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
       const listener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
         const change = changes[PLAN_KEY];
@@ -73,7 +65,35 @@ export class PlanService {
     } else {
       this.pending.push(apply);
       this.state.set(apply(this.state()));
+      // The first read failed: try again, so the change is not held forever. Writing without the stored list would
+      // replace the plans already saved.
+      this.read();
     }
+  }
+
+  /** Read the stored plans, then replay onto them the changes made meanwhile. */
+  private read(): void {
+    if (this.reading || this.loaded()) {
+      return;
+    }
+    this.reading = true;
+    this.storage.get(PLAN_KEY).subscribe({
+      next: (raw) => {
+        const changes = this.pending;
+        this.pending = [];
+        this.loaded.set(true);
+        const items = changes.reduce((list, change) => change(list), parsePlans(raw));
+        if (changes.length > 0) {
+          this.write(items);
+        } else {
+          this.state.set(items);
+        }
+      },
+      error: (error: unknown) => {
+        this.reading = false;
+        console.error('Could not read the plans', error);
+      },
+    });
   }
 
   private write(items: PlanItem[]): void {
