@@ -47,7 +47,7 @@ const ORDER: Section[] = ['breaking', 'new', 'fixes', 'performance'];
 
 /** The version a release commit makes, or null. */
 export function releaseVersion(subject: string): string | null {
-  return /^(?:(?:release|prepare|finish)\s+|v)?(\d+\.\d+\.\d+(?:-[\w.]+)?)$/i.exec(subject.trim())?.[1] ?? null;
+  return /^(?:(?:release|prepare|finish)\s+|v)?(\d+\.\d+\.\d+(?:-[\w.-]+)?)$/i.exec(subject.trim())?.[1] ?? null;
 }
 
 const sentence = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
@@ -71,7 +71,10 @@ export function classify({ subject, body = '' }: Commit): Change | null {
   return { section, text: scope ? `${sentence(scope)}: ${text}` : sentence(text) };
 }
 
-/** Groups commits, oldest first, into releases, newest first. Commits after the last release go under `next`. */
+/**
+ * Groups commits, oldest first, into releases, newest first. Commits after the last release go under `next`, unless
+ * `next` is already released: they are then unreleased and belong to no version yet.
+ */
 export function releases(commits: Commit[], next?: string): Release[] {
   const result: Release[] = [];
   let pending: Change[] = [];
@@ -87,7 +90,7 @@ export function releases(commits: Commit[], next?: string): Release[] {
       }
     }
   }
-  if (next && pending.length > 0) {
+  if (next && pending.length > 0 && !result.some((release) => release.version === next)) {
     result.unshift({ version: next, changes: pending });
   }
   return result;
@@ -185,7 +188,8 @@ function main(args: string[]): void {
   const notes = option('--notes') ?? option('--store');
   if (notes !== undefined) {
     const version = notes || packageVersion();
-    // The release being made may not have its version commit yet (a dry run): file the pending commits under it.
+    // The release being made may not have its version commit yet (a dry run): file the pending commits under it. Once
+    // it has one, releases() leaves newer commits out rather than make a second entry for the version.
     const all = releases(gitCommits(root), version);
     if (args.includes('--store')) {
       const count = Number(option('--releases') || STORE_RELEASES);

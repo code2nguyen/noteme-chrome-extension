@@ -17,6 +17,8 @@ describe('changelog', () => {
     expect(releaseVersion('v3.1.0')).toBe('3.1.0');
     expect(releaseVersion('release 2.1.1')).toBe('2.1.1');
     expect(releaseVersion('prepare 2.1.0')).toBe('2.1.0');
+    expect(releaseVersion('v3.0.0-rc.1')).toBe('3.0.0-rc.1');
+    expect(releaseVersion('v3.0.0-rc-1')).toBe('3.0.0-rc-1');
     expect(releaseVersion('fix: crash on 3.0.1')).toBeNull();
     expect(releaseVersion('update angular 11')).toBeNull();
   });
@@ -75,6 +77,9 @@ describe('changelog', () => {
     expect(withNext[0]).toEqual({ version: '1.1.0', changes: [{ section: 'new', text: 'Plan: weeks' }] });
     // Nothing pending: no empty release.
     expect(releases(commits('feat: a', '1.0.0'), '1.0.1').map((release) => release.version)).toEqual(['1.0.0']);
+    // A next version that is already released keeps its own notes; the newer commits are not filed under it again.
+    expect(releases(history, '1.0.1')).toEqual(releases(history));
+    expect(storeText(releases(history, '1.0.1'), '1.0.1').match(/What's new in 1\.0\.1/g)).toHaveLength(1);
   });
 
   it('writes markdown for the file and plain text for the store', () => {
