@@ -53,6 +53,8 @@ export class FlowCard {
   );
   readonly edited = computed(() => {
     const item = this.item();
-    return editedLabel(this.data()?.modifiedDate ?? item.dataModifiedDate ?? item.modifiedDate);
+    const data = this.data();
+    // An empty placeholder (no data stored yet) carries the time it was made, not when the note was edited.
+    return editedLabel((data?.empty ? undefined : data?.modifiedDate) ?? item.dataModifiedDate ?? item.modifiedDate);
   });
 }
