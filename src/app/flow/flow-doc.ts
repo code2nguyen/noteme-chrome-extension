@@ -65,8 +65,13 @@ export function addBox(doc: FlowDoc, id: string, position: { x: number; y: numbe
   return { nodes: [...doc.nodes, { id, label: NEW_BOX_LABEL, position }], edges };
 }
 
+/** Renames a box; the same document when nothing changes, so committing an unchanged label saves nothing. */
 export function renameBox(doc: FlowDoc, id: string, label: string): FlowDoc {
-  return { ...doc, nodes: doc.nodes.map((node) => (node.id === id ? { ...node, label } : node)) };
+  const box = doc.nodes.find((node) => node.id === id);
+  if (!box || box.label === label) {
+    return doc;
+  }
+  return { ...doc, nodes: doc.nodes.map((node) => (node === box ? { ...node, label } : node)) };
 }
 
 export function deleteBox(doc: FlowDoc, id: string): FlowDoc {

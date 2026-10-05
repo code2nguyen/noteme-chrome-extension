@@ -60,6 +60,8 @@ describe('flow document', () => {
     let doc = addBox(addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0)), 'c', at(2, 0));
     doc = renameBox(doc, 'a', 'Weather ok?');
     expect(doc.nodes[0].label).toBe('Weather ok?');
+    expect(renameBox(doc, 'a', 'Weather ok?')).toBe(doc);
+    expect(renameBox(doc, 'missing', 'Rain')).toBe(doc);
     doc = connect(connect(connect(doc, 'a', 'b'), 'a', 'b'), 'b', 'c');
     expect(doc.edges).toEqual([
       { source: 'a', target: 'b' },
