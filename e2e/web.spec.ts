@@ -576,19 +576,29 @@ test.describe('home', () => {
   });
 
   test('photos are downloaded ahead, so a new tab shows one without the network', async ({ page, errors }) => {
-    // The first tab fills the queue in the background.
-    await expect.poll(async () => (await backgroundState(page)).queue.length, { timeout: 15_000 }).toBe(3);
+    // The first tab fills the queue in the background, swaps its bundled stand-in for the first photo downloaded,
+    // and tops the queue up again: wait for all of it, or that last download is counted against the offline tab.
+    await expect
+      .poll(
+        async () => {
+          const state = await backgroundState(page);
+          return state.queue.length === 3 && state.current?.bundled !== true;
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true);
 
     // A new tab, offline: the photo still comes from the cache.
     const requests = await mockPhotoSources(page, { offline: true });
     await nextDay(page);
-    const queued = (await backgroundState(page)).queue[0].id;
+    const queued = (await backgroundState(page)).queue[0];
     await page.reload();
     await expect(page.locator('.home__photo')).toHaveAttribute('src', /^blob:/);
     await expect(page.locator('.home__photo')).toHaveClass(/home__photo--shown/);
     await expect(page.locator('.home__credit a')).toHaveText(new RegExp(commonsCredits.map(escape).join('|')));
-    expect((await backgroundState(page)).current?.id).toBe(queued);
-    expect(requests.images).toBe(0); // shown from the cache, before any download was even tried
+    expect((await backgroundState(page)).current?.id).toBe(queued.id);
+    // Shown from the cache: never requested. The refill, once the page is idle, may already be trying other photos.
+    expect(requests.imageUrls).not.toContain(queued.url);
     await page.waitForTimeout(1500); // the refill runs (and fails, offline) after the page is up
     errors.splice(0, errors.length, ...errors.filter((error) => !/ERR_INTERNET_DISCONNECTED/.test(error)));
   });

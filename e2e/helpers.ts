@@ -53,6 +53,8 @@ export const commonsCredits = [
 export interface PhotoRequests {
   searches: string[];
   images: number;
+  /** The image URLs requested, in order. */
+  imageUrls: string[];
 }
 
 // Commons answers both with CORS headers, which the app's fetch needs.
@@ -67,13 +69,14 @@ export async function mockPhotoSources(
   target: Page | BrowserContext,
   { offline = false } = {},
 ): Promise<PhotoRequests> {
-  const requests: PhotoRequests = { searches: [], images: 0 };
+  const requests: PhotoRequests = { searches: [], images: 0, imageUrls: [] };
   await target.route(/^https:\/\/commons\.wikimedia\.org\/w\/api\.php/, (route) => {
     requests.searches.push(new URL(route.request().url()).searchParams.get('gsrsearch') ?? '');
     return offline ? route.abort('internetdisconnected') : route.fulfill({ json: commonsSearch, headers: cors });
   });
   await target.route(/^https:\/\/upload\.wikimedia\.org\//, (route) => {
     requests.images += 1;
+    requests.imageUrls.push(route.request().url());
     return offline
       ? route.abort('internetdisconnected')
       : route.fulfill({ body: photo, contentType: 'image/jpeg', headers: cors });
@@ -82,9 +85,10 @@ export async function mockPhotoSources(
 }
 
 /** The background state the app keeps: the photo on screen and the ones downloaded ahead. */
-export function backgroundState(
-  page: Page,
-): Promise<{ current: { id: string; theme: string } | null; queue: { id: string; theme: string }[] }> {
+export function backgroundState(page: Page): Promise<{
+  current: { id: string; theme: string; url: string; bundled?: boolean } | null;
+  queue: { id: string; theme: string; url: string }[];
+}> {
   return page.evaluate(() => JSON.parse(localStorage.getItem('noteme-background') ?? '{"current":null,"queue":[]}'));
 }
 
