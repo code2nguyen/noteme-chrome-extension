@@ -17,8 +17,9 @@ export interface PlanItem {
   end?: string;
 }
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
-const TIME = /^([01]?\d|2[0-4]):([0-5]\d)$/;
+/** The end of the day: a plan may end at 24:00, never start there. */
+const END_OF_DAY = 24 * 60;
+const HOUR = 60;
 
 export function isoDay(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -36,13 +37,28 @@ export function addDays(day: string, days: number): string {
   return isoDay(date);
 }
 
+/** A real calendar day as `YYYY-MM-DD`: the shape alone would let 2026-02-31 roll over into March. */
+export function isValidDay(text: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) && isoDay(fromIsoDay(text)) === text;
+}
+
+/** A two-digit `HH:MM` from 00:00 to 23:59, or 24:00 for a plan that lasts to the end of the day. */
+export function isValidTime(text: string): boolean {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(text) || text === '24:00';
+}
+
+/** Whole days from `from` to `to`, rounded so a daylight-saving change in between does not cost a day. */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((fromIsoDay(to).getTime() - fromIsoDay(from).getTime()) / 86_400_000);
+}
+
 export function minutesOf(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
 }
 
 export function timeOf(minutes: number): string {
-  const clamped = Math.max(0, Math.min(24 * 60, minutes));
+  const clamped = Math.max(0, Math.min(END_OF_DAY, minutes));
   return `${String(Math.floor(clamped / 60)).padStart(2, '0')}:${String(clamped % 60).padStart(2, '0')}`;
 }
 
@@ -55,12 +71,12 @@ export function parsePlans(raw: unknown): PlanItem[] {
   const list = Array.isArray((raw as { items?: unknown } | null)?.items) ? (raw as { items: unknown[] }).items : [];
   return list.flatMap((value): PlanItem[] => {
     const item = value as Partial<PlanItem> | null;
-    if (!item || typeof item.id !== 'string' || typeof item.title !== 'string' || !DAY.test(item.date ?? '')) {
+    if (!item || typeof item.id !== 'string' || typeof item.title !== 'string' || !isValidDay(item.date ?? '')) {
       return [];
     }
     const timed =
-      TIME.test(item.start ?? '') && TIME.test(item.end ?? '') && minutesOf(item.end!) > minutesOf(item.start!);
-    const endDate = DAY.test(item.endDate ?? '') && item.endDate! > item.date! ? item.endDate : undefined;
+      isValidTime(item.start ?? '') && isValidTime(item.end ?? '') && minutesOf(item.end!) > minutesOf(item.start!);
+    const endDate = isValidDay(item.endDate ?? '') && item.endDate! > item.date! ? item.endDate : undefined;
     return [
       {
         id: item.id,
@@ -114,18 +130,36 @@ export function parseQuickAdd(text: string): { title: string; start?: string; en
   if (!match) {
     return { title: text.trim() };
   }
-  const start = Number(match[1]) * 60 + Number(match[2]);
-  const end = match[3] ? Number(match[3]) * 60 + Number(match[4]) : start + 60;
-  const title = (text.slice(0, match.index) + text.slice(match.index + match[0].length)).replace(/\s+/g, ' ').trim();
-  if (Number(match[2]) > 59 || start >= 24 * 60 || end <= start) {
+  // One-digit hours ("7:30") are padded before they are checked, so they pass the same rule as stored times.
+  const start = `${match[1].padStart(2, '0')}:${match[2]}`;
+  const end = match[3] ? `${match[3].padStart(2, '0')}:${match[4]}` : undefined;
+  const times = planTimes(start, end);
+  // An impossible time, or a range that does not end after it starts (by 24:00), is part of the title instead.
+  if (!times.start || (end !== undefined && times.end !== end)) {
     return { title: text.trim() };
   }
-  return { title, start: timeOf(start), end: timeOf(Math.min(end, 24 * 60)) };
+  const title = (text.slice(0, match.index) + text.slice(match.index + match[0].length)).replace(/\s+/g, ' ').trim();
+  return { title, ...times };
+}
+
+/**
+ * The times a plan is saved with, from the dialog's two fields (an empty field is ""): no start means all day, even
+ * if an end is set; a start without an end, or with an end that is not after it, lasts an hour (to 24:00 at most).
+ */
+export function planTimes(start: string | undefined, end: string | undefined): { start?: string; end?: string } {
+  if (!start || !isValidTime(start) || minutesOf(start) >= END_OF_DAY) {
+    return {};
+  }
+  const lasts = !!end && isValidTime(end) && minutesOf(end) > minutesOf(start);
+  return { start, end: lasts ? end : timeOf(minutesOf(start) + HOUR) };
 }
 
 /** Apply a week-planner move or resize. */
 export function moveInWeek(item: PlanItem, changes: { date?: string; start: string; end: string }): PlanItem {
-  return { ...item, date: changes.date ?? item.date, start: changes.start, end: changes.end };
+  const date = changes.date ?? item.date;
+  // A plan over several days moves as a whole, or its last day would end up before its first.
+  const endDate = item.endDate && addDays(item.endDate, daysBetween(item.date, date));
+  return { ...item, date, ...(endDate ? { endDate } : {}), start: changes.start, end: changes.end };
 }
 
 /** Apply a month-planner move or resize: new first and last day. */

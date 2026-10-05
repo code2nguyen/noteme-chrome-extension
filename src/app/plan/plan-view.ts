@@ -45,12 +45,13 @@ import {
   fromIsoDay,
   isoDay,
   isTimed,
-  minutesOf,
+  isValidDay,
   moveInMonth,
   moveInWeek,
   parseQuickAdd,
   PlanItem,
   plansOn,
+  planTimes,
   toMonthEvents,
   toWeekEvents,
   weekStartOf,
@@ -93,7 +94,7 @@ export class PlanViewComponent {
   readonly view = computed<PlanView>(() => (this.params().get('view') === 'month' ? 'month' : 'week'));
   readonly date = computed(() => {
     const day = this.params().get('date') ?? '';
-    return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : isoDay(new Date());
+    return isValidDay(day) ? day : isoDay(new Date());
   });
   readonly month = computed(() => this.date().slice(0, 7));
   readonly weekStart = computed(() => this.settings().weekStart);
@@ -230,12 +231,11 @@ export class PlanViewComponent {
     if (!draft || !draft.title.trim()) {
       return;
     }
-    const timed = draft.start && draft.end && minutesOf(draft.end) > minutesOf(draft.start);
     const item: Omit<PlanItem, 'id'> = {
       title: draft.title.trim(),
       date: draft.date,
       ...(draft.endDate ? { endDate: draft.endDate } : {}),
-      ...(timed ? { start: draft.start, end: draft.end } : {}),
+      ...planTimes(draft.start, draft.end),
     };
     if (draft.id) {
       this.plans.update({ ...item, id: draft.id });
