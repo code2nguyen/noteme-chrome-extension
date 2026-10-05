@@ -10,10 +10,12 @@ import { getTime } from './utils';
 type StoredRecord = Record<string, unknown> & { sourceId?: string; trust?: string; modifiedDate?: string };
 
 /**
- * The keys whose last write chrome.storage.sync refused, kept in chrome.storage.local so a restart still retries them.
- * Only the keys: a retry sends the record as it is then, so a note deleted or replaced meanwhile is never sent stale.
+ * Marks a key whose last write chrome.storage.sync refused: `SYNC__RETRY__<key>` in chrome.storage.local, so a restart
+ * still retries it. One marker per key, set or removed whole, so tabs open at once never overwrite each other's (a
+ * shared list read and written back by two tabs would lose one). Only the key: a retry sends the record as it is then,
+ * so a note deleted or replaced meanwhile is never sent stale.
  */
-export const SYNC_RETRY_KEY = 'SYNC__RETRY_KEYS';
+export const SYNC_RETRY_PREFIX = 'SYNC__RETRY__';
 
 @Injectable()
 export class ChromeStorageApi implements StorageApi {
@@ -24,8 +26,6 @@ export class ChromeStorageApi implements StorageApi {
   remoteDataQueue: Array<{ key: string | string[]; value?: string; action: 'remove' | 'set' }> = [];
   writingToRemoteSubscription: Subscription | null = null;
   remoteSync$ = new BehaviorSubject(false);
-  /** Reads and writes of SYNC_RETRY_KEY, one at a time, so a key refused during a retry is not lost. */
-  private retryKeysChange: Promise<unknown> = Promise.resolve();
 
   constructor() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -76,7 +76,7 @@ export class ChromeStorageApi implements StorageApi {
             (error: unknown) => {
               console.error(error);
               if (item.action === 'set') {
-                void this.markRefused(item.key as string);
+                void this.localStorageApi.set({ [SYNC_RETRY_PREFIX + item.key]: '1' });
               }
             },
           );
@@ -106,11 +106,7 @@ export class ChromeStorageApi implements StorageApi {
       this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
       this.syncToRemote();
       // Queued again: no retry needed (and its refusal, if it comes, marks it again).
-      void this.changeRefusedKeys(async (keys) => {
-        if (keys.includes(key)) {
-          await this.localStorageApi.set({ [SYNC_RETRY_KEY]: JSON.stringify(keys.filter((other) => other !== key)) });
-        }
-      });
+      void this.localStorageApi.remove(SYNC_RETRY_PREFIX + key);
     }
   }
 
@@ -146,20 +142,18 @@ export class ChromeStorageApi implements StorageApi {
   }
 
   /**
-   * Send again the records chrome.storage.sync refused (SYNC_RETRY_KEY), as they are now in chrome.storage.local: one
-   * deleted since is dropped, and so is one last written from the remote (its copy there is the newer one). Runs at
-   * start, after every write chrome.storage.sync takes, and when something is removed from it.
+   * Send again the records chrome.storage.sync refused (SYNC_RETRY_PREFIX), as they are now in chrome.storage.local:
+   * one deleted since is dropped, and so is one last written from the remote (its copy there is the newer one). Runs at
+   * start, after every write chrome.storage.sync takes, and when something is removed from it. Two tabs retrying at
+   * once may both send a record, which writes the same value twice.
    */
   async retryRefusedWrites(): Promise<void> {
-    const keys = await this.changeRefusedKeys(async (keys) => {
-      if (keys.length > 0) {
-        await this.localStorageApi.remove(SYNC_RETRY_KEY);
-      }
-      return keys;
-    });
-    if (keys.length === 0) {
+    const markers = (await this.localKeys()).filter((key) => key.startsWith(SYNC_RETRY_PREFIX));
+    if (markers.length === 0) {
       return;
     }
+    await this.localStorageApi.remove(markers);
+    const keys = markers.map((marker) => marker.slice(SYNC_RETRY_PREFIX.length));
     const stored: Record<string, unknown> = await this.localStorageApi.get(keys);
     const before = this.remoteDataQueue.length;
     for (const key of keys) {
@@ -183,21 +177,10 @@ export class ChromeStorageApi implements StorageApi {
     }
   }
 
-  private markRefused(key: string): Promise<unknown> {
-    return this.changeRefusedKeys(async (keys) => {
-      if (!keys.includes(key)) {
-        await this.localStorageApi.set({ [SYNC_RETRY_KEY]: JSON.stringify([...keys, key]) });
-      }
-    });
-  }
-
-  private changeRefusedKeys<T>(change: (keys: string[]) => Promise<T>): Promise<T> {
-    const run = this.retryKeysChange.then(async () => {
-      const keys = await this.read(this.localStorageApi, SYNC_RETRY_KEY);
-      return change(Array.isArray(keys) ? keys.filter((key): key is string => typeof key === 'string') : []);
-    });
-    this.retryKeysChange = run.catch(() => undefined);
-    return run;
+  /** Every key in chrome.storage.local, without reading the values where Chrome can (getKeys, Chrome 130). */
+  private async localKeys(): Promise<string[]> {
+    const area = this.localStorageApi as chrome.storage.StorageArea & { getKeys?: () => Promise<string[]> };
+    return area.getKeys ? area.getKeys() : Object.keys(await area.get(null));
   }
 
   private queued(key: string): boolean {

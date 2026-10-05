@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ExtensionId } from '../extension-id';
 import { DataType } from '../store/models/data-type';
-import { ChromeStorageApi, SYNC_RETRY_KEY } from './chrome-storage.api';
+import { ChromeStorageApi, SYNC_RETRY_PREFIX } from './chrome-storage.api';
 import { INSTANCE_ID } from './instance-id';
 import { StoreSyncService } from './store-sync.service';
 
@@ -96,7 +96,7 @@ describe('ChromeStorageApi', () => {
       await setup.api.setPromise('ITEM_DATA__a', note('Hi'));
       await vi.advanceTimersByTimeAsync(700);
       expect(setup.sync.records).toEqual({});
-      expect(JSON.parse(setup.local.records[SYNC_RETRY_KEY])).toEqual(['ITEM_DATA__a']);
+      expect(setup.local.records[SYNC_RETRY_PREFIX + 'ITEM_DATA__a']).toBe('1');
       return setup;
     }
 
@@ -106,7 +106,7 @@ describe('ChromeStorageApi', () => {
       await vi.advanceTimersByTimeAsync(700 * 3);
       expect(sync.remove).toHaveBeenCalledWith(['ART_BOARD_ITEM__old']);
       expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
-      expect(local.records[SYNC_RETRY_KEY]).toBeUndefined();
+      expect(local.records[SYNC_RETRY_PREFIX + 'ITEM_DATA__a']).toBeUndefined();
     });
 
     it('is sent again when another device removes something from chrome.storage.sync', async () => {
@@ -146,6 +146,41 @@ describe('ChromeStorageApi', () => {
       await vi.advanceTimersByTimeAsync(700 * 3);
       expect(sync.set).toHaveBeenCalledTimes(1);
       expect(sync.records['ITEM_DATA__a']).toBeUndefined();
+    });
+
+    it('is marked by each tab on its own, so two tabs refused at once both retry', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const first = setUp({}, { drain: true });
+      // A second tab over the same chrome.storage areas.
+      const second = runInInjectionContext(
+        Injector.create({
+          providers: [
+            { provide: INSTANCE_ID, useValue: 'other-tab' },
+            { provide: StoreSyncService, useValue: { sync: () => undefined } },
+          ],
+        }),
+        () => new ChromeStorageApi(),
+      );
+      first.sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+      first.sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+      // Reads take a moment, as they do across processes: the two tabs' refusals overlap.
+      const read = first.local.get;
+      first.local.get = async (keys) => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return read(keys);
+      };
+      await Promise.all([
+        first.api.setPromise('ITEM_DATA__a', note('From the first tab')),
+        second.setPromise('ITEM_DATA__b', { ...note('From the second tab'), id: 'b' }),
+      ]);
+      await vi.advanceTimersByTimeAsync(700);
+      expect(first.local.records[SYNC_RETRY_PREFIX + 'ITEM_DATA__a']).toBe('1');
+      expect(first.local.records[SYNC_RETRY_PREFIX + 'ITEM_DATA__b']).toBe('1');
+      // Both come back after a restart.
+      const restarted = setUp(first.local.records, { drain: true });
+      await vi.advanceTimersByTimeAsync(700 * 3);
+      expect(Object.keys(restarted.sync.records).sort()).toEqual(['ITEM_DATA__a', 'ITEM_DATA__b']);
     });
 
     it('is replaced by a newer write of the note', async () => {
