@@ -18,7 +18,10 @@ import { ItemDataEffects } from './item-data.effects';
 function setUp() {
   const actions = new Subject<Action>();
   const writes: string[] = [];
-  const storage = { set: (key: string) => (writes.push(key), of(undefined)) } as unknown as StorageApi;
+  const values: unknown[] = [];
+  const storage = {
+    set: (key: string, value: unknown) => (writes.push(key), values.push(value), of(undefined)),
+  } as unknown as StorageApi;
   const injector = Injector.create({
     providers: [
       { provide: Actions, useValue: new Actions(actions) },
@@ -28,7 +31,7 @@ function setUp() {
     ],
   });
   const effects = runInInjectionContext(injector, () => new ItemDataEffects());
-  return { actions, writes, effects };
+  return { actions, writes, values, effects };
 }
 
 describe('ItemDataEffects', () => {
@@ -54,6 +57,18 @@ describe('ItemDataEffects', () => {
       actions.next(ArtBoardItemActions.deleteArtBoardItem({ boardId: 'board', artBoardItemId: 'a' }));
       flush();
       expect(writes).toEqual(['ITEM_DATA__b']);
+    });
+  });
+
+  it('merges the edits made to one item within the window into one write', () => {
+    new TestScheduler((actual, expected) => expect(actual).toEqual(expected)).run(({ flush }) => {
+      const { actions, writes, values, effects } = setUp();
+      effects.updateItemData$.subscribe();
+      actions.next(ItemDataActions.updateItemData({ itemData: { id: 'a', data: 'Body', dataType: DataType.PAGE } }));
+      actions.next(ItemDataActions.updateItemData({ itemData: { id: 'a', properties: { title: 'Title' } } }));
+      flush();
+      expect(writes).toEqual(['ITEM_DATA__a']);
+      expect(values[0]).toMatchObject({ id: 'a', data: 'Body', properties: { title: 'Title' } });
     });
   });
 
