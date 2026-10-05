@@ -21,7 +21,7 @@
     <p>This page no longer exists.</p>
     <a routerLink="/main-board">Back to your notes</a>
   </main>
-} @else {
+} @else if (found()) {
   <main class="page">
     <c2-page-editor
       #editor
@@ -47,4 +47,7 @@
       </div>
     </c2-page-editor>
   </main>
+} @else {
+  <!-- Nothing to edit until the stored page is read: text typed into an empty editor would be overwritten by it. -->
+  <main class="page" aria-busy="true"></main>
 }

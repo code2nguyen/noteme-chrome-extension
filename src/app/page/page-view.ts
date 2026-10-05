@@ -7,10 +7,11 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  Injector,
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 // The c2 elements of a page, loaded with its route: the editor (ProseMirror, shiki on demand) never loads on Home.
@@ -24,7 +25,7 @@ import '@c2n/feather-icons/icons/trash-2.js';
 import type { PageEditor } from '@c2n/components/page-editor';
 import type { TextField } from '@c2n/components/text-field';
 import { combineLatest, interval } from 'rxjs';
-import { filter, map, startWith, switchMap, take } from 'rxjs/operators';
+import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
@@ -52,6 +53,7 @@ export class PageView {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly instanceId = inject(INSTANCE_ID);
+  private readonly injector = inject(Injector);
   private readonly titleField = viewChild<ElementRef<TextField>>('titleField');
   private readonly editor = viewChild<ElementRef<PageEditor>>('editor');
 
@@ -61,13 +63,23 @@ export class PageView {
   readonly saving = signal(false);
   readonly found = signal<boolean | null>(null);
   private readonly modified = signal<string | undefined>(undefined);
+  private readonly createdDate = signal<string | undefined>(undefined);
   private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
   private item: ArtBoardItem | undefined;
+  /** The page shown: Angular reuses this view from one page to the next. */
+  private shownId: string | undefined;
+  /** Whether the shown page's stored title and text are bound: until then the view holds nothing of it. */
+  private bound = false;
+  /** Opened by "New page": the only page removed when it is left before its data was read. */
+  private isNew = false;
   private deleted = false;
   private savingTimer?: ReturnType<typeof setTimeout>;
 
   readonly status = computed(() => {
     this.tick();
+    if (this.found() === null) {
+      return 'Loading…';
+    }
     if (this.saving()) {
       return 'Saving…';
     }
@@ -75,41 +87,44 @@ export class PageView {
     return modified ? `Saved · edited ${editedLabel(modified)}` : 'Saved';
   });
   readonly created = computed(() => {
-    const modified = this.modified();
-    return modified ? new Date(modified).toLocaleDateString(undefined, { day: 'numeric', month: 'long' }) : '';
+    const created = this.createdDate();
+    return created ? new Date(created).toLocaleDateString(undefined, { day: 'numeric', month: 'long' }) : '';
   });
 
   constructor() {
     this.dataService.loadAllArtBoardItems();
-    let firstBinding = true;
     combineLatest([
       this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
       this.dataService.isAllArtBoardItemsLoaded().pipe(filter(Boolean), take(1)),
     ])
       .pipe(
+        tap(([id]) => this.show(id)),
         switchMap(([id]) =>
           combineLatest([this.dataService.getArtBoardItemById(id), this.dataService.getItemData(id)]),
         ),
+        takeUntilDestroyed(),
       )
       .subscribe(([item, data]) => {
         this.item = item;
         this.found.set(!!item);
         this.modified.set(data.empty ? undefined : data.modifiedDate);
+        this.createdDate.set(data.empty ? undefined : data.createdDate);
         // Bind the stored page once, then only changes made elsewhere: re-applying our own saves would move the caret.
-        if (firstBinding || data.sourceId !== this.instanceId) {
-          firstBinding = false;
+        if (!this.bound || data.sourceId !== this.instanceId) {
+          const first = !this.bound;
+          this.bound = true;
           this.title.set(data.properties?.title ?? '');
           this.value.set(data.data ?? '');
+          // The title field renders with the page, once it is found.
+          if (first && item && this.isNew) {
+            afterNextRender(() => void this.focusTitle(), { injector: this.injector });
+          }
         }
       });
 
-    if (this.route.snapshot.queryParamMap.has('new')) {
-      afterNextRender(() => void this.focusTitle());
-    }
-
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.savingTimer);
-      this.removeIfEmpty();
+      this.leave();
     });
   }
 
@@ -164,10 +179,39 @@ export class PageView {
     field.focus();
   }
 
-  private removeIfEmpty(): void {
-    const item = this.item;
-    if (item && !this.deleted && !this.title().trim() && !pageMarkdownToText(this.value()).trim()) {
-      this.dataService.removeArtBoardItem(item);
+  private show(id: string): void {
+    if (id === this.shownId) {
+      return;
     }
+    this.leave();
+    this.shownId = id;
+    this.isNew = this.route.snapshot.queryParamMap.has('new');
+    this.found.set(null);
+  }
+
+  /** A page left with no title and no text is removed, as when the view is destroyed. */
+  private leave(): void {
+    const id = this.shownId;
+    if (id && !this.deleted) {
+      if (this.bound) {
+        const item = this.item;
+        if (item && !this.title().trim() && !pageMarkdownToText(this.value()).trim()) {
+          this.dataService.removeArtBoardItem(item);
+        }
+      } else if (this.isNew) {
+        // Left before its data was read: decide on what is stored, which is empty unless another tab wrote to it.
+        combineLatest([this.dataService.getArtBoardItemById(id), this.dataService.getItemData(id)])
+          .pipe(take(1))
+          .subscribe(([item, data]) => {
+            if (item && !data.properties?.title?.trim() && !pageMarkdownToText(data.data ?? '').trim()) {
+              this.dataService.removeArtBoardItem(item);
+            }
+          });
+      }
+    }
+    this.shownId = undefined;
+    this.item = undefined;
+    this.bound = false;
+    this.deleted = false;
   }
 }

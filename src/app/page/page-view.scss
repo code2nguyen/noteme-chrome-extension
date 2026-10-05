@@ -97,7 +97,9 @@
   --c2-text-field__focus--border-bottom: none;
   --c2-text-field__focus--border-left: none;
   --c2-text-field__focus--background: transparent;
-  --c2-text-field__focus--outline: none;
+  // A quiet ring rather than none: the title has no border, and keyboard users still need to see where they are.
+  --c2-text-field__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 35%, transparent);
+  --c2-text-field__focus--outline-offset: 4px;
   --c2-text-field--color: var(--c2-theme--color-on-surface);
   --c2-text-field__focus--color: var(--c2-theme--color-on-surface);
 }
