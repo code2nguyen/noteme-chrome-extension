@@ -25,7 +25,8 @@
 // data-theme on <html> (main.ts does it before the first paint); component variables are only set where a view needs
 // its own look.
 :root {
-  --c2-theme--color-primary: #c9483f;
+  // Dark enough for link text to reach 4.5:1 on both light surfaces (and white text on it, 5:1).
+  --c2-theme--color-primary: #c54137;
   --c2-theme--color-primary-hover: #b53d35;
   --c2-theme--color-primary-active: #a1352e;
   --c2-theme--color-on-primary: #ffffff;
@@ -36,7 +37,7 @@
   --c2-theme--color-on-surface-variant: #6b665e;
 
   --ntm-accent: var(--c2-theme--color-primary);
-  --ntm-muted: #8a847a;
+  --ntm-muted: #6b665e;
   --ntm-line: #e2ded6;
   --ntm-shadow: 0 2px 10px rgb(35 33 30 / 12%);
   --ntm-scrollbar: rgb(35 33 30 / 20%);
