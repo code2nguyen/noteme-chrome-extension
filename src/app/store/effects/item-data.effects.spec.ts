@@ -8,7 +8,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { describe, expect, it } from 'vitest';
 import type { Action } from '@ngrx/store';
 
-import { ArtBoardItemActions, ItemDataActions } from '../actions';
+import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataActions, ItemDataApiActions } from '../actions';
 import { INSTANCE_ID } from '../../services/instance-id';
 import { STORAGE_API, StorageApi } from '../../services/storage.api';
 import { DataType } from '../models/data-type';
@@ -54,6 +54,38 @@ describe('ItemDataEffects', () => {
       actions.next(ArtBoardItemActions.deleteArtBoardItem({ boardId: 'board', artBoardItemId: 'a' }));
       flush();
       expect(writes).toEqual(['ITEM_DATA__b']);
+    });
+  });
+
+  it('drops an edit still waiting to be saved when its item is deleted elsewhere', () => {
+    new TestScheduler((actual, expected) => expect(actual).toEqual(expected)).run(({ flush }) => {
+      const { actions, writes, effects } = setUp();
+      effects.trackDeletions$.subscribe();
+      effects.updateItemData$.subscribe();
+      actions.next(
+        ItemDataActions.updateItemData({ itemData: { id: 'a', data: 'Late', dataType: DataType.MARKDOWN } }),
+      );
+      actions.next(
+        ItemDataActions.updateItemData({ itemData: { id: 'b', data: 'Late', dataType: DataType.MARKDOWN } }),
+      );
+      actions.next(ArtBoardItemApiActions.deleteArtBoardItemSuccess({ artBoardItemId: 'a' }));
+      actions.next(ItemDataApiActions.deleteItemDataSuccess({ itemDataId: 'b' }));
+      flush();
+      expect(writes).toEqual([]);
+    });
+  });
+
+  it('saves edits again when the item could not be deleted', () => {
+    new TestScheduler((actual, expected) => expect(actual).toEqual(expected)).run(({ flush }) => {
+      const { actions, writes, effects } = setUp();
+      effects.trackDeletions$.subscribe();
+      effects.trackFailedDeletions$.subscribe();
+      effects.updateItemData$.subscribe();
+      actions.next(ArtBoardItemActions.deleteArtBoardItem({ boardId: 'board', artBoardItemId: 'a' }));
+      actions.next(ArtBoardItemApiActions.deleteArtBoardItemFailure({ artBoardItemId: 'a', error: new Error('full') }));
+      actions.next(ItemDataActions.updateItemData({ itemData: { id: 'a', data: 'Kept', dataType: DataType.PAGE } }));
+      flush();
+      expect(writes).toEqual(['ITEM_DATA__a']);
     });
   });
 });

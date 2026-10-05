@@ -159,7 +159,7 @@ export class ArtBoardItemEffects {
               ItemDataActions.deleteItemData({ itemDataId: artBoardItemId }),
             ),
           ),
-          catchError((error) => of(ArtBoardItemApiActions.deleteArtBoardItemFailure({ error }))),
+          catchError((error) => of(ArtBoardItemApiActions.deleteArtBoardItemFailure({ artBoardItemId, error }))),
         ),
       ),
     ),

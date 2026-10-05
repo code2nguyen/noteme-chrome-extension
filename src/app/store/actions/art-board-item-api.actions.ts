@@ -47,7 +47,7 @@ export const deleteArtBoardItemSuccess = createAction(
 
 export const deleteArtBoardItemFailure = createAction(
   '[Art Board Item Api] delete Art Board Item Failure',
-  props<{ error: unknown }>(),
+  props<{ artBoardItemId: string; error: unknown }>(),
 );
 
 export const searchArtBoardItemsSuccess = createAction(

@@ -16,7 +16,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ArtBoardItemActions, ItemDataActions, ItemDataApiActions } from '../actions';
+import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataActions, ItemDataApiActions } from '../actions';
 import { artBoardItemIdsKey, itemDataKey, STORAGE_API } from '../../services/storage.api';
 import { ItemData } from '../models';
 import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
@@ -31,14 +31,34 @@ export class ItemDataEffects {
   private readonly actions$ = inject(Actions);
   private readonly store = inject(Store);
   private readonly storageApi = inject(STORAGE_API);
-  /** Items deleted in this tab. Ids are never reused, so a save still waiting for one of them is dropped. */
+  /**
+   * Items deleted here or elsewhere (another tab, another device). Ids are never reused, so a save still waiting for
+   * one of them is dropped. A deletion counts from its request, so an edit typed just before Delete is dropped too,
+   * and stops counting if the item could not be deleted.
+   */
   private readonly deleted = new Set<string>();
 
   trackDeletions$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(ArtBoardItemActions.deleteArtBoardItem, ItemDataActions.deleteItemData),
+        ofType(
+          ArtBoardItemActions.deleteArtBoardItem,
+          ArtBoardItemApiActions.deleteArtBoardItemSuccess,
+          ItemDataActions.deleteItemData,
+          ItemDataApiActions.deleteItemDataSuccess,
+        ),
         tap((action) => this.deleted.add('artBoardItemId' in action ? action.artBoardItemId : action.itemDataId)),
+      ),
+    { dispatch: false },
+  );
+
+  // Only the note's own deletion can fail with the note still there: its data is deleted after it (a failure then
+  // leaves data that no note shows, which is no reason to save into it again).
+  trackFailedDeletions$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ArtBoardItemApiActions.deleteArtBoardItemFailure),
+        tap(({ artBoardItemId }) => this.deleted.delete(artBoardItemId)),
       ),
     { dispatch: false },
   );
