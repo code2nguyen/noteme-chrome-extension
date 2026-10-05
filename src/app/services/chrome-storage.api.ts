@@ -148,7 +148,8 @@ export class ChromeStorageApi implements StorageApi {
    * once may both send a record, which writes the same value twice.
    */
   async retryRefusedWrites(): Promise<void> {
-    const markers = (await this.localKeys()).filter((key) => key.startsWith(SYNC_RETRY_PREFIX));
+    // Keys only, never the values: getKeys is Chrome 130+, and the build targets the last two versions (.browserslistrc).
+    const markers = (await this.localStorageApi.getKeys()).filter((key) => key.startsWith(SYNC_RETRY_PREFIX));
     if (markers.length === 0) {
       return;
     }
@@ -175,12 +176,6 @@ export class ChromeStorageApi implements StorageApi {
     if (this.remoteDataQueue.length > before) {
       this.syncToRemote();
     }
-  }
-
-  /** Every key in chrome.storage.local, without reading the values where Chrome can (getKeys, Chrome 130). */
-  private async localKeys(): Promise<string[]> {
-    const area = this.localStorageApi as chrome.storage.StorageArea & { getKeys?: () => Promise<string[]> };
-    return area.getKeys ? area.getKeys() : Object.keys(await area.get(null));
   }
 
   private queued(key: string): boolean {

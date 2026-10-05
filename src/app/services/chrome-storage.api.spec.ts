@@ -13,10 +13,11 @@ import { StoreSyncService } from './store-sync.service';
 function area(records: Record<string, string> = {}) {
   return {
     records,
-    get: async (keys: string | string[] | null) => {
+    getKeys: vi.fn(async () => Object.keys(records)),
+    get: vi.fn(async (keys: string | string[] | null) => {
       const wanted = keys === null ? Object.keys(records) : Array.isArray(keys) ? keys : [keys];
       return Object.fromEntries(wanted.filter((key) => key in records).map((key) => [key, records[key]]));
-    },
+    }),
     set: vi.fn(async (items: Record<string, string>) => void Object.assign(records, items)),
     remove: vi.fn(async (keys: string | string[]) => {
       for (const key of Array.isArray(keys) ? keys : [keys]) {
@@ -107,6 +108,9 @@ describe('ChromeStorageApi', () => {
       expect(sync.remove).toHaveBeenCalledWith(['ART_BOARD_ITEM__old']);
       expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
       expect(local.records[SYNC_RETRY_PREFIX + 'ITEM_DATA__a']).toBeUndefined();
+      // Retries list keys only; they never read every stored record.
+      expect(local.getKeys).toHaveBeenCalled();
+      expect(local.get).not.toHaveBeenCalledWith(null);
     });
 
     it('is sent again when another device removes something from chrome.storage.sync', async () => {
@@ -165,11 +169,11 @@ describe('ChromeStorageApi', () => {
       first.sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
       first.sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
       // Reads take a moment, as they do across processes: the two tabs' refusals overlap.
-      const read = first.local.get;
-      first.local.get = async (keys) => {
+      const read = first.local.get.getMockImplementation()!;
+      first.local.get.mockImplementation(async (keys) => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         return read(keys);
-      };
+      });
       await Promise.all([
         first.api.setPromise('ITEM_DATA__a', note('From the first tab')),
         second.setPromise('ITEM_DATA__b', { ...note('From the second tab'), id: 'b' }),
