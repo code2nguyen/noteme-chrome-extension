@@ -118,7 +118,8 @@ export class Board {
           const kind =
             item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note';
           const label = firstLine || (kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`);
-          const edited = editedLabel(itemData?.modifiedDate ?? item.dataModifiedDate ?? item.modifiedDate);
+          const dataModified = itemData?.empty ? undefined : itemData?.modifiedDate;
+          const edited = editedLabel(dataModified ?? item.dataModifiedDate ?? item.modifiedDate);
           return {
             id: item.id,
             label: label.length > PREVIEW_LENGTH ? label.slice(0, PREVIEW_LENGTH) + '…' : label,
@@ -235,7 +236,10 @@ export class Board {
       return;
     }
     event.preventDefault();
-    this.create(kind);
+    // A held key repeats: one press, one note.
+    if (!event.repeat) {
+      this.create(kind);
+    }
   }
 
   create(kind: ExtensionId): void {
