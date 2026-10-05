@@ -96,6 +96,22 @@ export function publish(store: Store, { staged = false } = {}): Promise<PublishR
   });
 }
 
+/**
+ * Compares the version the store read from the package with the expected one: a mismatch throws, a match returns
+ * nothing. An upload the store processed asynchronously reports no version, which is no reason to fail the release
+ * (package-extension.ts already refused a zip whose manifest disagrees with package.json and the tag): that returns a
+ * warning instead.
+ */
+export function checkUploadedVersion(reported: string | undefined, expected: string): string | undefined {
+  if (!reported) {
+    return `The store did not report the uploaded version, so it was not checked against ${expected}`;
+  }
+  if (reported !== expected) {
+    throw new Error(`The store read version ${reported} from the package, expected ${expected}`);
+  }
+  return undefined;
+}
+
 function env(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -124,8 +140,10 @@ async function main(args: string[]): Promise<void> {
     const result = await upload(store, await readFile(path));
     console.log(`Uploaded ${path}: version ${result.crxVersion ?? '?'}`);
     const expected = option('--expect-version');
-    if (expected && result.crxVersion && result.crxVersion !== expected) {
-      throw new Error(`The store read version ${result.crxVersion} from the package, expected ${expected}`);
+    const warning = expected ? checkUploadedVersion(result.crxVersion, expected) : undefined;
+    if (warning) {
+      // A workflow command, so the warning shows on the run's summary rather than only in the log.
+      console.log(process.env['GITHUB_ACTIONS'] ? `::warning::${warning}` : `Warning: ${warning}`);
     }
   } else if (command === 'publish') {
     const result = await publish(store, { staged: rest.includes('--staged') });

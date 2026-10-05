@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { API, publish, status, Store, upload } from './chrome-web-store';
+import { API, checkUploadedVersion, publish, status, Store, upload } from './chrome-web-store';
 
 interface Call {
   method: string;
@@ -11,11 +11,14 @@ interface Call {
 /** A store whose fetch answers from a list of responses, recording each request. */
 function fakeStore(...responses: { status?: number; body: unknown }[]) {
   const calls: Call[] = [];
+  const sleeps: number[] = [];
   const store: Store = {
     publisherId: 'pub',
     itemId: 'item',
     token: 'token',
-    sleep: async () => undefined,
+    sleep: async (ms) => {
+      sleeps.push(ms);
+    },
     fetch: async (url, init) => {
       calls.push({
         method: init!.method!,
@@ -27,7 +30,7 @@ function fakeStore(...responses: { status?: number; body: unknown }[]) {
       return new Response(JSON.stringify(next.body), { status: next.status ?? 200 });
     },
   };
-  return { store, calls };
+  return { store, calls, sleeps };
 }
 
 describe('chrome web store client', () => {
@@ -44,7 +47,7 @@ describe('chrome web store client', () => {
   });
 
   it('waits for an upload the store is still processing', async () => {
-    const { store, calls } = fakeStore(
+    const { store, calls, sleeps } = fakeStore(
       { body: { uploadState: 'IN_PROGRESS' } },
       { body: { lastAsyncUploadState: 'IN_PROGRESS' } },
       { body: { lastAsyncUploadState: 'SUCCEEDED' } },
@@ -55,6 +58,24 @@ describe('chrome web store client', () => {
       `${API}/v2/publishers/pub/items/item:fetchStatus`,
       `${API}/v2/publishers/pub/items/item:fetchStatus`,
     ]);
+    // A pause before each status poll, none after the last.
+    expect(sleeps).toEqual([2000, 2000]);
+  });
+
+  it('gives up on an upload that stays in progress', async () => {
+    const { store, sleeps } = fakeStore(
+      { body: { uploadState: 'IN_PROGRESS' } },
+      { body: { lastAsyncUploadState: 'IN_PROGRESS' } },
+      { body: { lastAsyncUploadState: 'IN_PROGRESS' } },
+    );
+    await expect(upload(store, new Uint8Array(), 2)).rejects.toThrow('state IN_PROGRESS');
+    expect(sleeps).toEqual([2000, 2000]);
+  });
+
+  it('checks the version the store read, and only warns when it read none', () => {
+    expect(checkUploadedVersion('3.0.1', '3.0.1')).toBeUndefined();
+    expect(() => checkUploadedVersion('3.0.0', '3.0.1')).toThrow('read version 3.0.0 from the package, expected 3.0.1');
+    expect(checkUploadedVersion(undefined, '3.0.1')).toContain('did not report the uploaded version');
   });
 
   it('fails on a failed upload and on an HTTP error', async () => {
