@@ -38,12 +38,12 @@
   --c2-notepad__spiral--display: none;
   --c2-notepad__top--padding-top: 8px;
   --c2-notepad__margin--inset: 32px;
-  // The Paper button and the delete button show only on the note being pointed at or written in (on a touch screen,
+  // The Paper button and the actions button show only on the note being pointed at or written in (on a touch screen,
   // once tapped), so the board stays calm.
   --c2-notepad__controls--opacity: 0;
 }
 
-.note__delete {
+.note__actions {
   --c2-icon-button__icon--width: 16px;
   --c2-icon-button__icon--height: 16px;
   --c2-icon-button__icon--color: var(--ntm-muted);

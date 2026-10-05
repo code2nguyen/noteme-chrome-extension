@@ -3,8 +3,10 @@ import '@c2n/components/flow';
 import '@c2n/components/menu';
 import '@c2n/components/menu/menu-item';
 import '@c2n/components/text-field';
+import '@c2n/feather-icons/icons/archive.js';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
+import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 import '@c2n/feather-icons/icons/maximize.js';
 import '@c2n/feather-icons/icons/plus.js';
@@ -89,6 +91,8 @@ export class FlowView {
   readonly doc = signal<FlowDoc>(EMPTY_FLOW);
   readonly saving = signal(false);
   readonly found = signal<boolean | null>(null);
+  /** Archived: off the board, in the Archive view. */
+  readonly archived = signal(false);
   private readonly modified = signal<string | undefined>(undefined);
   private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
   private item: ArtBoardItem | undefined;
@@ -98,6 +102,7 @@ export class FlowView {
   private bound = false;
   /** Opened by "New flow": the only flow removed when it is left before its data was read. */
   private isNew = false;
+  /** Deleted or archived from its menu: leaving it must not remove it. */
   private deleted = false;
   private savingTimer?: ReturnType<typeof setTimeout>;
 
@@ -136,6 +141,7 @@ export class FlowView {
       .subscribe(([item, data]) => {
         this.item = item;
         this.found.set(!!item);
+        this.archived.set(!!item && !item.boardId);
         this.modified.set(data.empty ? undefined : data.modifiedDate);
         // Bind the stored flow once, then only changes made elsewhere (another tab).
         if (!this.bound || data.sourceId !== this.instanceId) {
@@ -231,11 +237,26 @@ export class FlowView {
   }
 
   onMenu(event: Event): void {
-    if ((event as CustomEvent<MenuSelectEventDetail>).detail.value === 'delete' && this.item) {
-      this.deleted = true;
-      this.dataService.removeArtBoardItem(this.item);
-      this.router.navigate(['/main-board']);
+    const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
+    const item = this.item;
+    if (!item) {
+      return;
     }
+    if (value === 'restore') {
+      this.dataService.restoreArtBoardItem(item);
+      return;
+    }
+    if (value !== 'delete' && value !== 'archive') {
+      return;
+    }
+    this.deleted = true;
+    // A blank flow is removed rather than archived, as it would be when left.
+    if (value === 'archive' && !(!this.title().trim() && this.doc().nodes.length === 0)) {
+      this.dataService.hideArtBoardItem(item);
+    } else {
+      this.dataService.removeArtBoardItem(item);
+    }
+    this.router.navigate(['/main-board']);
   }
 
   private change(doc: FlowDoc): void {

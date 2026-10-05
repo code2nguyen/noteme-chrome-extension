@@ -19,8 +19,10 @@ import '@c2n/components/menu';
 import '@c2n/components/menu/menu-item';
 import '@c2n/components/page-editor';
 import '@c2n/components/text-field';
+import '@c2n/feather-icons/icons/archive.js';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
+import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 import type { PageEditor } from '@c2n/components/page-editor';
 import type { TextField } from '@c2n/components/text-field';
@@ -62,6 +64,8 @@ export class PageView {
   readonly value = signal('');
   readonly saving = signal(false);
   readonly found = signal<boolean | null>(null);
+  /** Archived: off the board, in the Archive view. */
+  readonly archived = signal(false);
   private readonly modified = signal<string | undefined>(undefined);
   private readonly createdDate = signal<string | undefined>(undefined);
   private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
@@ -72,6 +76,7 @@ export class PageView {
   private bound = false;
   /** Opened by "New page": the only page removed when it is left before its data was read. */
   private isNew = false;
+  /** Deleted or archived from its menu: leaving it must not remove it. */
   private deleted = false;
   private savingTimer?: ReturnType<typeof setTimeout>;
 
@@ -107,6 +112,7 @@ export class PageView {
       .subscribe(([item, data]) => {
         this.item = item;
         this.found.set(!!item);
+        this.archived.set(!!item && !item.boardId);
         this.modified.set(data.empty ? undefined : data.modifiedDate);
         this.createdDate.set(data.empty ? undefined : data.createdDate);
         // Bind the stored page once, then only changes made elsewhere: re-applying our own saves would move the caret.
@@ -155,11 +161,26 @@ export class PageView {
   }
 
   onMenu(event: Event): void {
-    if ((event as CustomEvent<MenuSelectEventDetail>).detail.value === 'delete' && this.item) {
-      this.deleted = true;
-      this.dataService.removeArtBoardItem(this.item);
-      this.router.navigate(['/main-board']);
+    const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
+    const item = this.item;
+    if (!item) {
+      return;
     }
+    if (value === 'restore') {
+      this.dataService.restoreArtBoardItem(item);
+      return;
+    }
+    if (value !== 'delete' && value !== 'archive') {
+      return;
+    }
+    this.deleted = true;
+    // A blank page is removed rather than archived, as it would be when left.
+    if (value === 'archive' && !(!this.title().trim() && !pageMarkdownToText(this.value()).trim())) {
+      this.dataService.hideArtBoardItem(item);
+    } else {
+      this.dataService.removeArtBoardItem(item);
+    }
+    this.router.navigate(['/main-board']);
   }
 
   private save(changes: { data?: string; properties?: { title: string } }): void {

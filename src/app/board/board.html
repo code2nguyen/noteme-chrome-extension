@@ -10,14 +10,26 @@
       />
     </svg>
   </c2-icon-button>
-  <h1 class="navbar__title">Notes</h1>
+  <h1 class="navbar__title">{{ inNotesView() ? 'Notes' : 'Archive' }}</h1>
+  <c2-button-group
+    class="navbar__views"
+    selection="single"
+    appearance="segmented"
+    size="s"
+    aria-label="Notes or archive"
+    [value]="view()"
+    (change)="changeView($event)"
+  >
+    <c2-button value="notes">Notes</c2-button>
+    <c2-button value="archive">Archive</c2-button>
+  </c2-button-group>
   <a class="navbar__link" routerLink="/plan">Plan</a>
 
   <c2-autocomplete
     #searchField
     class="navbar__search"
-    aria-label="Search everything"
-    placeholder="Search everything"
+    [attr.aria-label]="inNotesView() ? 'Search everything' : 'Search the archive'"
+    [attr.placeholder]="inNotesView() ? 'Search everything' : 'Search the archive'"
     item-key="id"
     label-field="label"
     description-field="description"
@@ -84,7 +96,15 @@
 
 <main class="board">
   @if (items().length === 0) {
-    <p class="board__empty">Nothing here yet. Press N for a note, P for a page or F for a flow.</p>
+    <p class="board__empty">
+      @if (inNotesView()) {
+        Nothing here yet. Press N for a note, P for a page or F for a flow.
+      } @else if (searchQuery()) {
+        Nothing archived matches.
+      } @else {
+        The archive is empty.
+      }
+    </p>
   }
   <c2-masonry class="board__grid" save-layout="false" [layout]="layout()">
     @for (item of items(); track item.id) {
@@ -105,7 +125,14 @@
         } @else if (item.extensionId === ExtensionId.Flow) {
           <ntm-flow-card [item]="item" />
         } @else {
-          <ntm-note-card [item]="item" [autofocus]="item.id === focusItemId()" (remove)="removeNote(item)" />
+          <ntm-note-card
+            [item]="item"
+            [archived]="!inNotesView()"
+            [autofocus]="item.id === focusItemId()"
+            (archive)="archive(item)"
+            (restore)="restore(item)"
+            (remove)="removeNote(item)"
+          />
         }
       </c2-masonry-item>
     }

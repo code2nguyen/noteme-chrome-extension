@@ -121,6 +121,17 @@ export class DataService {
     );
   }
 
+  /** Bring an archived note, page or flow back to the board, first, as a new one would be. */
+  restoreArtBoardItem(item: ArtBoardItem): void {
+    this.store
+      .select(selectArtBoardItemsByBoardId(DEFAULT_BOARD_ID))
+      .pipe(take(1))
+      .subscribe((items) => {
+        const orders = items.map((boardItem) => boardItem.gridPosition?.order ?? 0);
+        this.showArtBoardItem(item, orders.length > 0 ? Math.min(...orders) - 1 : 0);
+      });
+  }
+
   searchArtBoardItem(query: string): void {
     this.store.dispatch(ArtBoardItemActions.searchArtBoardItems({ query }));
   }

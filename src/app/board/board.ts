@@ -18,8 +18,9 @@ import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
 import type { MasonryLayoutSnapshot } from '@c2n/components/masonry';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
-import { combineLatest, ReplaySubject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { Dictionary } from '@ngrx/entity';
+import { combineLatest, of, ReplaySubject } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 
 import './board-elements';
 import { ExtensionId } from '../extension-id';
@@ -28,7 +29,7 @@ import { DataService } from '../services/data.service';
 import { DeviceSyncService, SyncState } from '../services/device-sync.service';
 import { editedLabel, getCurrentDate, getText, pageMarkdownToText, uuid } from '../services/utils';
 import { ArtBoardItemApiActions } from '../store/actions';
-import { ArtBoardItem, DEFAULT_BOARD_ID } from '../store/models';
+import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { selectItemDataEntities } from '../store/reducers';
 import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
@@ -39,6 +40,8 @@ interface SearchSuggestion {
   label: string;
   description: string;
 }
+
+type BoardView = 'notes' | 'archive';
 
 const PREVIEW_LENGTH = 80;
 const MIN_PAGE_ROWS = 3;
@@ -52,8 +55,9 @@ const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: Exte
 const FULL_SCREEN: Partial<Record<ExtensionId, string>> = { [ExtensionId.Page]: '/page', [ExtensionId.Flow]: '/flow' };
 
 /**
- * Every note in one place, newest first. Quick notes are written right on their card; pages show their title and
- * first lines and open full screen. The search covers everything, including notes archived by older versions.
+ * Every note in one place, newest first. Quick notes are written right on their card; pages and flows show a card and
+ * open full screen. Notes, pages and flows put away land in the Archive view (`?view=archive`); the search on the
+ * Notes view covers everything, archived or not.
  */
 @Component({
   selector: 'ntm-board',
@@ -74,6 +78,7 @@ export class Board {
   private readonly deviceSync = inject(DeviceSyncService);
   private readonly cards = viewChildren(NoteCard);
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
+  private readonly route = inject(ActivatedRoute);
 
   readonly ExtensionId = ExtensionId;
   readonly SyncState = SyncState;
@@ -90,6 +95,13 @@ export class Board {
     )
     .subscribe(() => this.boardLoaded.next());
 
+  /** The view is in the URL, so the way back from a page opened in the Archive leads to the Archive. */
+  readonly view = toSignal(
+    this.route.queryParamMap.pipe(map((params): BoardView => (params.get('view') === 'archive' ? 'archive' : 'notes'))),
+    { initialValue: 'notes' as BoardView },
+  );
+  readonly inNotesView = computed(() => this.view() === 'notes');
+
   /** What the search field holds, as typed (binding it back trimmed would eat a space the user just typed). */
   readonly query = signal('');
   readonly searchQuery = computed(() => this.query().trim());
@@ -100,16 +112,53 @@ export class Board {
   readonly searching = toSignal(this.dataService.selectArtBoardItemSearchLoading(), { initialValue: false });
 
   /** The notes of the board in their stored order: a new note goes first. */
-  readonly items = toSignal(
+  private readonly boardItems = toSignal(
     this.dataService
       .getArtBoardItems(DEFAULT_BOARD_ID)
       .pipe(map((items) => [...items].sort((a, b) => a.gridPosition.order - b.gridPosition.order))),
     { initialValue: [] as ArtBoardItem[] },
   );
 
-  /** Search results as autocomplete rows: every note and page, archived ones included. */
+  /** What the Archive view shows: everything archived, oldest edit first, or what matches the search. */
+  private readonly archivedItems = toSignal(
+    combineLatest([toObservable(this.view), toObservable(this.searchQuery)]).pipe(
+      // Typing on the Notes view must not reload the archive, and the archive is only read once it is opened.
+      map(([view, query]) => (view === 'archive' ? query : null)),
+      distinctUntilChanged(),
+      switchMap((query) => {
+        if (query === null) {
+          return of([]);
+        }
+        if (query) {
+          return this.dataService.getSearchResults().pipe(map((items) => items.filter((item) => !item.boardId)));
+        }
+        return this.dataService
+          .getArchivedArtBoardItems()
+          .pipe(
+            map((items) =>
+              [...items].sort((a, b) =>
+                (a.dataModifiedDate || a.modifiedDate).localeCompare(b.dataModifiedDate || b.modifiedDate),
+              ),
+            ),
+          );
+      }),
+    ),
+    { initialValue: [] as ArtBoardItem[] },
+  );
+
+  readonly items = computed(() => (this.inNotesView() ? this.boardItems() : this.archivedItems()));
+
+  /**
+   * Search results as autocomplete rows on the Notes view: every note, archived ones included. The Archive view
+   * filters its own grid instead.
+   */
   readonly suggestions = toSignal(
-    combineLatest([this.dataService.getSearchResults(), this.store.select(selectItemDataEntities)]).pipe(
+    toObservable(this.view).pipe(
+      switchMap((view) =>
+        view === 'notes'
+          ? combineLatest([this.dataService.getSearchResults(), this.store.select(selectItemDataEntities)])
+          : of<[ArtBoardItem[], Dictionary<ItemData>]>([[], {}]),
+      ),
       map(([items, data]) =>
         items.map((item): SearchSuggestion => {
           const itemData = data[item.id];
@@ -168,7 +217,7 @@ export class Board {
   readonly matchAll = () => true;
 
   private readonly minOrder = computed(() => {
-    const items = this.items();
+    const items = this.boardItems();
     return items.length > 0 ? Math.min(...items.map((item) => item.gridPosition.order ?? 0)) : 0;
   });
 
@@ -181,7 +230,7 @@ export class Board {
 
   /** Home links here with `?new=note` (write a note) or `?search=1` (search); each runs once, then leaves the URL. */
   private handleHomeActions(): void {
-    const params = inject(ActivatedRoute).snapshot.queryParamMap;
+    const params = this.route.snapshot.queryParamMap;
     if (params.has('new')) {
       const kind = params.get('new') === 'page' ? ExtensionId.Page : ExtensionId.TextNote;
       // The new note goes before the first one, so wait until the board has read its notes.
@@ -193,6 +242,19 @@ export class Board {
     if (params.has('new') || params.has('search')) {
       this.router.navigate([], { queryParams: {}, replaceUrl: true });
     }
+  }
+
+  changeView(event: Event): void {
+    const view = (event as CustomEvent<{ value: string }>).detail.value === 'archive' ? 'archive' : 'notes';
+    this.showView(view);
+  }
+
+  private showView(view: BoardView): void {
+    if (view === this.view()) {
+      return;
+    }
+    this.query.set('');
+    this.router.navigate([], { queryParams: { view: view === 'archive' ? 'archive' : null }, replaceUrl: true });
   }
 
   search(event: Event): void {
@@ -212,9 +274,9 @@ export class Board {
       this.router.navigate([route, id]);
       return;
     }
-    // A note archived by an older version comes back to the board, first.
+    // An archived note comes back to the board, first.
     if (!found.boardId) {
-      this.dataService.showArtBoardItem(found, this.minOrder() - 1);
+      this.dataService.restoreArtBoardItem(found);
     }
     this.highlight(id);
   }
@@ -224,7 +286,7 @@ export class Board {
     this.create(value === 'page' ? ExtensionId.Page : value === 'flow' ? ExtensionId.Flow : ExtensionId.TextNote);
   }
 
-  /** N for a note, P for a page, when the keyboard is not busy in a field or an editor. */
+  /** N for a note, P for a page, F for a flow (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
   onKey(event: KeyboardEvent): void {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
@@ -243,6 +305,7 @@ export class Board {
   }
 
   create(kind: ExtensionId): void {
+    this.showView('notes');
     const defaults = structuredClone(noteDefaultProperties[kind]);
     const item: ArtBoardItem = {
       ...defaults,
@@ -267,6 +330,14 @@ export class Board {
 
   removeNote(item: ArtBoardItem): void {
     this.dataService.removeArtBoardItem(item);
+  }
+
+  archive(item: ArtBoardItem): void {
+    this.dataService.hideArtBoardItem(item);
+  }
+
+  restore(item: ArtBoardItem): void {
+    this.dataService.restoreArtBoardItem(item);
   }
 
   onScroll(): void {

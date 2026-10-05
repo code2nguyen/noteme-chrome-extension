@@ -169,7 +169,7 @@ test('delete a note', async ({ page }) => {
   await newNote(page);
   await page.keyboard.type('Delete me');
   await page.waitForTimeout(500);
-  await card(page).getByRole('button', { name: 'Delete note' }).click();
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
   await expect(card(page).locator('c2-menu-item[value="delete"]')).toBeVisible();
   await shot(page, '06-delete-confirm');
   await card(page).locator('c2-menu-item[value="delete"]').click();
@@ -253,6 +253,99 @@ test('changing the paper colour is saved on the note', async ({ page }) => {
   await openBoard(page);
   await expect(card(page).locator('c2-notepad')).toHaveAttribute('paper-color', 'pink');
   await expect(card(page).locator('c2-notepad')).toHaveAttribute('pad', 'legal');
+});
+
+test('archive a note, find it in the Archive and restore it to the board', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Keep me for later');
+  await page.waitForTimeout(500); // an empty note is deleted rather than archived: let the text be saved
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
+  await card(page).locator('c2-menu-item[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(page).toHaveURL(/#\/main-board\?view=archive$/);
+  await expect(page.locator('.navbar__title')).toHaveText('Archive');
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
+  await shot(page, '09-archive');
+
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
+  await expect(card(page).locator('c2-menu-item[value="archive"]')).toHaveCount(0);
+  await card(page).locator('c2-menu-item[value="restore"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await expect(page.locator('.board__empty')).toHaveText('The archive is empty.');
+
+  await page.locator('.navbar__views c2-button[value="notes"]').click();
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
+  await page.reload();
+  await openBoard(page);
+  await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
+});
+
+test('the Archive view filters by the search, and N brings back the board with a new note', async ({ page }) => {
+  await openBoard(page);
+  for (const text of ['Recipe for lemon tart', 'Bike repair checklist']) {
+    await newNote(page);
+    await page.keyboard.type(text);
+    await page.waitForTimeout(500);
+    await card(page).getByRole('button', { name: 'Note actions' }).click();
+    await card(page).locator('c2-menu-item[value="archive"]').click();
+    await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  }
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+  // Oldest edit first.
+  await expect(notepadSurface(card(page, 0))).toHaveText('Recipe for lemon tart');
+  const search = page.locator('c2-autocomplete input');
+  await search.pressSequentially('lemon');
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect(notepadSurface(card(page))).toHaveText('Recipe for lemon tart');
+  await search.fill('');
+  await search.pressSequentially('nothing like it');
+  await expect(page.locator('.board__empty')).toHaveText('Nothing archived matches.');
+
+  await page.locator('main.board').click({ position: { x: 4, y: 4 } });
+  await page.keyboard.press('n');
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect.poll(() => focusedTag(page)).toBe('c2-notepad');
+});
+
+test('archive a page from its view; it opens from the Archive and is restored from there', async ({ page }) => {
+  await openBoard(page);
+  await newPage(page);
+  await page.keyboard.type('Old recipes');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('Grandma’s soup, the long way.');
+  await page.waitForTimeout(500);
+  await page.locator('ntm-page-view c2-icon-button[aria-label="Page actions"]').click();
+  await expect(page.locator('ntm-page-view c2-menu-item[value="restore"]')).toHaveCount(0);
+  await page.locator('ntm-page-view c2-menu-item[value="archive"]').click();
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await expect(tiles(page)).toHaveCount(0);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  const pageCard = page.locator('ntm-page-card');
+  await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
+  await pageCard.click();
+  await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Old recipes');
+  // The way back leads to the Archive it was opened from.
+  await expect(page.locator('.page-bar__back')).toHaveText('Archive');
+  await page.locator('.page-bar__back').click();
+  await expect(page).toHaveURL(/#\/main-board\?view=archive$/);
+  await pageCard.click();
+
+  await page.locator('ntm-page-view c2-icon-button[aria-label="Page actions"]').click();
+  await expect(page.locator('ntm-page-view c2-menu-item[value="archive"]')).toHaveCount(0);
+  await page.locator('ntm-page-view c2-menu-item[value="restore"]').click();
+  await expect(page.locator('.page-bar__back')).toHaveText('Notes');
+  await page.locator('.page-bar__back').click();
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
 });
 
 test('phone width: one column, no horizontal scroll', async ({ page }) => {
@@ -429,14 +522,14 @@ test('Home loads only its own components; the board, settings and pages load the
   expect(await defined('c2-page-editor')).toBe(false);
 });
 
-test('a note shows its delete button only while hovered or written in', async ({ page }) => {
+test('a note shows its actions button only while hovered or written in', async ({ page }) => {
   await openBoard(page);
   const note = await newNote(page);
   await page.keyboard.type('Hover me');
   const toolbar = note.locator('c2-notepad .controls');
   const opacity = () => toolbar.evaluate((element) => getComputedStyle(element).opacity);
   await expect.poll(opacity).toBe('1'); // focused: being written in
-  await page.locator('.navbar__title').click();
+  await page.locator('main.board').click({ position: { x: 4, y: 4 } });
   await page.mouse.move(5, 300);
   await expect.poll(opacity).toBe('0');
   await note.hover();
@@ -446,12 +539,12 @@ test('a note shows its delete button only while hovered or written in', async ({
 test.describe('touch screen', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
 
-  test('the delete button shows once the note is tapped to write in it', async ({ page }) => {
+  test('the actions button shows once the note is tapped to write in it', async ({ page }) => {
     await openBoard(page);
     const note = await newNote(page);
     await page.keyboard.type('On the go');
     const opacity = () => note.locator('c2-notepad .controls').evaluate((element) => getComputedStyle(element).opacity);
-    await page.locator('.navbar__title').tap();
+    await page.locator('main.board').tap({ position: { x: 4, y: 4 } });
     await expect.poll(opacity).toBe('0');
     await note.locator('c2-notepad .ProseMirror').tap();
     await expect.poll(opacity).toBe('1');

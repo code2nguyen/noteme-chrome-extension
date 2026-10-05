@@ -23,7 +23,8 @@ import { ArtBoardItem } from '../store/models';
 import { DataType } from '../store/models/data-type';
 
 /**
- * A quick note: a c2-notepad written right on the board, with its delete button in the notepad's actions slot.
+ * A quick note: a c2-notepad written right on the board, with its actions menu (archive or restore, delete) in the
+ * notepad's actions slot.
  * Rendered inside the c2-masonry-item that places it.
  */
 @Component({
@@ -45,9 +46,13 @@ export class NoteCard {
   private readonly injector = inject(Injector);
 
   readonly item = input.required<ArtBoardItem>();
+  /** Shown in the Archive view: the menu restores the note instead of archiving it. */
+  readonly archived = input(false);
   /** Focus the editor once it is rendered (a note that was just created). */
   readonly autofocus = input(false);
 
+  readonly archive = output<void>();
+  readonly restore = output<void>();
   readonly remove = output<void>();
 
   readonly value = signal('');
@@ -126,8 +131,13 @@ export class NoteCard {
     });
   }
 
-  onDeleteMenu(event: Event): void {
-    if ((event as CustomEvent<MenuSelectEventDetail>).detail.value === 'delete') {
+  onMenu(event: Event): void {
+    const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
+    if (value === 'archive') {
+      this.archive.emit();
+    } else if (value === 'restore') {
+      this.restore.emit();
+    } else if (value === 'delete') {
       this.remove.emit();
     }
   }
