@@ -150,6 +150,95 @@ test('a page left empty is not kept, and a page can be deleted', async ({ page }
   expect(keys).toEqual([]);
 });
 
+test('a page shows its editor only once its stored data is read', async ({ page }) => {
+  await openBoard(page);
+  await newPage(page);
+  await page.keyboard.type('Alpha');
+  await page.waitForTimeout(500);
+  await page.reload();
+  await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Alpha');
+  await expect(page.locator('ntm-page-view c2-page-editor')).toHaveCount(1);
+  await expect(page.locator('ntm-page-view main[aria-busy]')).toHaveCount(0);
+  await expect(page.locator('.page-bar__status')).not.toHaveText('Loading…');
+
+  await page.goto(`/#/page/${crypto.randomUUID()}`);
+  await expect(page.locator('ntm-page-view .page--missing')).toBeVisible();
+  await expect(page.locator('ntm-page-view c2-page-editor')).toHaveCount(0);
+});
+
+test('a page or flow view reused for another one shows that one', async ({ page }) => {
+  const idOf = () => new URL(page.url()).hash.match(/^#\/(?:page|flow)\/([\w-]+)/)![1];
+  await openBoard(page);
+  const pages: Record<string, string> = {};
+  for (const title of ['Alpha', 'Beta']) {
+    await newPage(page);
+    await page.keyboard.type(title);
+    pages[title] = idOf();
+    await page.waitForTimeout(500);
+    await page.locator('.page-bar__back').click();
+  }
+  const pageTitle = page.locator('ntm-page-view c2-text-field');
+  for (const title of ['Alpha', 'Beta', 'Alpha']) {
+    await page.evaluate((id) => (location.hash = `#/page/${id}`), pages[title]);
+    await expect(pageTitle).toHaveJSProperty('value', title);
+  }
+
+  await page.locator('.page-bar__back').click();
+  const flows: Record<string, string> = {};
+  for (const title of ['Gamma', 'Delta']) {
+    await page.keyboard.press('f');
+    await expect(page).toHaveURL(/#\/flow\/[\w-]+\?new=1$/);
+    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await page.keyboard.type(title);
+    flows[title] = idOf();
+    await page.waitForTimeout(500);
+    await page.locator('.flow-bar__back').click();
+    await expect(page.locator('ntm-board')).toBeVisible();
+  }
+  const flowTitle = page.locator('ntm-flow-view c2-text-field.flow__title');
+  for (const title of ['Gamma', 'Delta', 'Gamma']) {
+    await page.evaluate((id) => (location.hash = `#/flow/${id}`), flows[title]);
+    await expect(flowTitle).toHaveJSProperty('value', title);
+  }
+});
+
+test('a new page or flow left immediately is not kept', async ({ page }) => {
+  const itemDataKeys = () =>
+    page.evaluate(() => Object.keys(localStorage).filter((key) => key.includes('ITEM_DATA__')));
+  await openBoard(page);
+  for (const [key, route] of [
+    ['p', 'page'],
+    ['f', 'flow'],
+  ]) {
+    await page.keyboard.press(key);
+    await expect(page).toHaveURL(new RegExp(`#/${route}/[\\w-]+\\?new=1$`));
+    await page.goBack();
+    await expect(page).toHaveURL(/#\/main-board$/);
+    await expect(page.locator('ntm-board')).toBeVisible();
+    await page.waitForTimeout(500);
+    await expect(tiles(page)).toHaveCount(0);
+    expect(await itemDataKeys()).toEqual([]);
+  }
+});
+
+test('holding P creates a single page', async ({ page }) => {
+  await openBoard(page);
+  // A held key repeats: the second and third keydown carry `repeat`.
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.down('p');
+  }
+  await page.keyboard.up('p');
+  await expect(page).toHaveURL(/#\/page\/[\w-]+\?new=1$/);
+  await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+  await page.keyboard.press('ControlOrMeta+a');
+  await page.keyboard.type('Held');
+  await page.waitForTimeout(500);
+  await page.locator('.page-bar__back').click();
+  await expect(page.locator('ntm-page-card')).toHaveCount(1);
+  await page.waitForTimeout(500);
+  await expect(tiles(page)).toHaveCount(1);
+});
+
 test('N and P start a note or a page from the keyboard', async ({ page }) => {
   await openBoard(page);
   await page.keyboard.press('n');
@@ -822,6 +911,54 @@ test.describe('plan', () => {
     await page.goto('/#/plan?view=week&date=2026-10-15');
     await expect(page.locator('c2-week-planner').getByRole('button', { name: /^Dinner with Linh/ })).toBeVisible();
     await expect(page.locator('.plan__all-day .plan__chip')).toHaveText([/Pack/]);
+  });
+
+  test('the dialog: From makes an all-day plan timed, clearing it makes it all day again', async ({ page }) => {
+    await page.evaluate(() =>
+      localStorage.setItem(
+        'noteme-dev:PLAN__ITEMS',
+        JSON.stringify({ items: [{ id: 'pack', title: 'Pack', date: '2026-10-15' }] }),
+      ),
+    );
+    await page.goto('/#/plan?view=week&date=2026-10-15');
+    const planner = page.locator('c2-week-planner');
+    const time = (label: string) => dialog(page).locator(`c2-time-input[aria-label="${label}"] input`);
+    const save = async () => {
+      await dialog(page).locator('.plan__dialog-save').click();
+      await expect(dialog(page)).toHaveJSProperty('open', false);
+    };
+
+    await page.locator('.plan__all-day .plan__chip', { hasText: 'Pack' }).click();
+    await expect(dialog(page)).toHaveJSProperty('open', true);
+    await time('From').fill('09:00');
+    await save();
+    await expect(planner.getByRole('button', { name: /^Pack/ })).toBeVisible();
+    await expect(page.locator('.plan__all-day')).toHaveCount(0);
+    expect(await stored(page)).toEqual([expect.objectContaining({ title: 'Pack', start: '09:00', end: '10:00' })]);
+
+    await planner.getByRole('button', { name: /^Pack/ }).click();
+    await expect(dialog(page)).toHaveJSProperty('open', true);
+    await time('From').fill('');
+    await save();
+    await expect(page.locator('.plan__all-day .plan__chip')).toHaveText([/Pack/]);
+    await expect(planner.getByRole('button', { name: /^Pack/ })).toHaveCount(0);
+    const [allDay] = await stored(page);
+    expect(allDay.start).toBeUndefined();
+    expect(allDay.end).toBeUndefined();
+
+    // An end before the start: the plan lasts an hour from its start.
+    await page.locator('.plan__all-day .plan__chip', { hasText: 'Pack' }).click();
+    await time('From').fill('10:00');
+    await time('To').fill('09:00');
+    await save();
+    expect(await stored(page)).toEqual([expect.objectContaining({ title: 'Pack', start: '10:00', end: '11:00' })]);
+  });
+
+  test('an invalid date in the link shows the current month', async ({ page }) => {
+    await page.goto('/#/plan?view=month&date=2026-02-31');
+    const today = new Date();
+    const month = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    await expect(page.locator('c2-month-planner')).toHaveJSProperty('month', month);
   });
 
   test('Plan is one click from Home and from the notes', async ({ page }) => {
