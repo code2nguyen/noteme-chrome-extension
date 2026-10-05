@@ -3,6 +3,7 @@ import '@angular/compiler';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { ExtensionId } from '../extension-id';
 import { DataType } from '../store/models/data-type';
 import { ChromeStorageApi } from './chrome-storage.api';
 import { INSTANCE_ID } from './instance-id';
@@ -55,5 +56,19 @@ describe('ChromeStorageApi', () => {
       empty: false,
     });
     expect(api.remoteDataQueue.map(({ key }) => key)).toEqual(['ITEM_DATA__a']);
+  });
+
+  it('removes from chrome.storage.sync only what the policy syncs', async () => {
+    const { api, local } = setUp({
+      ART_BOARD_ITEM__a: JSON.stringify({ id: 'a', extensionId: ExtensionId.TextNote }),
+      ART_BOARD_ITEM__p: JSON.stringify({ id: 'p', extensionId: ExtensionId.Page }),
+      ART_BOARD_ITEM__f: JSON.stringify({ id: 'f', extensionId: ExtensionId.Flow }),
+      ITEM_DATA__p: JSON.stringify({ id: 'p', dataType: DataType.PAGE, empty: false }),
+    });
+    await api.removePromise('ART_BOARD_ITEM__p');
+    await api.removePromise('ITEM_DATA__p');
+    await api.removePromise(['ART_BOARD_ITEM__a', 'ART_BOARD_ITEM__f']);
+    expect(local.records).toEqual({});
+    expect(api.remoteDataQueue).toEqual([{ key: ['ART_BOARD_ITEM__a'], action: 'remove' }]);
   });
 });

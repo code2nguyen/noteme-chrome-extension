@@ -104,9 +104,16 @@ export class ChromeStorageApi implements StorageApi {
   }
 
   async removePromise(key: string | string[]): Promise<void> {
+    // Only what the policy syncs can be in chrome.storage.sync, whatever its size (an older copy that fitted may be
+    // there). Read the records before the local copies are gone.
+    const keys = Array.isArray(key) ? key : [key];
+    const records = (await this.read(this.localStorageApi, keys)) as unknown[];
+    const remoteKeys = keys.filter((itemKey, index) => syncsWithChromeProfile(itemKey, records[index]));
     await this.localStorageApi.remove(key);
-    this.remoteDataQueue.push({ key, action: 'remove' });
-    this.syncToRemote();
+    if (remoteKeys.length > 0) {
+      this.remoteDataQueue.push({ key: remoteKeys, action: 'remove' });
+      this.syncToRemote();
+    }
   }
 
   private async read(area: chrome.storage.StorageArea, key: string | string[] | null): Promise<unknown> {
