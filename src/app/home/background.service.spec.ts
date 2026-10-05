@@ -112,13 +112,17 @@ describe('BackgroundService', () => {
 
   it('a slow lookup for earlier settings does not overwrite the state chosen for newer ones', async () => {
     const service = new BackgroundService();
+    // Nothing on screen yet: the earlier call takes the queued photo, then writes the state for its themes.
     const shown = commonsPhoto('nature', 0);
     cache.set(shown.url, new Response('jpeg'));
-    store({ themes: 'nature', current: shown, shownAt: Date.now() });
+    store({ themes: 'nature', queue: [shown] });
     const lookup = deferred();
-    beforeMatch = () => lookup.promise;
+    const matching = deferred();
+    beforeMatch = () => (matching.resolve(), lookup.promise);
 
+    // The newer call starts while the earlier one is held in its cache lookup.
     const before = service.current(options('nature'));
+    await matching.promise;
     const after = service.current(options('sea'));
     lookup.resolve();
 
