@@ -4,7 +4,7 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { firstValueFrom, from, of, Subject } from 'rxjs';
-import { filter, take, toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { describe, expect, it } from 'vitest';
 import type { Action } from '@ngrx/store';
 
@@ -32,6 +32,13 @@ const note = (id: string, order: number, boardId?: string): ArtBoardItem => ({
   properties: {},
   modifiedDate: '2026-01-01T00:00:00.000Z',
   gridPosition: { order, rows: 10, screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 } },
+});
+
+/** A note as a restore stores it and hands it to the store. */
+const shownItem = (id: string, order: number): ArtBoardItem => ({
+  ...note(id, order, DEFAULT_BOARD_ID),
+  silent: false,
+  sourceId: 'tab',
 });
 
 /** The effects over a storage that answers asynchronously, as chrome.storage does. */
@@ -68,16 +75,15 @@ describe('ArtBoardItemEffects', () => {
       [artBoardItemKey('a')]: note('a', 9),
       [artBoardItemKey('b')]: note('b', 9),
     });
-    const shown = firstValueFrom(
-      effects.showArtBoardItem$.pipe(
-        filter((action) => action.type === ArtBoardItemApiActions.showArtBoardItemSuccess.type),
-        take(2),
-        toArray(),
-      ),
-    );
+    const shown = firstValueFrom(effects.showArtBoardItem$.pipe(take(2), toArray()));
     actions.next(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'a' }));
     actions.next(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'b' }));
-    await shown;
+
+    // What the store is given: each on the board, first, the second before the first.
+    expect(await shown).toEqual([
+      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: shownItem('a', 3) }),
+      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: shownItem('b', 2) }),
+    ]);
 
     expect(records[artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]).toEqual(['kept', 'a', 'b']);
     // Taken from the stored board, not from a store that may not have read it: before the card already there.
@@ -96,7 +102,16 @@ describe('ArtBoardItemEffects', () => {
     const shown = firstValueFrom(effects.showArtBoardItem$);
     actions.next(ArtBoardItemActions.hideArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'gone' }));
     actions.next(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'back' }));
-    await Promise.all([hidden, shown]);
+
+    expect(await hidden).toEqual(
+      ArtBoardItemApiActions.hideArtBoardItemSuccess({
+        artBoardItem: { ...note('gone', 1), boardId: undefined, silent: false, sourceId: 'tab' },
+      }),
+    );
+    // Before the card left on the board.
+    expect(await shown).toEqual(
+      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: shownItem('back', -1) }),
+    );
 
     expect(records[artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]).toEqual(['kept', 'back']);
   });
