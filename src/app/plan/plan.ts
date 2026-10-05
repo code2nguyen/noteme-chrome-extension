@@ -2,8 +2,8 @@
  * Plans: what is on which day, optionally at what time. One small list, edited through pure functions (unit-tested)
  * and drawn by c2-week-planner and c2-month-planner.
  */
-import type { MonthPlannerEvent } from '@c2n/month-planner';
-import type { WeekPlannerEvent } from '@c2n/week-planner';
+import type { MonthPlannerEvent } from '@c2n/components/month-planner';
+import type { WeekPlannerEvent } from '@c2n/components/week-planner';
 
 export interface PlanItem {
   id: string;

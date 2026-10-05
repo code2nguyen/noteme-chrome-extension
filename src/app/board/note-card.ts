@@ -12,8 +12,8 @@ import {
   output,
   signal,
 } from '@angular/core';
-import type { MenuSelectEventDetail } from '@c2n/menu';
-import type { Notepad, NotepadPaperChangeEventDetail } from '@c2n/notepad';
+import type { MenuSelectEventDetail } from '@c2n/components/menu';
+import type { Notepad, NotepadPaperChangeEventDetail } from '@c2n/components/notepad';
 import { filter } from 'rxjs/operators';
 
 import { colorIndexFor, paperColorFor } from '../note-config';

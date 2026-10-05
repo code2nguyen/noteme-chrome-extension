@@ -1,11 +1,11 @@
 // The c2 elements of the board, loaded with its route.
-import '@c2n/autocomplete';
-import '@c2n/masonry';
-import '@c2n/masonry/masonry-item.js';
-import '@c2n/menu';
-import '@c2n/menu/menu-item.js';
-import '@c2n/notepad';
-import '@c2n/spinner';
+import '@c2n/components/autocomplete';
+import '@c2n/components/masonry';
+import '@c2n/components/masonry/masonry-item';
+import '@c2n/components/menu';
+import '@c2n/components/menu/menu-item';
+import '@c2n/components/notepad';
+import '@c2n/components/spinner';
 
 import '@c2n/feather-icons/icons/check.js';
 import '@c2n/feather-icons/icons/edit-3.js';

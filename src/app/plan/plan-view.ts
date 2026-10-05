@@ -1,11 +1,11 @@
 // The c2 elements of the plan, loaded with its route.
-import '@c2n/week-planner';
-import '@c2n/month-planner';
-import '@c2n/modal';
-import '@c2n/sheet';
-import '@c2n/text-field';
-import '@c2n/time-input';
-import '@c2n/button-group';
+import '@c2n/components/week-planner';
+import '@c2n/components/month-planner';
+import '@c2n/components/modal';
+import '@c2n/components/sheet';
+import '@c2n/components/text-field';
+import '@c2n/components/time-input';
+import '@c2n/components/button-group';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 
@@ -29,15 +29,15 @@ import type {
   MonthPlannerEventClickDetail,
   MonthPlannerMonthChangeDetail,
   MonthPlannerRangeSelectDetail,
-} from '@c2n/month-planner';
-import type { TextField } from '@c2n/text-field';
-import type { TimeInput } from '@c2n/time-input';
+} from '@c2n/components/month-planner';
+import type { TextField } from '@c2n/components/text-field';
+import type { TimeInput } from '@c2n/components/time-input';
 import type {
   WeekPlannerEventChangeDetail,
   WeekPlannerEventClickDetail,
   WeekPlannerSlotClickDetail,
   WeekPlannerWeekChangeDetail,
-} from '@c2n/week-planner';
+} from '@c2n/components/week-planner';
 
 import { SettingsService } from '../settings/settings.service';
 import {

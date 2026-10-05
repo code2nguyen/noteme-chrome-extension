@@ -15,9 +15,9 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import type { AutocompleteSelectEventDetail } from '@c2n/autocomplete';
-import type { MasonryLayoutSnapshot } from '@c2n/masonry';
-import type { MenuSelectEventDetail } from '@c2n/menu';
+import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
+import type { MasonryLayoutSnapshot } from '@c2n/components/masonry';
+import type { MenuSelectEventDetail } from '@c2n/components/menu';
 import { combineLatest, ReplaySubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 

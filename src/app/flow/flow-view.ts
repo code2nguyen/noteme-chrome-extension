@@ -1,8 +1,8 @@
 // The c2 elements of a flow, loaded with its route.
-import '@c2n/flow';
-import '@c2n/menu';
-import '@c2n/menu/menu-item.js';
-import '@c2n/text-field';
+import '@c2n/components/flow';
+import '@c2n/components/menu';
+import '@c2n/components/menu/menu-item';
+import '@c2n/components/text-field';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
 import '@c2n/feather-icons/icons/trash-2.js';
@@ -34,9 +34,9 @@ import type {
   FlowNodeAddDetail,
   FlowNodeDeleteDetail,
   FlowNodeEditDetail,
-} from '@c2n/flow';
-import type { MenuSelectEventDetail } from '@c2n/menu';
-import type { TextField } from '@c2n/text-field';
+} from '@c2n/components/flow';
+import type { MenuSelectEventDetail } from '@c2n/components/menu';
+import type { TextField } from '@c2n/components/text-field';
 import { combineLatest, interval } from 'rxjs';
 import { filter, map, startWith, switchMap, take } from 'rxjs/operators';
 

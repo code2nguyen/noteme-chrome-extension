@@ -12,17 +12,17 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import type { MenuSelectEventDetail } from '@c2n/menu';
+import type { MenuSelectEventDetail } from '@c2n/components/menu';
 // The c2 elements of a page, loaded with its route: the editor (ProseMirror, shiki on demand) never loads on Home.
-import '@c2n/menu';
-import '@c2n/menu/menu-item.js';
-import '@c2n/page-editor';
-import '@c2n/text-field';
+import '@c2n/components/menu';
+import '@c2n/components/menu/menu-item';
+import '@c2n/components/page-editor';
+import '@c2n/components/text-field';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
 import '@c2n/feather-icons/icons/trash-2.js';
-import type { PageEditor } from '@c2n/page-editor';
-import type { TextField } from '@c2n/text-field';
+import type { PageEditor } from '@c2n/components/page-editor';
+import type { TextField } from '@c2n/components/text-field';
 import { combineLatest, interval } from 'rxjs';
 import { filter, map, startWith, switchMap, take } from 'rxjs/operators';
 
