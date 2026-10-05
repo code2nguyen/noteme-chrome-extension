@@ -106,21 +106,16 @@
       (keydown)="onTitleKeydown($event)"
     ></c2-text-field>
     <p class="plan__dialog-when">{{ dateRange(current) }}</p>
-    @if (current.start) {
-      <div class="plan__dialog-times">
-        <c2-time-input
-          aria-label="From"
-          [value]="current.start"
-          (change)="onTimeChange('start', $event)"
-        ></c2-time-input>
-        <span aria-hidden="true">–</span>
-        <c2-time-input
-          aria-label="To"
-          [value]="current.end ?? ''"
-          (change)="onTimeChange('end', $event)"
-        ></c2-time-input>
-      </div>
-    }
+    <!-- Always shown: empty times make the plan all day, so either kind can become the other. -->
+    <div class="plan__dialog-times">
+      <c2-time-input
+        aria-label="From"
+        [value]="current.start ?? ''"
+        (change)="onTimeChange('start', $event)"
+      ></c2-time-input>
+      <span aria-hidden="true">–</span>
+      <c2-time-input aria-label="To" [value]="current.end ?? ''" (change)="onTimeChange('end', $event)"></c2-time-input>
+    </div>
     <div slot="footer" class="plan__dialog-actions">
       @if (current.id) {
         <c2-button class="plan__dialog-delete" (click)="remove()">
