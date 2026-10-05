@@ -14,20 +14,21 @@ export const PAGE_AUTO_ROWS = noteDefaultProperties[ExtensionId.Page].gridPositi
 
 /**
  * The rows a card spans. Notes and flows keep their stored height; a page card is as tall as its excerpt, so a short
- * page is a short card, until it is resized.
+ * page is a short card, until it is resized. `pageTextLength` is only called for such a page: reading the text means
+ * parsing its markdown.
  */
-export function cardRows(item: ArtBoardItem, pageTextLength: number): number {
+export function cardRows(item: ArtBoardItem, pageTextLength: () => number): number {
   if (item.extensionId !== ExtensionId.Page || item.gridPosition.rows !== PAGE_AUTO_ROWS) {
     return item.gridPosition.rows;
   }
   return Math.min(
     MAX_PAGE_ROWS,
-    MIN_PAGE_ROWS + Math.ceil(Math.min(pageTextLength, PAGE_EXCERPT_LENGTH) / CHARS_PER_ROW),
+    MIN_PAGE_ROWS + Math.ceil(Math.min(pageTextLength(), PAGE_EXCERPT_LENGTH) / CHARS_PER_ROW),
   );
 }
 
 /** The rows to store for a card the board laid out `tileRows` high: a page left at its excerpt's height keeps following it. */
-export function storedRows(item: ArtBoardItem, tileRows: number, pageTextLength: number): number {
+export function storedRows(item: ArtBoardItem, tileRows: number, pageTextLength: () => number): number {
   return item.extensionId === ExtensionId.Page && tileRows === cardRows(item, pageTextLength)
     ? item.gridPosition.rows
     : tileRows;

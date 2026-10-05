@@ -202,13 +202,10 @@ export class Board {
 
   /** The rows a card spans (card-rows.ts): a page card left at its default height follows its excerpt. */
   rowsOf(item: ArtBoardItem): number {
-    return cardRows(item, this.pageTextLength(item));
+    return cardRows(item, () => this.pageTextLength(item));
   }
 
   private pageTextLength(item: ArtBoardItem): number {
-    if (item.extensionId !== ExtensionId.Page) {
-      return 0;
-    }
     const data = this.itemData()[item.id];
     return data ? pageMarkdownToText(data.data ?? '').length : 0;
   }
@@ -356,7 +353,7 @@ export class Board {
           artBoardItemId: tile.id,
           gridPosition: {
             order: index,
-            rows: item ? storedRows(item, tile.rows, this.pageTextLength(item)) : tile.rows,
+            rows: item ? storedRows(item, tile.rows, () => this.pageTextLength(item)) : tile.rows,
             screenColumns: {
               Large: tile.columns.lg,
               Medium: tile.columns.md,
