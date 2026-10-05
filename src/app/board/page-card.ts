@@ -6,8 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { DataService } from '../services/data.service';
 import { editedLabel, pageMarkdownToText } from '../services/utils';
 import { ArtBoardItem } from '../store/models';
-
-export const PAGE_EXCERPT_LENGTH = 220;
+import { PAGE_EXCERPT_LENGTH } from './card-rows';
 
 /** A page on the board: its title and first lines. The whole card opens the page. */
 @Component({

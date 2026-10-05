@@ -33,7 +33,8 @@ import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { selectItemDataEntities } from '../store/reducers';
 import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
-import { PAGE_EXCERPT_LENGTH, PageCard } from './page-card';
+import { cardRows, storedRows } from './card-rows';
+import { PageCard } from './page-card';
 
 interface SearchSuggestion {
   id: string;
@@ -44,10 +45,6 @@ interface SearchSuggestion {
 type BoardView = 'notes' | 'archive';
 
 const PREVIEW_LENGTH = 80;
-const MIN_PAGE_ROWS = 3;
-const MAX_PAGE_ROWS = 6;
-const CHARS_PER_ROW = 70;
-const PAGE_AUTO_ROWS = noteDefaultProperties[ExtensionId.Page].gridPosition.rows;
 
 /** Keys that start something new from anywhere on the board, as shown in the New menu. */
 const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page, f: ExtensionId.Flow };
@@ -203,17 +200,17 @@ export class Board {
 
   private readonly itemData = toSignal(this.store.select(selectItemDataEntities), { requireSync: true });
 
-  /**
-   * Notes and flows keep their stored height; a page card is as tall as its excerpt, so a short page is a short card,
-   * until it is resized: a page's default height stands for "as tall as its excerpt".
-   */
+  /** The rows a card spans (card-rows.ts): a page card left at its default height follows its excerpt. */
   rowsOf(item: ArtBoardItem): number {
-    if (item.extensionId !== ExtensionId.Page || item.gridPosition.rows !== PAGE_AUTO_ROWS) {
-      return item.gridPosition.rows;
+    return cardRows(item, this.pageTextLength(item));
+  }
+
+  private pageTextLength(item: ArtBoardItem): number {
+    if (item.extensionId !== ExtensionId.Page) {
+      return 0;
     }
     const data = this.itemData()[item.id];
-    const length = data ? pageMarkdownToText(data.data ?? '').length : 0;
-    return Math.min(MAX_PAGE_ROWS, MIN_PAGE_ROWS + Math.ceil(Math.min(length, PAGE_EXCERPT_LENGTH) / CHARS_PER_ROW));
+    return data ? pageMarkdownToText(data.data ?? '').length : 0;
   }
 
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
@@ -355,13 +352,11 @@ export class Board {
     this.dataService.changeAllArtBoardItemPosition(
       layout.items.map((tile, index) => {
         const item = items.get(tile.id);
-        // A page card left at its excerpt's height keeps following its excerpt.
-        const autoHeight = item?.extensionId === ExtensionId.Page && tile.rows === this.rowsOf(item);
         return {
           artBoardItemId: tile.id,
           gridPosition: {
             order: index,
-            rows: autoHeight ? item.gridPosition.rows : tile.rows,
+            rows: item ? storedRows(item, tile.rows, this.pageTextLength(item)) : tile.rows,
             screenColumns: {
               Large: tile.columns.lg,
               Medium: tile.columns.md,

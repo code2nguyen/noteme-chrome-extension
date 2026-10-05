@@ -46,7 +46,8 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
     extensionId: ExtensionId.Page,
     gridPosition: {
       order: -1,
-      rows: 6,
+      // As tall as its excerpt until it is resized (board/card-rows.ts): a span no resize gives.
+      rows: 0,
       screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
     },
     colorIndex: 0,

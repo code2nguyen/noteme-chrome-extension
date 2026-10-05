@@ -159,7 +159,7 @@ async function seed(page: Page, theme: 'light' | 'dark'): Promise<void> {
       seeds: seeds.map((s, index) => ({
         ...s,
         date: ago(s.minutes),
-        grid: grid(index, { note: 10, page: 6, flow: 4 }[s.kind]),
+        grid: grid(index, { note: 10, page: 0, flow: 4 }[s.kind]),
       })),
     },
   );
