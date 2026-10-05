@@ -40,16 +40,19 @@ export function markdownToText(markdown: string): string {
 
 /** Strip page markdown (c2-page-editor's GFM) down to its words, for search and previews. */
 export function pageMarkdownToText(markdown: string): string {
-  return markdown
-    .replace(/^(`{3,}|~{3,}).*$/gm, '')
-    .replace(/^\s{0,3}(#{1,6}\s+|>\s?|[-*+]\s+\[[ xX]\]\s+|[-*+]\s+|\d+[.)]\s+)/gm, '')
-    .replace(/^\s*([-*_])(\s*\1){2,}\s*$/gm, '')
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/<\/?(u|span|mark)\b[^>]*>/g, '')
-    .replace(/(?<!\\)(\*\*|__|~~|\*|`)/g, '')
-    .replace(/\\(.)/g, '$1')
-    .replace(/\n{2,}/g, '\n')
-    .trim();
+  return (
+    markdown
+      .replace(/^(`{3,}|~{3,}).*$/gm, '')
+      .replace(/^\s{0,3}(#{1,6}\s+|>\s?|[-*+]\s+\[[ xX]\]\s+|[-*+]\s+|\d+[.)]\s+)/gm, '')
+      .replace(/^\s*([-*_])(\s*\1){2,}\s*$/gm, '')
+      // A destination may hold balanced parentheses, as in Wikipedia's (disambiguation) links.
+      .replace(/!?\[([^\]]*)\]\((?:[^()]|\([^()]*\))*\)/g, '$1')
+      .replace(/<\/?(u|span|mark)\b[^>]*>/g, '')
+      .replace(/(?<!\\)(\*\*|__|~~|\*|`)/g, '')
+      .replace(/\\(.)/g, '$1')
+      .replace(/\n{2,}/g, '\n')
+      .trim()
+  );
 }
 
 /** "2 min ago", "yesterday", "Tue", "24 Sep": how recent an edit is, in a few words. */
