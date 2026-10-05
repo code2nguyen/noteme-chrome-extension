@@ -61,7 +61,8 @@ export function editedLabel(value: string | undefined, now = new Date()): string
     return '';
   }
   const date = new Date(value);
-  const minutes = Math.round((now.getTime() - date.getTime()) / 60_000);
+  // Whole minutes elapsed: 30 seconds is still "just now", 59 minutes still "59 min ago".
+  const minutes = Math.floor((now.getTime() - date.getTime()) / 60_000);
   if (minutes < 1) {
     return 'just now';
   }

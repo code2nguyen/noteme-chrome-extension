@@ -13,4 +13,11 @@ describe('editedLabel', () => {
     expect(editedLabel(new Date(2026, 8, 24).toISOString(), now)).toMatch(/24/);
     expect(editedLabel(new Date(2025, 8, 24).toISOString(), now)).toMatch(/2025/);
   });
+
+  it('counts whole minutes', () => {
+    const secondsAgo = (seconds: number) => new Date(now.getTime() - seconds * 1000).toISOString();
+    expect(editedLabel(secondsAgo(30), now)).toBe('just now');
+    expect(editedLabel(secondsAgo(90), now)).toBe('1 min ago');
+    expect(editedLabel(secondsAgo(59 * 60 + 40), now)).toBe('59 min ago');
+  });
 });
