@@ -252,6 +252,8 @@ export class Board {
     }
     this.query.set('');
     this.arranging.set(false);
+    // A new note takes focus once, when it is created: not when its card is drawn again later.
+    this.focusItemId.set(null);
     this.router.navigate([], { queryParams: { view: view === 'archive' ? 'archive' : null }, replaceUrl: true });
   }
 
@@ -332,6 +334,9 @@ export class Board {
   }
 
   archive(item: ArtBoardItem): void {
+    if (this.focusItemId() === item.id) {
+      this.focusItemId.set(null);
+    }
     this.dataService.hideArtBoardItem(item);
   }
 

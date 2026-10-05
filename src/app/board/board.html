@@ -148,7 +148,7 @@
           <ntm-note-card
             [item]="item"
             [archived]="!inNotesView()"
-            [autofocus]="item.id === focusItemId()"
+            [autofocus]="inNotesView() && item.id === focusItemId()"
             (archive)="archive(item)"
             (restore)="restore(item)"
             (remove)="removeNote(item)"

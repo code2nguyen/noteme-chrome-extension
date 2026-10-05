@@ -441,6 +441,31 @@ test('the Archive view filters by the search, and N brings back the board with a
   await expect.poll(() => focusedTag(page)).toBe('c2-notepad');
 });
 
+test('typing in the Archive search stays in the search when a note created earlier shows again', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Bike repair checklist');
+  await expect
+    .poll(() => page.evaluate(() => Object.values(localStorage).some((value) => value.includes('Bike repair'))))
+    .toBe(true);
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
+  await card(page).locator('c2-menu-item[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+
+  // The search hides the card, then shows it again: drawn anew, it must not take the focus it had when created.
+  const search = page.locator('c2-autocomplete input');
+  await search.pressSequentially('zz');
+  await expect(page.locator('.board__empty')).toHaveText('Nothing archived matches.');
+  await search.press('Backspace');
+  await search.press('Backspace');
+  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await page.keyboard.type('bike', { delay: 50 });
+  await expect(search).toHaveValue('bike');
+  await expect(notepadSurface(card(page))).toHaveText('Bike repair checklist');
+});
+
 test('archive a page from its view; it opens from the Archive and is restored from there', async ({ page }) => {
   await openBoard(page);
   await newPage(page);
