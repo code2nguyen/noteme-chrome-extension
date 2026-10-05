@@ -115,21 +115,13 @@ export class DataService {
       });
   }
 
-  showArtBoardItem(item: ArtBoardItem, order: number): void {
-    this.store.dispatch(
-      ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: item.id, order }),
-    );
-  }
-
-  /** Bring an archived note, page or flow back to the board, first, as a new one would be. */
+  /**
+   * Bring an archived note, page or flow back to the board, first, as a new one would be. The order is taken from the
+   * stored board when the restore runs (art-board-item.effects.ts), not from the store, which may not have read the
+   * board yet or may not hold another restore still being written.
+   */
   restoreArtBoardItem(item: ArtBoardItem): void {
-    this.store
-      .select(selectArtBoardItemsByBoardId(DEFAULT_BOARD_ID))
-      .pipe(take(1))
-      .subscribe((items) => {
-        const orders = items.map((boardItem) => boardItem.gridPosition?.order ?? 0);
-        this.showArtBoardItem(item, orders.length > 0 ? Math.min(...orders) - 1 : 0);
-      });
+    this.store.dispatch(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: item.id }));
   }
 
   searchArtBoardItem(query: string): void {

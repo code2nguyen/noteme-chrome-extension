@@ -1,8 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { asyncScheduler, EMPTY, forkJoin, iif, Observable, of } from 'rxjs';
-import { catchError, debounceTime, map, mergeMap, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { asyncScheduler, defer, EMPTY, forkJoin, from, iif, Observable, of } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  finalize,
+  map,
+  mergeMap,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataActions } from '../actions';
 import {
@@ -26,6 +36,8 @@ export class ArtBoardItemEffects {
   private readonly store = inject(Store);
   private readonly storageApi = inject(STORAGE_API);
   private readonly searchService = inject(SearchService);
+  /** The end of the id-list change running now: see oneAtATime. */
+  private idListChange: Promise<void> = Promise.resolve();
 
   loadArtBoardItems$ = createEffect(() =>
     this.actions$.pipe(
@@ -48,26 +60,28 @@ export class ArtBoardItemEffects {
           return EMPTY;
         }
         const boardId = artBoardItem.boardId;
-        return forkJoin([
-          this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
-          this.storageApi.get<string[]>(artBoardItemIdsKey()),
-        ]).pipe(
-          mergeMap(([artBoardArtBoardItemIds, artBoardItemIds]) =>
-            forkJoin([
-              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [
-                ...(artBoardArtBoardItemIds ?? []),
-                artBoardItem.id,
+        return this.oneAtATime(() =>
+          forkJoin([
+            this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
+            this.storageApi.get<string[]>(artBoardItemIdsKey()),
+          ]).pipe(
+            mergeMap(([artBoardArtBoardItemIds, artBoardItemIds]) =>
+              forkJoin([
+                this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [
+                  ...(artBoardArtBoardItemIds ?? []),
+                  artBoardItem.id,
+                ]),
+                this.storageApi.set(artBoardItemIdsKey(), [...(artBoardItemIds ?? []), artBoardItem.id]),
+                this.storageApi.set(artBoardItemKey(artBoardItem.id), {
+                  ...artBoardItem,
+                  silent: false,
+                  sourceId: this.id,
+                }),
               ]),
-              this.storageApi.set(artBoardItemIdsKey(), [...(artBoardItemIds ?? []), artBoardItem.id]),
-              this.storageApi.set(artBoardItemKey(artBoardItem.id), {
-                ...artBoardItem,
-                silent: false,
-                sourceId: this.id,
-              }),
-            ]),
+            ),
+            map(() => ArtBoardItemApiActions.createArtBoardItemSuccess({ artBoardItem })),
+            catchError((error) => of(ArtBoardItemApiActions.createArtBoardItemFailure({ error }))),
           ),
-          map(() => ArtBoardItemApiActions.createArtBoardItemSuccess({ artBoardItem })),
-          catchError((error) => of(ArtBoardItemApiActions.createArtBoardItemFailure({ error }))),
         );
       }),
     ),
@@ -135,31 +149,33 @@ export class ArtBoardItemEffects {
     this.actions$.pipe(
       ofType(ArtBoardItemActions.deleteArtBoardItem),
       mergeMap(({ boardId, artBoardItemId }) =>
-        forkJoin([
-          iif(() => !!boardId, this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId!)), of([])),
-          this.storageApi.get<string[]>(artBoardItemIdsKey()),
-        ]).pipe(
-          mergeMap(([artBoardArtBoardItemIds, artBoardItemIds]) =>
-            forkJoin([
-              iif(
-                () => !!boardId,
-                this.storageApi.set(
-                  artBoardArtBoardItemIdsKey(boardId!),
-                  without(artBoardArtBoardItemIds ?? [], artBoardItemId),
+        this.oneAtATime(() =>
+          forkJoin([
+            iif(() => !!boardId, this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId!)), of([])),
+            this.storageApi.get<string[]>(artBoardItemIdsKey()),
+          ]).pipe(
+            mergeMap(([artBoardArtBoardItemIds, artBoardItemIds]) =>
+              forkJoin([
+                iif(
+                  () => !!boardId,
+                  this.storageApi.set(
+                    artBoardArtBoardItemIdsKey(boardId!),
+                    without(artBoardArtBoardItemIds ?? [], artBoardItemId),
+                  ),
+                  of(null),
                 ),
-                of(null),
-              ),
-              this.storageApi.set(artBoardItemIdsKey(), without(artBoardItemIds ?? [], artBoardItemId)),
-              this.storageApi.remove(artBoardItemKey(artBoardItemId)),
-            ]),
-          ),
-          mergeMap(() =>
-            of(
-              ArtBoardItemApiActions.deleteArtBoardItemSuccess({ artBoardItemId }),
-              ItemDataActions.deleteItemData({ itemDataId: artBoardItemId }),
+                this.storageApi.set(artBoardItemIdsKey(), without(artBoardItemIds ?? [], artBoardItemId)),
+                this.storageApi.remove(artBoardItemKey(artBoardItemId)),
+              ]),
             ),
+            mergeMap(() =>
+              of(
+                ArtBoardItemApiActions.deleteArtBoardItemSuccess({ artBoardItemId }),
+                ItemDataActions.deleteItemData({ itemDataId: artBoardItemId }),
+              ),
+            ),
+            catchError((error) => of(ArtBoardItemApiActions.deleteArtBoardItemFailure({ artBoardItemId, error }))),
           ),
-          catchError((error) => of(ArtBoardItemApiActions.deleteArtBoardItemFailure({ artBoardItemId, error }))),
         ),
       ),
     ),
@@ -188,59 +204,74 @@ export class ArtBoardItemEffects {
     this.actions$.pipe(
       ofType(ArtBoardItemActions.hideArtBoardItem),
       mergeMap(({ boardId, artBoardItemId }) =>
-        forkJoin([
-          this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
-          this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
-        ]).pipe(
-          mergeMap(([artBoardItemIds, artBoardItem]) => {
-            if (!artBoardItem) {
-              return EMPTY;
-            }
-            const hiddenArtBoardItem: ArtBoardItem = {
-              ...normalizeArtBoardItem(artBoardItem),
-              boardId: undefined,
-              silent: false,
-              sourceId: this.id,
-            };
-            return forkJoin([
-              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), without(artBoardItemIds ?? [], artBoardItemId)),
-              this.storageApi.set(artBoardItemKey(artBoardItemId), hiddenArtBoardItem),
-            ]).pipe(map(() => hiddenArtBoardItem));
-          }),
-          map((artBoardItem) => ArtBoardItemApiActions.hideArtBoardItemSuccess({ artBoardItem })),
-          catchError((error) => of(ArtBoardItemApiActions.hideArtBoardItemFailure({ error }))),
+        this.oneAtATime(() =>
+          forkJoin([
+            this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
+            this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
+          ]).pipe(
+            mergeMap(([artBoardItemIds, artBoardItem]) => {
+              if (!artBoardItem) {
+                return EMPTY;
+              }
+              const hiddenArtBoardItem: ArtBoardItem = {
+                ...normalizeArtBoardItem(artBoardItem),
+                boardId: undefined,
+                silent: false,
+                sourceId: this.id,
+              };
+              return forkJoin([
+                this.storageApi.set(
+                  artBoardArtBoardItemIdsKey(boardId),
+                  without(artBoardItemIds ?? [], artBoardItemId),
+                ),
+                this.storageApi.set(artBoardItemKey(artBoardItemId), hiddenArtBoardItem),
+              ]).pipe(map(() => hiddenArtBoardItem));
+            }),
+            map((artBoardItem) => ArtBoardItemApiActions.hideArtBoardItemSuccess({ artBoardItem })),
+            catchError((error) => of(ArtBoardItemApiActions.hideArtBoardItemFailure({ error }))),
+          ),
         ),
       ),
     ),
   );
 
+  // First on the board, as a new note would be: before every card stored on it when the restore runs.
   showArtBoardItem$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ArtBoardItemActions.showArtBoardItem),
-      mergeMap(({ boardId, artBoardItemId, order }) =>
-        forkJoin([
-          this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
-          this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
-        ]).pipe(
-          mergeMap(([artBoardItemIds, storedItem]) => {
-            if (!storedItem || storedItem.boardId === boardId) {
-              return EMPTY;
-            }
-            const artBoardItem = normalizeArtBoardItem(storedItem);
-            const shownArtBoardItem: ArtBoardItem = {
-              ...artBoardItem,
-              boardId,
-              gridPosition: { ...artBoardItem.gridPosition, order },
-              silent: false,
-              sourceId: this.id,
-            };
-            return forkJoin([
-              this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [...(artBoardItemIds ?? []), artBoardItemId]),
-              this.storageApi.set(artBoardItemKey(artBoardItemId), shownArtBoardItem),
-            ]).pipe(map(() => shownArtBoardItem));
-          }),
-          map((artBoardItem) => ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem })),
-          catchError((error) => of(ArtBoardItemApiActions.showArtBoardItemFailure({ error }))),
+      mergeMap(({ boardId, artBoardItemId }) =>
+        this.oneAtATime(() =>
+          forkJoin([
+            this.storageApi.get<string[]>(artBoardArtBoardItemIdsKey(boardId)),
+            this.storageApi.get<ArtBoardItem>(artBoardItemKey(artBoardItemId)),
+          ]).pipe(
+            mergeMap(([artBoardItemIds, storedItem]) =>
+              this.readArtBoardItems(artBoardItemIds).pipe(
+                map((boardItems) => ({ artBoardItemIds, storedItem, boardItems })),
+              ),
+            ),
+            mergeMap(({ artBoardItemIds, storedItem, boardItems }) => {
+              if (!storedItem || storedItem.boardId === boardId) {
+                return EMPTY;
+              }
+              const orders = boardItems.map((boardItem) => boardItem.gridPosition.order ?? 0);
+              const order = orders.length > 0 ? Math.min(...orders) - 1 : 0;
+              const artBoardItem = normalizeArtBoardItem(storedItem);
+              const shownArtBoardItem: ArtBoardItem = {
+                ...artBoardItem,
+                boardId,
+                gridPosition: { ...artBoardItem.gridPosition, order },
+                silent: false,
+                sourceId: this.id,
+              };
+              return forkJoin([
+                this.storageApi.set(artBoardArtBoardItemIdsKey(boardId), [...(artBoardItemIds ?? []), artBoardItemId]),
+                this.storageApi.set(artBoardItemKey(artBoardItemId), shownArtBoardItem),
+              ]).pipe(map(() => shownArtBoardItem));
+            }),
+            map((artBoardItem) => ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem })),
+            catchError((error) => of(ArtBoardItemApiActions.showArtBoardItemFailure({ error }))),
+          ),
         ),
       ),
     ),
@@ -262,6 +293,23 @@ export class ArtBoardItemEffects {
       }),
     ),
   );
+
+  /**
+   * Create, delete, archive and restore read an id list, change it and write it back: two at once would each write
+   * their own copy and drop the other's change (restoring two notes quickly would leave one off the board). They run
+   * one after the other.
+   */
+  private oneAtATime<T>(change: () => Observable<T>): Observable<T> {
+    return defer(() => {
+      const previous = this.idListChange;
+      let done!: () => void;
+      this.idListChange = new Promise<void>((resolve) => (done = resolve));
+      return from(previous).pipe(
+        switchMap(change),
+        finalize(() => done()),
+      );
+    });
+  }
 
   private readArtBoardItems(artBoardItemIds: string[] | undefined): Observable<ArtBoardItem[]> {
     if (!artBoardItemIds || artBoardItemIds.length === 0) {
