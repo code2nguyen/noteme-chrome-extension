@@ -31,7 +31,7 @@ export const CHROME_SYNC_ITEM_BYTES = 8192;
  * given. The records are stored as JSON strings, so that value is serialized a second time (quotes and escapes count).
  * A longer note stays on the device: the write could never succeed, and the remote keeps the last copy that fitted.
  * Fitting one item does not make room in the whole area (QUOTA_BYTES): a write refused for that is held and sent again
- * once a removal frees room (ChromeStorageApi.refusedRemoteWrites).
+ * once chrome.storage.sync takes a write again or loses a record (ChromeStorageApi.retryRefusedWrites).
  */
 export function fitsChromeSyncItem(key: string, serialized: string): boolean {
   return new TextEncoder().encode(key + JSON.stringify(serialized)).length <= CHROME_SYNC_ITEM_BYTES;

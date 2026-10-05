@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ExtensionId } from '../extension-id';
 import { DataType } from '../store/models/data-type';
-import { ChromeStorageApi } from './chrome-storage.api';
+import { ChromeStorageApi, SYNC_RETRY_KEY } from './chrome-storage.api';
 import { INSTANCE_ID } from './instance-id';
 import { StoreSyncService } from './store-sync.service';
 
@@ -26,10 +26,15 @@ function area(records: Record<string, string> = {}) {
   };
 }
 
+type ChangeListener = (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void;
+
 function setUp(localRecords: Record<string, string> = {}, { drain = false } = {}) {
   const local = area(localRecords);
   const sync = area();
-  vi.stubGlobal('chrome', { storage: { local, sync, onChanged: { addListener: () => undefined } } });
+  const listeners: ChangeListener[] = [];
+  vi.stubGlobal('chrome', {
+    storage: { local, sync, onChanged: { addListener: (listener: ChangeListener) => listeners.push(listener) } },
+  });
   const injector = Injector.create({
     providers: [
       { provide: INSTANCE_ID, useValue: 'tab' },
@@ -41,7 +46,7 @@ function setUp(localRecords: Record<string, string> = {}, { drain = false } = {}
     // Leave the queue for the test to read instead of draining it on a timer.
     api.syncToRemote = () => undefined;
   }
-  return { api, local, sync };
+  return { api, local, sync, listeners };
 }
 
 describe('ChromeStorageApi', () => {
@@ -78,36 +83,77 @@ describe('ChromeStorageApi', () => {
     expect(api.remoteDataQueue).toEqual([{ key: ['ART_BOARD_ITEM__a'], action: 'remove' }]);
   });
 
-  it('sends a note chrome.storage.sync refused (the area full) again once a removal frees room', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const { api, sync } = setUp(
-      { ART_BOARD_ITEM__old: JSON.stringify({ id: 'old', extensionId: ExtensionId.TextNote }) },
-      { drain: true },
-    );
-    sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
-    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false });
-    await vi.advanceTimersByTimeAsync(700);
-    expect(sync.records).toEqual({});
-    expect(api.refusedRemoteWrites.has('ITEM_DATA__a')).toBe(true);
+  describe('a note chrome.storage.sync refused (the area full)', () => {
+    const note = (data: string) => ({ id: 'a', dataType: DataType.MARKDOWN, data, empty: false });
+    const other = { ART_BOARD_ITEM__old: JSON.stringify({ id: 'old', extensionId: ExtensionId.TextNote }) };
 
-    await api.removePromise('ART_BOARD_ITEM__old');
-    await vi.advanceTimersByTimeAsync(700 * 3);
-    expect(sync.remove).toHaveBeenCalledWith(['ART_BOARD_ITEM__old']);
-    expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
-    expect(api.refusedRemoteWrites.size).toBe(0);
-  });
+    /** Write the note and let chrome.storage.sync refuse it. */
+    async function refused(localRecords: Record<string, string> = {}) {
+      vi.useFakeTimers();
+      vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const setup = setUp(localRecords, { drain: true });
+      setup.sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+      await setup.api.setPromise('ITEM_DATA__a', note('Hi'));
+      await vi.advanceTimersByTimeAsync(700);
+      expect(setup.sync.records).toEqual({});
+      expect(JSON.parse(setup.local.records[SYNC_RETRY_KEY])).toEqual(['ITEM_DATA__a']);
+      return setup;
+    }
 
-  it('drops a refused write that a newer write of the note replaces', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const { api, sync } = setUp({}, { drain: true });
-    sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
-    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false });
-    await vi.advanceTimersByTimeAsync(700);
-    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi again', empty: false });
-    expect(api.refusedRemoteWrites.size).toBe(0);
-    await vi.advanceTimersByTimeAsync(700 * 2);
-    expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi again' });
+    it('is sent again once a removal frees room', async () => {
+      const { api, sync, local } = await refused(other);
+      await api.removePromise('ART_BOARD_ITEM__old');
+      await vi.advanceTimersByTimeAsync(700 * 3);
+      expect(sync.remove).toHaveBeenCalledWith(['ART_BOARD_ITEM__old']);
+      expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
+      expect(local.records[SYNC_RETRY_KEY]).toBeUndefined();
+    });
+
+    it('is sent again when another device removes something from chrome.storage.sync', async () => {
+      const { sync, listeners } = await refused();
+      listeners.forEach((listener) => listener({ ITEM_DATA__gone: { oldValue: '{"id":"gone"}' } }, 'sync'));
+      await vi.advanceTimersByTimeAsync(700 * 2);
+      expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
+    });
+
+    it('is sent again after a restart', async () => {
+      const { local } = await refused();
+      const restarted = setUp(local.records, { drain: true });
+      await vi.advanceTimersByTimeAsync(700 * 2);
+      expect(JSON.parse(restarted.sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
+    });
+
+    it('is not sent again once deleted, even when the refusal comes after the deletion', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const { api, sync, local } = setUp({}, { drain: true });
+      sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+      await api.setPromise('ITEM_DATA__a', note('Hi'));
+      // Deleted while its write is still queued: the refusal and the removal come after.
+      await api.removePromise('ITEM_DATA__a');
+      await vi.advanceTimersByTimeAsync(700 * 4);
+      expect(sync.remove).toHaveBeenCalledWith(['ITEM_DATA__a']);
+      expect(sync.set).toHaveBeenCalledTimes(1);
+      expect(sync.records).toEqual({});
+      expect(local.records).toEqual({});
+    });
+
+    it('is not sent over a newer copy that came from the remote', async () => {
+      const { api, sync } = await refused(other);
+      // What syncRemoteToLocal writes when the remote copy is newer.
+      await api.setPromise('ITEM_DATA__a', note('Newer, from another device'), 'remote', 'other-device');
+      await api.removePromise('ART_BOARD_ITEM__old');
+      await vi.advanceTimersByTimeAsync(700 * 3);
+      expect(sync.set).toHaveBeenCalledTimes(1);
+      expect(sync.records['ITEM_DATA__a']).toBeUndefined();
+    });
+
+    it('is replaced by a newer write of the note', async () => {
+      const { api, sync } = await refused();
+      await api.setPromise('ITEM_DATA__a', note('Hi again'));
+      await vi.advanceTimersByTimeAsync(700 * 3);
+      expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi again' });
+      expect(sync.set).toHaveBeenCalledTimes(2);
+    });
   });
 });
