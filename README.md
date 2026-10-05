@@ -60,7 +60,7 @@ create that GitHub release by hand instead, with the zip attached as the tag run
 
 ```sh
 npm run build && npm run package                   # dist/noteme-<version>.zip
-node scripts/changelog.ts --notes <version> > notes.md
+node scripts/changelog.ts --notes <version> > notes.md   # needs the full git history (not a shallow clone)
 gh release create v<version> dist/noteme-<version>.zip --title "Noteme <version>" --notes-file notes.md
 ```
 
