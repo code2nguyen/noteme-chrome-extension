@@ -28,7 +28,7 @@
     <a class="home__search" routerLink="/main-board" [queryParams]="{ search: 1 }">
       <c2-feather-search aria-hidden="true"></c2-feather-search>
       <span>Search my notes</span>
-      <kbd>Ctrl K</kbd>
+      <kbd>{{ searchKey }}</kbd>
     </a>
 
     <a class="home__glass-button" routerLink="/main-board" [queryParams]="{ new: 'note' }">

@@ -63,6 +63,8 @@ export class Home {
   readonly shortcuts = signal<ShortcutsState>('hidden');
   /** Bumped by every refresh, so a slower earlier one cannot publish over the latest. */
   private shortcutsRun = 0;
+  /** The search shortcut as this keyboard writes it; onKey takes both. */
+  readonly searchKey = isApple() ? '⌘ K' : 'Ctrl K';
 
   readonly settingsOpen = toSignal(inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,
@@ -174,6 +176,12 @@ export class Home {
       this.router.navigate(['/main-board'], { queryParams: { search: 1 } });
     }
   }
+}
+
+/** Apple keyboards say ⌘ where others say Ctrl. */
+function isApple(): boolean {
+  const agent = navigator as Navigator & { userAgentData?: { platform?: string } };
+  return /mac|iphone|ipad/i.test(agent.userAgentData?.platform || navigator.platform);
 }
 
 /** After the page has settled: the downloads never compete with the first paint. */
