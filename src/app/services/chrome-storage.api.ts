@@ -18,6 +18,12 @@ export class ChromeStorageApi implements StorageApi {
   remoteDataQueue: Array<{ key: string | string[]; value?: string; action: 'remove' | 'set' }> = [];
   writingToRemoteSubscription: Subscription | null = null;
   remoteSync$ = new BehaviorSubject(false);
+  /**
+   * Notes chrome.storage.sync refused, by key, with the value last sent. Each fits an item, so the likely cause is the
+   * whole area being full (QUOTA_BYTES): they are sent again once a removal frees room, unless a newer write replaces
+   * them first. The note itself is safe in chrome.storage.local either way.
+   */
+  readonly refusedRemoteWrites = new Map<string, string>();
 
   constructor() {
     chrome.storage.onChanged.addListener((changes) => {
@@ -56,7 +62,19 @@ export class ChromeStorageApi implements StorageApi {
             item.action === 'remove'
               ? this.chromeSyncApi.remove(item.key)
               : this.chromeSyncApi.set({ [item.key as string]: item.value });
-          write.catch((error: unknown) => console.error(error));
+          write.then(
+            () => {
+              if (item.action === 'remove') {
+                this.retryRefusedWrites();
+              }
+            },
+            (error: unknown) => {
+              console.error(error);
+              if (item.action === 'set' && !this.queued(item.key as string)) {
+                this.refusedRemoteWrites.set(item.key as string, item.value!);
+              }
+            },
+          );
         },
         complete: () => {
           this.writingToRemoteSubscription = null;
@@ -75,6 +93,10 @@ export class ChromeStorageApi implements StorageApi {
     }
     const valueStr = JSON.stringify(value);
     await this.localStorageApi.set({ [key]: valueStr });
+    if (trust === 'local') {
+      // Superseded: this write is queued below, or is one the policy keeps on the device.
+      this.refusedRemoteWrites.delete(key);
+    }
     if (trust === 'local' && syncsWithChromeProfile(key, value) && fitsChromeSyncItem(key, valueStr)) {
       const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
       if (oldActionIndex > -1) {
@@ -110,10 +132,29 @@ export class ChromeStorageApi implements StorageApi {
     const records = (await this.read(this.localStorageApi, keys)) as unknown[];
     const remoteKeys = keys.filter((itemKey, index) => syncsWithChromeProfile(itemKey, records[index]));
     await this.localStorageApi.remove(key);
+    keys.forEach((itemKey) => this.refusedRemoteWrites.delete(itemKey));
     if (remoteKeys.length > 0) {
       this.remoteDataQueue.push({ key: remoteKeys, action: 'remove' });
       this.syncToRemote();
     }
+  }
+
+  /** Queue again the writes chrome.storage.sync refused, now that a removal has freed room. */
+  private retryRefusedWrites(): void {
+    if (this.refusedRemoteWrites.size === 0) {
+      return;
+    }
+    for (const [key, value] of this.refusedRemoteWrites) {
+      if (!this.queued(key)) {
+        this.remoteDataQueue.push({ key, value, action: 'set' });
+      }
+    }
+    this.refusedRemoteWrites.clear();
+    this.syncToRemote();
+  }
+
+  private queued(key: string): boolean {
+    return this.remoteDataQueue.some((item) => item.key === key);
   }
 
   private async read(area: chrome.storage.StorageArea, key: string | string[] | null): Promise<unknown> {

@@ -26,7 +26,7 @@ function area(records: Record<string, string> = {}) {
   };
 }
 
-function setUp(localRecords: Record<string, string> = {}) {
+function setUp(localRecords: Record<string, string> = {}, { drain = false } = {}) {
   const local = area(localRecords);
   const sync = area();
   vi.stubGlobal('chrome', { storage: { local, sync, onChanged: { addListener: () => undefined } } });
@@ -37,13 +37,19 @@ function setUp(localRecords: Record<string, string> = {}) {
     ],
   });
   const api = runInInjectionContext(injector, () => new ChromeStorageApi());
-  // Leave the queue for the test to read instead of draining it on a timer.
-  api.syncToRemote = () => undefined;
-  return { api, local };
+  if (!drain) {
+    // Leave the queue for the test to read instead of draining it on a timer.
+    api.syncToRemote = () => undefined;
+  }
+  return { api, local, sync };
 }
 
 describe('ChromeStorageApi', () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 
   it('queues a note for chrome.storage.sync, not a page or a note over the item quota', async () => {
     const { api } = setUp();
@@ -70,5 +76,38 @@ describe('ChromeStorageApi', () => {
     await api.removePromise(['ART_BOARD_ITEM__a', 'ART_BOARD_ITEM__f']);
     expect(local.records).toEqual({});
     expect(api.remoteDataQueue).toEqual([{ key: ['ART_BOARD_ITEM__a'], action: 'remove' }]);
+  });
+
+  it('sends a note chrome.storage.sync refused (the area full) again once a removal frees room', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { api, sync } = setUp(
+      { ART_BOARD_ITEM__old: JSON.stringify({ id: 'old', extensionId: ExtensionId.TextNote }) },
+      { drain: true },
+    );
+    sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false });
+    await vi.advanceTimersByTimeAsync(700);
+    expect(sync.records).toEqual({});
+    expect(api.refusedRemoteWrites.has('ITEM_DATA__a')).toBe(true);
+
+    await api.removePromise('ART_BOARD_ITEM__old');
+    await vi.advanceTimersByTimeAsync(700 * 3);
+    expect(sync.remove).toHaveBeenCalledWith(['ART_BOARD_ITEM__old']);
+    expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi' });
+    expect(api.refusedRemoteWrites.size).toBe(0);
+  });
+
+  it('drops a refused write that a newer write of the note replaces', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { api, sync } = setUp({}, { drain: true });
+    sync.set.mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false });
+    await vi.advanceTimersByTimeAsync(700);
+    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi again', empty: false });
+    expect(api.refusedRemoteWrites.size).toBe(0);
+    await vi.advanceTimersByTimeAsync(700 * 2);
+    expect(JSON.parse(sync.records['ITEM_DATA__a'])).toMatchObject({ data: 'Hi again' });
   });
 });
