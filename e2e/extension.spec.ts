@@ -287,8 +287,21 @@ test('notes sync through the Chrome profile; pages stay on this computer', async
   await expect
     .poll(async () => (await stored(page, 'local', `ITEM_DATA__${pageId}`))?.properties?.title)
     .toBe('Long page');
-  // Give the sync queue (one write every 700ms) time to have sent anything it was going to send.
-  await page.waitForTimeout(3000);
+  await expect
+    .poll(async () => JSON.stringify((await stored(page, 'local', `ITEM_DATA__${pageId}`))?.data))
+    .toContain('Pages are written locally only.');
+
+  // Every page write is now in local storage, and a record that syncs joins the sync queue (first in, first out, one
+  // write every 700ms) as its local write completes. Edit the note in the same document: its record joins the queue
+  // behind anything the page could have put there, so once the edit reaches sync, the page's records would have too.
+  await page.locator('ntm-page-view .page-bar__back').click();
+  await expect(card(page)).toBeVisible();
+  await notepadSurface(card(page)).click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' again');
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${noteId}`))?.data, { timeout: 15_000 })
+    .toBe('Synced note again');
   expect(await stored(page, 'sync', `ITEM_DATA__${pageId}`)).toBeUndefined();
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${pageId}`)).toBeUndefined();
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${noteId}`)).toBeDefined();
