@@ -97,9 +97,17 @@ export class DataService {
     );
   }
 
-  hideArtBoardItem(artBoardItem: ArtBoardItem): void {
+  /**
+   * Archive a note, or remove it when its stored data is empty. `keep` archives it without that check: a page or flow
+   * view decides from what it shows, which the store may not have yet (its save is debounced).
+   */
+  hideArtBoardItem(artBoardItem: ArtBoardItem, { keep = false }: { keep?: boolean } = {}): void {
     const boardId = artBoardItem.boardId;
     if (!boardId) {
+      return;
+    }
+    if (keep) {
+      this.store.dispatch(ArtBoardItemActions.hideArtBoardItem({ boardId, artBoardItemId: artBoardItem.id }));
       return;
     }
     this.store

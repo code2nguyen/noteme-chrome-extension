@@ -17,7 +17,7 @@ const SHOWN_BOXES = 6;
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [RouterLink],
   template: `
-    <a class="flow-card" [routerLink]="['/flow', item().id]">
+    <a class="flow-card" [routerLink]="['/flow', item().id]" [queryParams]="item().boardId ? {} : { from: 'archive' }">
       <span class="flow-card__kind">
         <c2-feather-share-2 aria-hidden="true"></c2-feather-share-2>
         Flow · {{ edited() }}

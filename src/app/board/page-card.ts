@@ -16,7 +16,7 @@ export const PAGE_EXCERPT_LENGTH = 220;
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [RouterLink],
   template: `
-    <a class="page-card" [routerLink]="['/page', item().id]">
+    <a class="page-card" [routerLink]="['/page', item().id]" [queryParams]="item().boardId ? {} : { from: 'archive' }">
       <span class="page-card__kind">
         <c2-feather-file-text aria-hidden="true"></c2-feather-file-text>
         Page · {{ edited() }}

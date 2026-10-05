@@ -34,6 +34,29 @@ const test = base.extend<{ errors: string[] }>({
 
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/**
+ * Choose an item of a page's or flow's menu right away, as a click would, but within the 300ms its last edit waits to
+ * be saved: what a quick click after typing does on a busy machine.
+ */
+const chooseAtOnce = (page: Page, view: 'ntm-page-view' | 'ntm-flow-view', value: string) =>
+  page.evaluate(
+    ([view, value]) =>
+      document.querySelector(`${view} c2-menu`)!.dispatchEvent(new CustomEvent('menu-select', { detail: { value } })),
+    [view, value],
+  );
+
+/** Wait for a page or flow title to be stored (saves are debounced), rather than for a fixed time. */
+const saved = (page: Page, title: string) =>
+  expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage)
+          .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+          .map(([, value]) => JSON.parse(value).properties?.title),
+      ),
+    )
+    .toContain(title);
+
 test.beforeEach(async ({ page }) => {
   await mockPhotoSources(page);
   await page.goto('/');
@@ -154,7 +177,7 @@ test('a page shows its editor only once its stored data is read', async ({ page 
   await openBoard(page);
   await newPage(page);
   await page.keyboard.type('Alpha');
-  await page.waitForTimeout(500);
+  await saved(page, 'Alpha');
   await page.reload();
   await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Alpha');
   await expect(page.locator('ntm-page-view c2-page-editor')).toHaveCount(1);
@@ -174,7 +197,7 @@ test('a page or flow view reused for another one shows that one', async ({ page 
     await newPage(page);
     await page.keyboard.type(title);
     pages[title] = idOf();
-    await page.waitForTimeout(500);
+    await saved(page, title);
     await page.locator('.page-bar__back').click();
   }
   const pageTitle = page.locator('ntm-page-view c2-text-field');
@@ -191,7 +214,7 @@ test('a page or flow view reused for another one shows that one', async ({ page 
     await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
     await page.keyboard.type(title);
     flows[title] = idOf();
-    await page.waitForTimeout(500);
+    await saved(page, title);
     await page.locator('.flow-bar__back').click();
     await expect(page.locator('ntm-board')).toBeVisible();
   }
@@ -215,9 +238,8 @@ test('a new page or flow left immediately is not kept', async ({ page }) => {
     await page.goBack();
     await expect(page).toHaveURL(/#\/main-board$/);
     await expect(page.locator('ntm-board')).toBeVisible();
-    await page.waitForTimeout(500);
     await expect(tiles(page)).toHaveCount(0);
-    expect(await itemDataKeys()).toEqual([]);
+    await expect.poll(itemDataKeys).toEqual([]);
   }
 });
 
@@ -232,11 +254,14 @@ test('holding P creates a single page', async ({ page }) => {
   await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
   await page.keyboard.press('ControlOrMeta+a');
   await page.keyboard.type('Held');
-  await page.waitForTimeout(500);
+  await saved(page, 'Held');
   await page.locator('.page-bar__back').click();
   await expect(page.locator('ntm-page-card')).toHaveCount(1);
-  await page.waitForTimeout(500);
   await expect(tiles(page)).toHaveCount(1);
+  const boardIds = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('noteme-dev:_ART_BOARD__ART_BOARD_ITEM_IDS__defaultArtBoard') ?? '[]'),
+  );
+  expect(boardIds).toHaveLength(1);
 });
 
 test('N and P start a note or a page from the keyboard', async ({ page }) => {
@@ -412,31 +437,40 @@ test('archive a page from its view; it opens from the Archive and is restored fr
   await page.keyboard.type('Old recipes');
   await page.keyboard.press('Enter');
   await page.keyboard.type('Grandma’s soup, the long way.');
-  await page.waitForTimeout(500);
-  await page.locator('ntm-page-view c2-icon-button[aria-label="Page actions"]').click();
   await expect(page.locator('ntm-page-view c2-menu-item[value="restore"]')).toHaveCount(0);
-  await page.locator('ntm-page-view c2-menu-item[value="archive"]').click();
+  // Archived before the typing is saved: the page is archived with it, not removed as empty.
+  await chooseAtOnce(page, 'ntm-page-view', 'archive');
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(tiles(page)).toHaveCount(0);
 
   await page.locator('.navbar__views c2-button[value="archive"]').click();
   const pageCard = page.locator('ntm-page-card');
   await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
+  await expect(pageCard.locator('.page-card__excerpt')).toContainText('Grandma’s soup, the long way.');
   await pageCard.click();
+  // The card says where it was opened from, so the way back leads to the Archive before the page is even read.
+  await expect(page).toHaveURL(/#\/page\/[\w-]+\?from=archive$/);
   await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Old recipes');
-  // The way back leads to the Archive it was opened from.
   await expect(page.locator('.page-bar__back')).toHaveText('Archive');
   await page.locator('.page-bar__back').click();
   await expect(page).toHaveURL(/#\/main-board\?view=archive$/);
   await pageCard.click();
 
-  await page.locator('ntm-page-view c2-icon-button[aria-label="Page actions"]').click();
+  // Restored right after an edit, in a tab that did not write the stored page: the edit stays on screen and is saved.
+  await page.reload();
+  const title = page.locator('ntm-page-view c2-text-field');
+  await expect(title).toHaveJSProperty('value', 'Old recipes');
+  await title.click();
+  await page.keyboard.press('End');
   await expect(page.locator('ntm-page-view c2-menu-item[value="archive"]')).toHaveCount(0);
-  await page.locator('ntm-page-view c2-menu-item[value="restore"]').click();
+  await page.keyboard.type(' and new');
+  await chooseAtOnce(page, 'ntm-page-view', 'restore');
   await expect(page.locator('.page-bar__back')).toHaveText('Notes');
+  await saved(page, 'Old recipes and new');
+  await expect(title).toHaveJSProperty('value', 'Old recipes and new');
   await page.locator('.page-bar__back').click();
   await expect(page).toHaveURL(/#\/main-board$/);
-  await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
+  await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes and new');
 });
 
 test('arrange: move a card with the keyboard, and the order is kept after a reload', async ({ page }) => {
@@ -714,6 +748,23 @@ test.describe('flow', () => {
     await page.keyboard.press('Enter');
     await expect(box(page, label)).toBeVisible();
   }
+
+  test('a flow archived right after its title is typed lands in the Archive with it', async ({ page }) => {
+    await openBoard(page);
+    await page.keyboard.press('f');
+    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await page.keyboard.type('Moving house');
+    // Before the typing is saved: the flow is archived with its title, not removed as empty.
+    await chooseAtOnce(page, 'ntm-flow-view', 'archive');
+    await expect(page).toHaveURL(/#\/main-board$/);
+    await expect(tiles(page)).toHaveCount(0);
+    await page.locator('.navbar__views c2-button[value="archive"]').click();
+    const flowCard = page.locator('ntm-flow-card');
+    await expect(flowCard.locator('.flow-card__title')).toHaveText('Moving house');
+    await flowCard.click();
+    await expect(page).toHaveURL(/#\/flow\/[\w-]+\?from=archive$/);
+    await expect(page.locator('.flow-bar__back')).toHaveText('Archive');
+  });
 
   test('a flow is drawn with boxes and arrows, saved, and shown on the board', async ({ page }) => {
     await openBoard(page);

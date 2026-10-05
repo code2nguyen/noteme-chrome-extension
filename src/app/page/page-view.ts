@@ -26,13 +26,13 @@ import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 import type { PageEditor } from '@c2n/components/page-editor';
 import type { TextField } from '@c2n/components/text-field';
-import { combineLatest, interval } from 'rxjs';
-import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { combineLatest, EMPTY, interval } from 'rxjs';
+import { filter, map, startWith, switchMap, take, tap, timeout } from 'rxjs/operators';
 
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { editedLabel, pageMarkdownToText } from '../services/utils';
-import { ArtBoardItem } from '../store/models';
+import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
 
 /** How long "Saving…" stays after the last keystroke: the store writes 300ms after typing stops. */
@@ -66,6 +66,13 @@ export class PageView {
   readonly found = signal<boolean | null>(null);
   /** Archived: off the board, in the Archive view. */
   readonly archived = signal(false);
+  /** Opened from the Archive (`?from=archive`): what the header goes by until the page is read. */
+  private readonly openedFromArchive = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('from') === 'archive')),
+    { initialValue: false },
+  );
+  /** Whether the way back leads to the Archive and the menu offers Restore. */
+  readonly inArchive = computed(() => (this.found() === null ? this.openedFromArchive() : this.archived()));
   private readonly modified = signal<string | undefined>(undefined);
   private readonly createdDate = signal<string | undefined>(undefined);
   private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
@@ -74,6 +81,8 @@ export class PageView {
   private shownId: string | undefined;
   /** Whether the shown page's stored title and text are bound: until then the view holds nothing of it. */
   private bound = false;
+  /** The stored data last seen: an emission for the item alone (restored, moved) must not bind it again. */
+  private boundData: ItemData | undefined;
   /** Opened by "New page": the only page removed when it is left before its data was read. */
   private isNew = false;
   /** Deleted or archived from its menu: leaving it must not remove it. */
@@ -116,7 +125,9 @@ export class PageView {
         this.modified.set(data.empty ? undefined : data.modifiedDate);
         this.createdDate.set(data.empty ? undefined : data.createdDate);
         // Bind the stored page once, then only changes made elsewhere: re-applying our own saves would move the caret.
-        if (!this.bound || data.sourceId !== this.instanceId) {
+        const changed = data !== this.boundData;
+        this.boundData = data;
+        if (!this.bound || (changed && data.sourceId !== this.instanceId)) {
           const first = !this.bound;
           this.bound = true;
           this.title.set(data.properties?.title ?? '');
@@ -176,7 +187,8 @@ export class PageView {
     this.deleted = true;
     // A blank page is removed rather than archived, as it would be when left.
     if (value === 'archive' && !(!this.title().trim() && !pageMarkdownToText(this.value()).trim())) {
-      this.dataService.hideArtBoardItem(item);
+      // Decided on what the view shows: the store may not have the last edit yet (its save is debounced).
+      this.dataService.hideArtBoardItem(item, { keep: true });
     } else {
       this.dataService.removeArtBoardItem(item);
     }
@@ -207,6 +219,10 @@ export class PageView {
     this.leave();
     this.shownId = id;
     this.isNew = this.route.snapshot.queryParamMap.has('new');
+    // Nothing of the last one carries over: its "Saving…" (its save goes on regardless) or its being archived.
+    clearTimeout(this.savingTimer);
+    this.saving.set(false);
+    this.archived.set(false);
     this.found.set(null);
   }
 
@@ -222,7 +238,8 @@ export class PageView {
       } else if (this.isNew) {
         // Left before its data was read: decide on what is stored, which is empty unless another tab wrote to it.
         combineLatest([this.dataService.getArtBoardItemById(id), this.dataService.getItemData(id)])
-          .pipe(take(1))
+          // A failed read never brings the data: give up rather than hold this view and a store selector forever.
+          .pipe(take(1), timeout({ first: 10_000, with: () => EMPTY }))
           .subscribe(([item, data]) => {
             if (item && !data.properties?.title?.trim() && !pageMarkdownToText(data.data ?? '').trim()) {
               this.dataService.removeArtBoardItem(item);
@@ -233,6 +250,7 @@ export class PageView {
     this.shownId = undefined;
     this.item = undefined;
     this.bound = false;
+    this.boundData = undefined;
     this.deleted = false;
   }
 }
