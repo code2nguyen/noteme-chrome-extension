@@ -23,7 +23,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type {
   Flow,
@@ -38,7 +38,7 @@ import type {
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 import type { TextField } from '@c2n/components/text-field';
 import { combineLatest, interval } from 'rxjs';
-import { filter, map, startWith, switchMap, take } from 'rxjs/operators';
+import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
@@ -92,6 +92,12 @@ export class FlowView {
   private readonly modified = signal<string | undefined>(undefined);
   private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
   private item: ArtBoardItem | undefined;
+  /** The flow shown: Angular reuses this view from one flow to the next. */
+  private shownId: string | undefined;
+  /** Whether the shown flow's stored title and boxes are bound: until then the view holds nothing of it. */
+  private bound = false;
+  /** Opened by "New flow": the only flow removed when it is left before its data was read. */
+  private isNew = false;
   private deleted = false;
   private savingTimer?: ReturnType<typeof setTimeout>;
 
@@ -104,6 +110,9 @@ export class FlowView {
 
   readonly status = computed(() => {
     this.tick();
+    if (this.found() === null) {
+      return 'Loading…';
+    }
     if (this.saving()) {
       return 'Saving…';
     }
@@ -113,35 +122,37 @@ export class FlowView {
 
   constructor() {
     this.dataService.loadAllArtBoardItems();
-    let firstBinding = true;
     combineLatest([
       this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
       this.dataService.isAllArtBoardItemsLoaded().pipe(filter(Boolean), take(1)),
     ])
       .pipe(
+        tap(([id]) => this.show(id)),
         switchMap(([id]) =>
           combineLatest([this.dataService.getArtBoardItemById(id), this.dataService.getItemData(id)]),
         ),
+        takeUntilDestroyed(),
       )
       .subscribe(([item, data]) => {
         this.item = item;
         this.found.set(!!item);
         this.modified.set(data.empty ? undefined : data.modifiedDate);
         // Bind the stored flow once, then only changes made elsewhere (another tab).
-        if (firstBinding || data.sourceId !== this.instanceId) {
-          firstBinding = false;
+        if (!this.bound || data.sourceId !== this.instanceId) {
+          const first = !this.bound;
+          this.bound = true;
           this.title.set(data.properties?.title ?? '');
           this.doc.set(parseFlow(data.data));
+          // The title field renders with the flow, once it is found.
+          if (first && item && this.isNew) {
+            afterNextRender(() => void this.focusTitle(), { injector: this.injector });
+          }
         }
       });
 
-    if (this.route.snapshot.queryParamMap.has('new')) {
-      afterNextRender(() => void this.focusTitle());
-    }
-
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.savingTimer);
-      this.removeIfEmpty();
+      this.leave();
     });
   }
 
@@ -252,10 +263,39 @@ export class FlowView {
     field.focus();
   }
 
-  private removeIfEmpty(): void {
-    const item = this.item;
-    if (item && !this.deleted && !this.title().trim() && this.doc().nodes.length === 0) {
-      this.dataService.removeArtBoardItem(item);
+  private show(id: string): void {
+    if (id === this.shownId) {
+      return;
     }
+    this.leave();
+    this.shownId = id;
+    this.isNew = this.route.snapshot.queryParamMap.has('new');
+    this.found.set(null);
+  }
+
+  /** A flow left with no title and no box is removed, as when the view is destroyed. */
+  private leave(): void {
+    const id = this.shownId;
+    if (id && !this.deleted) {
+      if (this.bound) {
+        const item = this.item;
+        if (item && !this.title().trim() && this.doc().nodes.length === 0) {
+          this.dataService.removeArtBoardItem(item);
+        }
+      } else if (this.isNew) {
+        // Left before its data was read: decide on what is stored, which is empty unless another tab wrote to it.
+        combineLatest([this.dataService.getArtBoardItemById(id), this.dataService.getItemData(id)])
+          .pipe(take(1))
+          .subscribe(([item, data]) => {
+            if (item && !data.properties?.title?.trim() && parseFlow(data.data).nodes.length === 0) {
+              this.dataService.removeArtBoardItem(item);
+            }
+          });
+      }
+    }
+    this.shownId = undefined;
+    this.item = undefined;
+    this.bound = false;
+    this.deleted = false;
   }
 }

@@ -86,7 +86,9 @@
   --c2-text-field__focus--border-bottom: none;
   --c2-text-field__focus--border-left: none;
   --c2-text-field__focus--background: transparent;
-  --c2-text-field__focus--outline: none;
+  // A quiet ring rather than none: the title has no border, and keyboard users still need to see where they are.
+  --c2-text-field__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 35%, transparent);
+  --c2-text-field__focus--outline-offset: 4px;
   --c2-text-field--color: var(--c2-theme--color-on-surface);
   --c2-text-field__focus--color: var(--c2-theme--color-on-surface);
 }
@@ -128,7 +130,10 @@
   background: var(--c2-theme--color-surface-container);
   color: var(--c2-theme--color-on-surface-variant);
   font-size: 12px;
-  white-space: nowrap;
+  // One line when it fits, wrapped (and centred) on a narrow window rather than running off the canvas.
+  width: max-content;
+  max-width: calc(100% - 24px);
+  text-align: center;
   pointer-events: none;
 }
 
@@ -152,12 +157,5 @@
   .flow {
     padding-left: 12px;
     padding-right: 12px;
-  }
-
-  .flow__hint {
-    white-space: normal;
-    width: max-content;
-    max-width: calc(100% - 24px);
-    text-align: center;
   }
 }

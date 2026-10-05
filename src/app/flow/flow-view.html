@@ -21,7 +21,7 @@
     <p>This flow no longer exists.</p>
     <a routerLink="/main-board">Back to your notes</a>
   </main>
-} @else {
+} @else if (found()) {
   <main class="flow">
     <c2-text-field
       #titleField
@@ -65,7 +65,8 @@
           <span class="flow__hint-touch">Double-tap anywhere to add a box</span>
         } @else {
           <span class="flow__hint-pointer">
-            Double-click to add a box · drag from a box's edge to connect · double-click an arrow to label it
+            Double-click to add a box · drag from an edge to connect · double-click an arrow to label it · Delete
+            removes the selection
           </span>
           <span class="flow__hint-touch"
             >Double-tap to add a box · drag from a box's edge to connect · double-tap an arrow to label it</span
@@ -74,4 +75,7 @@
       </p>
     </div>
   </main>
+} @else {
+  <!-- Nothing to edit until the stored flow is read: a box added now would be overwritten by it. -->
+  <main class="flow" aria-busy="true"></main>
 }
