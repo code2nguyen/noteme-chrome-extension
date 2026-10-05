@@ -22,3 +22,15 @@ export function syncsWithChromeProfile(key: string, value: unknown): boolean {
   }
   return true;
 }
+
+/** chrome.storage.sync's QUOTA_BYTES_PER_ITEM. */
+export const CHROME_SYNC_ITEM_BYTES = 8192;
+
+/**
+ * Whether a write fits one chrome.storage.sync item, which Chrome measures as the key plus the JSON of the value it is
+ * given. The records are stored as JSON strings, so that value is serialized a second time (quotes and escapes count).
+ * A longer note stays on the device: the write could never succeed, and the remote keeps the last copy that fitted.
+ */
+export function fitsChromeSyncItem(key: string, serialized: string): boolean {
+  return new TextEncoder().encode(key + JSON.stringify(serialized)).length <= CHROME_SYNC_ITEM_BYTES;
+}

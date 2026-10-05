@@ -1,0 +1,59 @@
+// The storage class is partially compiled: JIT finishes it outside an Angular build.
+import '@angular/compiler';
+import { Injector, runInInjectionContext } from '@angular/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { DataType } from '../store/models/data-type';
+import { ChromeStorageApi } from './chrome-storage.api';
+import { INSTANCE_ID } from './instance-id';
+import { StoreSyncService } from './store-sync.service';
+
+/** A storage area that keeps its records in a map. */
+function area(records: Record<string, string> = {}) {
+  return {
+    records,
+    get: async (keys: string | string[] | null) => {
+      const wanted = keys === null ? Object.keys(records) : Array.isArray(keys) ? keys : [keys];
+      return Object.fromEntries(wanted.filter((key) => key in records).map((key) => [key, records[key]]));
+    },
+    set: vi.fn(async (items: Record<string, string>) => void Object.assign(records, items)),
+    remove: vi.fn(async (keys: string | string[]) => {
+      for (const key of Array.isArray(keys) ? keys : [keys]) {
+        delete records[key];
+      }
+    }),
+  };
+}
+
+function setUp(localRecords: Record<string, string> = {}) {
+  const local = area(localRecords);
+  const sync = area();
+  vi.stubGlobal('chrome', { storage: { local, sync, onChanged: { addListener: () => undefined } } });
+  const injector = Injector.create({
+    providers: [
+      { provide: INSTANCE_ID, useValue: 'tab' },
+      { provide: StoreSyncService, useValue: { sync: () => undefined } },
+    ],
+  });
+  const api = runInInjectionContext(injector, () => new ChromeStorageApi());
+  // Leave the queue for the test to read instead of draining it on a timer.
+  api.syncToRemote = () => undefined;
+  return { api, local };
+}
+
+describe('ChromeStorageApi', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('queues a note for chrome.storage.sync, not a page or a note over the item quota', async () => {
+    const { api } = setUp();
+    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false });
+    await api.setPromise('ITEM_DATA__p', { id: 'p', dataType: DataType.PAGE, data: 'Long', empty: false });
+    await api.setPromise('ITEM_DATA__b', {
+      id: 'b',
+      dataType: DataType.MARKDOWN,
+      data: 'x'.repeat(9000),
+      empty: false,
+    });
+    expect(api.remoteDataQueue.map(({ key }) => key)).toEqual(['ITEM_DATA__a']);
+  });
+});
