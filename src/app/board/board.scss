@@ -108,7 +108,15 @@
   --c2-masonry-item--border-radius: var(--c2-theme--radius-lg, 8px);
 }
 
-// Phones: the Notes | Archive switch and the search get a row of their own, so nothing scrolls sideways.
+// While arranging, outline every card and keep its move handle visible, so the mode is obvious.
+.board__grid--arranging {
+  --c2-masonry-item--border: 1px dashed var(--ntm-accent);
+  --c2-masonry-item__handle--background: var(--c2-theme--color-surface-container, #3d4046);
+  --c2-masonry-item__handle--color: var(--ntm-accent);
+}
+
+// Phones: the Notes | Archive switch, the search and the Arrange button get a row of their own, so nothing
+// scrolls sideways.
 @media (max-width: 640px) {
   .navbar {
     flex-wrap: wrap;
@@ -117,7 +125,8 @@
   }
 
   .navbar__views,
-  .navbar__search {
+  .navbar__search,
+  .navbar__arrange {
     order: 2;
   }
 

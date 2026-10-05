@@ -16,7 +16,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
-import type { MasonryLayoutSnapshot } from '@c2n/components/masonry';
+import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/components/masonry';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 import { Dictionary } from '@ngrx/entity';
 import { combineLatest, of, ReplaySubject } from 'rxjs';
@@ -47,6 +47,7 @@ const PREVIEW_LENGTH = 80;
 const MIN_PAGE_ROWS = 3;
 const MAX_PAGE_ROWS = 6;
 const CHARS_PER_ROW = 70;
+const PAGE_AUTO_ROWS = noteDefaultProperties[ExtensionId.Page].gridPosition.rows;
 
 /** Keys that start something new from anywhere on the board, as shown in the New menu. */
 const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page, f: ExtensionId.Flow };
@@ -101,6 +102,8 @@ export class Board {
     { initialValue: 'notes' as BoardView },
   );
   readonly inNotesView = computed(() => this.view() === 'notes');
+  /** Moving and resizing cards, on the Notes view only. */
+  readonly arranging = signal(false);
 
   /** What the search field holds, as typed (binding it back trimmed would eat a space the user just typed). */
   readonly query = signal('');
@@ -200,12 +203,12 @@ export class Board {
 
   private readonly itemData = toSignal(this.store.select(selectItemDataEntities), { requireSync: true });
 
-  /** Notes keep their stored height; a page card is as tall as its excerpt, so a short page is a short card. */
+  /**
+   * Notes and flows keep their stored height; a page card is as tall as its excerpt, so a short page is a short card,
+   * until it is resized: a page's default height stands for "as tall as its excerpt".
+   */
   rowsOf(item: ArtBoardItem): number {
-    if (item.extensionId === ExtensionId.Flow) {
-      return item.gridPosition.rows;
-    }
-    if (item.extensionId !== ExtensionId.Page) {
+    if (item.extensionId !== ExtensionId.Page || item.gridPosition.rows !== PAGE_AUTO_ROWS) {
       return item.gridPosition.rows;
     }
     const data = this.itemData()[item.id];
@@ -254,6 +257,7 @@ export class Board {
       return;
     }
     this.query.set('');
+    this.arranging.set(false);
     this.router.navigate([], { queryParams: { view: view === 'archive' ? 'archive' : null }, replaceUrl: true });
   }
 
@@ -338,6 +342,36 @@ export class Board {
 
   restore(item: ArtBoardItem): void {
     this.dataService.restoreArtBoardItem(item);
+  }
+
+  toggleArranging(): void {
+    this.arranging.update((arranging) => !arranging);
+  }
+
+  /** A card moved or resized: store the order and spans of every card, so the arrangement survives a reload. */
+  onLayoutChange(event: Event): void {
+    const { layout } = (event as CustomEvent<MasonryLayoutChangeDetail>).detail;
+    const items = new Map(this.boardItems().map((item) => [item.id, item]));
+    this.dataService.changeAllArtBoardItemPosition(
+      layout.items.map((tile, index) => {
+        const item = items.get(tile.id);
+        // A page card left at its excerpt's height keeps following its excerpt.
+        const autoHeight = item?.extensionId === ExtensionId.Page && tile.rows === this.rowsOf(item);
+        return {
+          artBoardItemId: tile.id,
+          gridPosition: {
+            order: index,
+            rows: autoHeight ? item.gridPosition.rows : tile.rows,
+            screenColumns: {
+              Large: tile.columns.lg,
+              Medium: tile.columns.md,
+              Small: tile.columns.sm,
+              XSmall: tile.columns.xs,
+            },
+          },
+        };
+      }),
+    );
   }
 
   onScroll(): void {

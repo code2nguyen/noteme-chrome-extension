@@ -46,6 +46,19 @@
     }
   </c2-autocomplete>
 
+  @if (inNotesView()) {
+    <c2-icon-button
+      class="navbar__arrange"
+      toggle
+      aria-label="Arrange"
+      tooltip="Move and resize cards"
+      [selected]="arranging()"
+      (click)="toggleArranging()"
+    >
+      <c2-feather-move></c2-feather-move>
+    </c2-icon-button>
+  }
+
   <span class="navbar__spacer"></span>
 
   <div class="navbar__sync">
@@ -106,7 +119,14 @@
       }
     </p>
   }
-  <c2-masonry class="board__grid" save-layout="false" [layout]="layout()">
+  <c2-masonry
+    class="board__grid"
+    [class.board__grid--arranging]="arranging()"
+    save-layout="false"
+    [layout]="layout()"
+    [editable]="arranging()"
+    (layout-change)="onLayoutChange($event)"
+  >
     @for (item of items(); track item.id) {
       <c2-masonry-item
         [attr.item-id]="item.id"

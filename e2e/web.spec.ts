@@ -269,6 +269,8 @@ test('archive a note, find it in the Archive and restore it to the board', async
   await expect(page.locator('.navbar__title')).toHaveText('Archive');
   await expect(page.locator('ntm-note-card')).toHaveCount(1);
   await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
+  // Arranging is for the board only.
+  await expect(page.getByRole('button', { name: 'Arrange' })).toHaveCount(0);
   await shot(page, '09-archive');
 
   await card(page).getByRole('button', { name: 'Note actions' }).click();
@@ -346,6 +348,53 @@ test('archive a page from its view; it opens from the Archive and is restored fr
   await page.locator('.page-bar__back').click();
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
+});
+
+test('arrange: move a card with the keyboard, and the order is kept after a reload', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Second');
+  await newNote(page);
+  await page.keyboard.type('First');
+  await page.waitForTimeout(500);
+
+  const arrange = page.getByRole('button', { name: 'Arrange' });
+  const handles = tiles(page).getByRole('button', { name: /^Move / });
+  await expect(handles).toHaveCount(0);
+  await arrange.click();
+  await expect(handles).toHaveCount(2);
+  await expect(page.locator('c2-masonry')).toHaveClass(/board__grid--arranging/);
+  await shot(page, '10-arrange');
+
+  // The newest note comes first; move it one step on: Enter, ArrowRight, Enter.
+  await expect(notepadSurface(card(page, 0))).toHaveText('First');
+  await handles.first().focus();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage)
+          .filter(([key]) => key.startsWith('noteme-dev:ART_BOARD_ITEM__'))
+          .map(([, value]) => JSON.parse(value).gridPosition.order)
+          .sort(),
+      ),
+    )
+    .toEqual([0, 1]);
+
+  // Leaving the Notes view stops arranging.
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await page.locator('.navbar__views c2-button[value="notes"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+  await expect(handles).toHaveCount(0);
+
+  await page.reload();
+  await openBoard(page);
+  await expect(notepadSurface(card(page, 0))).toHaveText('Second');
+  await expect(notepadSurface(card(page, 1))).toHaveText('First');
+  const [first, second] = [await tiles(page).nth(0).boundingBox(), await tiles(page).nth(1).boundingBox()];
+  expect(first!.x).toBeLessThan(second!.x);
 });
 
 test('phone width: one column, no horizontal scroll', async ({ page }) => {
