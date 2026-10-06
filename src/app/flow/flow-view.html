@@ -49,6 +49,7 @@
         class="flow__flow"
         editable
         no-card
+        no-double-click-add
         aria-label="Flow"
         [nodes]="nodes()"
         [edges]="edges()"
@@ -60,7 +61,14 @@
         (edge-edit)="onEdgeEdit($event)"
         (layout-change)="onLayoutChange($event)"
       >
-        <c2-icon-button slot="actions" aria-label="Add a box" tooltip="Add a box (N)" (click)="addBox()">
+        <c2-icon-button
+          slot="actions"
+          class="flow__add"
+          aria-label="Add a box"
+          tooltip="Click or drag onto the canvas to add a box (N)"
+          (pointerdown)="dragBox($event)"
+          (click)="addBox()"
+        >
           <c2-feather-plus></c2-feather-plus>
         </c2-icon-button>
         <c2-icon-button slot="actions" aria-label="Tidy up" tooltip="Tidy up: lay the boxes out again" (click)="tidy()">
@@ -72,15 +80,15 @@
       </c2-flow>
       <p class="flow__hint">
         @if (empty()) {
-          <span class="flow__hint-pointer">Double-click anywhere to add a box, or press N</span>
-          <span class="flow__hint-touch">Double-tap anywhere to add a box</span>
+          <span class="flow__hint-pointer">Click or drag + to add a box, or press N</span>
+          <span class="flow__hint-touch">Tap or drag + to add a box</span>
         } @else {
           <span class="flow__hint-pointer">
-            Double-click to add a box · drag from an edge to connect · double-click an arrow to label it · Delete
+            Click or drag + to add a box · drag from an edge to connect · double-click an arrow to label it · Delete
             removes the selection
           </span>
           <span class="flow__hint-touch"
-            >Double-tap to add a box · drag from a box's edge to connect · double-tap an arrow to label it</span
+            >Tap or drag + to add a box · drag from a box's edge to connect · double-tap an arrow to label it</span
           >
         }
       </p>

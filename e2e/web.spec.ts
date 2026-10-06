@@ -776,10 +776,15 @@ test.describe('flow', () => {
   const storedBoxes = async (page: Page): Promise<{ label: string; position?: unknown }[]> =>
     JSON.parse((await storedFlow(page))?.data ?? '{"nodes":[]}').nodes;
 
-  /** Double-click an empty spot of the canvas: low on the stage, at a given fraction across. */
+  /** Drag + from the toolbar onto an empty spot of the canvas: low on the stage, at a given fraction across. */
   async function addBoxAt(page: Page, across: number, label: string): Promise<void> {
     const stage = (await page.locator('c2-flow .stage').boundingBox())!;
-    await page.mouse.dblclick(stage.x + stage.width * across, stage.y + stage.height - 80);
+    const plus = (await page.locator('c2-flow c2-icon-button[aria-label="Add a box"]').boundingBox())!;
+    await page.mouse.move(plus.x + plus.width / 2, plus.y + plus.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(stage.x + stage.width * across, stage.y + stage.height - 80, { steps: 8 });
+    await expect(page.locator('c2-flow .ghost')).toBeVisible();
+    await page.mouse.up();
     await expect(editor(page)).toBeVisible();
     await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.type(label);
@@ -824,7 +829,12 @@ test.describe('flow', () => {
     await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
     await page.keyboard.type('Long weekend in Da Lat?');
     await page.keyboard.press('Enter');
-    await expect(page.locator('.flow__hint')).toContainText('Double-click anywhere to add a box');
+    await expect(page.locator('.flow__hint')).toContainText('Click or drag + to add a box');
+    // Double-clicking the canvas no longer adds a box: the + button does.
+    const stage = (await page.locator('c2-flow .stage').boundingBox())!;
+    await page.mouse.dblclick(stage.x + stage.width / 2, stage.y + stage.height / 2);
+    await expect(editor(page)).toHaveCount(0);
+    await expect(page.locator('c2-flow .node')).toHaveCount(0);
 
     await addBoxAt(page, 0.25, 'Weather ok?');
     await addBoxAt(page, 0.6, 'Book the night bus');

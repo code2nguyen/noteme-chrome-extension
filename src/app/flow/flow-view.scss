@@ -141,7 +141,12 @@
   display: none;
 }
 
-// A touch screen has no double-click and no Delete key.
+// A touch drag from + moves a box, not the page.
+.flow__add {
+  touch-action: none;
+}
+
+// A touch screen has no Delete key, and taps rather than clicks.
 @media (hover: none) {
   .flow__hint-pointer {
     display: none;

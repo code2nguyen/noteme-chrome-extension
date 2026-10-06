@@ -238,6 +238,14 @@ export class FlowView {
     this.flow()?.nativeElement.addNode();
   }
 
+  /**
+   * Pressing + starts dragging a new box onto the canvas, where it is dropped (and named, onNodeAdd). A press that does
+   * not move is the button's click (addBox).
+   */
+  dragBox(event: PointerEvent): void {
+    this.flow()?.nativeElement.dragNewNode(event);
+  }
+
   /** Back to the automatic layout: the flow fires layout-change without positions, which forgets them. */
   tidy(): void {
     this.flow()?.nativeElement.resetLayout();
