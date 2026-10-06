@@ -1,6 +1,7 @@
 import { Action, ActionReducerMap, createFeatureSelector, createSelector } from '@ngrx/store';
 import { InjectionToken } from '@angular/core';
 
+import { isSupportedNote } from '../../services/migration';
 import * as fromBoard from './board.reducer';
 import * as fromArtBoardItem from './art-board-item.reducer';
 import * as fromItemData from './item-data.reducer';
@@ -75,10 +76,13 @@ export const {
 export const selectArtBoardItemById = (artBoardItemId: string) =>
   createSelector(selectArtBoardItemEntities, (entities) => entities[artBoardItemId]);
 
-export const selectArtBoardItemsByBoardId = (boardId: string) =>
-  createSelector(selectAllArtBoardItems, (artBoardItems) => artBoardItems.filter((item) => item.boardId === boardId));
+/** Notes and pages: kinds of note Noteme no longer has (2.x code and vocabulary notes) are left out everywhere. */
+const selectNotes = createSelector(selectAllArtBoardItems, (artBoardItems) => artBoardItems.filter(isSupportedNote));
 
-export const selectArchivedArtBoardItems = createSelector(selectAllArtBoardItems, (artBoardItems) =>
+export const selectArtBoardItemsByBoardId = (boardId: string) =>
+  createSelector(selectNotes, (artBoardItems) => artBoardItems.filter((item) => item.boardId === boardId));
+
+export const selectArchivedArtBoardItems = createSelector(selectNotes, (artBoardItems) =>
   artBoardItems.filter((item) => !item.boardId),
 );
 
@@ -124,5 +128,5 @@ export const selectArtBoardItemSearchResults = createSelector(
   (artBoardItems, searchIds) =>
     searchIds
       .map((id) => artBoardItems[id])
-      .filter((artBoardItem): artBoardItem is ArtBoardItem => artBoardItem != null),
+      .filter((artBoardItem): artBoardItem is ArtBoardItem => artBoardItem != null && isSupportedNote(artBoardItem)),
 );

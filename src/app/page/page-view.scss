@@ -1,0 +1,129 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--c2-theme--color-surface-container-low);
+}
+
+.page-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 60px;
+  padding: 0 20px;
+  background: var(--c2-theme--color-surface-container-low);
+  --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
+}
+
+.page-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 10px;
+  margin-left: -10px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  --c2-feather-icon--size: 16px;
+
+  &:hover {
+    background: var(--c2-theme--color-surface-container);
+  }
+}
+
+.page-bar__status {
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.page-bar__spacer {
+  flex: 1;
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 24px 120px;
+}
+
+.page--missing {
+  text-align: center;
+  color: var(--c2-theme--color-on-surface-variant);
+
+  a {
+    color: var(--ntm-accent);
+  }
+}
+
+.page__editor {
+  // The gutter on the left holds the editor's + button; the title lines up with the text.
+  --c2-page-editor__content--padding: 8px 0 8px 40px;
+  --c2-page-editor__content--min-height: 60vh;
+  --c2-page-editor__content--font-size: 17px;
+  --c2-page-editor__selection--background: color-mix(in srgb, var(--ntm-accent) 22%, transparent);
+  --c2-page-editor__inline-code--color: var(--ntm-accent);
+}
+
+.page__header {
+  padding-left: 40px;
+  margin-bottom: 12px;
+}
+
+.page__title {
+  display: block;
+  --c2-text-field--font-size: 36px;
+  --c2-text-field--font-weight: 700;
+  --c2-text-field--line-height: 1.2;
+  --c2-text-field--min-height: 52px;
+  --c2-text-field--padding-left: 0;
+  --c2-text-field--padding-right: 0;
+  --c2-text-field--background: transparent;
+  --c2-text-field--border-top: none;
+  --c2-text-field--border-right: none;
+  --c2-text-field--border-bottom: none;
+  --c2-text-field--border-left: none;
+  --c2-text-field__hover--border-top: none;
+  --c2-text-field__hover--border-right: none;
+  --c2-text-field__hover--border-bottom: none;
+  --c2-text-field__hover--border-left: none;
+  --c2-text-field__focus--border-top: none;
+  --c2-text-field__focus--border-right: none;
+  --c2-text-field__focus--border-bottom: none;
+  --c2-text-field__focus--border-left: none;
+  --c2-text-field__focus--background: transparent;
+  // A quiet ring rather than none: the title has no border, and keyboard users still need to see where they are.
+  --c2-text-field__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 35%, transparent);
+  --c2-text-field__focus--outline-offset: 4px;
+  --c2-text-field--color: var(--c2-theme--color-on-surface);
+  --c2-text-field__focus--color: var(--c2-theme--color-on-surface);
+}
+
+.page__meta {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 12px 12px 80px;
+  }
+
+  .page__editor {
+    --c2-page-editor__content--padding: 8px 0 8px 28px;
+  }
+
+  .page__header {
+    padding-left: 28px;
+  }
+
+  .page__title {
+    --c2-text-field--font-size: 24px;
+  }
+}

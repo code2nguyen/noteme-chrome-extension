@@ -1,0 +1,100 @@
+<header class="flow-bar">
+  <a class="flow-bar__back" routerLink="/main-board" [queryParams]="inArchive() ? { view: 'archive' } : {}">
+    <c2-feather-arrow-left aria-hidden="true"></c2-feather-arrow-left>
+    {{ inArchive() ? 'Archive' : 'Notes' }}
+  </a>
+  <span class="flow-bar__status" role="status">{{ status() }}</span>
+  <span class="flow-bar__spacer"></span>
+  <c2-menu placement="bottom-end" aria-label="Flow actions" (menu-select)="onMenu($event)">
+    <c2-icon-button slot="trigger" aria-label="Flow actions" tooltip="More">
+      <c2-feather-more-horizontal></c2-feather-more-horizontal>
+    </c2-icon-button>
+    @if (inArchive()) {
+      <c2-menu-item value="restore">
+        <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+        Restore to the board
+      </c2-menu-item>
+    } @else {
+      <c2-menu-item value="archive">
+        <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
+        Archive
+      </c2-menu-item>
+    }
+    <c2-menu-item value="delete" destructive>
+      <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+      Delete this flow
+    </c2-menu-item>
+  </c2-menu>
+</header>
+
+@if (found() === false) {
+  <main class="flow flow--missing">
+    <p>This flow no longer exists.</p>
+    <a routerLink="/main-board">Back to your notes</a>
+  </main>
+} @else if (found()) {
+  <main class="flow">
+    <c2-text-field
+      #titleField
+      class="flow__title"
+      aria-label="Title"
+      placeholder="Untitled flow"
+      [value]="title()"
+      (input)="onTitleInput($event)"
+      (keydown)="onTitleKeydown($event)"
+    ></c2-text-field>
+    <div class="flow__canvas">
+      <c2-flow
+        #flow
+        class="flow__flow"
+        editable
+        no-card
+        no-double-click-add
+        aria-label="Flow"
+        [nodes]="nodes()"
+        [edges]="edges()"
+        (node-add)="onNodeAdd($event)"
+        (node-edit)="onNodeEdit($event)"
+        (node-delete)="onNodeDelete($event)"
+        (edge-add)="onEdgeAdd($event)"
+        (edge-delete)="onEdgeDelete($event)"
+        (edge-edit)="onEdgeEdit($event)"
+        (layout-change)="onLayoutChange($event)"
+      >
+        <c2-icon-button
+          slot="actions"
+          class="flow__add"
+          aria-label="Add a box"
+          tooltip="Click or drag onto the canvas to add a box (N)"
+          (pointerdown)="dragBox($event)"
+          (click)="addBox()"
+        >
+          <c2-feather-plus></c2-feather-plus>
+        </c2-icon-button>
+        <c2-icon-button slot="actions" aria-label="Tidy up" tooltip="Tidy up: lay the boxes out again" (click)="tidy()">
+          <c2-feather-layout></c2-feather-layout>
+        </c2-icon-button>
+        <c2-icon-button slot="actions" aria-label="Show the whole flow" tooltip="Fit to screen" (click)="fit()">
+          <c2-feather-maximize></c2-feather-maximize>
+        </c2-icon-button>
+      </c2-flow>
+      <p class="flow__hint">
+        @if (empty()) {
+          <span class="flow__hint-pointer">Click or drag + to add a box, or press N</span>
+          <span class="flow__hint-touch">Tap or drag + to add a box</span>
+        } @else {
+          <span class="flow__hint-pointer">
+            Click or drag + to add a box · drag from an edge to connect · double-click an arrow to label it · Delete
+            removes the selection
+          </span>
+          <span class="flow__hint-touch"
+            >Tap or drag + to add a box · drag from a box's edge to connect · double-tap an arrow to label it</span
+          >
+        }
+      </p>
+    </div>
+  </main>
+} @else {
+  <!-- Nothing to edit until the stored flow is read: a box added now would be overwritten by it. -->
+  <main class="flow" aria-busy="true"></main>
+}

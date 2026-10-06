@@ -3,13 +3,13 @@ import { DataType } from './models/data-type';
 import { mergeItemDataUpdates } from './item-data-updates';
 
 describe('mergeItemDataUpdates', () => {
-  it('keeps the code typed before a language change made within the debounce window', () => {
+  it('keeps the text typed before a title change made within the debounce window', () => {
     expect(
       mergeItemDataUpdates([
-        { id: 'a', data: 'const x = 1', dataType: DataType.TEXT, properties: { language: 'plaintext' } },
-        { id: 'a', dataType: DataType.TEXT, properties: { language: 'javascript' } },
+        { id: 'a', data: 'Bus at 22:00', dataType: DataType.PAGE },
+        { id: 'a', dataType: DataType.PAGE, properties: { title: 'Trip' } },
       ]),
-    ).toEqual({ id: 'a', data: 'const x = 1', dataType: DataType.TEXT, properties: { language: 'javascript' } });
+    ).toEqual({ id: 'a', data: 'Bus at 22:00', dataType: DataType.PAGE, properties: { title: 'Trip' } });
   });
 
   it('lets the latest value win', () => {

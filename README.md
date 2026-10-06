@@ -38,6 +38,73 @@ The Playwright suites (`e2e/`) write screenshots of every verified state to `tes
 
 Load the extension: `chrome://extensions` → Developer mode → **Load unpacked** → `dist/noteme-chrome-extension`.
 
+## Release
+
+CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the changelog check, the production
+build and both Playwright suites (Chromium only) on every pull request and push to `master`, and keeps the packaged zip as the `extension` artifact.
+
+To release, bump the version and push the tag:
+
+```sh
+npm version patch        # or minor / major: updates package.json and src/manifest.json, commits, tags v<version>
+git push --follow-tags
+```
+
+The tag runs `.github/workflows/release.yml`: the same checks, then `npm run package` (`dist/noteme-<version>.zip`,
+refused if package.json, the manifest and the tag disagree), an upload through the Chrome Web Store API v2, a
+submission for review, and a GitHub release with the zip attached. **Run workflow** in the Actions tab starts it by
+hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run. A
+run started by hand sends package.json's version to the store but creates no GitHub release (that step needs a tag
+ref). Release through the tag to get both; pushing the tag after a run by hand would upload the same version again, so
+create that GitHub release by hand instead, with the zip attached as the tag run does:
+
+```sh
+npm run build && npm run package                   # dist/noteme-<version>.zip
+node scripts/changelog.ts --notes <version> > notes.md   # needs the full git history (not a shallow clone)
+gh release create v<version> dist/noteme-<version>.zip --title "Noteme <version>" --notes-file notes.md
+```
+
+`npm run package` zips with the system's `zip` command, which Linux, macOS and the workflow's Ubuntu runners have; on
+Windows, run it from WSL or install a `zip` on the PATH.
+
+The first 3.x release keeps the version package.json already has: `npm version 3.0.0 --allow-same-version`.
+
+### Changelog
+
+`CHANGELOG.md` and the release notes are generated from the commit history (`scripts/changelog.ts`), so write commit
+subjects as [Conventional Commits](https://www.conventionalcommits.org) with the area as scope, in words a user
+understands: `feat(plan): drag an event to another day`. `feat`, `fix` and `perf` commits and breaking changes
+(`feat!:`) are listed; `chore`, `ci`, `test`, `docs`, `refactor` and the like are not. A `Changelog: <text>` line in
+the commit body words the entry differently, and `Changelog: skip` leaves the commit out.
+
+- `npm version` files the commits since the last release under the new version and commits `CHANGELOG.md` with it;
+  CI fails when the file is stale.
+- The release workflow puts that version's notes in the GitHub release. For the store listing it writes, in the run's
+  summary, a plain-text "What's new" of that release and the ones before it, the last 10 releases at most rather than
+  the whole history, ready to paste (the store's API takes no release notes).
+- Preview a release's notes, by version: `npm run changelog -- --notes 3.1.0` (markdown, as in the GitHub release)
+  or `npm run changelog -- --store 3.1.0` (the store text; `--releases 5` for fewer). An unreleased version gets the
+  commits since the last release.
+
+### One-time setup
+
+The workflow signs in as a Google Cloud service account that the store lets publish.
+
+1. In a Google Cloud project, enable the **Chrome Web Store API** and create a service account (no roles needed).
+2. In the [developer dashboard](https://chrome.google.com/webstore/devconsole), **Account** → service accounts:
+   add the service account's email. Note the **publisher ID** shown there and the extension's **item ID**.
+3. On GitHub, **Settings → Environments → New environment** `chrome-web-store`, with:
+   - variables `CWS_PUBLISHER_ID` and `CWS_ITEM_ID`;
+   - either a JSON key of the service account as the secret `CWS_SERVICE_ACCOUNT_KEY`,
+   - or, keyless, a Workload Identity Federation provider for this repository as the variable
+     `GCP_WORKLOAD_IDENTITY_PROVIDER` (`projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>`)
+     and the service account's email as `CWS_SERVICE_ACCOUNT`. Grant the pool's principal for this repository
+     _Service Account Token Creator_ on the service account, and enable the IAM Service Account Credentials API.
+   - Optionally, required reviewers, so each release waits for a click before anything reaches the store.
+
+Check an item by hand with the same script:
+`CWS_ACCESS_TOKEN=$(gcloud auth print-access-token --scopes=https://www.googleapis.com/auth/chromewebstore) CWS_PUBLISHER_ID=… CWS_ITEM_ID=… node scripts/chrome-web-store.ts status`.
+
 ## Upgrading from 2.x
 
 Version 3 is a Manifest V3 extension and reads the data 2.x stored, unchanged:

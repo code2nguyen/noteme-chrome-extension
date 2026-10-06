@@ -1,0 +1,166 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--c2-theme--color-surface-container-low);
+}
+
+.flow-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  min-height: 60px;
+  padding: 0 20px;
+  --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
+}
+
+.flow-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 10px;
+  margin-left: -10px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  --c2-feather-icon--size: 16px;
+
+  &:hover {
+    background: var(--c2-theme--color-surface-container);
+  }
+}
+
+.flow-bar__status {
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.flow-bar__spacer {
+  flex: 1;
+}
+
+.flow {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px;
+}
+
+.flow--missing {
+  align-items: center;
+  justify-content: center;
+  color: var(--c2-theme--color-on-surface-variant);
+
+  a {
+    color: var(--ntm-accent);
+  }
+}
+
+.flow__title {
+  flex: none;
+  display: block;
+  max-width: 760px;
+  margin-bottom: 8px;
+  --c2-text-field--font-size: 28px;
+  --c2-text-field--font-weight: 700;
+  --c2-text-field--min-height: 44px;
+  --c2-text-field--padding-left: 0;
+  --c2-text-field--padding-right: 0;
+  --c2-text-field--background: transparent;
+  --c2-text-field--border-top: none;
+  --c2-text-field--border-right: none;
+  --c2-text-field--border-bottom: none;
+  --c2-text-field--border-left: none;
+  --c2-text-field__hover--border-top: none;
+  --c2-text-field__hover--border-right: none;
+  --c2-text-field__hover--border-bottom: none;
+  --c2-text-field__hover--border-left: none;
+  --c2-text-field__focus--border-top: none;
+  --c2-text-field__focus--border-right: none;
+  --c2-text-field__focus--border-bottom: none;
+  --c2-text-field__focus--border-left: none;
+  --c2-text-field__focus--background: transparent;
+  // A quiet ring rather than none: the title has no border, and keyboard users still need to see where they are.
+  --c2-text-field__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 35%, transparent);
+  --c2-text-field__focus--outline-offset: 4px;
+  --c2-text-field--color: var(--c2-theme--color-on-surface);
+  --c2-text-field__focus--color: var(--c2-theme--color-on-surface);
+}
+
+.flow__canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.flow__flow {
+  display: block;
+  --c2-flow--height: 100%;
+  height: 100%;
+  --c2-flow--background-color: var(--c2-theme--color-surface);
+  --c2-flow--border: 1px solid var(--ntm-line);
+  --c2-flow--border-radius: 12px;
+  --c2-flow__node--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-flow__connector--background-color: var(--c2-theme--color-primary);
+  // The arrows and their heads in the secondary text colour: the default grey fades into either canvas.
+  --c2-flow__edge--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-flow__edge-label--border: 1px solid var(--ntm-line);
+  --c2-flow__editor--background-color: var(--c2-theme--color-surface-container-low);
+  // A box is its label only: the status marker (pending, running…) belongs to pipelines, not to notes.
+  --c2-flow__marker--display: none;
+  --c2-flow__actions--align: flex-end;
+}
+
+.flow__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  margin: 0;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--c2-theme--color-surface-container);
+  color: var(--c2-theme--color-on-surface-variant);
+  font-size: 12px;
+  // One line when it fits, wrapped (and centred) on a narrow window rather than running off the canvas.
+  width: max-content;
+  max-width: calc(100% - 24px);
+  text-align: center;
+  pointer-events: none;
+}
+
+.flow__hint-touch {
+  display: none;
+}
+
+// A touch drag from + moves a box, not the page.
+.flow__add {
+  touch-action: none;
+}
+
+// A touch screen has no Delete key, and taps rather than clicks.
+@media (hover: none) {
+  .flow__hint-pointer {
+    display: none;
+  }
+
+  .flow__hint-touch {
+    display: inline;
+  }
+}
+
+@media (max-width: 640px) {
+  .flow-bar,
+  .flow {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

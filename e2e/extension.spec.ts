@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, codeSurface, newNote, notepadSurface, openBoard, shot } from './helpers';
+import { card, mockPhotoSources, newNote, newPage, notepadSurface, openBoard, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -10,10 +10,13 @@ const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> 
     const extension = join(import.meta.dirname, '..', 'dist', 'noteme-chrome-extension');
     const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'noteme-')), {
       executablePath: process.env['CHROMIUM_PATH'] || undefined,
+      // Playwright's default headless shell cannot load extensions; the full Chromium build in new headless mode can.
+      channel: process.env['CHROMIUM_PATH'] ? undefined : 'chromium',
       headless: true,
       viewport: { width: 1440, height: 900 },
       args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`],
     });
+    await mockPhotoSources(context);
     await use(context);
     await context.close();
   },
@@ -147,20 +150,24 @@ const legacyData = {
 
 test('the extension replaces the new tab page', async ({ newTab }) => {
   const page = await newTab();
-  expect(page.url()).toMatch(/^chrome-extension:\/\/[a-p]{32}\/index\.html#\/welcome$/);
-  await expect(page.locator('.welcome__time')).toBeVisible();
+  expect(page.url()).toMatch(/^chrome-extension:\/\/[a-p]{32}\/index\.html#\/$/);
+  await expect(page.locator('.home__time')).toBeVisible();
+  await expect(page.locator('.home__photo')).toHaveAttribute('src', /^(blob:|assets\/bg\/)/);
+  // Shortcuts are an optional permission: Home offers them instead of asking Chrome on its own.
+  await expect(page.locator('.home__ask c2-button', { hasText: 'Show my most visited sites' })).toBeVisible();
   // Chrome's extension-page stylesheet shrinks body text to 75%; the app sets it back.
   expect(await page.evaluate(() => getComputedStyle(document.body).fontSize)).toBe('16px');
   await shot(page, '10-extension-new-tab');
 });
 
-test('2.x notes open migrated, and are only rewritten when edited', async ({ newTab }) => {
+test('2.x text notes open migrated, and are only rewritten when edited', async ({ newTab }) => {
   const page = await newTab();
   await seed(page, 'local', legacyData);
   await page.reload();
   await openBoard(page);
-  await expect(page.locator('ntm-note-card')).toHaveCount(4);
-  // Board order: quill (0), the 1.x note (default order 0), code (1), vocabulary (2).
+  // Code and vocabulary notes are not carried over: only the two text notes show.
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+  await expect(page.locator('ntm-page-card')).toHaveCount(0);
 
   // Quill text note → notepad markdown: heading as bold, checklist as tasks, bold kept, colour dropped.
   const quill = card(page, 0);
@@ -168,16 +175,6 @@ test('2.x notes open migrated, and are only rewritten when edited', async ({ new
   await expect(quill.locator('c2-notepad strong')).toHaveText(['Shopping list', 'coupon']);
   await expect(notepadSurface(quill)).toContainText('Remember the coupon!');
   await expect(quill.locator('c2-notepad [data-checked="true"], c2-notepad .task.checked').first()).toBeAttached();
-
-  // Code note keeps its value and language.
-  const code = card(page, 2);
-  await expect(code.locator('c2-code-editor')).toHaveAttribute('language', 'javascript');
-  await expect(codeSurface(code)).toContainText('return `Hello ${name}`;');
-
-  // Removed vocabulary note → JSON code note.
-  const vocab = card(page, 3);
-  await expect(vocab.locator('c2-code-editor')).toHaveAttribute('language', 'json');
-  await expect(codeSurface(vocab)).toContainText('"word": "bonjour"');
 
   // 1.x record without a note type → text note with a default grid position.
   await expect(notepadSurface(card(page, 1))).toHaveText('A note from 2019');
@@ -199,7 +196,7 @@ test('2.x notes open migrated, and are only rewritten when edited', async ({ new
 test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ newTab }) => {
   const page = await newTab();
   await openBoard(page);
-  await newNote(page, 'Text');
+  await newNote(page);
   await page.keyboard.type('Synced across devices');
   const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
 
@@ -239,7 +236,7 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
 test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
   const first = await newTab();
   await openBoard(first);
-  await newNote(first, 'Text');
+  await newNote(first);
   await first.keyboard.type('Draft');
   await first.waitForTimeout(500);
 
@@ -253,6 +250,59 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
   await first.keyboard.type(' v2');
   await expect(notepadSurface(card(second))).toHaveText('Draft v2');
 
-  await newNote(first, 'Code');
+  await newNote(first);
   await expect(second.locator('ntm-note-card')).toHaveCount(2);
+});
+
+test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
+  const page = await newTab();
+  await page.goto(page.url() + '?settings=1');
+  await page.locator('ntm-settings-panel c2-button', { hasText: 'Sunday' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        chrome.storage.sync
+          .get('NOTEME_SETTINGS')
+          .then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}')).weekStart),
+      ),
+    )
+    .toBe('sunday');
+});
+
+test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {
+  const page = await newTab();
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Synced note');
+  const noteId = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
+  await newPage(page);
+  await page.keyboard.type('Long page');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('Pages are written locally only.');
+  const pageId = page.url().match(/page\/([\w-]+)/)![1];
+
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${noteId}`))?.data, { timeout: 15_000 })
+    .toBe('Synced note');
+  await expect
+    .poll(async () => (await stored(page, 'local', `ITEM_DATA__${pageId}`))?.properties?.title)
+    .toBe('Long page');
+  await expect
+    .poll(async () => JSON.stringify((await stored(page, 'local', `ITEM_DATA__${pageId}`))?.data))
+    .toContain('Pages are written locally only.');
+
+  // Every page write is now in local storage, and a record that syncs joins the sync queue (first in, first out, one
+  // write every 700ms) as its local write completes. Edit the note in the same document: its record joins the queue
+  // behind anything the page could have put there, so once the edit reaches sync, the page's records would have too.
+  await page.locator('ntm-page-view .page-bar__back').click();
+  await expect(card(page)).toBeVisible();
+  await notepadSurface(card(page)).click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' again');
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${noteId}`))?.data, { timeout: 15_000 })
+    .toBe('Synced note again');
+  expect(await stored(page, 'sync', `ITEM_DATA__${pageId}`)).toBeUndefined();
+  expect(await stored(page, 'sync', `ART_BOARD_ITEM__${pageId}`)).toBeUndefined();
+  expect(await stored(page, 'sync', `ART_BOARD_ITEM__${noteId}`)).toBeDefined();
 });

@@ -6,15 +6,17 @@ import {
   buffer,
   catchError,
   debounceTime,
+  filter,
   groupBy,
   map,
   mergeMap,
   switchMap,
   take,
+  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ItemDataActions, ItemDataApiActions } from '../actions';
+import { ArtBoardItemActions, ArtBoardItemApiActions, ItemDataActions, ItemDataApiActions } from '../actions';
 import { artBoardItemIdsKey, itemDataKey, STORAGE_API } from '../../services/storage.api';
 import { ItemData } from '../models';
 import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../../services/utils';
@@ -29,6 +31,37 @@ export class ItemDataEffects {
   private readonly actions$ = inject(Actions);
   private readonly store = inject(Store);
   private readonly storageApi = inject(STORAGE_API);
+  /**
+   * Items deleted here or elsewhere (another tab, another device). Ids are never reused, so a save still waiting for
+   * one of them is dropped. A deletion counts from its request, so an edit typed just before Delete is dropped too,
+   * and stops counting if the item could not be deleted.
+   */
+  private readonly deleted = new Set<string>();
+
+  trackDeletions$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(
+          ArtBoardItemActions.deleteArtBoardItem,
+          ArtBoardItemApiActions.deleteArtBoardItemSuccess,
+          ItemDataActions.deleteItemData,
+          ItemDataApiActions.deleteItemDataSuccess,
+        ),
+        tap((action) => this.deleted.add('artBoardItemId' in action ? action.artBoardItemId : action.itemDataId)),
+      ),
+    { dispatch: false },
+  );
+
+  // Only the note's own deletion can fail with the note still there: its data is deleted after it (a failure then
+  // leaves data that no note shows, which is no reason to save into it again).
+  trackFailedDeletions$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ArtBoardItemApiActions.deleteArtBoardItemFailure),
+        tap(({ artBoardItemId }) => this.deleted.delete(artBoardItemId)),
+      ),
+    { dispatch: false },
+  );
 
   getItemData$ = createEffect(() =>
     this.actions$.pipe(
@@ -67,7 +100,7 @@ export class ItemDataEffects {
   );
 
   // Debounced per note, and every partial update made within the window is merged: keeping only the last one would
-  // drop the code typed just before a language change (and, with one debounce for all notes as in 2.x, an edit to
+  // drop the page text typed just before a title change (and, with one debounce for all notes as in 2.x, an edit to
   // one note made within 300ms of an edit to another).
   updateItemData$ = createEffect(({ debounce = 300, scheduler = asyncScheduler } = {}) =>
     this.actions$.pipe(
@@ -77,6 +110,8 @@ export class ItemDataEffects {
       mergeMap((updates$) =>
         updates$.pipe(
           buffer(updates$.pipe(debounceTime(debounce, scheduler))),
+          // Typed just before Delete: writing it now would bring the deleted item's data back.
+          filter(() => !updates$.key || !this.deleted.has(updates$.key)),
           map(mergeItemDataUpdates),
           mergeMap((itemData) =>
             this.store.select(selectItemDataById(itemData.id!)).pipe(

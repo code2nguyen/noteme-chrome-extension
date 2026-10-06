@@ -1,0 +1,101 @@
+@if (photo(); as current) {
+  <img
+    class="home__photo"
+    [src]="current.src"
+    alt=""
+    (load)="photoLoaded.set(current.src)"
+    [class.home__photo--shown]="photoLoaded() === current.src"
+  />
+}
+<div class="home__scrim"></div>
+
+<div class="home__layout">
+  <header class="home__bar">
+    <a class="home__logo" routerLink="/" aria-label="Noteme home">
+      <svg width="20" height="20" viewBox="0 0 148.56 148.56" aria-hidden="true">
+        <path fill="#3498db" d="M60,0H36A36,36,0,0,0,0,36V60A12,12,0,0,0,12,72H72V12A12,12,0,0,0,60,0Z" />
+        <path fill="#efc94c" d="M112.56,0h-24a12,12,0,0,0-12,12V72h60a12,12,0,0,0,12-12V36A36,36,0,0,0,112.56,0Z" />
+        <path fill="#b280c1" d="M12,76.56a12,12,0,0,0-12,12v24a36,36,0,0,0,36,36H60a12,12,0,0,0,12-12v-60Z" />
+        <path
+          fill="#ff726b"
+          d="M136.56,76.56h-60v60a12,12,0,0,0,12,12h24a36,36,0,0,0,36-36v-24A12,12,0,0,0,136.56,76.56Z"
+        />
+      </svg>
+    </a>
+    <a class="home__link" routerLink="/main-board">Notes</a>
+    <a class="home__link" routerLink="/plan">Plan</a>
+
+    <a class="home__search" routerLink="/main-board" [queryParams]="{ search: 1 }">
+      <c2-feather-search aria-hidden="true"></c2-feather-search>
+      <span>Search my notes</span>
+      <kbd>{{ searchKey }}</kbd>
+    </a>
+
+    <a class="home__glass-button" routerLink="/main-board" [queryParams]="{ new: 'note' }">
+      <c2-feather-plus aria-hidden="true"></c2-feather-plus>Note
+    </a>
+    <c2-icon-button class="home__icon-button" aria-label="Settings" (click)="openSettings()">
+      <c2-feather-settings></c2-feather-settings>
+    </c2-icon-button>
+  </header>
+
+  <main class="home__main">
+    <div class="home__clock">
+      <p class="home__time">{{ time() }}</p>
+      <p class="home__date">{{ date() }}</p>
+    </div>
+
+    @switch (shortcuts()) {
+      @case ('shown') {
+        <nav class="home__sites" aria-label="Your most visited sites">
+          @for (site of sites(); track site.url) {
+            <a class="home__site" [href]="site.url" [title]="site.host">
+              <span class="home__site-icon">
+                @if (site.icon) {
+                  <img [src]="site.icon" alt="" width="28" height="28" />
+                } @else {
+                  {{ site.letter }}
+                }
+              </span>
+              <span class="home__site-name">{{ site.title }}</span>
+            </a>
+          }
+        </nav>
+      }
+      @case ('ask') {
+        <div class="home__ask">
+          <c2-button class="home__ask-button" (click)="allowShortcuts()">Show my most visited sites</c2-button>
+          <c2-button class="home__ask-later" (click)="declineShortcuts()">Not now</c2-button>
+        </div>
+      }
+    }
+  </main>
+
+  <footer class="home__footer">
+    @if (quote(); as q) {
+      <figure class="home__quote">
+        <blockquote>“{{ q.text }}”</blockquote>
+        <figcaption>{{ q.author }}</figcaption>
+      </figure>
+    }
+    @if (photo(); as current) {
+      <p class="home__credit">
+        @if (current.link) {
+          <a [href]="current.link" target="_blank" rel="noopener">{{ current.credit }}</a>
+        } @else {
+          {{ current.credit }}
+        }
+      </p>
+    }
+  </footer>
+</div>
+
+<!-- The sheet and its controls load the first time settings open, not with every new tab. -->
+@defer (when settingsOpen()) {
+  <ntm-settings-panel
+    [open]="settingsOpen()"
+    [photo]="photo()"
+    (closed)="closeSettings()"
+    (changePhoto)="changePhoto()"
+  />
+}

@@ -1,0 +1,192 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--c2-theme--color-surface);
+}
+
+.plan-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  padding: 0 20px;
+}
+
+.plan-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 10px;
+  margin-left: -10px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  --c2-feather-icon--size: 16px;
+
+  &:hover {
+    background: var(--c2-theme--color-surface-container);
+  }
+}
+
+.plan-bar__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.plan {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 20px 20px;
+}
+
+.plan__week,
+.plan__month {
+  display: block;
+  --c2-week-planner--background: var(--c2-theme--color-surface-container-low);
+  --c2-month-planner--background: var(--c2-theme--color-surface-container-low);
+  // The resize grip sits on the bar, which is the primary here: it takes on-primary, not the theme's on-fill (white in
+  // both themes, for fills other than the primary), which would vanish on the dark theme's light coral.
+  --c2-month-planner__handle--color: var(--c2-theme--color-on-primary);
+}
+
+.plan__all-day {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan__all-day-label {
+  margin-right: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.plan__chip {
+  --c2-button__container--height: 28px;
+  --c2-button__container--font-size: 13px;
+  --c2-button__container--border-radius: 999px;
+}
+
+.plan__hint {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.plan__day {
+  --c2-sheet--size: 380px;
+}
+
+.plan__day-empty {
+  margin: 0 0 16px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.plan__day-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plan__day-item,
+.plan__chip {
+  // Plain rows and chips, not call-to-action buttons.
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface);
+  --c2-button__container--border: 1px solid var(--ntm-line);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__container__hover--color: var(--c2-theme--color-on-surface);
+  --c2-button__container__hover--border: 1px solid var(--ntm-line);
+}
+
+.plan__day-item {
+  display: block;
+  width: 100%;
+  --c2-button__container--width: 100%;
+  --c2-button__container--height: 40px;
+  --c2-button__container--justify-content: flex-start;
+  --c2-button__label--justify-content: flex-start;
+  --c2-button__label--flex-grow: 1;
+  --c2-button__container--gap: 12px;
+  --c2-button__container--font-size: 14px;
+  --c2-button__container--font-weight: 500;
+}
+
+.plan__day-time {
+  min-width: 96px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.plan__day-add {
+  display: block;
+}
+
+.plan__day-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.plan__dialog-title {
+  display: block;
+  --c2-text-field--font-size: 17px;
+}
+
+.plan__dialog-when {
+  margin: 12px 0 0;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.plan__dialog-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.plan__dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.plan__dialog-spacer {
+  flex: 1;
+}
+
+.plan__dialog-save {
+  --c2-button__container--background-color: var(--c2-theme--color-primary);
+  --c2-button__container--color: var(--c2-theme--color-on-primary);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-primary-hover);
+  --c2-button__container__hover--color: var(--c2-theme--color-on-primary);
+}
+
+.plan__dialog-delete {
+  --c2-button__container--color: var(--c2-theme--color-error, #c0392b);
+}
+
+@media (max-width: 640px) {
+  .plan-bar,
+  .plan {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

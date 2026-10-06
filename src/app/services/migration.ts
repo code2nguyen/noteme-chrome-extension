@@ -4,7 +4,7 @@
  * Nothing is rewritten in storage here: a note keeps its stored form until the user edits it, at which point the
  * migrated value is saved. That keeps a migration bug from destroying data that was never touched.
  */
-import { ExtensionId, LEGACY_VOCABULARY_EXTENSION_ID } from '../extension-id';
+import { ExtensionId } from '../extension-id';
 import { NBR_COLORS } from '../note-config';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
@@ -122,17 +122,22 @@ export function deltaToMarkdown(delta: Delta): string {
   return lines.join('\n');
 }
 
-/** Bring a stored item data to the form the 3.x editors read. */
+/** Bring a stored item data to the form the editors read: 2.x Quill notes become notepad markdown. */
 export function normalizeItemData(itemData: ItemData): ItemData {
   const raw: unknown = itemData.data;
   if (itemData.dataType === DataType.DELTA) {
     return { ...itemData, data: isDelta(raw) ? deltaToMarkdown(raw) : '', dataType: DataType.MARKDOWN };
   }
-  if (itemData.dataType === DataType.JSON) {
-    const data = raw == null ? '' : typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
-    return { ...itemData, data, dataType: DataType.TEXT, properties: { ...itemData.properties, language: 'json' } };
-  }
   return itemData;
+}
+
+/** Notes and pages; 2.x code and vocabulary notes are not carried over and stay out of the app. */
+export function isSupportedNote(artBoardItem: ArtBoardItem): boolean {
+  return (
+    artBoardItem.extensionId === ExtensionId.TextNote ||
+    artBoardItem.extensionId === ExtensionId.Page ||
+    artBoardItem.extensionId === ExtensionId.Flow
+  );
 }
 
 const DEFAULT_POSITION = {
@@ -148,17 +153,11 @@ export function normalizeArtBoardItem(artBoardItem: ArtBoardItem): ArtBoardItem 
   }
   const legacy = artBoardItem as ArtBoardItem & { element?: string };
   const gridPosition = { ...DEFAULT_POSITION, ...artBoardItem.gridPosition };
-  let extensionId = artBoardItem.extensionId as string | undefined;
-  if (!extensionId) {
-    extensionId = legacy.element === ExtensionId.CodeNote ? ExtensionId.CodeNote : ExtensionId.TextNote;
-  }
-  if (extensionId === LEGACY_VOCABULARY_EXTENSION_ID) {
-    extensionId = ExtensionId.CodeNote;
-  }
-  if (extensionId !== ExtensionId.CodeNote) {
-    extensionId = ExtensionId.TextNote;
-  }
+  // 1.x items name their kind in `element`; anything without a kind is a text note.
+  const extensionId = (artBoardItem.extensionId ?? legacy.element ?? ExtensionId.TextNote) as ExtensionId;
   const colorIndex =
-    extensionId === ExtensionId.CodeNote ? 0 : (artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS));
-  return { ...artBoardItem, gridPosition, extensionId: extensionId as ExtensionId, colorIndex };
+    extensionId === ExtensionId.TextNote
+      ? (artBoardItem.colorIndex ?? Math.floor(Math.random() * NBR_COLORS))
+      : (artBoardItem.colorIndex ?? 0);
+  return { ...artBoardItem, gridPosition, extensionId, colorIndex };
 }

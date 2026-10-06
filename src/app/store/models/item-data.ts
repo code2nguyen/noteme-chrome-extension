@@ -5,7 +5,8 @@ export interface ItemData {
   // Delta objects (2.x text notes) and JSON values (2.x vocabulary notes) are normalised to strings on load.
   data: string | null;
   properties?: {
-    language?: string;
+    /** Title of a page. */
+    title?: string;
   };
   compressedData?: string;
   modifiedDate: string;

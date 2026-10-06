@@ -1,18 +1,35 @@
 <header class="navbar" [class.navbar--raised]="raised()">
-  <c2-tabs
-    class="navbar__tabs"
+  <c2-icon-button class="navbar__logo" aria-label="Home" tooltip="Home" (click)="goHome()">
+    <svg viewBox="0 0 148.56 148.56" aria-hidden="true">
+      <path fill="#3498db" d="M60,0H36A36,36,0,0,0,0,36V60A12,12,0,0,0,12,72H72V12A12,12,0,0,0,60,0Z" />
+      <path fill="#efc94c" d="M112.56,0h-24a12,12,0,0,0-12,12V72h60a12,12,0,0,0,12-12V36A36,36,0,0,0,112.56,0Z" />
+      <path fill="#b280c1" d="M12,76.56a12,12,0,0,0-12,12v24a36,36,0,0,0,36,36H60a12,12,0,0,0,12-12v-60Z" />
+      <path
+        fill="#ff726b"
+        d="M136.56,76.56h-60v60a12,12,0,0,0,12,12h24a36,36,0,0,0,36-36v-24A12,12,0,0,0,136.56,76.56Z"
+      />
+    </svg>
+  </c2-icon-button>
+  <h1 class="navbar__title">{{ inNotesView() ? 'Notes' : 'Archive' }}</h1>
+  <c2-button-group
+    class="navbar__views"
+    selection="single"
+    appearance="segmented"
+    size="s"
     aria-label="Notes or archive"
-    [attr.selected-tab]="tab()"
-    (selection-change)="changeTab($event)"
+    [value]="view()"
+    (change)="changeView($event)"
   >
-    <c2-tab for="notes">Notes</c2-tab>
-    <c2-tab for="archive">Archive</c2-tab>
-  </c2-tabs>
+    <c2-button value="notes">Notes</c2-button>
+    <c2-button value="archive">Archive</c2-button>
+  </c2-button-group>
+  <a class="navbar__link" routerLink="/plan">Plan</a>
 
   <c2-autocomplete
+    #searchField
     class="navbar__search"
-    aria-label="Search notes"
-    [attr.placeholder]="inNoteTab() ? 'Search notes' : 'Search the archive'"
+    [attr.aria-label]="inNotesView() ? 'Search everything' : 'Search the archive'"
+    [attr.placeholder]="inNotesView() ? 'Search everything' : 'Search the archive'"
     item-key="id"
     label-field="label"
     description-field="description"
@@ -29,23 +46,14 @@
     }
   </c2-autocomplete>
 
-  @if (inNoteTab()) {
-    <c2-button-group class="navbar__new" aria-label="New note">
-      <c2-button (click)="newNote(ExtensionId.TextNote)">
-        <c2-feather-edit slot="prefix-icon"></c2-feather-edit>
-        Text
-      </c2-button>
-      <c2-button (click)="newNote(ExtensionId.CodeNote)">
-        <c2-feather-code slot="prefix-icon"></c2-feather-code>
-        Code
-      </c2-button>
-    </c2-button-group>
+  @if (inNotesView()) {
     <c2-icon-button
+      class="navbar__arrange"
       toggle
-      aria-label="Arrange notes"
-      tooltip="Move and resize notes"
+      aria-label="Arrange"
+      tooltip="Move and resize cards"
       [selected]="arranging()"
-      (click)="arranging.set(!arranging())"
+      (click)="toggleArranging()"
     >
       <c2-feather-move></c2-feather-move>
     </c2-icon-button>
@@ -69,30 +77,46 @@
     }
   </div>
 
-  <c2-icon-button class="navbar__logo" aria-label="Back to the clock" tooltip="Home" (click)="goHome()">
-    <svg viewBox="0 0 148.56 148.56" aria-hidden="true">
-      <path fill="#3498db" d="M60,0H36A36,36,0,0,0,0,36V60A12,12,0,0,0,12,72H72V12A12,12,0,0,0,60,0Z" />
-      <path fill="#efc94c" d="M112.56,0h-24a12,12,0,0,0-12,12V72h60a12,12,0,0,0,12-12V36A36,36,0,0,0,112.56,0Z" />
-      <path fill="#b280c1" d="M12,76.56a12,12,0,0,0-12,12v24a36,36,0,0,0,36,36H60a12,12,0,0,0,12-12v-60Z" />
-      <path
-        fill="#ff726b"
-        d="M136.56,76.56h-60v60a12,12,0,0,0,12,12h24a36,36,0,0,0,36-36v-24A12,12,0,0,0,136.56,76.56Z"
-      />
-    </svg>
+  <c2-menu class="navbar__new" placement="bottom-end" aria-label="New" (menu-select)="onNewMenu($event)">
+    <c2-button slot="trigger" class="navbar__new-button">
+      <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+      New
+    </c2-button>
+    <c2-menu-item value="note">
+      <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
+      Note
+      <span slot="description">A quick thought, on a card</span>
+      <span slot="shortcut">N</span>
+    </c2-menu-item>
+    <c2-menu-item value="page">
+      <c2-feather-file-text slot="prefix-icon"></c2-feather-file-text>
+      Page
+      <span slot="description">A full page: headings, lists, code</span>
+      <span slot="shortcut">P</span>
+    </c2-menu-item>
+    <c2-menu-item value="flow">
+      <c2-feather-share-2 slot="prefix-icon"></c2-feather-share-2>
+      Flow
+      <span slot="description">Boxes and arrows</span>
+      <span slot="shortcut">F</span>
+    </c2-menu-item>
+  </c2-menu>
+
+  <c2-icon-button aria-label="Settings" tooltip="Settings" (click)="openSettings()">
+    <c2-feather-settings></c2-feather-settings>
   </c2-icon-button>
 </header>
 
 <main class="board">
   @if (items().length === 0) {
     <p class="board__empty">
-      {{
-        inNoteTab()
-          ? 'No notes yet. Start one with Text or Code.'
-          : searchQuery()
-            ? 'Nothing archived matches.'
-            : 'The
-    archive is empty.'
-      }}
+      @if (inNotesView()) {
+        Nothing here yet. Press N for a note, P for a page or F for a flow.
+      } @else if (searchQuery()) {
+        Nothing archived matches.
+      } @else {
+        The archive is empty.
+      }
     </p>
   }
   <c2-masonry
@@ -106,21 +130,30 @@
     @for (item of items(); track item.id) {
       <c2-masonry-item
         [attr.item-id]="item.id"
-        [attr.label]="item.extensionId === ExtensionId.CodeNote ? 'Code note' : 'Note'"
-        [rows]="item.gridPosition.rows"
+        [attr.label]="
+          item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note'
+        "
+        [rows]="rowsOf(item)"
         [cols]="item.gridPosition.screenColumns.Large"
         [colsLg]="item.gridPosition.screenColumns.Large"
         [colsMd]="item.gridPosition.screenColumns.Medium"
         [colsSm]="item.gridPosition.screenColumns.Small"
         [colsXs]="item.gridPosition.screenColumns.XSmall"
       >
-        <ntm-note-card
-          [item]="item"
-          [archived]="!inNoteTab()"
-          [autofocus]="item.id === focusItemId()"
-          (archiveToggle)="toggleArchive(item)"
-          (remove)="removeNote(item)"
-        />
+        @if (item.extensionId === ExtensionId.Page) {
+          <ntm-page-card [item]="item" />
+        } @else if (item.extensionId === ExtensionId.Flow) {
+          <ntm-flow-card [item]="item" />
+        } @else {
+          <ntm-note-card
+            [item]="item"
+            [archived]="!inNotesView()"
+            [autofocus]="inNotesView() && item.id === focusItemId()"
+            (archive)="archive(item)"
+            (restore)="restore(item)"
+            (remove)="removeNote(item)"
+          />
+        }
       </c2-masonry-item>
     }
   </c2-masonry>

@@ -4,9 +4,18 @@ import { inject, Injectable } from '@angular/core';
 import { StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
 import { INSTANCE_ID } from './instance-id';
+import { fitsChromeSyncItem, syncsWithChromeProfile } from './sync-policy';
 import { getTime } from './utils';
 
 type StoredRecord = Record<string, unknown> & { sourceId?: string; trust?: string; modifiedDate?: string };
+
+/**
+ * Marks a key whose last write chrome.storage.sync refused: `SYNC__RETRY__<key>` in chrome.storage.local, so a restart
+ * still retries it. One marker per key, set or removed whole, so tabs open at once never overwrite each other's (a
+ * shared list read and written back by two tabs would lose one). Only the key: a retry sends the record as it is then,
+ * so a note deleted or replaced meanwhile is never sent stale.
+ */
+export const SYNC_RETRY_PREFIX = 'SYNC__RETRY__';
 
 @Injectable()
 export class ChromeStorageApi implements StorageApi {
@@ -19,7 +28,11 @@ export class ChromeStorageApi implements StorageApi {
   remoteSync$ = new BehaviorSubject(false);
 
   constructor() {
-    chrome.storage.onChanged.addListener((changes) => {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      // Room freed in chrome.storage.sync, by another device too: send what it refused again.
+      if (areaName === 'sync' && Object.values(changes).some((change) => change.newValue === undefined)) {
+        void this.retryRefusedWrites();
+      }
       for (const key of Object.keys(changes)) {
         const change = changes[key];
         const newValue = this.jsonParse(change.newValue);
@@ -29,6 +42,8 @@ export class ChromeStorageApi implements StorageApi {
         }
       }
     });
+    // What was refused before a restart.
+    void this.retryRefusedWrites();
   }
 
   getRemoteSyncStatus(): Observable<boolean> {
@@ -55,7 +70,16 @@ export class ChromeStorageApi implements StorageApi {
             item.action === 'remove'
               ? this.chromeSyncApi.remove(item.key)
               : this.chromeSyncApi.set({ [item.key as string]: item.value });
-          write.catch((error: unknown) => console.error(error));
+          // A refused write is retried once chrome.storage.sync takes a write again (room freed, a passing error over).
+          write.then(
+            () => void this.retryRefusedWrites(),
+            (error: unknown) => {
+              console.error(error);
+              if (item.action === 'set') {
+                void this.localStorageApi.set({ [SYNC_RETRY_PREFIX + item.key]: '1' });
+              }
+            },
+          );
         },
         complete: () => {
           this.writingToRemoteSubscription = null;
@@ -74,13 +98,15 @@ export class ChromeStorageApi implements StorageApi {
     }
     const valueStr = JSON.stringify(value);
     await this.localStorageApi.set({ [key]: valueStr });
-    if (trust === 'local') {
+    if (trust === 'local' && syncsWithChromeProfile(key, value) && fitsChromeSyncItem(key, valueStr)) {
       const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
       if (oldActionIndex > -1) {
         this.remoteDataQueue.splice(oldActionIndex, 1);
       }
       this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
       this.syncToRemote();
+      // Queued again: no retry needed (and its refusal, if it comes, marks it again).
+      void this.localStorageApi.remove(SYNC_RETRY_PREFIX + key);
     }
   }
 
@@ -103,9 +129,57 @@ export class ChromeStorageApi implements StorageApi {
   }
 
   async removePromise(key: string | string[]): Promise<void> {
+    // Only what the policy syncs can be in chrome.storage.sync, whatever its size (an older copy that fitted may be
+    // there). Read the records before the local copies are gone.
+    const keys = Array.isArray(key) ? key : [key];
+    const records = (await this.read(this.localStorageApi, keys)) as unknown[];
+    const remoteKeys = keys.filter((itemKey, index) => syncsWithChromeProfile(itemKey, records[index]));
     await this.localStorageApi.remove(key);
-    this.remoteDataQueue.push({ key, action: 'remove' });
-    this.syncToRemote();
+    if (remoteKeys.length > 0) {
+      this.remoteDataQueue.push({ key: remoteKeys, action: 'remove' });
+      this.syncToRemote();
+    }
+  }
+
+  /**
+   * Send again the records chrome.storage.sync refused (SYNC_RETRY_PREFIX), as they are now in chrome.storage.local:
+   * one deleted since is dropped, and so is one last written from the remote (its copy there is the newer one). Runs at
+   * start, after every write chrome.storage.sync takes, and when something is removed from it. Two tabs retrying at
+   * once may both send a record, which writes the same value twice.
+   */
+  async retryRefusedWrites(): Promise<void> {
+    // Keys only, never the values: getKeys is Chrome 130+, and the build targets the last two versions (.browserslistrc).
+    const markers = (await this.localStorageApi.getKeys()).filter((key) => key.startsWith(SYNC_RETRY_PREFIX));
+    if (markers.length === 0) {
+      return;
+    }
+    await this.localStorageApi.remove(markers);
+    const keys = markers.map((marker) => marker.slice(SYNC_RETRY_PREFIX.length));
+    const stored: Record<string, unknown> = await this.localStorageApi.get(keys);
+    const before = this.remoteDataQueue.length;
+    for (const key of keys) {
+      const valueStr = stored[key];
+      const record = this.jsonParse(valueStr) as StoredRecord | unknown[] | null;
+      if (
+        typeof valueStr !== 'string' ||
+        !record ||
+        // Id lists carry no trust: only this device writes them.
+        (!Array.isArray(record) && record.trust !== 'local') ||
+        !syncsWithChromeProfile(key, record) ||
+        !fitsChromeSyncItem(key, valueStr) ||
+        this.queued(key)
+      ) {
+        continue;
+      }
+      this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
+    }
+    if (this.remoteDataQueue.length > before) {
+      this.syncToRemote();
+    }
+  }
+
+  private queued(key: string): boolean {
+    return this.remoteDataQueue.some((item) => item.key === key);
   }
 
   private async read(area: chrome.storage.StorageArea, key: string | string[] | null): Promise<unknown> {

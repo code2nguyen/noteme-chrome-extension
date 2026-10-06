@@ -12,16 +12,40 @@
   gap: 16px;
   min-height: 72px;
   padding: 0 16px;
-  background: var(--c2-theme--color-surface, #303236);
+  background: var(--c2-theme--color-surface);
   transition: box-shadow 0.3s ease;
 }
 
 .navbar--raised {
-  box-shadow: 0 2px 10px rgb(0 0 0 / 60%);
+  box-shadow: var(--ntm-shadow);
 }
 
-.navbar__tabs {
+// The Notes | Archive switch stands for the title on screen; the heading stays for screen readers.
+.navbar__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.navbar__views {
   flex: none;
+}
+
+.navbar__link {
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+
+  &:hover {
+    background: var(--c2-theme--color-surface-container);
+  }
 }
 
 .navbar__search {
@@ -40,6 +64,11 @@
 
 .navbar__new {
   flex: none;
+  --c2-menu--min-width: 260px;
+}
+
+.navbar__new-button {
+  --c2-button__container--border-radius: 999px;
 }
 
 .navbar__spacer {
@@ -77,19 +106,17 @@
   --c2-masonry--gap: 16px;
   --c2-masonry--row-height: 20px;
   --c2-masonry-item--border-radius: var(--c2-theme--radius-lg, 8px);
-  --c2-masonry-item__handle--color: var(--c2-theme--color-on-surface, #f4f4f5);
-  --c2-masonry-item__handle--background: var(--c2-theme--color-surface, #18181b);
-  --c2-masonry__placeholder--border: 2px dashed var(--ntm-accent);
 }
 
-// While arranging, outline every tile and keep its move handle visible, so the mode is obvious.
+// While arranging, outline every card and keep its move handle visible, so the mode is obvious.
 .board__grid--arranging {
   --c2-masonry-item--border: 1px dashed var(--ntm-accent);
   --c2-masonry-item__handle--background: var(--c2-theme--color-surface-container, #3d4046);
   --c2-masonry-item__handle--color: var(--ntm-accent);
 }
 
-// Phones: the search gets a row of its own and the button labels go, so nothing scrolls sideways.
+// Phones: the Notes | Archive switch, the search and the Arrange button get a row of their own, so nothing
+// scrolls sideways.
 @media (max-width: 640px) {
   .navbar {
     flex-wrap: wrap;
@@ -97,14 +124,23 @@
     padding: 8px 12px;
   }
 
+  .navbar__views,
+  .navbar__search,
+  .navbar__arrange {
+    order: 2;
+  }
+
   .navbar__search {
-    order: 1;
-    flex-basis: 100%;
+    flex: 1 1 0;
     min-width: 0;
   }
 
+  // The line break before the second row.
   .navbar__spacer {
-    display: none;
+    order: 1;
+    flex-basis: 100%;
+    height: 0;
+    margin-top: -8px;
   }
 
   .board {

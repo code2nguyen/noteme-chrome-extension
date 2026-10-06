@@ -1,0 +1,293 @@
+// The photo carries the page; everything on it sits on frosted glass and follows the theme through --ntm-home-*.
+:host {
+  position: relative;
+  display: block;
+  min-height: 100vh;
+  overflow: hidden;
+  color: var(--ntm-home-ink);
+  background: var(--c2-theme--color-surface);
+}
+
+.home__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.home__photo--shown {
+  opacity: 1;
+}
+
+.home__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--ntm-home-scrim);
+}
+
+.home__layout {
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 32px 24px;
+}
+
+.home__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+%glass {
+  background: var(--ntm-home-glass);
+  backdrop-filter: blur(16px);
+}
+
+.home__logo {
+  @extend %glass;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.home__link {
+  // On glass like every other control of the bar: plain text over a busy or mid-tone photo is hard to read.
+  @extend %glass;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+
+  &:hover {
+    background: var(--ntm-home-glass-strong);
+  }
+}
+
+.home__search {
+  @extend %glass;
+  flex: 1 1 260px;
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+  --c2-feather-icon--size: 16px;
+
+  span {
+    flex: 1;
+    opacity: 0.85;
+  }
+
+  kbd {
+    font:
+      500 11px ui-monospace,
+      monospace;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--ntm-home-line);
+  }
+}
+
+.home__glass-button {
+  @extend %glass;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  --c2-feather-icon--size: 16px;
+}
+
+.home__icon-button {
+  @extend %glass;
+  border-radius: 50%;
+  --c2-icon-button__icon--width: 18px;
+  --c2-icon-button__icon--height: 18px;
+  --c2-icon-button__icon--color: var(--ntm-home-ink);
+  --c2-icon-button__icon__hover--color: var(--ntm-home-ink);
+}
+
+.home__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  padding: 32px 0;
+}
+
+.home__clock {
+  text-align: center;
+}
+
+.home__time {
+  margin: 0;
+  font:
+    300 88px/1 'RedHatDisplay',
+    system-ui,
+    sans-serif;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.home__date {
+  margin: 10px 0 0;
+  font-size: 17px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.home__sites {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 88px);
+  justify-content: center;
+  gap: 12px 8px;
+  width: 100%;
+  max-width: 760px;
+}
+
+.home__site {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  border-radius: 16px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 13px;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ntm-home-glass);
+  }
+}
+
+.home__site-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ntm-home-glass-strong);
+  backdrop-filter: blur(16px);
+  font:
+    600 18px 'RedHatDisplay',
+    system-ui,
+    sans-serif;
+}
+
+.home__site-name {
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home__ask {
+  display: flex;
+  gap: 8px;
+}
+
+.home__ask-button,
+.home__ask-later {
+  --c2-button__container--background-color: var(--ntm-home-glass);
+  --c2-button__container--color: var(--ntm-home-ink);
+  --c2-button__container--border: none;
+  --c2-button__container--border-radius: 999px;
+  --c2-button__container__hover--background-color: var(--ntm-home-glass-strong);
+  --c2-button__container__hover--color: var(--ntm-home-ink);
+}
+
+.home__ask-later {
+  --c2-button__container--background-color: transparent;
+}
+
+.home__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 32px;
+}
+
+.home__quote {
+  flex: 1 1 320px;
+  max-width: 560px;
+  margin: 0;
+
+  blockquote {
+    margin: 0;
+    font:
+      400 17px/1.45 'RedHatDisplay',
+      system-ui,
+      sans-serif;
+  }
+
+  figcaption {
+    margin-top: 2px;
+    font-size: 13px;
+    opacity: 0.75;
+  }
+}
+
+.home__credit {
+  margin: 0 0 0 auto;
+  font-size: 12px;
+  opacity: 0.75;
+
+  a {
+    color: inherit;
+  }
+}
+
+@media (max-width: 640px) {
+  .home__layout {
+    padding: 12px 16px 16px;
+  }
+
+  .home__time {
+    font-size: 64px;
+  }
+
+  // One row of actions, the search on its own row below.
+  .home__search {
+    order: 1;
+    flex-basis: 100%;
+    max-width: none;
+    margin: 4px 0 0;
+
+    kbd {
+      display: none;
+    }
+  }
+
+  .home__glass-button {
+    margin-left: auto;
+  }
+}

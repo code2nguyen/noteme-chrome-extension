@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ExtensionId, LEGACY_VOCABULARY_EXTENSION_ID } from '../extension-id';
+import { ExtensionId } from '../extension-id';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
-import { deltaToMarkdown, normalizeArtBoardItem, normalizeItemData } from './migration';
+import { deltaToMarkdown, isSupportedNote, normalizeArtBoardItem, normalizeItemData } from './migration';
 import { getText } from './utils';
 
 const itemData = (data: unknown, dataType: DataType): ItemData => ({
@@ -93,16 +93,11 @@ describe('normalizeItemData', () => {
     expect(result.data).toBe('**hello**');
   });
 
-  it('turns a 2.x vocabulary value into JSON text', () => {
-    const result = normalizeItemData(itemData([{ word: 'chat', meaning: 'cat' }], DataType.JSON));
-    expect(result.dataType).toBe(DataType.TEXT);
-    expect(result.properties?.language).toBe('json');
-    expect(JSON.parse(result.data!)).toEqual([{ word: 'chat', meaning: 'cat' }]);
-  });
-
-  it('leaves 3.x data untouched', () => {
-    const data = itemData('const a = 1', DataType.TEXT);
-    expect(normalizeItemData(data)).toBe(data);
+  it('leaves notes and pages untouched', () => {
+    const note = itemData('**hi**', DataType.MARKDOWN);
+    const page = itemData('# Hi', DataType.PAGE);
+    expect(normalizeItemData(note)).toBe(note);
+    expect(normalizeItemData(page)).toBe(page);
   });
 });
 
@@ -118,15 +113,18 @@ describe('normalizeArtBoardItem', () => {
   });
 
   it('derives the note type of 1.x items from their element', () => {
-    expect(normalizeArtBoardItem({ ...base, element: 'ntm-code-note-element' } as ArtBoardItem).extensionId).toBe(
-      ExtensionId.CodeNote,
+    expect(normalizeArtBoardItem({ ...base, element: 'ntm-text-note-element' } as ArtBoardItem).extensionId).toBe(
+      ExtensionId.TextNote,
     );
     expect(normalizeArtBoardItem(base).extensionId).toBe(ExtensionId.TextNote);
   });
 
-  it('opens a removed vocabulary note as a code note', () => {
-    const item = { ...base, extensionId: LEGACY_VOCABULARY_EXTENSION_ID } as unknown as ArtBoardItem;
-    expect(normalizeArtBoardItem(item).extensionId).toBe(ExtensionId.CodeNote);
+  it('keeps notes and pages, and leaves out the code and vocabulary notes of older versions', () => {
+    const kind = (extensionId: string) => normalizeArtBoardItem({ ...base, extensionId } as unknown as ArtBoardItem);
+    expect(isSupportedNote(kind(ExtensionId.TextNote))).toBe(true);
+    expect(isSupportedNote(kind(ExtensionId.Page))).toBe(true);
+    expect(isSupportedNote(kind('ntm-code-note-element'))).toBe(false);
+    expect(isSupportedNote(kind('vocabulary-extension'))).toBe(false);
   });
 
   it('does not mutate the stored item', () => {
@@ -139,5 +137,10 @@ describe('normalizeArtBoardItem', () => {
 describe('getText', () => {
   it('strips the notepad markup for the search index', () => {
     expect(getText('- [x] **buy** <u>milk</u> \\*now', DataType.MARKDOWN)).toBe('buy milk *now');
+  });
+
+  it('indexes a page with its title and its words', () => {
+    const page = '## Install\n- [ ] brew `node`\n> **Note** [docs](https://x)\n```sh\nnpm i\n```\n---';
+    expect(getText(page, DataType.PAGE, { title: 'Laptop' })).toBe('Laptop\nInstall\nbrew node\nNote docs\nnpm i');
   });
 });

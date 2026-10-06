@@ -12,6 +12,7 @@ import {
   selectArtBoardItemsByBoardId,
   selectArtBoardItemSearchLoading,
   selectArtBoardItemSearchResults,
+  selectIsAllLoadedArtBoardItems,
   selectItemDataById,
 } from '../store/reducers';
 import { isNotNullOrUndefined } from './utils';
@@ -42,6 +43,15 @@ export class DataService {
       this.store.dispatch(ArtBoardItemActions.loadArtBoardItems({ boardId }));
     }
     return this.store.select(selectArtBoardItemsByBoardId(boardId));
+  }
+
+  /** Read every note, on the board or not (a page opened by its link, or from the search). */
+  loadAllArtBoardItems(): void {
+    this.store.dispatch(ArtBoardItemActions.getAllArtBoardItems());
+  }
+
+  isAllArtBoardItemsLoaded(): Observable<boolean> {
+    return this.store.select(selectIsAllLoadedArtBoardItems);
   }
 
   getArchivedArtBoardItems(): Observable<ArtBoardItem[]> {
@@ -87,9 +97,17 @@ export class DataService {
     );
   }
 
-  hideArtBoardItem(artBoardItem: ArtBoardItem): void {
+  /**
+   * Archive a note, or remove it when its stored data is empty. `keep` archives it without that check: a page or flow
+   * view decides from what it shows, which the store may not have yet (its save is debounced).
+   */
+  hideArtBoardItem(artBoardItem: ArtBoardItem, { keep = false }: { keep?: boolean } = {}): void {
     const boardId = artBoardItem.boardId;
     if (!boardId) {
+      return;
+    }
+    if (keep) {
+      this.store.dispatch(ArtBoardItemActions.hideArtBoardItem({ boardId, artBoardItemId: artBoardItem.id }));
       return;
     }
     this.store
@@ -105,10 +123,13 @@ export class DataService {
       });
   }
 
-  showArtBoardItem(item: ArtBoardItem, order: number): void {
-    this.store.dispatch(
-      ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: item.id, order }),
-    );
+  /**
+   * Bring an archived note, page or flow back to the board, first, as a new one would be. The order is taken from the
+   * stored board when the restore runs (art-board-item.effects.ts), not from the store, which may not have read the
+   * board yet or may not hold another restore still being written.
+   */
+  restoreArtBoardItem(item: ArtBoardItem): void {
+    this.store.dispatch(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: item.id }));
   }
 
   searchArtBoardItem(query: string): void {

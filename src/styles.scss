@@ -1,4 +1,4 @@
-@use '@c2n/theme/theme.css';
+@use '@c2n/components/theme.css';
 
 @font-face {
   font-family: 'RedHatDisplay';
@@ -21,22 +21,62 @@
   font-weight: 600 700;
 }
 
-// Noteme is a dark app (index.html sets data-theme="dark"). The 2.x palette is mapped onto the @c2n/theme tokens,
-// which every c2 component follows; component variables are only set where a note needs its own look.
-:root[data-theme='dark'] {
-  --c2-theme--color-primary: #ff726b;
-  --c2-theme--color-primary-hover: #ff8a84;
-  --c2-theme--color-primary-active: #f25b53;
-  --c2-theme--color-on-primary: #1d1d1f;
-  --c2-theme--color-surface: #303236;
-  --c2-theme--color-surface-container-low: #36393e;
-  --c2-theme--color-surface-container: #3d4046;
-  --c2-theme--color-on-surface: #dfe3eb;
-  --c2-theme--color-on-surface-variant: #a3a8b3;
+// Light and dark palettes mapped onto the @c2n/theme tokens, which every c2 component follows. SettingsService puts
+// data-theme on <html> (main.ts does it before the first paint); component variables are only set where a view needs
+// its own look.
+:root {
+  // Dark enough for link text to reach 4.5:1 on both light surfaces (and white text on it, 5:1).
+  --c2-theme--color-primary: #c54137;
+  --c2-theme--color-primary-hover: #b53d35;
+  --c2-theme--color-primary-active: #a1352e;
+  --c2-theme--color-on-primary: #ffffff;
+  --c2-theme--color-surface: #f5f3ef;
+  --c2-theme--color-surface-container-low: #fbfaf8;
+  --c2-theme--color-surface-container: #ece9e3;
+  --c2-theme--color-on-surface: #23211e;
+  --c2-theme--color-on-surface-variant: #6b665e;
 
-  // App-level values used by app-owned styles.
   --ntm-accent: var(--c2-theme--color-primary);
-  --ntm-muted: #808389;
+  --ntm-muted: #6b665e;
+  --ntm-line: #e2ded6;
+  --ntm-shadow: 0 2px 10px rgb(35 33 30 / 12%);
+  --ntm-scrollbar: rgb(35 33 30 / 20%);
+  --ntm-scrollbar-hover: rgb(35 33 30 / 40%);
+
+  // Home: text and frosted glass over the photo.
+  --ntm-home-ink: #1f1d1a;
+  --ntm-home-glass: rgb(255 255 255 / 55%);
+  --ntm-home-glass-strong: rgb(255 255 255 / 75%);
+  --ntm-home-line: rgb(31 29 26 / 25%);
+  --ntm-home-scrim: linear-gradient(rgb(255 255 255 / 35%), rgb(255 255 255 / 10%) 40%, rgb(255 255 255 / 45%));
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --c2-theme--color-primary: #ff8a7a;
+  --c2-theme--color-primary-hover: #ff9e90;
+  --c2-theme--color-primary-active: #f2725f;
+  --c2-theme--color-on-primary: #2a1512;
+  --c2-theme--color-surface: #1b1a19;
+  --c2-theme--color-surface-container-low: #232220;
+  --c2-theme--color-surface-container: #2c2a28;
+  --c2-theme--color-on-surface: #efece6;
+  --c2-theme--color-on-surface-variant: #a9a49b;
+
+  --ntm-muted: #8d887f;
+  --ntm-line: #3a3733;
+  --ntm-shadow: 0 2px 10px rgb(0 0 0 / 60%);
+  --ntm-scrollbar: rgb(245 245 245 / 20%);
+  --ntm-scrollbar-hover: rgb(245 245 245 / 40%);
+
+  --ntm-home-ink: #f7f5f0;
+  --ntm-home-glass: rgb(20 19 18 / 45%);
+  --ntm-home-glass-strong: rgb(20 19 18 / 65%);
+  --ntm-home-line: rgb(247 245 240 / 30%);
+  --ntm-home-scrim: linear-gradient(rgb(0 0 0 / 40%), rgb(0 0 0 / 15%) 40%, rgb(0 0 0 / 55%));
+
+  color-scheme: dark;
 }
 
 html {
@@ -62,10 +102,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgb(245 245 245 / 20%);
+  background-color: var(--ntm-scrollbar);
   border-radius: 20px;
 
   &:hover {
-    background-color: rgb(245 245 245 / 40%);
+    background-color: var(--ntm-scrollbar-hover);
   }
 }
