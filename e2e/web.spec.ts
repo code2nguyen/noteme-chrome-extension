@@ -759,6 +759,16 @@ test.describe('touch screen', () => {
     await note.locator('c2-notepad .ProseMirror').tap();
     await expect.poll(opacity).toBe('1');
   });
+
+  test("a flow's + button is dragged with a finger, not taken for a page scroll", async ({ page }) => {
+    await openBoard(page);
+    await page.locator('c2-button.navbar__new-button').tap();
+    await page.locator('c2-menu-item[value="flow"]').tap();
+    const plus = page.locator('c2-flow c2-icon-button[aria-label="Add a box"]');
+    await expect(plus).toBeVisible();
+    expect(await plus.evaluate((element) => getComputedStyle(element).touchAction)).toBe('none');
+    await expect(page.locator('.flow__hint')).toContainText('Tap or drag + to add a box');
+  });
 });
 
 test.describe('flow', () => {
@@ -904,9 +914,10 @@ test.describe('flow', () => {
     await page.keyboard.press('f');
     await page.keyboard.press('Enter');
     await addBoxAt(page, 0.3, 'Pack');
-    // The toolbar over the canvas adds a box too, named straight away.
+    // A click on + adds one box (the press did not move, so it is not also a drop), named straight away.
     await page.locator('c2-flow c2-icon-button[aria-label="Add a box"]').click();
     await expect(editor(page)).toBeVisible();
+    await expect(page.locator('c2-flow .node')).toHaveCount(2);
     await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.type('Ask Linh');
     await page.keyboard.press('Enter');
