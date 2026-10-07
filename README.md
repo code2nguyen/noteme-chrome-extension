@@ -47,6 +47,7 @@ this one (`C2N_REPO` points elsewhere). package.json and the lockfile keep the p
 # in ../web-components, after each change
 npm run build -w packages/umbrella && npm run build -w packages/icons/feather-icons && npm run build -w packages/tools/theme
 
+# back in this repository
 npm run c2n:link     # node_modules/@c2n/components, feather-icons and theme -> ../web-components
 npm run c2n:unlink   # back to the published packages
 ```
