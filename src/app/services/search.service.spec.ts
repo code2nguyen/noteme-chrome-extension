@@ -32,14 +32,15 @@ function setUp() {
         ),
       ),
   };
+  const actions = new ActionsSubject();
   const injector = Injector.create({
     providers: [
       { provide: Store, useValue: store },
-      { provide: ActionsSubject, useValue: new ActionsSubject() },
+      { provide: ActionsSubject, useValue: actions },
     ],
   });
   const service = runInInjectionContext(injector, () => new SearchService());
-  return { service, state, dispatched };
+  return { service, state, dispatched, actions };
 }
 
 describe('SearchService', () => {
@@ -51,10 +52,12 @@ describe('SearchService', () => {
   });
 
   it('still answers when reading the notes failed, from those it has, and reads them again for the next search', async () => {
-    const { service, state, dispatched } = setUp();
+    const { service, state, dispatched, actions } = setUp();
     const answer = firstValueFrom(service.search('milk'));
     state.next({ items: [note('a', 'Buy milk')], isAllLoaded: false, failed: true });
     expect(await answer).toEqual(['a']);
+    // That index follows no note changes: nothing is left listening once it answered.
+    expect(actions.observed).toBe(false);
 
     await Promise.resolve();
     state.next({ items: [note('a', 'Buy milk'), note('b', 'Oat milk')], isAllLoaded: true, failed: false });
