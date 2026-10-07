@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y @c2n/mcp@1.0.4 validate --hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
