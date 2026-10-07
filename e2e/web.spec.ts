@@ -466,7 +466,14 @@ test('the Archive restores several notes at once, and deletes forever only once 
   await expect(archiveRows(page)).toHaveText([/Spare keys/, /Old budget/, /Tram times/]);
   await expect(archivePreview(page).locator('.archive__title')).toHaveText('Spare keys');
 
+  // Select all acts on the rows listed: a note the filter hides keeps its tick.
   await archiveRows(page).nth(0).locator('c2-checkbox').click();
+  await page.locator('.archive__kinds c2-button[value="Page"]').click();
+  await expect(archiveRows(page)).toHaveCount(0);
+  await page.locator('.archive__all').click();
+  await page.locator('.archive__kinds c2-button[value="all"]').click();
+  await expect(page.locator('.archive__bulk-count')).toHaveText('1 selected');
+
   await archiveRows(page).nth(2).locator('c2-checkbox').click();
   await expect(page.locator('.archive__bulk-count')).toHaveText('2 selected');
   // Ticking a row leaves the preview where it was.
@@ -623,12 +630,41 @@ test('arrange: cards move and resize without a mode, and the order is kept after
   const [a, b] = Object.keys(before);
   await expect.poll(orders).toEqual({ [a]: before[b], [b]: before[a] });
 
+  // Resize the first card three rows taller from its bottom edge: Enter, ArrowDown ×3, Enter. The new span is saved.
+  const rows = () =>
+    page.evaluate(() =>
+      Object.fromEntries(
+        Object.entries(localStorage)
+          .filter(([key]) => key.startsWith('noteme-dev:ART_BOARD_ITEM__'))
+          .map(([, value]) => JSON.parse(value))
+          .map((item) => [item.id, item.gridPosition.rows]),
+      ),
+    );
+  // Once the move shows: the card resized is the one measured after the reload.
+  await expect(notepadSurface(card(page, 0))).toHaveText('Second');
+  const id = (await tiles(page).nth(0).getAttribute('item-id'))!;
+  const rowsBefore: Record<string, number> = await rows();
+  const heightBefore = (await tiles(page).nth(0).boundingBox())!.height;
+  await tiles(page)
+    .nth(0)
+    .getByRole('button', { name: /^Resize / })
+    .focus();
+  await page.keyboard.press('Enter');
+  for (let step = 0; step < 3; step++) {
+    await page.keyboard.press('ArrowDown');
+  }
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await rows())[id]).toBe(rowsBefore[id] + 3);
+
   await page.reload();
   await openBoard(page);
   await expect(notepadSurface(card(page, 0))).toHaveText('Second');
   await expect(notepadSurface(card(page, 1))).toHaveText('First');
   const [first, second] = [await tiles(page).nth(0).boundingBox(), await tiles(page).nth(1).boundingBox()];
   expect(first!.x).toBeLessThan(second!.x);
+  // The resized card keeps its height after the reload.
+  const resized = (await page.locator(`c2-masonry-item[item-id="${id}"]`).boundingBox())!;
+  expect(resized.height).toBeGreaterThan(heightBefore + 20);
 });
 
 test('phone width: one column, no horizontal scroll', async ({ page }) => {

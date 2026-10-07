@@ -228,7 +228,10 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
       sourceId: 'other-device',
     },
   });
+  // Only in the sync until the tab pulls it in: the board's own copy is made by the pull, not by the seeding.
+  expect(await stored(page, 'local', 'ITEM_DATA__remote')).toBeUndefined();
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect.poll(async () => (await stored(page, 'local', 'ITEM_DATA__remote'))?.data).toBe('Written on my laptop');
   await expect(page.locator('ntm-note-card')).toHaveCount(2);
   await expect(page.locator('c2-notepad .ProseMirror', { hasText: 'Written on my laptop' })).toBeVisible();
   await shot(page, '12-extension-synced');

@@ -3,7 +3,7 @@ import { ExtensionId } from '../extension-id';
 import { noteDefaultProperties } from '../note-config';
 import { DataType } from '../store/models/data-type';
 import { ArtBoardItem, ItemData } from '../store/models';
-import { groupByMonth, rearrange, splitBoard, summarize } from './older-notes';
+import { groupByMonth, plainLine, rearrange, splitBoard, summarize } from './older-notes';
 
 const day = (n: number) => `2026-09-${String(n).padStart(2, '0')}T10:00:00.000Z`;
 
@@ -51,6 +51,15 @@ describe('splitBoard', () => {
 });
 
 describe('summarize and groupByMonth', () => {
+  it('reads a line without its list marker or checkbox', () => {
+    expect(plainLine('- [ ] oat milk')).toBe('oat milk');
+    expect(plainLine('1. [x] oat milk')).toBe('oat milk');
+    // A numbered task whose number the page editor already dropped.
+    expect(plainLine('[ ] oat milk')).toBe('oat milk');
+    expect(plainLine('  2) rice ')).toBe('rice');
+    expect(plainLine('[link](url) stays')).toBe('[link](url) stays');
+  });
+
   it('takes the first line as the label and the rest as the excerpt', () => {
     const summary = summarize(note('a', 0), { a: written('a', 4, 'Groceries\n- [ ] oat milk\n- [ ] rice') });
     expect(summary).toMatchObject({ kind: 'Note', label: 'Groceries', edited: day(4) });

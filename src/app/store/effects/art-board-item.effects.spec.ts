@@ -72,9 +72,17 @@ const restored = (item: ArtBoardItem): ArtBoardItem => ({ ...item, restoredDate:
 describe('ArtBoardItemEffects', () => {
   it('records when a note is archived, and forgets it when the note comes back', async () => {
     const { actions, effects, records } = setUp({
-      [artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]: [],
-      [artBoardItemKey('back')]: { ...note('back', 5), archivedDate: '2026-09-01T10:00:00.000Z' },
+      [artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]: ['back'],
+      [artBoardItemKey('back')]: note('back', 5, DEFAULT_BOARD_ID),
     });
+    const hidden = firstValueFrom(effects.hideArtBoardItem$);
+    actions.next(ArtBoardItemActions.hideArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'back' }));
+    await hidden;
+    // Saved, not only handed to the store.
+    const archived = records[artBoardItemKey('back')] as ArtBoardItem;
+    expect(archived.boardId).toBeUndefined();
+    expect(Date.parse(archived.archivedDate ?? '')).not.toBeNaN();
+
     const shown = firstValueFrom(effects.showArtBoardItem$);
     actions.next(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'back' }));
     await shown;
