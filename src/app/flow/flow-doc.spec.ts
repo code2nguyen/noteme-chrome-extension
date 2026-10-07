@@ -4,6 +4,7 @@ import {
   connect,
   deleteBox,
   disconnect,
+  duplicateBox,
   EMPTY_FLOW,
   flowText,
   labelArrow,
@@ -12,6 +13,7 @@ import {
   placeBoxes,
   renameBox,
   serializeFlow,
+  styleBox,
 } from './flow-doc';
 
 const at = (x: number, y: number) => ({ x, y });
@@ -101,5 +103,47 @@ describe('flow document', () => {
     const doc = connect(renameBox(addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0)), 'a', 'Pack'), 'a', 'b');
     expect(flowText(doc)).toBe(`Pack\n${NEW_BOX_LABEL}`);
     expect(flowText(labelArrow(doc, 'a', 'b', 'if it rains'))).toBe(`Pack\n${NEW_BOX_LABEL}\nif it rains`);
+  });
+
+  it('styles a box, keeps its look through an auto layout, and reads only known styles back', () => {
+    let doc = addBox(EMPTY_FLOW, 'a', at(0, 0));
+    doc = styleBox(doc, 'a', { shape: 'diamond', paper: 'yellow', icon: 'question' });
+    expect(doc.nodes[0]).toEqual({
+      id: 'a',
+      label: NEW_BOX_LABEL,
+      position: at(0, 0),
+      shape: 'diamond',
+      paper: 'yellow',
+      icon: 'question',
+    });
+    expect(styleBox(doc, 'a', { paper: 'yellow' })).toBe(doc);
+    expect(styleBox(doc, 'missing', { paper: 'blue' })).toBe(doc);
+    // A box is the plain shape, and undefined clears a choice (Auto ink, no icon).
+    const plain = styleBox(styleBox(doc, 'a', { shape: 'rect', icon: undefined }), 'a', { ink: 'red' });
+    expect(plain.nodes[0]).toEqual({ id: 'a', label: NEW_BOX_LABEL, position: at(0, 0), paper: 'yellow', ink: 'red' });
+
+    expect(placeBoxes(doc, null).nodes[0]).toEqual({
+      id: 'a',
+      label: NEW_BOX_LABEL,
+      shape: 'diamond',
+      paper: 'yellow',
+      icon: 'question',
+    });
+    expect(parseFlow(serializeFlow(doc))).toEqual(doc);
+    const odd = JSON.stringify({
+      nodes: [{ id: 'a', label: 'A', shape: 'star', paper: 'gold', ink: 7, icon: 'rocket' }],
+    });
+    expect(parseFlow(odd).nodes).toEqual([{ id: 'a', label: 'A' }]);
+  });
+
+  it('duplicates a box beside it, with its look and without its arrows', () => {
+    let doc = connect(addBox(addBox(EMPTY_FLOW, 'a', at(10, 20)), 'b', at(300, 20)), 'a', 'b');
+    doc = styleBox(doc, 'a', { shape: 'pill', paper: 'green' });
+    const copied = duplicateBox(doc, 'a', 'c');
+    expect(copied.nodes.map((node) => node.id)).toEqual(['a', 'c', 'b']);
+    expect(copied.nodes[1]).toEqual({ ...copied.nodes[0], id: 'c', position: at(34, 44) });
+    expect(copied.edges).toEqual(doc.edges);
+    expect(duplicateBox(doc, 'a', 'd', at(100, 100)).nodes[1].position).toEqual(at(124, 124));
+    expect(duplicateBox(doc, 'missing', 'e')).toBe(doc);
   });
 });

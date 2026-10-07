@@ -6,6 +6,17 @@ export type ClockSetting = '24h' | '12h';
 export type DateFormat = 'long' | 'short' | 'numeric';
 export type WeekStart = 'monday' | 'sunday';
 
+/** Optional parts of Noteme, switched on or off in Settings. Plan is the first; more will join it. */
+export type Feature = 'plan';
+
+export const FEATURES: readonly { id: Feature; label: string; description: string }[] = [
+  { id: 'plan', label: 'Plan', description: 'A week and month calendar for what you plan to do' },
+];
+
+export function hasFeature(settings: Settings, feature: Feature): boolean {
+  return settings.features.includes(feature);
+}
+
 export interface Settings {
   theme: ThemeSetting;
   clock: ClockSetting;
@@ -19,10 +30,13 @@ export interface Settings {
   quote: boolean;
   shortcuts: boolean;
   weekStart: WeekStart;
+  /** The optional features switched on; may be none. */
+  features: Feature[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  theme: 'auto',
+  // Dark until the user picks another theme, whatever the system's.
+  theme: 'dark',
   clock: '24h',
   dateFormat: 'long',
   photos: true,
@@ -31,6 +45,8 @@ export const DEFAULT_SETTINGS: Settings = {
   quote: true,
   shortcuts: true,
   weekStart: 'monday',
+  // Every feature is opt-in: switched on in Settings.
+  features: [],
 };
 
 const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
@@ -46,7 +62,7 @@ export function parseSettings(raw: unknown): Settings {
   const stored = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   const result: Settings = { ...DEFAULT_SETTINGS };
   for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[]) {
-    if (key === 'photoThemes') {
+    if (key === 'photoThemes' || key === 'features') {
       continue;
     }
     const value = stored[key];
@@ -59,6 +75,11 @@ export function parseSettings(raw: unknown): Settings {
     ? PHOTO_THEME_IDS.filter((id) => (stored['photoThemes'] as unknown[]).includes(id))
     : [];
   result.photoThemes = themes.length > 0 ? themes : [...DEFAULT_SETTINGS.photoThemes];
+  // Known features only, in their own order; none at all is a choice, nothing stored is the default.
+  const features = stored['features'];
+  result.features = Array.isArray(features)
+    ? FEATURES.map((feature) => feature.id).filter((id) => features.includes(id))
+    : [...DEFAULT_SETTINGS.features];
   return result;
 }
 

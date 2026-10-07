@@ -18,39 +18,36 @@ import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
 import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/components/masonry';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
+import type { SearchFieldSearchDetail } from '@c2n/components/search-field';
+import type { ToastRegion } from '@c2n/components/toast';
 import { Dictionary } from '@ngrx/entity';
 import { combineLatest, of, ReplaySubject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith, switchMap, take } from 'rxjs/operators';
 
 import './board-elements';
 import { ExtensionId } from '../extension-id';
-import { noteDefaultProperties } from '../note-config';
+import { latestNotePaper, noteDefaultProperties, paperColorFor } from '../note-config';
 import { DataService } from '../services/data.service';
-import { DeviceSyncService, SyncState } from '../services/device-sync.service';
-import { editedLabel, getCurrentDate, getText, pageMarkdownToText, uuid } from '../services/utils';
-import { ArtBoardItemApiActions } from '../store/actions';
+import { DeviceSyncService } from '../services/device-sync.service';
+import { FULL_SCREEN, SearchSuggestion, searchShortcut, searchSuggestions } from '../services/search-results';
+import { editedLabel, getCurrentDate, pageMarkdownToText, uuid } from '../services/utils';
+import { ArtBoardItemApiActions, ItemDataActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
-import { selectItemDataEntities } from '../store/reducers';
+import { selectIsAllLoadedItemDatas, selectItemDataEntities, selectItemDatasLoadFailed } from '../store/reducers';
+import { hasFeature } from '../settings/settings';
+import { SettingsPanel } from '../settings/settings-panel';
+import { SettingsService } from '../settings/settings.service';
+import { ArchiveView } from './archive-view';
 import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
 import { cardRows, storedRows } from './card-rows';
 import { PageCard } from './page-card';
-
-interface SearchSuggestion {
-  id: string;
-  label: string;
-  description: string;
-}
+import { groupByMonth, NoteSummary, rearrange, splitBoard, summarize } from './older-notes';
 
 type BoardView = 'notes' | 'archive';
 
-const PREVIEW_LENGTH = 80;
-
 /** Keys that start something new from anywhere on the board, as shown in the New menu. */
 const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page, f: ExtensionId.Flow };
-
-/** The notes that open full screen, and their route. */
-const FULL_SCREEN: Partial<Record<ExtensionId, string>> = { [ExtensionId.Page]: '/page', [ExtensionId.Flow]: '/flow' };
 
 /**
  * Every note in one place, newest first. Quick notes are written right on their card; pages and flows show a card and
@@ -61,25 +58,29 @@ const FULL_SCREEN: Partial<Record<ExtensionId, string>> = { [ExtensionId.Page]: 
   selector: 'ntm-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [NoteCard, PageCard, FlowCard, RouterLink],
+  imports: [ArchiveView, NoteCard, PageCard, FlowCard, RouterLink, SettingsPanel],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {
     '(window:scroll)': 'onScroll()',
     '(document:keydown)': 'onKey($event)',
+    '(document:visibilitychange)': 'onVisibilityChange()',
   },
 })
 export class Board {
   private readonly router = inject(Router);
+  private readonly settings = inject(SettingsService).settings;
+  /** Plan is optional: its link shows only while it is switched on in Settings. */
+  readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
   private readonly store = inject(Store);
   private readonly dataService = inject(DataService);
   private readonly deviceSync = inject(DeviceSyncService);
   private readonly cards = viewChildren(NoteCard);
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
+  private readonly toasts = viewChild<ElementRef<ToastRegion>>('toasts');
   private readonly route = inject(ActivatedRoute);
 
   readonly ExtensionId = ExtensionId;
-  readonly SyncState = SyncState;
 
   /**
    * Emits once the board has read its notes. Subscribed before `items` asks for them: storage may answer at once
@@ -99,8 +100,10 @@ export class Board {
     { initialValue: 'notes' as BoardView },
   );
   readonly inNotesView = computed(() => this.view() === 'notes');
-  /** Moving and resizing cards, on the Notes view only. */
-  readonly arranging = signal(false);
+  /** Settings open in a sheet over the board, as over Home (`?settings=1`), so closing it comes back here. */
+  readonly settingsOpen = toSignal(this.route.queryParamMap.pipe(map((params) => params.has('settings'))), {
+    initialValue: false,
+  });
 
   /** What the search field holds, as typed (binding it back trimmed would eat a space the user just typed). */
   readonly query = signal('');
@@ -108,7 +111,6 @@ export class Board {
   readonly raised = signal(false);
   readonly focusItemId = signal<string | null>(null);
 
-  readonly syncState = toSignal(this.deviceSync.syncState$, { requireSync: true });
   readonly searching = toSignal(this.dataService.selectArtBoardItemSearchLoading(), { initialValue: false });
 
   /** The notes of the board in their stored order: a new note goes first. */
@@ -119,8 +121,11 @@ export class Board {
     { initialValue: [] as ArtBoardItem[] },
   );
 
-  /** What the Archive view shows: everything archived, oldest edit first, or what matches the search. */
-  private readonly archivedItems = toSignal(
+  /**
+   * What the Archive view shows: everything archived, oldest edit first, or what matches the search; `null` while it is
+   * read, so the view never says the archive is empty before it knows.
+   */
+  private readonly archivedItems = toSignal<ArtBoardItem[] | null>(
     combineLatest([toObservable(this.view), toObservable(this.searchQuery)]).pipe(
       // Typing on the Notes view must not reload the archive, and the archive is only read once it is opened.
       map(([view, query]) => (view === 'archive' ? query : null)),
@@ -129,24 +134,88 @@ export class Board {
         if (query === null) {
           return of([]);
         }
-        if (query) {
-          return this.dataService.getSearchResults().pipe(map((items) => items.filter((item) => !item.boardId)));
-        }
-        return this.dataService
-          .getArchivedArtBoardItems()
-          .pipe(
-            map((items) =>
-              [...items].sort((a, b) =>
-                (a.dataModifiedDate || a.modifiedDate).localeCompare(b.dataModifiedDate || b.modifiedDate),
-              ),
-            ),
-          );
+        const items = query
+          ? this.dataService.getSearchResults().pipe(map((items) => items.filter((item) => !item.boardId)))
+          : this.dataService
+              .getArchivedArtBoardItems()
+              .pipe(
+                map((items) =>
+                  [...items].sort((a, b) =>
+                    (a.dataModifiedDate || a.modifiedDate).localeCompare(b.dataModifiedDate || b.modifiedDate),
+                  ),
+                ),
+              );
+        return items.pipe(startWith(null));
       }),
     ),
-    { initialValue: [] as ArtBoardItem[] },
+    { initialValue: null },
   );
 
-  readonly items = computed(() => (this.inNotesView() ? this.boardItems() : this.archivedItems()));
+  protected readonly itemData = toSignal(this.store.select(selectItemDataEntities), { requireSync: true });
+  /** Every note's stored text is read: each one's last edit is known, and with it which notes the board shows. */
+  private readonly dataLoaded = toSignal(this.store.select(selectIsAllLoadedItemDatas), { initialValue: false });
+  /** Reading the notes' text failed: the board shows every note rather than staying blank. */
+  private readonly dataFailed = toSignal(this.store.select(selectItemDatasLoadFailed), { initialValue: false });
+  /** Notes shown on the board on purpose this session, recent or not: picked in the search, or just unpinned. */
+  private readonly revealed = signal<ReadonlySet<string>>(new Set());
+
+  /** The board's notes split: pinned and recent ones on the board, the rest in the Older notes sheet. */
+  private readonly split = computed(() => splitBoard(this.boardItems(), this.itemData(), this.revealed()));
+
+  /**
+   * Whether the view has what it shows: the Notes view waits for the notes' dates, or it would show them all first (or
+   * gives up waiting when they cannot be read); the Archive waits for what is archived.
+   */
+  readonly ready = computed(() =>
+    this.inNotesView() ? this.dataLoaded() || this.dataFailed() : this.archivedItems() !== null,
+  );
+
+  readonly items = computed(() => {
+    if (!this.inNotesView()) {
+      return this.archivedItems() ?? [];
+    }
+    if (this.dataLoaded()) {
+      return this.split().shown;
+    }
+    // Without the notes' dates there is no telling recent from older: every note stays on the board.
+    return this.dataFailed() ? this.boardItems() : [];
+  });
+
+  readonly olderOpen = signal(false);
+  /** The Older notes sheet's filters: a kind (or all of them) and words. */
+  readonly olderKind = signal<'all' | 'Note' | 'Page' | 'Flow'>('all');
+  readonly olderQuery = signal('');
+  /** The note open in the sheet. */
+  readonly olderOpenId = signal<string | null>(null);
+  /**
+   * The notes whose detail is drawn: the open one, and one still sliding shut after another was opened. A detail
+   * leaves once its own panel says it closed, at the end of the slide, so it never vanishes mid-way.
+   */
+  readonly olderRendered = signal<ReadonlySet<string>>(new Set());
+  readonly older = computed(() => (this.dataLoaded() ? this.split().older : []));
+  private readonly olderSummaries = computed(() => {
+    const data = this.itemData();
+    return this.older().map((item) => ({ item, ...summarize(item, data) }));
+  });
+  /** How many older notes there are of each kind, for the filter. */
+  readonly olderCounts = computed(() => {
+    const counts = { Note: 0, Page: 0, Flow: 0 };
+    for (const note of this.olderSummaries()) {
+      counts[note.kind]++;
+    }
+    return counts;
+  });
+  readonly olderGroups = computed(() => {
+    const kind = this.olderKind();
+    const words = this.olderQuery().trim().toLowerCase();
+    return groupByMonth(
+      this.olderSummaries().filter(
+        (note) =>
+          (kind === 'all' || note.kind === kind) &&
+          (!words || `${note.label} ${note.excerpt}`.toLowerCase().includes(words)),
+      ),
+    );
+  });
 
   /**
    * Search results as autocomplete rows on the Notes view: every note, archived ones included. The Archive view
@@ -156,26 +225,15 @@ export class Board {
     toObservable(this.view).pipe(
       switchMap((view) =>
         view === 'notes'
-          ? combineLatest([this.dataService.getSearchResults(), this.store.select(selectItemDataEntities)])
-          : of<[ArtBoardItem[], Dictionary<ItemData>]>([[], {}]),
+          ? combineLatest([
+              this.dataService.getSearchResults(),
+              this.store.select(selectItemDataEntities),
+              this.dataService.selectArtBoardItemSearchLoading(),
+            ])
+          : of<[ArtBoardItem[], Dictionary<ItemData>, boolean]>([[], {}, false]),
       ),
-      map(([items, data]) =>
-        items.map((item): SearchSuggestion => {
-          const itemData = data[item.id];
-          const text = itemData ? getText(itemData.data, itemData.dataType, itemData.properties) : '';
-          const firstLine = text.split('\n').find((line) => line.trim()) ?? '';
-          const kind =
-            item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note';
-          const label = firstLine || (kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`);
-          const dataModified = itemData?.empty ? undefined : itemData?.modifiedDate;
-          const edited = editedLabel(dataModified ?? item.dataModifiedDate ?? item.modifiedDate);
-          return {
-            id: item.id,
-            label: label.length > PREVIEW_LENGTH ? label.slice(0, PREVIEW_LENGTH) + '…' : label,
-            description: `${kind} · ${edited}`,
-          };
-        }),
-      ),
+      // None while a search is pending: a quick pick must never open a match of the previous query.
+      map(([items, data, loading]) => (loading ? [] : searchSuggestions(items, data))),
     ),
     { initialValue: [] as SearchSuggestion[] },
   );
@@ -198,8 +256,6 @@ export class Board {
     })),
   }));
 
-  private readonly itemData = toSignal(this.store.select(selectItemDataEntities), { requireSync: true });
-
   /** The rows a card spans (card-rows.ts): a page card left at its default height follows its excerpt. */
   rowsOf(item: ArtBoardItem): number {
     return cardRows(item, () => this.pageTextLength(item));
@@ -212,6 +268,8 @@ export class Board {
 
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
   readonly matchAll = () => true;
+  /** The search shortcut as this keyboard writes it; onKey takes both. */
+  readonly searchKey = searchShortcut();
 
   private readonly minOrder = computed(() => {
     const items = this.boardItems();
@@ -220,12 +278,17 @@ export class Board {
 
   constructor() {
     toObservable(this.searchQuery).subscribe((query) => this.dataService.searchArtBoardItem(query));
+    // Every note's text, for when each was last edited: the board shows the recent ones.
+    this.store.dispatch(ItemDataActions.getAllItemData());
     this.deviceSync.sync();
     this.handleHomeActions();
     inject(DestroyRef).onDestroy(() => this.boardLoadedSubscription.unsubscribe());
   }
 
-  /** Home links here with `?new=note` (write a note) or `?search=1` (search); each runs once, then leaves the URL. */
+  /**
+   * Home links here with `?new=note` (write a note), `?search=1` (search) or `?show=<id>` (a note picked in its search,
+   * shown as one picked here); each runs once, then leaves the URL.
+   */
   private handleHomeActions(): void {
     const params = this.route.snapshot.queryParamMap;
     if (params.has('new')) {
@@ -236,7 +299,12 @@ export class Board {
     if (params.has('search')) {
       afterNextRender(() => this.searchField()?.nativeElement.focus());
     }
-    if (params.has('new') || params.has('search')) {
+    const show = params.get('show');
+    if (show) {
+      this.reveal(show);
+      this.boardLoaded.pipe(take(1)).subscribe(() => this.highlight(show));
+    }
+    if (params.has('new') || params.has('search') || show) {
       this.router.navigate([], { queryParams: {}, replaceUrl: true });
     }
   }
@@ -251,7 +319,6 @@ export class Board {
       return;
     }
     this.query.set('');
-    this.arranging.set(false);
     // A new note takes focus once, when it is created: not when its card is drawn again later.
     this.focusItemId.set(null);
     this.router.navigate([], { queryParams: { view: view === 'archive' ? 'archive' : null }, replaceUrl: true });
@@ -275,10 +342,11 @@ export class Board {
       this.router.navigate([route, id], found.boardId ? {} : { queryParams: { from: 'archive' } });
       return;
     }
-    // An archived note comes back to the board, first.
+    // An archived note comes back to the board, first; an older one is shown on it.
     if (!found.boardId) {
       this.dataService.restoreArtBoardItem(found);
     }
+    this.reveal(id);
     this.highlight(id);
   }
 
@@ -289,6 +357,10 @@ export class Board {
 
   /** N for a note, P for a page, F for a flow (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
   onKey(event: KeyboardEvent): void {
+    // The settings sheet has the keyboard: N in it must not start a note behind it.
+    if (this.settingsOpen()) {
+      return;
+    }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       this.searchField()?.nativeElement.focus();
@@ -308,6 +380,16 @@ export class Board {
   create(kind: ExtensionId): void {
     this.showView('notes');
     const defaults = structuredClone(noteDefaultProperties[kind]);
+    // A new note starts on the paper (pad, ruling and colour) last picked for a note.
+    const paper = kind === ExtensionId.TextNote ? latestNotePaper(this.boardItems()) : undefined;
+    if (paper) {
+      defaults.colorIndex = paper.colorIndex;
+      for (const key of ['pad', 'paper'] as const) {
+        if (paper.properties[key] !== undefined) {
+          defaults.properties[key] = paper.properties[key];
+        }
+      }
+    }
     const item: ArtBoardItem = {
       ...defaults,
       id: uuid(),
@@ -340,25 +422,194 @@ export class Board {
     this.dataService.hideArtBoardItem(item);
   }
 
+  /** Back to the board, and shown on it this session whatever its age. */
   restore(item: ArtBoardItem): void {
     this.dataService.restoreArtBoardItem(item);
+    this.reveal(item.id);
   }
 
-  toggleArranging(): void {
-    this.arranging.update((arranging) => !arranging);
+  /** Notes restored from the Archive view, one or several at once. */
+  restoreMany(items: ArtBoardItem[]): void {
+    for (const item of items) {
+      this.restore(item);
+    }
+    const label =
+      items.length === 1 ? `“${summarize(items[0], this.itemData()).label}” is` : `${items.length} notes are`;
+    this.toasts()?.nativeElement.show({ message: `${label} back on the board`, duration: 4000, noIcon: true });
   }
 
-  /** A card moved or resized: store the order and spans of every card, so the arrangement survives a reload. */
+  /** Notes deleted forever from the Archive view, once confirmed there. */
+  removeMany(items: ArtBoardItem[]): void {
+    for (const item of items) {
+      this.removeNote(item);
+    }
+  }
+
+  /** A page or a flow of the Archive, full screen; it says it is archived, and the way back leads to the Archive. */
+  openArchived(item: ArtBoardItem): void {
+    const route = FULL_SCREEN[item.extensionId];
+    if (route) {
+      this.router.navigate([route, item.id], { queryParams: { from: 'archive' } });
+    }
+  }
+
+  /** An action from a tile's own menu, for a card that has no menu of its own (a page or a flow). */
+  onTileMenu(item: ArtBoardItem, event: Event): void {
+    const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
+    if (value === 'archive') {
+      this.archive(item);
+    } else if (value === 'delete') {
+      this.removeNote(item);
+    } else if (value === 'pin') {
+      this.pin(item);
+    } else if (value === 'unpin') {
+      this.unpin(item);
+    }
+  }
+
+  /**
+   * Pin a note: it stays on the board, first, until unpinned. From the Older notes sheet it comes back to the board,
+   * lit up, with a message that can undo it.
+   */
+  pin(item: ArtBoardItem, fromOlder = false): void {
+    const previous = item.gridPosition;
+    // First of the pinned notes.
+    this.dataService.updateArtBoardItem({
+      ...item,
+      starred: true,
+      gridPosition: { ...item.gridPosition, order: this.minOrder() - 1 },
+    });
+    if (!fromOlder) {
+      return;
+    }
+    this.olderOpen.set(false);
+    this.olderOpenId.set(null);
+    this.olderRendered.set(new Set());
+    this.highlight(item.id);
+    const toasts = this.toasts()?.nativeElement;
+    if (toasts) {
+      const id = toasts.show({
+        message: `“${summarize(item, this.itemData()).label}” is pinned to the board`,
+        actionLabel: 'Undo',
+        actionPlacement: 'end',
+        duration: 6000,
+        noIcon: true,
+      });
+      this.undoes.set(id, () => {
+        const current = this.boardItems().find((candidate) => candidate.id === item.id) ?? item;
+        this.dataService.updateArtBoardItem({
+          ...current,
+          starred: false,
+          gridPosition: { ...current.gridPosition, order: previous.order },
+        });
+      });
+    }
+  }
+
+  /** Unpin a note. It stays on the board until the next visit, if it is not among the recent ones: not gone from under the pointer. */
+  unpin(item: ArtBoardItem): void {
+    this.reveal(item.id);
+    this.dataService.updateArtBoardItem({ ...item, starred: false });
+  }
+
+  /** What each message's Undo does, by the message's id. */
+  private readonly undoes = new Map<string, () => void>();
+
+  onToastAction(event: Event): void {
+    const { id } = (event as CustomEvent<{ id: string }>).detail;
+    this.undoes.get(id)?.();
+    this.undoes.delete(id);
+  }
+
+  onToastDismiss(event: Event): void {
+    this.undoes.delete((event as CustomEvent<{ id: string }>).detail.id);
+  }
+
+  /** A note of the sheet opened or closed: only the open one's content is drawn. */
+  onOlderToggle(note: NoteSummary, event: Event): void {
+    const open = (event as ToggleEvent).newState === 'open';
+    this.olderRendered.update((rendered) => {
+      const next = new Set(rendered);
+      if (open) {
+        next.add(note.id);
+      } else {
+        next.delete(note.id);
+      }
+      return next;
+    });
+    if (open) {
+      this.olderOpenId.set(note.id);
+    } else if (this.olderOpenId() === note.id) {
+      this.olderOpenId.set(null);
+    }
+  }
+
+  onOlderKind(event: Event): void {
+    const value = (event as CustomEvent<{ value: string }>).detail.value;
+    this.olderKind.set(value === 'Note' || value === 'Page' || value === 'Flow' ? value : 'all');
+  }
+
+  onOlderSearch(event: Event): void {
+    this.olderQuery.set((event as CustomEvent<SearchFieldSearchDetail>).detail.value);
+  }
+
+  /** Open a page or a flow of the sheet, full screen. */
+  openOlder(item: ArtBoardItem): void {
+    const route = FULL_SCREEN[item.extensionId];
+    if (route) {
+      this.router.navigate([route, item.id]);
+    }
+  }
+
+  /** "Sep 24" this year, "Sep 24, 2025" before. */
+  shortDate(iso: string): string {
+    const date = new Date(iso);
+    return date.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      ...(date.getFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' }),
+    });
+  }
+
+  edited(iso: string): string {
+    return editedLabel(iso);
+  }
+
+  paperColor(item: ArtBoardItem): string {
+    return paperColorFor(item.colorIndex);
+  }
+
+  /** A note's markdown, for the sheet to show it on its paper. */
+  olderText(id: string): string {
+    return this.itemData()[id]?.data ?? '';
+  }
+
+  private reveal(id: string): void {
+    if (!this.revealed().has(id)) {
+      this.revealed.update((ids) => new Set([...ids, id]));
+    }
+  }
+
+  /**
+   * A card moved or resized: store the order and spans of the cards shown, so the arrangement survives a reload. They
+   * take the order values they held between them (older-notes.ts), so the notes in the sheet keep their place.
+   */
   onLayoutChange(event: Event): void {
     const { layout } = (event as CustomEvent<MasonryLayoutChangeDetail>).detail;
     const items = new Map(this.boardItems().map((item) => [item.id, item]));
+    const orders = new Map(
+      rearrange(layout.items.map((tile) => items.get(tile.id)).filter((item) => !!item)).map(({ item, order }) => [
+        item.id,
+        order,
+      ]),
+    );
     this.dataService.changeAllArtBoardItemPosition(
       layout.items.map((tile, index) => {
         const item = items.get(tile.id);
         return {
           artBoardItemId: tile.id,
           gridPosition: {
-            order: index,
+            order: orders.get(tile.id) ?? index,
             rows: item ? storedRows(item, tile.rows, () => this.pageTextLength(item)) : tile.rows,
             screenColumns: {
               Large: tile.columns.lg,
@@ -376,8 +627,14 @@ export class Board {
     this.raised.set(window.scrollY > 0);
   }
 
-  resync(): void {
-    this.deviceSync.sync();
+  /**
+   * Sync runs in the background, with nothing to show for it: on opening the board, and again each time the tab comes
+   * back into view, which pulls in what other devices wrote meanwhile (chrome.storage brings most of it live already).
+   */
+  onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') {
+      this.deviceSync.sync();
+    }
   }
 
   goHome(): void {
@@ -385,7 +642,11 @@ export class Board {
   }
 
   openSettings(): void {
-    this.router.navigate(['/'], { queryParams: { settings: 1 } });
+    this.router.navigate([], { queryParams: { settings: 1 }, queryParamsHandling: 'merge' });
+  }
+
+  closeSettings(): void {
+    this.router.navigate([], { queryParams: { settings: null }, queryParamsHandling: 'merge' });
   }
 
   private typing(event: KeyboardEvent): boolean {
@@ -409,11 +670,17 @@ export class Board {
     return found;
   }
 
-  /** Blink the note once it is on the board (a restored note renders a moment later). */
+  /**
+   * Light the note up once it is on the board (a restored or pinned note renders a moment later); a page or a flow is
+   * brought into view.
+   */
   private highlight(id: string, attempts = 20): void {
     const card = this.cards().find((candidate) => candidate.item().id === id);
+    const tile = document.querySelector<HTMLElement>(`ntm-board c2-masonry-item[item-id="${CSS.escape(id)}"]`);
     if (card) {
       card.highlight();
+    } else if (tile) {
+      tile.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else if (attempts > 0) {
       setTimeout(() => this.highlight(id, attempts - 1), 50);
     }

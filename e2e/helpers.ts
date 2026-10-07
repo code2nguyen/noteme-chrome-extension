@@ -26,6 +26,16 @@ export function tiles(page: Page): Locator {
   return page.locator('c2-masonry-item');
 }
 
+/** The rows of the Archive's list, in the order it shows them. */
+export function archiveRows(page: Page): Locator {
+  return page.locator('ntm-archive-view c2-list-item');
+}
+
+/** The Archive's preview of the row picked. */
+export function archivePreview(page: Page): Locator {
+  return page.locator('ntm-archive-view .archive__preview');
+}
+
 /** Go from Home to the board (a reload of the board stays on the board). */
 export async function openBoard(page: Page): Promise<void> {
   const notes = page.locator('ntm-home .home__link', { hasText: 'Notes' });
@@ -112,11 +122,11 @@ export async function newNote(page: Page): Promise<Locator> {
   return note;
 }
 
-/** New → Page: the page opens full screen with its title focused. */
+/** New → Page: the page opens full screen with its title open and focused. */
 export async function newPage(page: Page): Promise<void> {
   await chooseNew(page, 'page');
   await expect(page).toHaveURL(/#\/page\/[\w-]+\?new=1$/);
-  await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+  await expect.poll(() => focusedTag(page)).toBe('c2-inline-edit');
 }
 
 /** Make the photo on screen two days old, so the next tab is a new day and gets the next photo. */

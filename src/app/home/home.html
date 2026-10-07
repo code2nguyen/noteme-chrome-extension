@@ -12,27 +12,45 @@
 <div class="home__layout">
   <header class="home__bar">
     <a class="home__logo" routerLink="/" aria-label="Noteme home">
-      <svg width="20" height="20" viewBox="0 0 148.56 148.56" aria-hidden="true">
-        <path fill="#3498db" d="M60,0H36A36,36,0,0,0,0,36V60A12,12,0,0,0,12,72H72V12A12,12,0,0,0,60,0Z" />
-        <path fill="#efc94c" d="M112.56,0h-24a12,12,0,0,0-12,12V72h60a12,12,0,0,0,12-12V36A36,36,0,0,0,112.56,0Z" />
-        <path fill="#b280c1" d="M12,76.56a12,12,0,0,0-12,12v24a36,36,0,0,0,36,36H60a12,12,0,0,0,12-12v-60Z" />
-        <path
-          fill="#ff726b"
-          d="M136.56,76.56h-60v60a12,12,0,0,0,12,12h24a36,36,0,0,0,36-36v-24A12,12,0,0,0,136.56,76.56Z"
-        />
+      <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#3498db" d="M22 22H12A10 10 0 0 1 2 12A10 10 0 0 1 12 2A10 10 0 0 1 22 12Z" />
+        <path fill="#efc94c" d="M26 22H36A10 10 0 0 0 46 12A10 10 0 0 0 36 2A10 10 0 0 0 26 12Z" />
+        <path fill="#b280c1" d="M22 26H12A10 10 0 0 0 2 36A10 10 0 0 0 12 46A10 10 0 0 0 22 36Z" />
+        <path fill="#ff726b" d="M26 26H36A10 10 0 0 1 46 36A10 10 0 0 1 36 46A10 10 0 0 1 26 36Z" />
       </svg>
     </a>
-    <a class="home__link" routerLink="/main-board">Notes</a>
-    <a class="home__link" routerLink="/plan">Plan</a>
+    <a class="home__link" routerLink="/main-board"><c2-feather-layout aria-hidden="true"></c2-feather-layout>Notes</a>
+    @if (planOn()) {
+      <a class="home__link" routerLink="/plan"><c2-feather-calendar aria-hidden="true"></c2-feather-calendar>Plan</a>
+    }
 
-    <a class="home__search" routerLink="/main-board" [queryParams]="{ search: 1 }">
-      <c2-feather-search aria-hidden="true"></c2-feather-search>
-      <span>Search my notes</span>
-      <kbd>{{ searchKey }}</kbd>
-    </a>
+    <!-- Searches right here: a note picked opens the board on it, a page or a flow opens full screen. -->
+    <div class="home__search">
+      <c2-autocomplete
+        #searchField
+        class="home__search-field"
+        aria-label="Search my notes"
+        placeholder="Search my notes"
+        item-key="id"
+        label-field="label"
+        description-field="description"
+        selection-behavior="preserve"
+        [value]="query()"
+        [suggestions]="suggestions()"
+        [matcher]="matchAll"
+        (query-change)="search($event)"
+        (suggestion-select)="selectSearchResult($event)"
+      >
+        <c2-feather-search slot="prefix-icon"></c2-feather-search>
+      </c2-autocomplete>
+      <!-- Beside the field, not in its suffix-icon slot, which sizes what it holds as a 16px icon. -->
+      @if (!query()) {
+        <c2-kbd class="home__search-key" aria-hidden="true">{{ searchKey }}</c2-kbd>
+      }
+    </div>
 
     <a class="home__glass-button" routerLink="/main-board" [queryParams]="{ new: 'note' }">
-      <c2-feather-plus aria-hidden="true"></c2-feather-plus>Note
+      <c2-feather-edit-3 aria-hidden="true"></c2-feather-edit-3>Note
     </a>
     <c2-icon-button class="home__icon-button" aria-label="Settings" (click)="openSettings()">
       <c2-feather-settings></c2-feather-settings>

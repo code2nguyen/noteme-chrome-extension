@@ -1,0 +1,7 @@
+<!-- The Noteme clover: four round leaves, one per colour. The source of noteme-icon-*.png. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+      <path fill="#3498db" d="M22 22H12A10 10 0 0 1 2 12A10 10 0 0 1 12 2A10 10 0 0 1 22 12Z" />
+      <path fill="#efc94c" d="M26 22H36A10 10 0 0 0 46 12A10 10 0 0 0 36 2A10 10 0 0 0 26 12Z" />
+      <path fill="#b280c1" d="M22 26H12A10 10 0 0 0 2 36A10 10 0 0 0 12 46A10 10 0 0 0 22 36Z" />
+      <path fill="#ff726b" d="M26 26H36A10 10 0 0 1 46 36A10 10 0 0 1 36 46A10 10 0 0 1 26 36Z" />
+</svg>

@@ -6,7 +6,7 @@ Noteme is a Chrome extension that replaces the new tab page with a personal note
 
 - Text notes (a ruled notepad with bold, italic, underline, strike, highlights, inks and checklists) and code notes
   (syntax highlighting for JavaScript, TypeScript, JSX/TSX, HTML, CSS and JSON)
-- A board you can arrange: move and resize notes with the arrange button
+- A board you can arrange: move notes by their handle and resize them by their edges
 - Archive, full-text search across notes and archive
 - Sync between your Chrome profiles through `chrome.storage.sync`
 
@@ -37,6 +37,22 @@ The Playwright suites (`e2e/`) write screenshots of every verified state to `tes
 `CHROMIUM_PATH` to use an installed Chromium instead of Playwright's download (`npx playwright install chromium`).
 
 Load the extension: `chrome://extensions` → Developer mode → **Load unpacked** → `dist/noteme-chrome-extension`.
+
+### Local c2n components
+
+To try changes to the c2n components before they are published, link a checkout of the web-components repo next to
+this one (`C2N_REPO` points elsewhere). package.json and the lockfile keep the published versions.
+
+```sh
+# in ../web-components, after each change
+npm run build -w packages/umbrella && npm run build -w packages/icons/feather-icons && npm run build -w packages/tools/theme
+
+# back in this repository
+npm run c2n:link     # node_modules/@c2n/components, feather-icons and theme -> ../web-components
+npm run c2n:unlink   # back to the published packages
+```
+
+`npm install` also puts the published packages back; run `npm run c2n:link` again after it.
 
 ## Release
 

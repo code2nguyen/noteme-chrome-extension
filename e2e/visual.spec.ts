@@ -137,7 +137,8 @@ async function seed(page: Page, theme: 'light' | 'dark'): Promise<void> {
           modifiedDate: s.date,
         });
       });
-      localStorage.setItem('noteme-settings', JSON.stringify({ theme }));
+      // Plan is opt-in: on, for its screenshots.
+      localStorage.setItem('noteme-settings', JSON.stringify({ theme, features: ['plan'] }));
       const today = new Date();
       const day = (offset: number) => {
         const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);

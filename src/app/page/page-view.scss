@@ -76,32 +76,22 @@
 }
 
 .page__title {
+  // The inline edit's Page title preset, at the size of a flow's title in its bar. It keeps its own box (padding) for the
+  // hover tint and the field: pulled out by that much, the text lines up with the page below it.
   display: block;
-  --c2-text-field--font-size: 36px;
-  --c2-text-field--font-weight: 700;
-  --c2-text-field--line-height: 1.2;
-  --c2-text-field--min-height: 52px;
-  --c2-text-field--padding-left: 0;
-  --c2-text-field--padding-right: 0;
-  --c2-text-field--background: transparent;
-  --c2-text-field--border-top: none;
-  --c2-text-field--border-right: none;
-  --c2-text-field--border-bottom: none;
-  --c2-text-field--border-left: none;
-  --c2-text-field__hover--border-top: none;
-  --c2-text-field__hover--border-right: none;
-  --c2-text-field__hover--border-bottom: none;
-  --c2-text-field__hover--border-left: none;
-  --c2-text-field__focus--border-top: none;
-  --c2-text-field__focus--border-right: none;
-  --c2-text-field__focus--border-bottom: none;
-  --c2-text-field__focus--border-left: none;
-  --c2-text-field__focus--background: transparent;
-  // A quiet ring rather than none: the title has no border, and keyboard users still need to see where they are.
-  --c2-text-field__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 35%, transparent);
-  --c2-text-field__focus--outline-offset: 4px;
-  --c2-text-field--color: var(--c2-theme--color-on-surface);
-  --c2-text-field__focus--color: var(--c2-theme--color-on-surface);
+  margin-inline-start: -8px;
+  --c2-inline-edit--font-size: 17px;
+  --c2-inline-edit--font-weight: 700;
+  --c2-inline-edit--line-height: 1.3;
+  --c2-inline-edit--padding-block: 4px;
+  --c2-inline-edit--padding-inline: 8px;
+  --c2-inline-edit--border-radius: 8px;
+  --c2-inline-edit--color: var(--c2-theme--color-on-surface);
+  --c2-inline-edit__edit-icon--size: 14px;
+  // The field stays on the page: no box of a different colour, a quiet accent border.
+  --c2-inline-edit__editor--background: transparent;
+  --c2-inline-edit__editor--border: 1px solid color-mix(in srgb, var(--ntm-accent) 45%, transparent);
+  --c2-inline-edit__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 35%, transparent);
 }
 
 .page__meta {
@@ -121,9 +111,5 @@
 
   .page__header {
     padding-left: 28px;
-  }
-
-  .page__title {
-    --c2-text-field--font-size: 24px;
   }
 }

@@ -43,15 +43,16 @@
       (input)="onEditorInput($event)"
     >
       <div slot="header" class="page__header">
-        <c2-text-field
+        <!-- Read as the page's heading; a click (or Enter on it) turns it into a field, saved on Enter or on leaving it. -->
+        <c2-inline-edit
           #titleField
           class="page__title"
-          aria-label="Title"
+          label="Title"
           placeholder="Untitled"
           [value]="title()"
-          (input)="onTitleInput($event)"
-          (keydown)="onTitleKeydown($event)"
-        ></c2-text-field>
+          (input)="$event.stopPropagation()"
+          (change)="onTitleChange($event)"
+        ></c2-inline-edit>
         @if (created()) {
           <p class="page__meta">Page · {{ created() }}</p>
         }

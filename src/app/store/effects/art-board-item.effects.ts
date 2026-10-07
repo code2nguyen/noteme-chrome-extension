@@ -216,6 +216,7 @@ export class ArtBoardItemEffects {
               const hiddenArtBoardItem: ArtBoardItem = {
                 ...normalizeArtBoardItem(artBoardItem),
                 boardId: undefined,
+                archivedDate: new Date().toISOString(),
                 silent: false,
                 sourceId: this.id,
               };
@@ -256,10 +257,11 @@ export class ArtBoardItemEffects {
               }
               const orders = boardItems.map((boardItem) => boardItem.gridPosition.order ?? 0);
               const order = orders.length > 0 ? Math.min(...orders) - 1 : 0;
-              const artBoardItem = normalizeArtBoardItem(storedItem);
+              const { archivedDate: _archived, ...artBoardItem } = normalizeArtBoardItem(storedItem);
               const shownArtBoardItem: ArtBoardItem = {
                 ...artBoardItem,
                 boardId,
+                restoredDate: new Date().toISOString(),
                 gridPosition: { ...artBoardItem.gridPosition, order },
                 silent: false,
                 sourceId: this.id,

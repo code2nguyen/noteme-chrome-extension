@@ -5,6 +5,7 @@ import {
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -18,14 +19,14 @@ import type { MenuSelectEventDetail } from '@c2n/components/menu';
 import '@c2n/components/menu';
 import '@c2n/components/menu/menu-item';
 import '@c2n/components/page-editor';
-import '@c2n/components/text-field';
+import '@c2n/components/inline-edit';
 import '@c2n/feather-icons/icons/archive.js';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
 import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 import type { PageEditor } from '@c2n/components/page-editor';
-import type { TextField } from '@c2n/components/text-field';
+import type { InlineEdit } from '@c2n/components/inline-edit';
 import { combineLatest, EMPTY, interval } from 'rxjs';
 import { filter, map, startWith, switchMap, take, tap, timeout } from 'rxjs/operators';
 
@@ -56,7 +57,7 @@ export class PageView {
   private readonly route = inject(ActivatedRoute);
   private readonly instanceId = inject(INSTANCE_ID);
   private readonly injector = inject(Injector);
-  private readonly titleField = viewChild<ElementRef<TextField>>('titleField');
+  private readonly titleField = viewChild<ElementRef<InlineEdit>>('titleField');
   private readonly editor = viewChild<ElementRef<PageEditor>>('editor');
 
   readonly id = toSignal(this.route.paramMap.pipe(map((params) => params.get('id') ?? '')), { initialValue: '' });
@@ -139,22 +140,40 @@ export class PageView {
         }
       });
 
+    effect((onCleanup) => {
+      const field = this.titleField()?.nativeElement;
+      if (field) {
+        const listener = (event: KeyboardEvent) => this.onTitleKeydown(field, event);
+        field.addEventListener('keydown', listener, { capture: true });
+        onCleanup(() => field.removeEventListener('keydown', listener, { capture: true }));
+      }
+    });
+
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.savingTimer);
       this.leave();
     });
   }
 
-  onTitleInput(event: Event): void {
-    // The title sits in the editor's header slot: keep its input from reaching the editor's own listener.
+  /** The title was committed (Enter, or leaving the field). */
+  onTitleChange(event: Event): void {
+    // The title sits in the editor's header slot: keep its events from reaching the editor's own listener.
     event.stopPropagation();
-    const title = (event.target as TextField).value;
+    const title = (event.target as InlineEdit).value;
     this.title.set(title);
     this.save({ properties: { title } });
   }
 
-  /** Enter in the title moves on to the page, as in any document editor. */
-  onTitleKeydown(event: KeyboardEvent): void {
+  /**
+   * Enter in the open title saves it and moves on to the page, as in any document editor; so does the down arrow.
+   * Listened to on the way down (capture): the inline edit closes on Enter inside its shadow root, before the key
+   * would reach a listener on the element. Enter on the closed title only opens it.
+   */
+  private onTitleKeydown(field: InlineEdit, event: KeyboardEvent): void {
+    if (!field.editing) {
+      return;
+    }
+    // At once, so the next keys land in the page: the field, losing focus, commits (and saves) its title.
     if (event.key === 'Enter' || (event.key === 'ArrowDown' && !event.shiftKey)) {
       event.preventDefault();
       this.editor()?.nativeElement.focus();
@@ -202,12 +221,14 @@ export class PageView {
     this.savingTimer = setTimeout(() => this.saving.set(false), SAVING_DELAY);
   }
 
+  /** A new page opens with its title field open and focused, ready to type in. */
   private async focusTitle(): Promise<void> {
     const field = this.titleField()?.nativeElement;
     if (!field) {
       return;
     }
-    await customElements.whenDefined('c2-text-field');
+    await customElements.whenDefined('c2-inline-edit');
+    field.editing = true;
     await field.updateComplete;
     field.focus();
   }

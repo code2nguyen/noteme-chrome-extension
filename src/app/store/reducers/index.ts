@@ -101,6 +101,7 @@ export const selectItemDataById = (itemDataId: string) =>
   createSelector(selectItemDataEntities, (entities) => entities[itemDataId]);
 
 export const selectIsAllLoadedItemDatas = createSelector(selectItemDatasState, (state) => state.isAllLoaded);
+export const selectItemDatasLoadFailed = createSelector(selectItemDatasState, (state) => state.loadFailed);
 
 // -------------------
 // ArtBoardItemSearch selectors

@@ -95,7 +95,12 @@
               "buildTarget": "noteme-chrome-extension:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "prebundle": {
+              "exclude": ["@c2n/components", "@c2n/feather-icons"]
+            }
+          }
         }
       }
     }

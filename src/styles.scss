@@ -23,28 +23,34 @@
 
 // Light and dark palettes mapped onto the @c2n/theme tokens, which every c2 component follows. SettingsService puts
 // data-theme on <html> (main.ts does it before the first paint); component variables are only set where a view needs
-// its own look.
+// its own look. The page itself sits on --ntm-canvas, a step darker than the surface of notes, cards and fields, so
+// they stand out from it in both themes.
 :root {
-  // Dark enough for link text to reach 4.5:1 on both light surfaces (and white text on it, 5:1).
-  --c2-theme--color-primary: #c54137;
-  --c2-theme--color-primary-hover: #b53d35;
-  --c2-theme--color-primary-active: #a1352e;
+  // Dark enough for link text to reach 4.5:1 on the canvas (and white text on it, 5.6:1).
+  --c2-theme--color-primary: #b83b32;
+  --c2-theme--color-primary-hover: #a8362e;
+  --c2-theme--color-primary-active: #96302a;
   --c2-theme--color-on-primary: #ffffff;
-  --c2-theme--color-surface: #f5f3ef;
-  --c2-theme--color-surface-container-low: #fbfaf8;
-  --c2-theme--color-surface-container: #ece9e3;
-  --c2-theme--color-on-surface: #23211e;
-  --c2-theme--color-on-surface-variant: #6b665e;
+  --c2-theme--color-surface: #f6f4ef;
+  --c2-theme--color-surface-container-low: #fbfaf7;
+  --c2-theme--color-surface-container: #dedad2;
+  // Text and icons stay off near-black, which is harsh on the light canvas: the main ink is a soft charcoal (9.5:1 on
+  // the canvas, 8.6:1 on the container) and the theme's own near-black tooltip surface follows it.
+  --c2-theme--color-on-surface: #3a3631;
+  --c2-theme--color-on-surface-variant: #5f5a52;
+  --c2-theme--color-inverse-surface: #3a3631;
+  --c2-theme--color-on-inverse-surface: #f2efe9;
 
+  --ntm-canvas: #e9e5dd;
   --ntm-accent: var(--c2-theme--color-primary);
-  --ntm-muted: #6b665e;
-  --ntm-line: #e2ded6;
+  --ntm-muted: #5f5a52;
+  --ntm-line: #d6d1c8;
   --ntm-shadow: 0 2px 10px rgb(35 33 30 / 12%);
   --ntm-scrollbar: rgb(35 33 30 / 20%);
   --ntm-scrollbar-hover: rgb(35 33 30 / 40%);
 
   // Home: text and frosted glass over the photo.
-  --ntm-home-ink: #1f1d1a;
+  --ntm-home-ink: #3a3631;
   --ntm-home-glass: rgb(255 255 255 / 55%);
   --ntm-home-glass-strong: rgb(255 255 255 / 75%);
   --ntm-home-line: rgb(31 29 26 / 25%);
@@ -53,24 +59,33 @@
   color-scheme: light;
 }
 
-:root[data-theme='dark'] {
+// As specific as the theme's own `@media (prefers-color-scheme: dark) :root:not([data-theme='light']):not(.c2-light)`
+// and after it, so this palette, not the theme's default dark one, applies when the system is dark too.
+:root[data-theme='dark']:not(.c2-light) {
   --c2-theme--color-primary: #ff8a7a;
   --c2-theme--color-primary-hover: #ff9e90;
   --c2-theme--color-primary-active: #f2725f;
   --c2-theme--color-on-primary: #2a1512;
-  --c2-theme--color-surface: #1b1a19;
-  --c2-theme--color-surface-container-low: #232220;
-  --c2-theme--color-surface-container: #2c2a28;
-  --c2-theme--color-on-surface: #efece6;
-  --c2-theme--color-on-surface-variant: #a9a49b;
+  --c2-theme--color-surface: #2f2c29;
+  --c2-theme--color-surface-container-low: #363330;
+  --c2-theme--color-surface-container: #3e3b37;
+  // Text and icons stay off pure white, which glares on the dark canvas: the main ink is ~85% light (10.6:1 on the
+  // canvas, 7.5:1 on the container) and the theme's own near-white tokens follow it.
+  --c2-theme--color-on-surface: #d8d3ca;
+  --c2-theme--color-on-surface-variant: #a8a39a;
+  --c2-theme--color-inverse-surface: #d8d3ca;
+  --c2-theme--color-on-inverse-surface: #242220;
+  --c2-theme--color-on-dark-surface: #d8d3ca;
+  --c2-theme--color-on-fill: #ebe7df;
 
-  --ntm-muted: #8d887f;
-  --ntm-line: #3a3733;
+  --ntm-canvas: #242220;
+  --ntm-muted: #a29d94;
+  --ntm-line: #46423d;
   --ntm-shadow: 0 2px 10px rgb(0 0 0 / 60%);
   --ntm-scrollbar: rgb(245 245 245 / 20%);
   --ntm-scrollbar-hover: rgb(245 245 245 / 40%);
 
-  --ntm-home-ink: #f7f5f0;
+  --ntm-home-ink: #e4e0d8;
   --ntm-home-glass: rgb(20 19 18 / 45%);
   --ntm-home-glass-strong: rgb(20 19 18 / 65%);
   --ntm-home-line: rgb(247 245 240 / 30%);
@@ -89,7 +104,7 @@ body {
   font-size: 16px;
   font-family: 'RedHatDisplay', system-ui, sans-serif;
   color: var(--c2-theme--color-on-surface);
-  background-color: var(--c2-theme--color-surface);
+  background-color: var(--ntm-canvas);
 }
 
 ::-webkit-scrollbar {

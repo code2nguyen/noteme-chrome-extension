@@ -1,0 +1,106 @@
+---
+name: c2n-components
+description: Build and theme applications with the `c2-*` web components from `@c2n/*`. Use for ANY UI work in a project that depends on `@c2n/components` or other `@c2n/*` packages — pages, forms, inputs, buttons, dialogs, tables, menus, navigation — even when the request does not mention c2n, so that `c2-*` elements are used instead of native HTML elements or hand-rolled widgets. Also use when adopting c2n, mapping `@c2n/theme` tokens, or creating application-owned variants and compositions.
+license: MIT
+---
+
+# c2n components
+
+Build screens from `@c2n/*` web components with the least code: **theme once, use the tags directly, name what repeats.** In a c2n project, a matching `c2-*` element is the default for controls and interactive widgets: reach for `c2-button`, `c2-text-field`, `c2-select` or `c2-modal` rather than `<button>`, `<input>`, `<select>` or `<dialog>`, and `c2-table` for a data grid (sorting, selection, many rows) rather than a hand-rolled one. Search the components before concluding one is missing; keep native HTML or an app component when no equivalent fits, such as a short static table. Facts about components come from the c2n MCP tools or the component manifests, never from memory. The references in `references/` hold the details; read only the one the current step points to.
+
+This workflow expects a JavaScript project and Node.js 20 or newer. The c2n MCP server is recommended; the skill retains a compact discovery index and can inspect installed package manifests when MCP is unavailable.
+
+## 1. Detect the project
+
+Inspect the project's `package.json` with the available filesystem or shell tools. Identify installed `@c2n/*` packages and the framework before changing dependencies or source files.
+
+Then look for what already exists before adding anything:
+
+- a theme: `--c2-theme--` in the CSS, or an import of `@c2n/components/theme.css` (or `base.css`, or `@c2n/theme` directly);
+- a variants directory: `src/components/ui/`, `src/ui/`, files that `extends … from '@c2n/`, or classes setting `--c2-…` variables;
+- the CSS entry point and the dark-mode switch (`data-theme`, a class, `prefers-color-scheme`).
+
+Reuse an existing variant or token bridge over creating a new one.
+
+## 2. Get the facts
+
+When c2n MCP tools are available:
+
+1. `list_components` or `search_components` to pick the component for the need.
+2. `get_component` for attributes, slots, events, documented CSS parts and CSS variables (grouped by semantic target and state, with the theme token each follows).
+3. `get_examples` for real markup. Start with the default example, then pick a look from the docs gallery (§2a). Preserve any accessibility note returned with an example.
+4. `get_presets` when a curated visual treatment is useful. A preset is structured CSS-variable and attribute data suitable for generation; a gallery example is broader usage and composition context.
+5. `get_theme` **before writing any CSS**, so overrides go on tokens when a token exists.
+6. `validate_markup` on what you wrote, before finishing (§7).
+7. `generate_variant` when a selected preset or gallery look repeats: it validates names and emits the class / HTML / Lit code.
+8. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
+
+### 2a. Find the look in the gallery
+
+Each component has a gallery of designed looks on the docs site. Start from one instead of inventing CSS:
+
+- `get_examples` with `view: "index"` lists every card of a component on one page: label, slug, a summary of what it changes and a screenshot link (light; swap `.light.png` for `.dark.png`). Open the screenshots when you can read images.
+- `search_examples` finds a look across all components by style or situation ("compact", "glass", "pill", "underline", "KPI").
+- Fetch the chosen card with `get_examples` `label: "<slug>"`. Its CSS already uses `var(--c2-theme--…, literal)` wherever a colour belongs to the theme; a literal left over is the card's own accent, so replace it with the application's token (usually `--c2-theme--color-primary…`) rather than pasting it.
+- When the look repeats, `generate_variant` with `example: "<slug>"` turns the card into a class or Lit subclass under the app's prefix.
+
+Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/components/custom-elements.json` for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
+
+## 3. Theme once
+
+Read `references/theming.md`.
+
+- Install the components with `npm install @c2n/components`: it is the one published component package and includes the theme. Import each component you use through its entry — `@c2n/components/<name>` (`@c2n/components/table`, `@c2n/components/chart` for every chart element) — and the theme with `@c2n/components/theme.css`. Prefer the per-component entries to the `@c2n/components` barrel, which registers everything; `@c2n/components/react` and `/vue` type every tag. Not included: icon sets and the optional chart/code-editor engines (`uplot`, `echarts`, CodeMirror) — install those separately. The MCP server prints the matching import lines.
+- Import `@c2n/components/theme.css` once at the application root (`main.ts`, root layout, global stylesheet). If the app already has design tokens, import `@c2n/components/base.css` alone and bridge the app's tokens onto the `--c2-theme--*` names on `:root`.
+- Override tokens on `:root` (light) and under the app's dark selector. Component variables are never set globally when a token covers the job.
+- Register elements with side-effect imports (`import '@c2n/components/button'`) at the entry or in the module that renders them; icons individually (`import '@c2n/feather-icons/icons/search.js'`).
+
+## 4. Decide: tag, variant, or composed component
+
+Read `references/variant-components.md` when creating one.
+
+| Situation                                                    | Do                                                                                                                           |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Appears once, themed default is right                        | plain `<c2-…>` tag                                                                                                           |
+| Same look repeats, markup otherwise plain                    | **CSS class** setting `--c2-<component>__…` variables (in the app's variants stylesheet)                                     |
+| Same attributes / slots / accessible name repeat too         | **wrapper component** in the app's framework rendering the c2 element                                                        |
+| Must be its own tag (strings, other Lit templates, shipping) | **Lit subclass**: `class X extends Button { static override styles = [Button.styles, css\`:host{…}\`] }`, defined as `app-*` |
+| Several c2 components + logic repeat                         | **composed component**: children's variables on `:host`/a class, attributes forwarded, events re-emitted                     |
+| No c2 component fits (kbd hint, count pill, …)               | app component styled with `--c2-theme--*` tokens; avoid patching installed `@c2n/*` packages for app-local behavior          |
+
+Naming: the app's prefix (`app-*`, `site-*`, `my-*`), kebab-case with a hyphen, never `c2-*`. One file per variant in one directory, exported from a barrel, with a short header comment (what it wraps, which variables it fixes, where it is used).
+
+## 5. Conventions
+
+- Prefer variables set on the host element, a class or an ancestor. Use `::part()` only when `get_component` documents that native CSS part and variables cannot express the change. Do not repeat inline `style="--c2-…"`.
+- Style consumer-owned slotted nodes with their own classes. Use a documented host `::part()` only for the component-owned wrapper, fallback, or state region. Put part selectors in global CSS under Vue scoped styles or Angular Emulated encapsulation, and never assume a part crosses a nested component's shadow root.
+- Grammar `--c2-<component>__<part>[__<state>]--<property>`; states `hover | active | focus | selected | disabled | open | error | read-only`.
+- Boolean attributes are present or absent (`disabled`, `running`, `selected`), and `disabled="false"` reads as false rather than true, so a value bound by a framework behaves; slots by name (`prefix-icon`, `suffix-icon`, `header`, `footer`, `description`…).
+- Array and object properties (`rows`, `columns`, `items`, `options`, `series`, `steps`) take the value itself, or a JSON string in the attribute _and_ on the property — `JSON.stringify(rows)` is one binding that survives server rendering.
+- An attribute is the property lowercased unless the component renamed it: `readOnly` is `readonly`, `rowKey` is `row-key`. Manifests give the real attribute as `name` and the property as `fieldName`.
+- Composed components set child variables from the parent (`--c2-text-field--border-top: none` on the wrapper class) and re-emit events (`redispatchEvent` from `@c2n/core/dom-helper.js` in Lit).
+- Icons: use the registered Feather or Phosphor icon tag and its published module; prefer individual icon imports and theme through the icon package's shared variables.
+- Dark mode only through tokens; SSR or static HTML guards unregistered tags with `c2-x:not(:defined) { visibility: hidden }`.
+
+## 6. Framework notes
+
+Read `references/frameworks.md` for details.
+
+- Plain HTML / Vite: side-effect imports in a `<script type="module">` or the entry module.
+- Lit: import what you render; subclass for tag variants; `redispatchEvent` for child events.
+- Astro: `@astrojs/lit` islands (`<Button client:load>`, kebab-case attributes only; a `client:only` island must not contain islands) or plain tags plus a client `<script>` for repeated markup; variant styles need `is:global`.
+- React 19: props become attributes, custom events via `ref.addEventListener`; older React needs string attributes and refs. Server-rendered (Next.js): kebab-case attribute names (`min-width`, not `minWidth`) and objects through a ref.
+- Vue: `compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-')`; `.prop` for arrays/objects.
+
+## 7. Verify
+
+- Run `validate_markup` on every file you wrote, passing its `filename` so CSS and JSX/Vue/Angular syntax are read as such (or `npx -y @c2n/mcp validate src` without MCP), and fix what it reports: native controls with a `c2-*` replacement; unknown `c2-*` tags and unknown attributes, slots, events and `--c2-*` variables of c2 elements; box styling on a `c2-*` host. It does not check other tags. A deliberate native element gets a `c2n-ignore` comment.
+- Every element used is registered (no empty tags, no `HTMLUnknownElement`); the theme (`@c2n/components/theme.css` or `base.css`) imported exactly once.
+- Every variable, attribute, slot and event name exists in `get_component` / the manifest.
+- Every `::part()` name exists in `get_component`; no repeated inline variable styles; repeated looks became variants.
+- Variant tags contain a hyphen and do not start with `c2-`.
+- Light and dark both checked; the project's build, lint and type-check pass.
+
+## 8. Report
+
+List the packages added, where the theme is imported and which tokens are set, each variant created (name → base tag, file), composed components, and the gaps left as plain app components.

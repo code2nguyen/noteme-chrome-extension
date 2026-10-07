@@ -3,7 +3,18 @@
  * page). Every edit is a pure function from one document to the next, so the view only routes c2-flow's events here.
  */
 
-export interface FlowBox {
+import { BoxIcon, BoxInk, BoxPaper, BoxShape, isBoxIcon, isBoxInk, isBoxPaper, isBoxShape } from './flow-style';
+
+/** How a box looks; each is absent until chosen (a box, on the theme's colours, without an icon). */
+export interface BoxStyle {
+  shape?: BoxShape;
+  paper?: BoxPaper;
+  /** Absent: Auto, an ink that reads on the paper. */
+  ink?: BoxInk;
+  icon?: BoxIcon;
+}
+
+export interface FlowBox extends BoxStyle {
   id: string;
   label: string;
   /** Top-left corner on the canvas; absent until placed, then the auto layout decides. */
@@ -42,7 +53,7 @@ export function parseFlow(data: string | null | undefined): FlowDoc {
       node.position && Number.isFinite(node.position.x) && Number.isFinite(node.position.y)
         ? { x: node.position.x, y: node.position.y }
         : undefined;
-    return [{ id: node.id, label: node.label, ...(position ? { position } : {}) }];
+    return [{ id: node.id, label: node.label, ...(position ? { position } : {}), ...readStyle(node) }];
   });
   const ids = new Set(nodes.map((node) => node.id));
   const edges = (Array.isArray(doc.edges) ? doc.edges : []).flatMap((edge): FlowArrow[] => {
@@ -53,6 +64,16 @@ export function parseFlow(data: string | null | undefined): FlowDoc {
     return [{ source: edge.source, target: edge.target, ...(label ? { label } : {}) }];
   });
   return { nodes, edges };
+}
+
+/** The style a stored box has, without anything unknown (a shape or colour from a later version is dropped). */
+function readStyle(node: Partial<BoxStyle>): BoxStyle {
+  return {
+    ...(isBoxShape(node.shape) && node.shape !== 'rect' ? { shape: node.shape } : {}),
+    ...(isBoxPaper(node.paper) ? { paper: node.paper } : {}),
+    ...(isBoxInk(node.ink) ? { ink: node.ink } : {}),
+    ...(isBoxIcon(node.icon) ? { icon: node.icon } : {}),
+  };
 }
 
 export function serializeFlow(doc: FlowDoc): string {
@@ -93,7 +114,7 @@ export function disconnect(doc: FlowDoc, source: string, target: string): FlowDo
 /** Keep where the boxes are now (after a drag, or once the flow pinned the auto layout). */
 export function placeBoxes(doc: FlowDoc, positions: Record<string, { x: number; y: number }> | null): FlowDoc {
   if (!positions) {
-    return { ...doc, nodes: doc.nodes.map(({ id, label }) => ({ id, label })) };
+    return { ...doc, nodes: doc.nodes.map(({ position: _position, ...node }) => node) };
   }
   return {
     ...doc,
@@ -102,6 +123,40 @@ export function placeBoxes(doc: FlowDoc, positions: Record<string, { x: number; 
       return position ? { ...node, position: { x: Math.round(position.x), y: Math.round(position.y) } } : node;
     }),
   };
+}
+
+/**
+ * Changes how a box looks: each key given is set, or cleared when `undefined` (a plain box is `rect`, so `rect` clears
+ * the shape). The same document when nothing changes.
+ */
+export function styleBox(doc: FlowDoc, id: string, style: BoxStyle): FlowDoc {
+  const box = doc.nodes.find((node) => node.id === id);
+  if (!box) {
+    return doc;
+  }
+  const next: FlowBox = { ...box };
+  for (const key of Object.keys(style) as (keyof BoxStyle)[]) {
+    const value = key === 'shape' && style.shape === 'rect' ? undefined : style[key];
+    if (value === undefined) {
+      delete next[key];
+    } else {
+      (next as unknown as Record<string, unknown>)[key] = value;
+    }
+  }
+  const same = (['shape', 'paper', 'ink', 'icon'] as const).every((key) => next[key] === box[key]);
+  return same ? doc : { ...doc, nodes: doc.nodes.map((node) => (node === box ? next : node)) };
+}
+
+/** A copy of a box, label and look, beside it (`at`: where the box is now); not connected to anything. */
+export function duplicateBox(doc: FlowDoc, id: string, newId: string, at?: { x: number; y: number }): FlowDoc {
+  const box = doc.nodes.find((node) => node.id === id);
+  if (!box) {
+    return doc;
+  }
+  const from = at ?? box.position;
+  const copy: FlowBox = { ...box, id: newId, ...(from ? { position: { x: from.x + 24, y: from.y + 24 } } : {}) };
+  const index = doc.nodes.indexOf(box);
+  return { ...doc, nodes: [...doc.nodes.slice(0, index + 1), copy, ...doc.nodes.slice(index + 1)] };
 }
 
 /** Names the arrow from `source` to `target`; an empty label removes it. */

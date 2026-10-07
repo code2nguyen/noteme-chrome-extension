@@ -204,9 +204,10 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
   await expect
     .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
     .toBe('Synced across devices');
-  await expect(page.getByRole('button', { name: 'Synchronize again' })).toBeVisible({ timeout: 10_000 });
+  // Sync has no indicator: nothing to see on the board.
+  await expect(page.getByRole('button', { name: 'Synchronize again' })).toHaveCount(0);
 
-  // A note written by another device, then a manual re-sync.
+  // A note written by another device, pulled in when the tab comes back into view.
   await seed(page, 'sync', {
     ART_BOARD_ITEM__remote: {
       id: 'remote',
@@ -227,7 +228,10 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
       sourceId: 'other-device',
     },
   });
-  await page.getByRole('button', { name: 'Synchronize again' }).click();
+  // Only in the sync until the tab pulls it in: the board's own copy is made by the pull, not by the seeding.
+  expect(await stored(page, 'local', 'ITEM_DATA__remote')).toBeUndefined();
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect.poll(async () => (await stored(page, 'local', 'ITEM_DATA__remote'))?.data).toBe('Written on my laptop');
   await expect(page.locator('ntm-note-card')).toHaveCount(2);
   await expect(page.locator('c2-notepad .ProseMirror', { hasText: 'Written on my laptop' })).toBeVisible();
   await shot(page, '12-extension-synced');
@@ -257,16 +261,17 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
 test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
   const page = await newTab();
   await page.goto(page.url() + '?settings=1');
+  const synced = () =>
+    page.evaluate(() =>
+      chrome.storage.sync.get('NOTEME_SETTINGS').then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}'))),
+    );
+  // Plan is off until chosen under Features; its week settings come with it.
+  await page.locator('ntm-settings-panel c2-select.settings__features').click();
+  await page.locator('c2-list-item', { hasText: 'A week and month calendar' }).click();
+  await page.keyboard.press('Escape');
+  await expect.poll(async () => (await synced()).features).toEqual(['plan']);
   await page.locator('ntm-settings-panel c2-button', { hasText: 'Sunday' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        chrome.storage.sync
-          .get('NOTEME_SETTINGS')
-          .then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}')).weekStart),
-      ),
-    )
-    .toBe('sunday');
+  await expect.poll(async () => (await synced()).weekStart).toBe('sunday');
 });
 
 test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {

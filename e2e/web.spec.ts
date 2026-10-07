@@ -1,5 +1,7 @@
 import { expect, type Page, test as base } from '@playwright/test';
 import {
+  archivePreview,
+  archiveRows,
   backgroundState,
   nextDay,
   card,
@@ -43,15 +45,20 @@ const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const editTitleAndChoose = (page: Page, title: string, menu: string, text: string, value: string) =>
   page.evaluate(
     async ([title, menu, text, value]) => {
-      const field = document.querySelector(title) as HTMLElement & { value: string };
+      const field = document.querySelector(title) as HTMLElement & { value: string; editing?: boolean };
+      // An open inline edit would commit its (empty) draft over this value when it closes: close it first, unsaved.
+      if (field.editing) {
+        field.editing = false;
+      }
       field.value += text;
-      field.dispatchEvent(new Event('input', { bubbles: true }));
+      // A title (an inline edit) saves once committed, on change.
+      field.dispatchEvent(new Event('change', { bubbles: true }));
       await new Promise((resolve) => setTimeout(resolve));
       document.querySelector(menu)!.dispatchEvent(new CustomEvent('menu-select', { detail: { value } }));
     },
     [title, menu, text, value],
   );
-const PAGE_TITLE = 'ntm-page-view c2-text-field.page__title';
+const PAGE_TITLE = 'ntm-page-view c2-inline-edit.page__title';
 const PAGE_MENU = 'ntm-page-view c2-menu';
 
 /** Wait for a page or flow title to be stored (saves are debounced), rather than for a fixed time. */
@@ -83,8 +90,9 @@ test('home shows the clock, a photo and the quote, and opens the board', async (
   await shot(page, '01-home');
   await openBoard(page);
   await expect(page).toHaveURL(/#\/main-board$/);
-  await expect(page.locator('.board__empty')).toHaveText(
-    'Nothing here yet. Press N for a note, P for a page or F for a flow.',
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('Nothing here yet');
+  await expect(page.locator('.board__empty [slot="description"]')).toHaveText(
+    'Press N for a note, P for a page or F for a flow.',
   );
   await shot(page, '02-board-empty');
 });
@@ -108,7 +116,7 @@ test('notepad formatting is stored as markdown', async ({ page }) => {
   await openBoard(page);
   const note = await newNote(page);
   await page.keyboard.type('plain ');
-  await page.keyboard.press('Control+b');
+  await page.keyboard.press('ControlOrMeta+b');
   await page.keyboard.type('bold');
   await page.waitForTimeout(500);
   const stored = await page.evaluate(() =>
@@ -119,6 +127,33 @@ test('notepad formatting is stored as markdown', async ({ page }) => {
   expect(stored).toHaveLength(1);
   expect(stored[0]).toMatchObject({ dataType: 'markdown', data: 'plain **bold**' });
   await expect(note.locator('c2-notepad strong')).toHaveText('bold');
+});
+
+test('tearing off a page clears the note, and the cleared note is saved', async ({ page }) => {
+  await openBoard(page);
+  const note = await newNote(page);
+  await page.keyboard.type('Call the plumber');
+  await expect(notepadSurface(note)).toHaveText('Call the plumber');
+  await note.hover();
+  await note.locator('c2-notepad').getByRole('button', { name: 'Tear off' }).click();
+  // The torn sheet is a copy of the page while it flies off: wait for it to go.
+  await expect(note.locator('c2-notepad .ProseMirror')).toHaveCount(1);
+  await expect(notepadSurface(note)).toHaveText('');
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage)
+          .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+          .map(([, value]) => JSON.parse(value).data),
+      ),
+    )
+    .toEqual(['']);
+  // The stack of sheets under a tear-off pad still fits the card.
+  const body = note.locator('.note__body');
+  expect(await body.evaluate((element) => element.scrollHeight - element.clientHeight)).toBe(0);
+  await page.reload();
+  await openBoard(page);
+  await expect(notepadSurface(card(page))).toHaveText('');
 });
 
 test('a page is written full screen, with markdown and code, and shows as a card', async ({ page }) => {
@@ -154,7 +189,7 @@ test('a page is written full screen, with markdown and code, and shows as a card
 
   // Reloading the page keeps it; back on the board it is a card that opens it again.
   await page.reload();
-  await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Setting up the new laptop');
+  await expect(page.locator('ntm-page-view c2-inline-edit')).toHaveJSProperty('value', 'Setting up the new laptop');
   await expect(pageSurface(page).locator('h2')).toHaveText('Install');
   await page.locator('.page-bar__back').click();
   const pageCard = page.locator('ntm-page-card');
@@ -186,9 +221,10 @@ test('a page shows its editor only once its stored data is read', async ({ page 
   await openBoard(page);
   await newPage(page);
   await page.keyboard.type('Alpha');
+  await page.keyboard.press('Enter'); // the title is saved once committed
   await saved(page, 'Alpha');
   await page.reload();
-  await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Alpha');
+  await expect(page.locator('ntm-page-view c2-inline-edit')).toHaveJSProperty('value', 'Alpha');
   await expect(page.locator('ntm-page-view c2-page-editor')).toHaveCount(1);
   await expect(page.locator('ntm-page-view main[aria-busy]')).toHaveCount(0);
   await expect(page.locator('.page-bar__status')).not.toHaveText('Loading…');
@@ -205,11 +241,12 @@ test('a page or flow view reused for another one shows that one', async ({ page 
   for (const title of ['Alpha', 'Beta']) {
     await newPage(page);
     await page.keyboard.type(title);
+    await page.keyboard.press('Enter');
     pages[title] = idOf();
     await saved(page, title);
     await page.locator('.page-bar__back').click();
   }
-  const pageTitle = page.locator('ntm-page-view c2-text-field');
+  const pageTitle = page.locator('ntm-page-view c2-inline-edit');
   for (const title of ['Alpha', 'Beta', 'Alpha']) {
     await page.evaluate((id) => (location.hash = `#/page/${id}`), pages[title]);
     await expect(pageTitle).toHaveJSProperty('value', title);
@@ -220,14 +257,15 @@ test('a page or flow view reused for another one shows that one', async ({ page 
   for (const title of ['Gamma', 'Delta']) {
     await page.keyboard.press('f');
     await expect(page).toHaveURL(/#\/flow\/[\w-]+\?new=1$/);
-    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await expect.poll(() => focusedTag(page)).toBe('c2-inline-edit');
     await page.keyboard.type(title);
+    await page.keyboard.press('Enter');
     flows[title] = idOf();
     await saved(page, title);
     await page.locator('.flow-bar__back').click();
     await expect(page.locator('ntm-board')).toBeVisible();
   }
-  const flowTitle = page.locator('ntm-flow-view c2-text-field.flow__title');
+  const flowTitle = page.locator('ntm-flow-view c2-inline-edit.flow-bar__title');
   for (const title of ['Gamma', 'Delta', 'Gamma']) {
     await page.evaluate((id) => (location.hash = `#/flow/${id}`), flows[title]);
     await expect(flowTitle).toHaveJSProperty('value', title);
@@ -260,9 +298,10 @@ test('holding P creates a single page', async ({ page }) => {
   }
   await page.keyboard.up('p');
   await expect(page).toHaveURL(/#\/page\/[\w-]+\?new=1$/);
-  await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+  await expect.poll(() => focusedTag(page)).toBe('c2-inline-edit');
   await page.keyboard.press('ControlOrMeta+a');
   await page.keyboard.type('Held');
+  await page.keyboard.press('Enter');
   await saved(page, 'Held');
   await page.locator('.page-bar__back').click();
   await expect(page.locator('ntm-page-card')).toHaveCount(1);
@@ -391,17 +430,17 @@ test('archive a note, find it in the Archive and restore it to the board', async
   await page.locator('.navbar__views c2-button[value="archive"]').click();
   await expect(page).toHaveURL(/#\/main-board\?view=archive$/);
   await expect(page.locator('.navbar__title')).toHaveText('Archive');
-  await expect(page.locator('ntm-note-card')).toHaveCount(1);
-  await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
-  // Arranging is for the board only.
-  await expect(page.getByRole('button', { name: 'Arrange' })).toHaveCount(0);
+  // A list, not the board: the note is a row, and the preview shows it on its paper, read only.
+  await expect(tiles(page)).toHaveCount(0);
+  await expect(archiveRows(page)).toHaveCount(1);
+  await expect(archiveRows(page).first()).toContainText('Keep me for later');
+  await expect(notepadSurface(archivePreview(page))).toHaveText('Keep me for later');
+  await expect(archivePreview(page).locator('c2-notepad')).toHaveAttribute('readonly', '');
   await shot(page, '09-archive');
 
-  await card(page).getByRole('button', { name: 'Note actions' }).click();
-  await expect(card(page).locator('c2-menu-item[value="archive"]')).toHaveCount(0);
-  await card(page).locator('c2-menu-item[value="restore"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(0);
-  await expect(page.locator('.board__empty')).toHaveText('The archive is empty.');
+  await archivePreview(page).locator('.archive__restore').click();
+  await expect(archiveRows(page)).toHaveCount(0);
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('The archive is empty');
 
   await page.locator('.navbar__views c2-button[value="notes"]').click();
   await expect(page).toHaveURL(/#\/main-board$/);
@@ -410,6 +449,57 @@ test('archive a note, find it in the Archive and restore it to the board', async
   await page.reload();
   await openBoard(page);
   await expect(notepadSurface(card(page))).toHaveText('Keep me for later');
+});
+
+test('the Archive restores several notes at once, and deletes forever only once asked', async ({ page }) => {
+  await openBoard(page);
+  for (const text of ['Tram times', 'Old budget', 'Spare keys']) {
+    await newNote(page);
+    await page.keyboard.type(text);
+    await page.waitForTimeout(500);
+    await card(page).getByRole('button', { name: 'Note actions' }).click();
+    await card(page).locator('c2-menu-item[value="archive"]').click();
+    await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  }
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  // Most recently archived first, the first one in the preview.
+  await expect(archiveRows(page)).toHaveText([/Spare keys/, /Old budget/, /Tram times/]);
+  await expect(archivePreview(page).locator('.archive__title')).toHaveText('Spare keys');
+
+  // Select all acts on the rows listed: a note the filter hides keeps its tick.
+  await archiveRows(page).nth(0).locator('c2-checkbox').click();
+  await page.locator('.archive__kinds c2-button[value="Page"]').click();
+  await expect(archiveRows(page)).toHaveCount(0);
+  await page.locator('.archive__all').click();
+  await page.locator('.archive__kinds c2-button[value="all"]').click();
+  await expect(page.locator('.archive__bulk-count')).toHaveText('1 selected');
+
+  await archiveRows(page).nth(2).locator('c2-checkbox').click();
+  await expect(page.locator('.archive__bulk-count')).toHaveText('2 selected');
+  // Ticking a row leaves the preview where it was.
+  await archiveRows(page).nth(1).click();
+  await archiveRows(page).nth(2).locator('c2-checkbox').click();
+  await archiveRows(page).nth(2).locator('c2-checkbox').click();
+  await expect(archivePreview(page).locator('.archive__title')).toHaveText('Old budget');
+  await page.locator('.archive__bulk .archive__restore').click();
+  await expect(archiveRows(page)).toHaveText([/Old budget/]);
+  await expect(page.locator('c2-toast')).toContainText('2 notes are back on the board');
+
+  // Delete forever asks first; Cancel keeps the note.
+  await archivePreview(page).locator('.archive__delete').click();
+  const confirm = page.locator('c2-modal.archive__confirm');
+  await expect(confirm).toContainText('Delete “Old budget” forever?');
+  await confirm.locator('.archive__secondary').click();
+  await expect(archiveRows(page)).toHaveCount(1);
+  await archivePreview(page).locator('.archive__delete').click();
+  await confirm.locator('.archive__confirm-delete').click();
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('The archive is empty');
+
+  await page.locator('.navbar__views c2-button[value="notes"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+  await page.reload();
+  await openBoard(page);
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
 });
 
 test('the Archive view filters by the search, and N brings back the board with a new note', async ({ page }) => {
@@ -423,16 +513,14 @@ test('the Archive view filters by the search, and N brings back the board with a
     await expect(page.locator('ntm-note-card')).toHaveCount(0);
   }
   await page.locator('.navbar__views c2-button[value="archive"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(2);
-  // Oldest edit first.
-  await expect(notepadSurface(card(page, 0))).toHaveText('Recipe for lemon tart');
+  await expect(archiveRows(page)).toHaveText([/Bike repair checklist/, /Recipe for lemon tart/]);
   const search = page.locator('c2-autocomplete input');
   await search.pressSequentially('lemon');
-  await expect(page.locator('ntm-note-card')).toHaveCount(1);
-  await expect(notepadSurface(card(page))).toHaveText('Recipe for lemon tart');
+  await expect(archiveRows(page)).toHaveText([/Recipe for lemon tart/]);
+  await expect(notepadSurface(archivePreview(page))).toHaveText('Recipe for lemon tart');
   await search.fill('');
   await search.pressSequentially('nothing like it');
-  await expect(page.locator('.board__empty')).toHaveText('Nothing archived matches.');
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('Nothing archived matches');
 
   await page.locator('main.board').click({ position: { x: 4, y: 4 } });
   await page.keyboard.press('n');
@@ -452,18 +540,18 @@ test('typing in the Archive search stays in the search when a note created earli
   await card(page).locator('c2-menu-item[value="archive"]').click();
   await expect(page.locator('ntm-note-card')).toHaveCount(0);
   await page.locator('.navbar__views c2-button[value="archive"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect(archiveRows(page)).toHaveCount(1);
 
-  // The search hides the card, then shows it again: drawn anew, it must not take the focus it had when created.
+  // The search hides the note, then shows it again: drawn anew, it must not take the focus it had when created.
   const search = page.locator('c2-autocomplete input');
   await search.pressSequentially('zz');
-  await expect(page.locator('.board__empty')).toHaveText('Nothing archived matches.');
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('Nothing archived matches');
   await search.press('Backspace');
   await search.press('Backspace');
-  await expect(page.locator('ntm-note-card')).toHaveCount(1);
+  await expect(archiveRows(page)).toHaveCount(1);
   await page.keyboard.type('bike', { delay: 50 });
   await expect(search).toHaveValue('bike');
-  await expect(notepadSurface(card(page))).toHaveText('Bike repair checklist');
+  await expect(notepadSurface(archivePreview(page))).toHaveText('Bike repair checklist');
 });
 
 test('archive a page from its view; it opens from the Archive and is restored from there', async ({ page }) => {
@@ -476,20 +564,20 @@ test('archive a page from its view; it opens from the Archive and is restored fr
   await expect(tiles(page)).toHaveCount(0);
 
   await page.locator('.navbar__views c2-button[value="archive"]').click();
-  const pageCard = page.locator('ntm-page-card');
-  await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes');
-  await pageCard.click();
-  // The card says where it was opened from, so the way back leads to the Archive before the page is even read.
+  await expect(archiveRows(page)).toHaveText([/Old recipes/]);
+  const open = archivePreview(page).locator('c2-button', { hasText: 'Open' });
+  await open.click();
+  // It says where it was opened from, so the way back leads to the Archive before the page is even read.
   await expect(page).toHaveURL(/#\/page\/[\w-]+\?from=archive$/);
-  await expect(page.locator('ntm-page-view c2-text-field')).toHaveJSProperty('value', 'Old recipes');
+  await expect(page.locator('ntm-page-view c2-inline-edit')).toHaveJSProperty('value', 'Old recipes');
   await expect(page.locator('.page-bar__back')).toHaveText('Archive');
   await page.locator('.page-bar__back').click();
   await expect(page).toHaveURL(/#\/main-board\?view=archive$/);
-  await pageCard.click();
+  await open.click();
 
   // Restored right after an edit, in a tab that did not write the stored page: the edit stays on screen and is saved.
   await page.reload();
-  const title = page.locator('ntm-page-view c2-text-field');
+  const title = page.locator('ntm-page-view c2-inline-edit');
   await expect(title).toHaveJSProperty('value', 'Old recipes');
   await expect(page.locator('ntm-page-view c2-menu-item[value="archive"]')).toHaveCount(0);
   await editTitleAndChoose(page, PAGE_TITLE, PAGE_MENU, ' and new', 'restore');
@@ -498,10 +586,10 @@ test('archive a page from its view; it opens from the Archive and is restored fr
   await expect(title).toHaveJSProperty('value', 'Old recipes and new');
   await page.locator('.page-bar__back').click();
   await expect(page).toHaveURL(/#\/main-board$/);
-  await expect(pageCard.locator('.page-card__title')).toHaveText('Old recipes and new');
+  await expect(page.locator('ntm-page-card .page-card__title')).toHaveText('Old recipes and new');
 });
 
-test('arrange: move a card with the keyboard, and the order is kept after a reload', async ({ page }) => {
+test('arrange: cards move and resize without a mode, and the order is kept after a reload', async ({ page }) => {
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Second');
@@ -509,36 +597,64 @@ test('arrange: move a card with the keyboard, and the order is kept after a relo
   await page.keyboard.type('First');
   await page.waitForTimeout(500);
 
-  const arrange = page.getByRole('button', { name: 'Arrange' });
+  // A short note fills its card without a scrollbar.
+  for (const body of await page.locator('.note__body').all()) {
+    expect(await body.evaluate((element) => element.scrollHeight - element.clientHeight)).toBe(0);
+  }
+
+  // No Arrange button: every card has its move handle and resize edge.
+  await expect(page.getByRole('button', { name: 'Arrange' })).toHaveCount(0);
   const handles = tiles(page).getByRole('button', { name: /^Move / });
-  await expect(handles).toHaveCount(0);
-  await arrange.click();
   await expect(handles).toHaveCount(2);
-  await expect(page.locator('c2-masonry')).toHaveClass(/board__grid--arranging/);
+  await expect(tiles(page).getByRole('button', { name: /^Resize / })).toHaveCount(2);
+  await tiles(page).first().hover();
   await shot(page, '10-arrange');
 
   // The newest note comes first; move it one step on: Enter, ArrowRight, Enter.
   await expect(notepadSurface(card(page, 0))).toHaveText('First');
+  const orders = () =>
+    page.evaluate(() =>
+      Object.fromEntries(
+        Object.entries(localStorage)
+          .filter(([key]) => key.startsWith('noteme-dev:ART_BOARD_ITEM__'))
+          .map(([, value]) => JSON.parse(value))
+          .map((item) => [item.id, item.gridPosition.order]),
+      ),
+    );
+  const before: Record<string, number> = await orders();
   await handles.first().focus();
   await page.keyboard.press('Enter');
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Enter');
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
+  // The two notes swap the order values they held; no other note's changes.
+  const [a, b] = Object.keys(before);
+  await expect.poll(orders).toEqual({ [a]: before[b], [b]: before[a] });
+
+  // Resize the first card three rows taller from its bottom edge: Enter, ArrowDown ×3, Enter. The new span is saved.
+  const rows = () =>
+    page.evaluate(() =>
+      Object.fromEntries(
         Object.entries(localStorage)
           .filter(([key]) => key.startsWith('noteme-dev:ART_BOARD_ITEM__'))
-          .map(([, value]) => JSON.parse(value).gridPosition.order)
-          .sort(),
+          .map(([, value]) => JSON.parse(value))
+          .map((item) => [item.id, item.gridPosition.rows]),
       ),
-    )
-    .toEqual([0, 1]);
-
-  // Leaving the Notes view stops arranging.
-  await page.locator('.navbar__views c2-button[value="archive"]').click();
-  await page.locator('.navbar__views c2-button[value="notes"]').click();
-  await expect(page.locator('ntm-note-card')).toHaveCount(2);
-  await expect(handles).toHaveCount(0);
+    );
+  // Once the move shows: the card resized is the one measured after the reload.
+  await expect(notepadSurface(card(page, 0))).toHaveText('Second');
+  const id = (await tiles(page).nth(0).getAttribute('item-id'))!;
+  const rowsBefore: Record<string, number> = await rows();
+  const heightBefore = (await tiles(page).nth(0).boundingBox())!.height;
+  await tiles(page)
+    .nth(0)
+    .getByRole('button', { name: /^Resize / })
+    .focus();
+  await page.keyboard.press('Enter');
+  for (let step = 0; step < 3; step++) {
+    await page.keyboard.press('ArrowDown');
+  }
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await rows())[id]).toBe(rowsBefore[id] + 3);
 
   await page.reload();
   await openBoard(page);
@@ -546,6 +662,9 @@ test('arrange: move a card with the keyboard, and the order is kept after a relo
   await expect(notepadSurface(card(page, 1))).toHaveText('First');
   const [first, second] = [await tiles(page).nth(0).boundingBox(), await tiles(page).nth(1).boundingBox()];
   expect(first!.x).toBeLessThan(second!.x);
+  // The resized card keeps its height after the reload.
+  const resized = (await page.locator(`c2-masonry-item[item-id="${id}"]`).boundingBox())!;
+  expect(resized.height).toBeGreaterThan(heightBefore + 20);
 });
 
 test('phone width: one column, no horizontal scroll', async ({ page }) => {
@@ -649,6 +768,8 @@ test.describe('home', () => {
   });
 
   test('settings change the clock, the theme and the quote, and survive a reload', async ({ page }) => {
+    // A fresh start is dark, whatever the system's theme.
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.locator('ntm-home c2-icon-button[aria-label="Settings"]').click();
     await expect(page).toHaveURL(/settings=1/);
     const sheet = page.locator('ntm-settings-panel c2-sheet');
@@ -658,29 +779,32 @@ test.describe('home', () => {
     await sheet.locator('c2-button', { hasText: '12 h' }).click();
     await expect(page.locator('.home__time')).toHaveText(/^\d{1,2}:\d{2}\s?(AM|PM)$/i);
 
-    await sheet.locator('c2-button', { hasText: 'Dark' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await sheet.locator('c2-button', { hasText: 'Light' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
     await sheet.locator('c2-switch', { hasText: 'Quote of the day' }).click();
     await expect(page.locator('.home__quote')).toHaveCount(0);
-    await shot(page, '04-settings-dark');
+    await shot(page, '04-settings-light');
 
     await page.keyboard.press('Escape');
     await expect(page).not.toHaveURL(/settings=1/);
-    await shot(page, '05-home-dark');
+    await shot(page, '05-home-light');
 
     await page.reload();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await expect(page.locator('.home__time')).toHaveText(/(AM|PM)$/i);
     await expect(page.locator('.home__quote')).toHaveCount(0);
   });
 
-  test('light theme follows the setting', async ({ page }) => {
+  test('the Auto theme follows the system', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/#/?settings=1');
-    await page.locator('ntm-settings-panel c2-button', { hasText: 'Light' }).click();
+    await page.locator('ntm-settings-panel c2-button', { hasText: 'Auto' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.keyboard.press('Escape');
-    await shot(page, '06-home-light');
+    await shot(page, '06-home-auto');
   });
 
   test('"+ Note" opens the board with a new note ready for typing', async ({ page }) => {
@@ -692,13 +816,38 @@ test.describe('home', () => {
     await expect(page.locator('ntm-note-card c2-notepad .ProseMirror')).toHaveText('From home');
   });
 
-  test('Ctrl K and the search pill open the board with the search focused', async ({ page }) => {
+  test('Home searches in place: a note picked opens the board on it, lit up, and a page opens full screen', async ({
+    page,
+  }) => {
+    await openBoard(page);
+    await newNote(page);
+    await page.keyboard.type('Dentist on Tuesday');
+    await newPage(page);
+    await page.keyboard.type('Garden plans');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Tomatoes along the south wall');
+    await page.waitForTimeout(500);
+    await page.goto('/');
+
+    // Ctrl K focuses the search on Home, which stays Home.
     await page.keyboard.press('Control+k');
+    await expect.poll(() => focusedTag(page)).toBe('c2-autocomplete');
+    await expect(page.locator('ntm-home')).toBeVisible();
+    await page.keyboard.type('dentist');
+    const note = page.locator('ntm-home c2-autocomplete c2-list-item', { hasText: 'Dentist on Tuesday' });
+    await expect(note).toContainText('Note ·');
+    await shot(page, '05-home-search');
+    await note.click();
     await expect(page).toHaveURL(/#\/main-board$/);
-    await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-autocomplete');
+    await expect(page.locator('ntm-note-card.note--blink c2-border-beam')).toHaveCount(1);
+    await expect(notepadSurface(page.locator('ntm-note-card.note--blink'))).toHaveText('Dentist on Tuesday');
+
     await page.locator('ntm-board c2-icon-button[aria-label="Home"]').click();
-    await page.locator('.home__search').click();
-    await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-autocomplete');
+    await page.locator('.home__search c2-autocomplete').click();
+    await page.keyboard.type('tomatoes');
+    await page.locator('ntm-home c2-autocomplete c2-list-item', { hasText: 'Garden plans' }).click();
+    await expect(page).toHaveURL(/#\/page\/[\w-]+$/);
+    await expect(pageSurface(page)).toHaveText('Tomatoes along the south wall');
   });
 });
 
@@ -721,7 +870,8 @@ test('Home loads only its own components; the board, settings and pages load the
   const defined = (tag: string) => page.evaluate((name) => !!customElements.get(name), tag);
   await expect(page.locator('.home__time')).toBeVisible();
   expect(await defined('c2-icon-button')).toBe(true);
-  for (const tag of ['c2-notepad', 'c2-masonry', 'c2-autocomplete', 'c2-sheet', 'c2-page-editor']) {
+  // Home has its own search field, so c2-autocomplete loads with it.
+  for (const tag of ['c2-notepad', 'c2-masonry', 'c2-sheet', 'c2-page-editor']) {
     expect(await defined(tag), `${tag} on Home`).toBe(false);
   }
   await page.locator('ntm-home c2-icon-button[aria-label="Settings"]').click();
@@ -805,11 +955,11 @@ test.describe('flow', () => {
   test('a flow archived right after its title is typed lands in the Archive with it', async ({ page }) => {
     await openBoard(page);
     await page.keyboard.press('f');
-    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await expect.poll(() => focusedTag(page)).toBe('c2-inline-edit');
     // Before its first edit is saved: the flow is archived with its title, not removed as empty.
     await editTitleAndChoose(
       page,
-      'ntm-flow-view c2-text-field.flow__title',
+      'ntm-flow-view c2-inline-edit.flow-bar__title',
       'ntm-flow-view c2-menu',
       'Moving house',
       'archive',
@@ -817,9 +967,8 @@ test.describe('flow', () => {
     await expect(page).toHaveURL(/#\/main-board$/);
     await expect(tiles(page)).toHaveCount(0);
     await page.locator('.navbar__views c2-button[value="archive"]').click();
-    const flowCard = page.locator('ntm-flow-card');
-    await expect(flowCard.locator('.flow-card__title')).toHaveText('Moving house');
-    await flowCard.click();
+    await expect(archiveRows(page)).toHaveText([/Moving house/]);
+    await archivePreview(page).locator('c2-button', { hasText: 'Open' }).click();
     await expect(page).toHaveURL(/#\/flow\/[\w-]+\?from=archive$/);
     await expect(page.locator('.flow-bar__back')).toHaveText('Archive');
 
@@ -832,11 +981,54 @@ test.describe('flow', () => {
     await expect(page.locator('.flow-bar__back')).toHaveText('Archive');
   });
 
+  test('a box takes a shape, a paper, an ink and an icon from its right-click menu, and can be duplicated', async ({
+    page,
+  }) => {
+    const item = (value: string) => page.locator(`c2-menu-item[value="${value}"]`);
+    await openBoard(page);
+    await page.keyboard.press('f');
+    await page.keyboard.type('Weekend');
+    await page.keyboard.press('Enter');
+    await addBoxAt(page, 0.3, 'Check the forecast');
+    await addBoxAt(page, 0.6, 'Weather ok?');
+
+    // Each choice applies at once and the menu stays open, to try another.
+    await box(page, 'Weather ok?').click({ button: 'right' });
+    await item('box:shape:diamond').click();
+    await item('box:paper:yellow').click();
+    await expect(item('box:paper:yellow')).toBeVisible();
+    await expect(box(page, 'Weather ok?')).toHaveClass(/shape--diamond/);
+    await expect.poll(async () => (await storedBoxes(page))[1]).toMatchObject({ shape: 'diamond', paper: 'yellow' });
+    await page.keyboard.press('Escape');
+
+    await box(page, 'Check the forecast').click({ button: 'right' });
+    await item('box:ink:blue').click();
+    await page.locator('c2-menu-item[label="Icon"]').hover();
+    await item('box:icon:sun').click();
+    await expect(box(page, 'Check the forecast').locator('.node-icon c2-phosphor-sun')).toHaveCount(1);
+    await expect.poll(async () => (await storedBoxes(page))[0]).toMatchObject({ ink: 'blue', icon: 'sun' });
+
+    await box(page, 'Check the forecast').click({ button: 'right' });
+    await item('box:duplicate').click();
+    await expect.poll(async () => (await storedBoxes(page)).length).toBe(3);
+
+    // The canvas keeps its own menu, without the box rows.
+    const stage = (await page.locator('c2-flow .stage').boundingBox())!;
+    await page.mouse.click(stage.x + 30, stage.y + stage.height - 30, { button: 'right' });
+    await expect(item('flow:zoom-in')).toBeVisible();
+    await expect(item('box:shape:rect')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+
+    await page.reload();
+    await expect(box(page, 'Weather ok?')).toHaveClass(/shape--diamond/);
+    await expect(page.locator('c2-flow .node-icon c2-phosphor-sun')).toHaveCount(2);
+  });
+
   test('a flow is drawn with boxes and arrows, saved, and shown on the board', async ({ page }) => {
     await openBoard(page);
     await page.keyboard.press('f');
     await expect(page).toHaveURL(/#\/flow\/[\w-]+\?new=1$/);
-    await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+    await expect.poll(() => focusedTag(page)).toBe('c2-inline-edit');
     await page.keyboard.type('Long weekend in Da Lat?');
     await page.keyboard.press('Enter');
     await expect(page.locator('.flow__hint')).toContainText('Click or drag + to add a box');
@@ -847,6 +1039,8 @@ test.describe('flow', () => {
     await expect(page.locator('c2-flow .node')).toHaveCount(0);
 
     await addBoxAt(page, 0.25, 'Weather ok?');
+    // The hint is for an empty flow only.
+    await expect(page.locator('.flow__hint')).toHaveCount(0);
     await addBoxAt(page, 0.6, 'Book the night bus');
 
     // Connect the two by dragging from the first box's handle onto the second.
@@ -877,7 +1071,6 @@ test.describe('flow', () => {
     await expect
       .poll(async () => JSON.parse((await storedFlow(page)).data).edges.map((edge: { label?: string }) => edge.label))
       .toEqual(['if it is sunny']);
-    await expect(page.locator('.flow-bar__status')).toHaveText(/^Saved/);
     await shot(page, '14-flow');
 
     const stored = await storedFlow(page);
@@ -898,11 +1091,14 @@ test.describe('flow', () => {
       await page.locator('c2-flow').evaluate((flow) => (flow as unknown as { getLayout(): unknown }).getLayout()),
     ).toEqual(saved);
 
-    // On the board: a card with the title and the boxes; search finds an arrow's label and opens the flow.
+    // On the board: a card with the title and the flow itself, drawn still (a click anywhere opens it); search finds
+    // an arrow's label and opens the flow.
     await page.locator('.flow-bar__back').click();
     const card = page.locator('ntm-flow-card');
     await expect(card.locator('.flow-card__title')).toHaveText('Long weekend in Da Lat?');
-    await expect(card.locator('.flow-card__box')).toHaveText(['Weather ok?', 'Book the night bus']);
+    await expect(card.locator('c2-flow .node .label')).toHaveText(['Weather ok?', 'Book the night bus']);
+    await expect(card.locator('c2-flow .edge-label')).toHaveText('if it is sunny');
+    await expect(card.locator('c2-flow')).toHaveAttribute('inert', '');
     await shot(page, '15-board-with-flow');
     await page.locator('c2-autocomplete input').pressSequentially('sunny');
     await page.locator('c2-autocomplete c2-list-item', { hasText: 'Long weekend' }).click();
@@ -953,6 +1149,12 @@ test.describe('flow', () => {
 });
 
 test.describe('plan', () => {
+  // Plan is opt-in: switched on in the settings, as Settings stores them, before the app reads them.
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('noteme-settings', JSON.stringify({ features: ['plan'] })));
+    await page.reload();
+  });
+
   const stored = (page: Page) =>
     page.evaluate(() => JSON.parse(localStorage.getItem('noteme-dev:PLAN__ITEMS') ?? '{"items":[]}').items);
   const dialog = (page: Page) => page.locator('c2-modal.plan__dialog');
@@ -1091,4 +1293,39 @@ test.describe('plan', () => {
     await page.locator('ntm-board .navbar__link', { hasText: 'Plan' }).click();
     await expect(page).toHaveURL(/#\/plan/);
   });
+});
+
+test('Plan is off until switched on in Settings, and switched off it leaves the menus', async ({ page }) => {
+  // Off at first: no link, and its address leads Home.
+  await expect(page.locator('ntm-home .home__link', { hasText: 'Notes' })).toBeVisible();
+  await expect(page.locator('ntm-home .home__link', { hasText: 'Plan' })).toHaveCount(0);
+  await page.goto('/#/plan');
+  await expect(page).toHaveURL(/#\/$/);
+  await expect(page.locator('c2-week-planner')).toHaveCount(0);
+
+  await page.goto('/#/?settings=1');
+  const features = page.locator('ntm-settings-panel c2-select.settings__features');
+  const plan = page.locator('c2-list-item', { hasText: 'A week and month calendar' });
+  await expect(features).toHaveJSProperty('value', []);
+  await expect(page.locator('#settings-plan')).toHaveCount(0);
+  await features.click();
+  await plan.click();
+  await page.keyboard.press('Escape');
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('noteme-settings') ?? '{}').features))
+    .toEqual(['plan']);
+  // Its own settings come with it.
+  await expect(page.locator('#settings-plan')).toBeVisible();
+  await page.goto('/#/');
+  await expect(page.locator('ntm-home .home__link', { hasText: 'Plan' })).toBeVisible();
+  await openBoard(page);
+  await page.locator('ntm-board .navbar__link', { hasText: 'Plan' }).click();
+  await expect(page.locator('c2-week-planner')).toBeVisible();
+
+  // Switched off again, it leaves the menus.
+  await page.goto('/#/main-board?settings=1');
+  await features.click();
+  await plan.click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('ntm-board .navbar__link', { hasText: 'Plan' })).toHaveCount(0);
 });

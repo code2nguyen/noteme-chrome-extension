@@ -65,6 +65,11 @@ export class SettingsService {
   private readonly state = signal<Settings>(readMirroredSettings());
   private readonly systemDark = signal(matchMedia('(prefers-color-scheme: dark)').matches);
   readonly settings = this.state.asReadonly();
+  /**
+   * Resolves once the synced settings have been read at start-up (at once without chrome.storage, and also when the
+   * read fails): until then `settings` is the local mirror, which a fresh profile does not have yet.
+   */
+  readonly loaded: Promise<void>;
 
   constructor() {
     const media = matchMedia('(prefers-color-scheme: dark)');
@@ -78,19 +83,24 @@ export class SettingsService {
     });
 
     if (hasChromeStorage()) {
-      chrome.storage.sync.get(SYNC_KEY).then((stored) => {
-        const action = startupSettingsAction(stored[SYNC_KEY], readLocal(UNSYNCED_KEY) !== null);
-        if (action === 'push') {
-          this.push(JSON.stringify(this.state()));
-        } else if (action === 'adopt') {
-          this.adopt(stored[SYNC_KEY]);
-        }
-      });
+      this.loaded = chrome.storage.sync.get(SYNC_KEY).then(
+        (stored) => {
+          const action = startupSettingsAction(stored[SYNC_KEY], readLocal(UNSYNCED_KEY) !== null);
+          if (action === 'push') {
+            this.push(JSON.stringify(this.state()));
+          } else if (action === 'adopt') {
+            this.adopt(stored[SYNC_KEY]);
+          }
+        },
+        (error: unknown) => console.error(error),
+      );
       chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync' && changes[SYNC_KEY]) {
           this.adopt(changes[SYNC_KEY].newValue);
         }
       });
+    } else {
+      this.loaded = Promise.resolve();
     }
   }
 

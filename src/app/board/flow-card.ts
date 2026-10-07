@@ -1,16 +1,20 @@
+import '@c2n/components/flow';
+
 import { ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 
 import { parseFlow } from '../flow/flow-doc';
+import { flowNodes } from '../flow/flow-nodes';
 import { DataService } from '../services/data.service';
 import { editedLabel } from '../services/utils';
 import { ArtBoardItem } from '../store/models';
 
-const SHOWN_BOXES = 6;
-
-/** A flow on the board: its title and the names of its first boxes. The whole card opens the flow. */
+/**
+ * A flow on the board: its title over the flow itself, drawn small and still (fitted to the card, its boxes in their
+ * shapes and colours). The flow is inert, so the whole card is one link that opens it.
+ */
 @Component({
   selector: 'ntm-flow-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,12 +29,16 @@ const SHOWN_BOXES = 6;
       <span class="flow-card__title" [class.flow-card__title--untitled]="!title()">{{
         title() || 'Untitled flow'
       }}</span>
-      @if (boxes().length > 0) {
-        <span class="flow-card__boxes">
-          @for (box of boxes(); track $index) {
-            <span class="flow-card__box">{{ box }}</span>
-          }
-        </span>
+      @if (nodes().length > 0) {
+        <c2-flow
+          class="flow-card__flow"
+          inert
+          locked
+          no-card
+          no-context-menu
+          [nodes]="nodes()"
+          [edges]="edges()"
+        ></c2-flow>
       }
     </a>
   `,
@@ -46,11 +54,9 @@ export class FlowCard {
   );
 
   readonly title = computed(() => this.data()?.properties?.title?.trim() ?? '');
-  readonly boxes = computed(() =>
-    parseFlow(this.data()?.data)
-      .nodes.slice(0, SHOWN_BOXES)
-      .map((node) => node.label),
-  );
+  private readonly doc = computed(() => parseFlow(this.data()?.data));
+  readonly nodes = computed(() => flowNodes(this.doc()));
+  readonly edges = computed(() => this.doc().edges);
   readonly edited = computed(() => {
     const item = this.item();
     const data = this.data();
