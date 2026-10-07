@@ -3,7 +3,18 @@
     <c2-feather-arrow-left aria-hidden="true"></c2-feather-arrow-left>
     {{ inArchive() ? 'Archive' : 'Notes' }}
   </a>
-  <span class="flow-bar__status" role="status">{{ status() }}</span>
+  @if (found()) {
+    <!-- The flow's name, in the bar: read as its heading; a click (or Enter on it) turns it into a field, saved on
+      Enter or on leaving it. -->
+    <c2-inline-edit
+      #titleField
+      class="flow-bar__title"
+      label="Title"
+      placeholder="Untitled flow"
+      [value]="title()"
+      (change)="onTitleChange($event)"
+    ></c2-inline-edit>
+  }
   <span class="flow-bar__spacer"></span>
   <c2-menu placement="bottom-end" aria-label="Flow actions" (menu-select)="onMenu($event)">
     <c2-icon-button slot="trigger" aria-label="Flow actions" tooltip="More">
@@ -34,15 +45,6 @@
   </main>
 } @else if (found()) {
   <main class="flow">
-    <c2-text-field
-      #titleField
-      class="flow__title"
-      aria-label="Title"
-      placeholder="Untitled flow"
-      [value]="title()"
-      (input)="onTitleInput($event)"
-      (keydown)="onTitleKeydown($event)"
-    ></c2-text-field>
     <div class="flow__canvas">
       <c2-flow
         #flow
@@ -53,6 +55,8 @@
         aria-label="Flow"
         [nodes]="nodes()"
         [edges]="edges()"
+        [renderContextMenu]="renderContextMenu"
+        (flow-menu-select)="onBoxMenu($event)"
         (node-add)="onNodeAdd($event)"
         (node-edit)="onNodeEdit($event)"
         (node-delete)="onNodeDelete($event)"
@@ -69,29 +73,22 @@
           (pointerdown)="dragBox($event)"
           (click)="addBox()"
         >
-          <c2-feather-plus></c2-feather-plus>
+          <c2-phosphor-rectangle-dashed></c2-phosphor-rectangle-dashed>
         </c2-icon-button>
         <c2-icon-button slot="actions" aria-label="Tidy up" tooltip="Tidy up: lay the boxes out again" (click)="tidy()">
-          <c2-feather-layout></c2-feather-layout>
+          <c2-phosphor-tree-structure></c2-phosphor-tree-structure>
         </c2-icon-button>
         <c2-icon-button slot="actions" aria-label="Show the whole flow" tooltip="Fit to screen" (click)="fit()">
-          <c2-feather-maximize></c2-feather-maximize>
+          <c2-phosphor-scan></c2-phosphor-scan>
         </c2-icon-button>
       </c2-flow>
-      <p class="flow__hint">
-        @if (empty()) {
+      <!-- Only on an empty flow, to show where to start: once there are boxes, the canvas speaks for itself. -->
+      @if (empty()) {
+        <p class="flow__hint">
           <span class="flow__hint-pointer">Click or drag + to add a box, or press N</span>
           <span class="flow__hint-touch">Tap or drag + to add a box</span>
-        } @else {
-          <span class="flow__hint-pointer">
-            Click or drag + to add a box · drag from an edge to connect · double-click an arrow to label it · Delete
-            removes the selection
-          </span>
-          <span class="flow__hint-touch"
-            >Tap or drag + to add a box · drag from a box's edge to connect · double-tap an arrow to label it</span
-          >
-        }
-      </p>
+        </p>
+      }
     </div>
   </main>
 } @else {

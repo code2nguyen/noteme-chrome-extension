@@ -47,23 +47,22 @@
   color: var(--c2-theme--color-on-surface-variant);
 }
 
-// The first boxes, as small boxes: enough to recognise the flow.
-.flow-card__boxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  overflow: hidden;
-}
-
-.flow-card__box {
-  box-sizing: border-box;
-  max-width: 100%;
-  padding: 2px 8px;
-  border: 1px solid var(--ntm-line);
-  border-radius: 6px;
-  background: var(--c2-theme--color-surface);
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+// The flow, still, filling the rest of the card: no canvas of its own, the boxes and arrows as in the flow view.
+.flow-card__flow {
+  display: block;
+  // The rest of the tile, whatever its size: the flow fits itself into it.
+  flex: 1;
+  min-height: 0;
+  margin: 2px -8px -6px;
+  --c2-flow--height: 100%;
+  --c2-flow--background-color: transparent;
+  --c2-flow--border: none;
+  --c2-flow__dot--color: transparent;
+  --c2-flow__node--background-color: var(--c2-theme--color-surface);
+  --c2-flow__edge--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-flow__edge-label--border: 1px solid var(--ntm-line);
+  --c2-flow__marker--display: none;
+  --c2-flow__shape--border-color: var(--ntm-line);
 }

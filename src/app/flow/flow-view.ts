@@ -1,16 +1,17 @@
 // The c2 elements of a flow, loaded with its route.
 import '@c2n/components/flow';
+import '@c2n/components/inline-edit';
 import '@c2n/components/menu';
 import '@c2n/components/menu/menu-item';
-import '@c2n/components/text-field';
 import '@c2n/feather-icons/icons/archive.js';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
 import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
-import '@c2n/feather-icons/icons/maximize.js';
-import '@c2n/feather-icons/icons/plus.js';
-import '@c2n/feather-icons/icons/layout.js';
+// The canvas tools: a box to drop onto it, the flow laid out again, the whole flow in view.
+import '@c2n/phosphor-icons/icons/rectangle-dashed.js';
+import '@c2n/phosphor-icons/icons/scan.js';
+import '@c2n/phosphor-icons/icons/tree-structure.js';
 
 import {
   afterNextRender,
@@ -19,6 +20,7 @@ import {
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -29,29 +31,33 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type {
   Flow,
+  FlowContextMenuContext,
   FlowEdgeEditDetail,
   FlowEdgeEventDetail,
   FlowLayoutChangeDetail,
+  FlowMenuSelectDetail,
   FlowNode,
   FlowNodeAddDetail,
   FlowNodeDeleteDetail,
   FlowNodeEditDetail,
 } from '@c2n/components/flow';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
-import type { TextField } from '@c2n/components/text-field';
-import { combineLatest, EMPTY, interval } from 'rxjs';
-import { filter, map, startWith, switchMap, take, tap, timeout } from 'rxjs/operators';
+import type { InlineEdit } from '@c2n/components/inline-edit';
+import { combineLatest, EMPTY } from 'rxjs';
+import { filter, map, switchMap, take, tap, timeout } from 'rxjs/operators';
 
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
-import { editedLabel, uuid } from '../services/utils';
+import { uuid } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
+import { boxMenu, readBoxMenuValue } from './box-menu';
 import {
   addBox,
   connect,
   deleteBox,
   disconnect,
+  duplicateBox,
   EMPTY_FLOW,
   FlowDoc,
   labelArrow,
@@ -59,10 +65,9 @@ import {
   placeBoxes,
   renameBox,
   serializeFlow,
+  styleBox,
 } from './flow-doc';
-
-/** How long "Saving…" stays after the last change: the store writes 300ms after changes stop. */
-const SAVING_DELAY = 700;
+import { flowNodes } from './flow-nodes';
 
 /**
  * A flow note, full screen: a title and an editable c2-flow. The flow never changes its own boxes: each of its events
@@ -83,13 +88,12 @@ export class FlowView {
   private readonly route = inject(ActivatedRoute);
   private readonly instanceId = inject(INSTANCE_ID);
   private readonly injector = inject(Injector);
-  private readonly titleField = viewChild<ElementRef<TextField>>('titleField');
+  private readonly titleField = viewChild<ElementRef<InlineEdit>>('titleField');
   private readonly flow = viewChild<ElementRef<Flow>>('flow');
 
   readonly id = toSignal(this.route.paramMap.pipe(map((params) => params.get('id') ?? '')), { initialValue: '' });
   readonly title = signal('');
   readonly doc = signal<FlowDoc>(EMPTY_FLOW);
-  readonly saving = signal(false);
   readonly found = signal<boolean | null>(null);
   /** Archived: off the board, in the Archive view. */
   readonly archived = signal(false);
@@ -100,8 +104,6 @@ export class FlowView {
   );
   /** Whether the way back leads to the Archive and the menu offers Restore. */
   readonly inArchive = computed(() => (this.found() === null ? this.openedFromArchive() : this.archived()));
-  private readonly modified = signal<string | undefined>(undefined);
-  private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
   private item: ArtBoardItem | undefined;
   /** The flow shown: Angular reuses this view from one flow to the next. */
   private shownId: string | undefined;
@@ -113,26 +115,17 @@ export class FlowView {
   private isNew = false;
   /** Deleted or archived from its menu: leaving it must not remove it. */
   private deleted = false;
-  private savingTimer?: ReturnType<typeof setTimeout>;
 
-  /** What c2-flow draws: the boxes as its nodes, placed where they were left. */
-  readonly nodes = computed<FlowNode[]>(() =>
-    this.doc().nodes.map(({ id, label, position }) => ({ id, label, ...(position ? { position } : {}) })),
-  );
+  /** What c2-flow draws: the boxes as its nodes, placed where they were left, in their shape, colours and icon. */
+  readonly nodes = computed<FlowNode[]>(() => flowNodes(this.doc()));
+
+  /** A box's right-click menu: its look and Duplicate, before the flow's Rename and Delete. The canvas keeps its own. */
+  readonly renderContextMenu = ({ node, defaultItems }: FlowContextMenuContext): unknown => {
+    const box = node && this.doc().nodes.find((entry) => entry.id === node.id);
+    return box ? [...boxMenu(box), defaultItems] : undefined;
+  };
   readonly edges = computed(() => this.doc().edges);
   readonly empty = computed(() => this.doc().nodes.length === 0);
-
-  readonly status = computed(() => {
-    this.tick();
-    if (this.found() === null) {
-      return 'Loading…';
-    }
-    if (this.saving()) {
-      return 'Saving…';
-    }
-    const modified = this.modified();
-    return modified ? `Saved · edited ${editedLabel(modified)}` : 'Saved';
-  });
 
   constructor() {
     this.dataService.loadAllArtBoardItems();
@@ -151,7 +144,6 @@ export class FlowView {
         this.item = item;
         this.found.set(!!item);
         this.archived.set(!!item && !item.boardId);
-        this.modified.set(data.empty ? undefined : data.modifiedDate);
         // Bind the stored flow once, then only changes made elsewhere (another tab).
         const changed = data !== this.boundData;
         this.boundData = data;
@@ -167,23 +159,37 @@ export class FlowView {
         }
       });
 
-    inject(DestroyRef).onDestroy(() => {
-      clearTimeout(this.savingTimer);
-      this.leave();
+    effect((onCleanup) => {
+      const field = this.titleField()?.nativeElement;
+      if (field) {
+        const listener = (event: KeyboardEvent) => this.onTitleKeydown(field, event);
+        field.addEventListener('keydown', listener, { capture: true });
+        onCleanup(() => field.removeEventListener('keydown', listener, { capture: true }));
+      }
     });
+
+    inject(DestroyRef).onDestroy(() => this.leave());
   }
 
-  onTitleInput(event: Event): void {
-    const title = (event.target as TextField).value;
+  /** The title was committed (Enter, or leaving the field). */
+  onTitleChange(event: Event): void {
+    const title = (event.target as InlineEdit).value;
     this.title.set(title);
     this.save({ properties: { title } });
   }
 
-  /** Enter in the title moves on to the canvas. */
-  onTitleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
+  /**
+   * Enter in the open title saves it; so does the down arrow. The canvas takes no focus of its own, so the title commits
+   * itself rather than losing focus. Listened to on the way down (capture), before the inline edit's own handling of
+   * the key. Enter on the closed title only opens it.
+   */
+  private onTitleKeydown(field: InlineEdit, event: KeyboardEvent): void {
+    if (!field.editing) {
+      return;
+    }
+    if (event.key === 'Enter' || (event.key === 'ArrowDown' && !event.shiftKey)) {
       event.preventDefault();
-      this.flow()?.nativeElement.focus();
+      field.commit();
     }
   }
 
@@ -231,6 +237,33 @@ export class FlowView {
 
   onLayoutChange(event: Event): void {
     this.change(placeBoxes(this.doc(), (event as CustomEvent<FlowLayoutChangeDetail>).detail.positions));
+  }
+
+  /** A row of a box's menu: its look changes at once; Duplicate puts a copy beside it. */
+  onBoxMenu(event: Event): void {
+    const { value, node } = (event as CustomEvent<FlowMenuSelectDetail>).detail;
+    const choice = readBoxMenuValue(value);
+    if (!choice || !node) {
+      return;
+    }
+    const doc = this.doc();
+    switch (choice.kind) {
+      case 'shape':
+        this.change(styleBox(doc, node.id, { shape: choice.shape }));
+        return;
+      case 'paper':
+        this.change(styleBox(doc, node.id, { paper: choice.paper }));
+        return;
+      case 'ink':
+        this.change(styleBox(doc, node.id, { ink: choice.ink }));
+        return;
+      case 'icon':
+        this.change(styleBox(doc, node.id, { icon: choice.icon }));
+        return;
+      case 'duplicate':
+        this.change(duplicateBox(doc, node.id, uuid(), this.flow()?.nativeElement.getLayout()[node.id]));
+        return;
+    }
   }
 
   /** A box connected after the selected one, or in a free spot of the view; named straight away (onNodeAdd). */
@@ -289,9 +322,6 @@ export class FlowView {
 
   private save(changes: { data?: string; properties?: { title: string } }): void {
     this.dataService.updateDataItem({ id: this.id(), dataType: DataType.FLOW, ...changes });
-    this.saving.set(true);
-    clearTimeout(this.savingTimer);
-    this.savingTimer = setTimeout(() => this.saving.set(false), SAVING_DELAY);
   }
 
   private async focusTitle(): Promise<void> {
@@ -299,7 +329,8 @@ export class FlowView {
     if (!field) {
       return;
     }
-    await customElements.whenDefined('c2-text-field');
+    await customElements.whenDefined('c2-inline-edit');
+    field.editing = true;
     await field.updateComplete;
     field.focus();
   }
@@ -311,9 +342,7 @@ export class FlowView {
     this.leave();
     this.shownId = id;
     this.isNew = this.route.snapshot.queryParamMap.has('new');
-    // Nothing of the last one carries over: its "Saving…" (its save goes on regardless) or its being archived.
-    clearTimeout(this.savingTimer);
-    this.saving.set(false);
+    // Nothing of the last one carries over: its being archived.
     this.archived.set(false);
     this.found.set(null);
   }
