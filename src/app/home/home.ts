@@ -5,15 +5,24 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
+import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
+import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { formatDate, formatTime } from '../settings/settings';
+import { DataService } from '../services/data.service';
+import { FULL_SCREEN, SearchSuggestion, searchShortcut, searchSuggestions } from '../services/search-results';
+import { selectItemDataEntities } from '../store/reducers';
+
+import { formatDate, formatTime, hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
 import { BackgroundOptions, BackgroundService, ShownPhoto } from './background.service';
@@ -42,12 +51,17 @@ export class Home {
   private readonly backgrounds = inject(BackgroundService);
   private readonly topSites = inject(TopSitesService);
   private readonly router = inject(Router);
+  private readonly dataService = inject(DataService);
+  private readonly store = inject(Store);
   private readonly now = signal(new Date());
+  private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
 
   readonly settings = this.settingsService.settings;
   readonly time = computed(() => formatTime(this.now(), this.settings().clock));
   readonly date = computed(() => formatDate(this.now(), this.settings().dateFormat));
   readonly quote = computed(() => (this.settings().quote ? quoteOfTheDay(this.now()) : null));
+  /** Plan is optional: its link shows only while it is switched on in Settings. */
+  readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
 
   readonly photo = signal<ShownPhoto | null>(null);
   /** The photo fades in once decoded, rather than painting top to bottom. */
@@ -63,14 +77,27 @@ export class Home {
   readonly shortcuts = signal<ShortcutsState>('hidden');
   /** Bumped by every refresh, so a slower earlier one cannot publish over the latest. */
   private shortcutsRun = 0;
+  /** What the search field holds, as typed. */
+  readonly query = signal('');
+  private readonly results = toSignal(this.dataService.getSearchResults(), { initialValue: [] });
+  readonly suggestions = toSignal(
+    combineLatest([this.dataService.getSearchResults(), this.store.select(selectItemDataEntities)]).pipe(
+      map(([items, data]) => searchSuggestions(items, data)),
+    ),
+    { initialValue: [] as SearchSuggestion[] },
+  );
+  /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
+  readonly matchAll = () => true;
   /** The search shortcut as this keyboard writes it; onKey takes both. */
-  readonly searchKey = isApple() ? '⌘ K' : 'Ctrl K';
+  readonly searchKey = searchShortcut();
 
   readonly settingsOpen = toSignal(inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,
   });
 
   constructor() {
+    toObservable(computed(() => this.query().trim())).subscribe((query) => this.dataService.searchArtBoardItem(query));
+
     const timer = setInterval(() => this.now.set(new Date()), 1000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
 
@@ -170,18 +197,37 @@ export class Home {
     this.router.navigate([], { queryParams: {} });
   }
 
+  search(event: Event): void {
+    this.query.set((event as CustomEvent<{ query: string }>).detail.query);
+  }
+
+  /** A page or a flow opens full screen; a note opens the board, which brings it into view and lights it up. */
+  selectSearchResult(event: Event): void {
+    const id = ((event as CustomEvent<AutocompleteSelectEventDetail>).detail.item as SearchSuggestion).id;
+    const found = this.results().find((item) => item.id === id);
+    this.query.set('');
+    if (!found) {
+      return;
+    }
+    const route = FULL_SCREEN[found.extensionId];
+    if (route) {
+      // An archived one says so before it is read, as when it is opened from the Archive.
+      this.router.navigate([route, id], found.boardId ? {} : { queryParams: { from: 'archive' } });
+      return;
+    }
+    // An archived note comes back to the board, first.
+    if (!found.boardId) {
+      this.dataService.restoreArtBoardItem(found);
+    }
+    this.router.navigate(['/main-board'], { queryParams: { show: id } });
+  }
+
   onKey(event: KeyboardEvent): void {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
-      this.router.navigate(['/main-board'], { queryParams: { search: 1 } });
+      this.searchField()?.nativeElement.focus();
     }
   }
-}
-
-/** Apple keyboards say ⌘ where others say Ctrl. */
-function isApple(): boolean {
-  const agent = navigator as Navigator & { userAgentData?: { platform?: string } };
-  return /mac|iphone|ipad/i.test(agent.userAgentData?.platform || navigator.platform);
 }
 
 /** After the page has settled: the downloads never compete with the first paint. */

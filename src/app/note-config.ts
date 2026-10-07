@@ -29,13 +29,16 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
       screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
     },
     colorIndex: 0,
-    properties: {},
+    // A new note is a sticky note, until a paper is picked for one (latestNotePaper). Notes stored without a pad keep
+    // the notebook they were shown as.
+    properties: { pad: 'sticky' },
   },
   [ExtensionId.Flow]: {
     extensionId: ExtensionId.Flow,
     gridPosition: {
       order: -1,
-      rows: 4,
+      // Room for the flow itself, drawn small under its title.
+      rows: 8,
       screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
     },
     colorIndex: 0,
@@ -54,3 +57,26 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
     properties: {},
   },
 };
+
+/** What a note's paper is made of: its colour, and the pad and ruling picked in the paper picker. */
+export type NotePaper = Pick<ArtBoardItem, 'colorIndex'> & { properties: { pad?: unknown; paper?: unknown } };
+
+/**
+ * The paper of the note whose paper was changed last (pad, ruling or colour, in the paper picker), for a new note to
+ * start on. Writing in a note does not count, and neither does a note's own date, which every layout change moves.
+ * Undefined until a text note has had its paper changed.
+ */
+export function latestNotePaper(notes: readonly ArtBoardItem[]): NotePaper | undefined {
+  let latest: { date: string; note: ArtBoardItem } | undefined;
+  for (const note of notes) {
+    const date = note.properties['paperModifiedDate'];
+    if (note.extensionId === ExtensionId.TextNote && typeof date === 'string' && (!latest || date > latest.date)) {
+      latest = { date, note };
+    }
+  }
+  if (!latest) {
+    return undefined;
+  }
+  const { colorIndex, properties } = latest.note;
+  return { colorIndex, properties: { pad: properties['pad'], paper: properties['paper'] } };
+}

@@ -7,45 +7,170 @@
   border-radius: var(--c2-theme--radius-lg, 8px);
 }
 
-:host(.note--blink) {
-  animation: note-blink 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 3;
+// Picked from the search: a light in the accent colour runs twice around the note's border, 3s a lap, then fades out.
+.note__beam {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: note-beam 6.6s ease-out forwards;
 }
 
-@keyframes note-blink {
-  from,
+.note__beam-light {
+  --c2-border-beam__beam--width: 2px;
+  --c2-border-beam__beam--size: 120px;
+  --c2-border-beam__beam--radius: var(--c2-theme--radius-lg, 8px);
+  --c2-border-beam__beam--color-from: var(--ntm-accent);
+  --c2-border-beam__beam--color-to: color-mix(in srgb, var(--ntm-accent) 30%, white);
+  --c2-border-beam__beam--opacity: 1;
+  --c2-border-beam__beam--filter: drop-shadow(0 0 6px color-mix(in srgb, var(--ntm-accent) 70%, transparent));
+  --c2-border-beam__beam--duration: 3s;
+}
+
+@keyframes note-beam {
+  from {
+    opacity: 0;
+  }
+  8%,
+  85% {
+    opacity: 1;
+  }
   to {
-    box-shadow: none;
+    opacity: 0;
   }
-  33% {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ntm-accent) 50%, transparent);
+}
+
+// The beam does not move with reduced motion (the component hides it): a still ring shows the note instead, then fades.
+@media (prefers-reduced-motion: reduce) {
+  .note__beam {
+    animation-name: note-ring;
   }
-  66% {
-    box-shadow: 0 0 0 2px var(--ntm-accent);
+}
+
+@keyframes note-ring {
+  from,
+  85% {
+    box-shadow: inset 0 0 0 2px var(--ntm-accent);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px transparent;
   }
 }
 
 .note__body {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  // Text wraps, so a note only ever scrolls down: anything decorative that pokes out sideways is clipped, rather than
+  // giving a horizontal scrollbar whose height then forces a vertical one.
+  overflow: hidden auto;
   // The notepad sizes its sheet with a min-height only, so the body is a size container it can fill.
   container-type: size;
 }
 
+// The torn page falls out of the note as it comes off: no scrollbar for it while it does.
+.note__body--tearing {
+  overflow: hidden;
+}
+
 .note__text {
-  // 12px is the pad's own space above the sheet.
-  --c2-notepad__sheet--min-height: calc(100cqh - 12px);
-  --c2-notepad__spiral--display: none;
-  --c2-notepad__top--padding-top: 8px;
-  --c2-notepad__margin--inset: 32px;
+  // The notepad gives its writing area the sheet's min-height less a 26px top, but the actions button makes the top
+  // taller: zero that and size the sheet itself instead, so it fills the body whatever its top.
+  --c2-notepad__sheet--min-height: 26px;
+  // The placeholder in the page's own ink, faded, so it never reads as written text on any paper colour.
+  --c2-notepad__placeholder--color: color-mix(in srgb, currentColor 40%, transparent);
+  // Every sheet stands straight but a sticky note's, which leans a little (note-card.ts): a full tilt would poke out
+  // of the tile and make it scroll.
+  --c2-notepad__sheet--rotate: 0deg;
+  // No focus ring around the sheet: the tile would clip it to a stray line above the binding, and the caret already
+  // shows where the writer is.
+  --c2-notepad__focus--outline: none;
+  // A tear-off note shows its page alone: the sheets drawn under it would be clipped by the tile into a stray wedge,
+  // and the perforation and the Tear off button already say it tears.
+  --c2-notepad__stack--display: none;
+  --c2-notepad__pad--padding-bottom: 0px;
   // The Paper button and the actions button show only on the note being pointed at or written in (on a touch screen,
   // once tapped), so the board stays calm.
   --c2-notepad__controls--opacity: 0;
 }
 
+// Dark papers: the theme's coloured papers are bright enough there that the ink, and the caret, which is drawn in it,
+// fell to 2.5–3.5:1. A deeper paper (22% of its hue) and the plain text colour as ink keep every one above 5:1, and
+// deep highlighters keep highlighted text readable.
+:host-context([data-theme='dark']) .note__text {
+  --c2-notepad__writing--color: var(--c2-theme--color-on-surface);
+  --c2-notepad__paper-yellow--background: color-mix(in srgb, #f5d547 22%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-green--background: color-mix(in srgb, #bddcb2 22%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-blue--background: color-mix(in srgb, #b8ceee 22%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-pink--background: color-mix(in srgb, #f4b8c3 22%, var(--c2-theme--color-surface));
+  --c2-notepad__pad-legal--background: color-mix(in srgb, #f5d547 22%, var(--c2-theme--color-surface));
+  --c2-notepad__pad-sticky--background: color-mix(in srgb, #ffd23f 22%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-yellow--color: var(--c2-theme--color-on-surface);
+  --c2-notepad__paper-green--color: var(--c2-theme--color-on-surface);
+  --c2-notepad__paper-blue--color: var(--c2-theme--color-on-surface);
+  --c2-notepad__paper-pink--color: var(--c2-theme--color-on-surface);
+  // Highlighters as deep markers: the light text keeps 4.5:1 on them over every dark paper, where the bright light-mode
+  // ones fell under 3:1.
+  --c2-notepad__highlight-yellow--background: rgb(122 94 0 / 60%);
+  --c2-notepad__highlight-green--background: rgb(40 107 51 / 60%);
+  --c2-notepad__highlight-pink--background: rgb(154 58 98 / 60%);
+}
+
+// The sheet fills the body, less the room the notepad keeps above it for a spiral (12px on a notebook, none on the
+// other pads, which then line up with the cards beside them) and below it for the sheets of a tear-off pad.
+.note__text::part(sheet) {
+  min-height: calc(100cqh - var(--c2-notepad__pad--padding-top, 12px) - var(--c2-notepad__pad--padding-bottom, 0px));
+}
+
+// A sticky note leans by 1–1.5deg: its sheet sits 8px inside the tile, room for the corners of a tile up to ~600px wide.
+.note__text[pad='sticky']::part(sheet) {
+  min-height: calc(100cqh - 16px);
+  margin: 8px;
+}
+
+// A tile is smaller than a page of paper: the notebook and the legal pad come in tighter. The top keeps the controls row
+// just clear of the spiral, which reaches 14px into the sheet. Each pad sets these inside the notepad, which a value set
+// here would override for every pad: the sticky note and the index card keep their own.
+.note__text:not([pad]),
+.note__text[pad='notebook'] {
+  --c2-notepad__top--padding-top: 14px;
+  --c2-notepad__margin--inset: 40px;
+}
+
+.note__text[pad='legal'] {
+  --c2-notepad__margin--inset: 44px;
+}
+
+// A legal pad glues its top binding above the sheet: 18px less the 3px it overlaps the sheet by. Leave room for it, or
+// the note scrolls.
+.note__text[pad='legal']::part(sheet) {
+  min-height: calc(
+    100cqh - var(--c2-notepad__pad--padding-top, 12px) - var(--c2-notepad__pad--padding-bottom, 0px) - 15px
+  );
+}
+
 .note__actions {
-  --c2-icon-button__icon--width: 16px;
-  --c2-icon-button__icon--height: 16px;
+  // A shade above the Paper button's 12px icon.
+  --c2-icon-button__icon--width: 14px;
+  --c2-icon-button__icon--height: 14px;
+  // A small hover and press circle, in proportion to the row's Paper button rather than the default 48px.
+  --c2-icon-button__state-layer--size: 28px;
   --c2-icon-button__icon--color: var(--ntm-muted);
   --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
+}
+
+// The move button drags the tile: a grab hand (the icon button's own button shows a pointer), and a touch drag must
+// move it rather than scroll the board.
+.note__move {
+  touch-action: none;
+}
+
+.note__move::part(button) {
+  cursor: grab;
+}
+
+// The unpin button of a pinned note: the pin in the accent colour, pressed in.
+.note__unpin {
+  --c2-icon-button__icon--color: var(--ntm-accent);
+  --c2-icon-button__icon__hover--color: var(--ntm-accent);
 }

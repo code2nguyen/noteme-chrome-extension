@@ -66,7 +66,23 @@ function setUp(records: Record<string, unknown>) {
   return { actions, effects, records };
 }
 
+/** Back on the board: when it came back is recorded, and when it was archived is forgotten. */
+const restored = (item: ArtBoardItem): ArtBoardItem => ({ ...item, restoredDate: expect.any(String) });
+
 describe('ArtBoardItemEffects', () => {
+  it('records when a note is archived, and forgets it when the note comes back', async () => {
+    const { actions, effects, records } = setUp({
+      [artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]: [],
+      [artBoardItemKey('back')]: { ...note('back', 5), archivedDate: '2026-09-01T10:00:00.000Z' },
+    });
+    const shown = firstValueFrom(effects.showArtBoardItem$);
+    actions.next(ArtBoardItemActions.showArtBoardItem({ boardId: DEFAULT_BOARD_ID, artBoardItemId: 'back' }));
+    await shown;
+    const stored = records[artBoardItemKey('back')] as ArtBoardItem;
+    expect(stored.archivedDate).toBeUndefined();
+    expect(stored.restoredDate).toEqual(expect.any(String));
+  });
+
   it('restores two notes at once: both stay on the board, first, in the order they were restored', async () => {
     const { actions, effects, records } = setUp({
       [artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]: ['kept'],
@@ -81,8 +97,8 @@ describe('ArtBoardItemEffects', () => {
 
     // What the store is given: each on the board, first, the second before the first.
     expect(await shown).toEqual([
-      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: shownItem('a', 3) }),
-      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: shownItem('b', 2) }),
+      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: restored(shownItem('a', 3)) }),
+      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: restored(shownItem('b', 2)) }),
     ]);
 
     expect(records[artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]).toEqual(['kept', 'a', 'b']);
@@ -105,12 +121,18 @@ describe('ArtBoardItemEffects', () => {
 
     expect(await hidden).toEqual(
       ArtBoardItemApiActions.hideArtBoardItemSuccess({
-        artBoardItem: { ...note('gone', 1), boardId: undefined, silent: false, sourceId: 'tab' },
+        artBoardItem: {
+          ...note('gone', 1),
+          boardId: undefined,
+          archivedDate: expect.any(String),
+          silent: false,
+          sourceId: 'tab',
+        },
       }),
     );
     // Before the card left on the board.
     expect(await shown).toEqual(
-      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: shownItem('back', -1) }),
+      ArtBoardItemApiActions.showArtBoardItemSuccess({ artBoardItem: restored(shownItem('back', -1)) }),
     );
 
     expect(records[artBoardArtBoardItemIdsKey(DEFAULT_BOARD_ID)]).toEqual(['kept', 'back']);

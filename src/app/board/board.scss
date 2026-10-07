@@ -12,8 +12,13 @@
   gap: 16px;
   min-height: 72px;
   padding: 0 16px;
-  background: var(--c2-theme--color-surface);
+  background: var(--ntm-canvas);
   transition: box-shadow 0.3s ease;
+  // The header's icons are all 16px (settings, synchronize again, synchronized, New), each icon button in a hover
+  // circle no taller than the New button.
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+  --c2-icon-button__state-layer--size: 36px;
 }
 
 .navbar--raised {
@@ -33,6 +38,8 @@
 
 .navbar__views {
   flex: none;
+  --c2-button__icon--size: 14px;
+  --c2-button__container--gap: 6px;
 }
 
 .navbar__link {
@@ -40,8 +47,12 @@
   border-radius: 999px;
   color: inherit;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
   font-size: 15px;
+  --c2-feather-icon--size: 16px;
 
   &:hover {
     background: var(--c2-theme--color-surface-container);
@@ -49,15 +60,38 @@
 }
 
 .navbar__search {
+  position: relative;
+  display: flex;
+  align-items: center;
   flex: 1;
   min-width: 180px;
   max-width: 650px;
-  --c2-autocomplete__panel--max-height: 40vh;
 }
 
-.navbar__searching,
-.navbar__sync-spinner {
-  --c2-spinner--size: 18px;
+.navbar__search-field {
+  flex: 1;
+  // Shrinks with the header on a phone rather than pushing it past the screen.
+  min-width: 0;
+  --c2-autocomplete__panel--max-height: 40vh;
+  // Dim, like the shortcut beside it: a hint, not text.
+  --c2-autocomplete__placeholder--color: color-mix(in srgb, var(--c2-theme--color-on-surface) 55%, transparent);
+}
+
+.navbar__search-key {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  --c2-kbd--height: 22px;
+  --c2-kbd--background-color: transparent;
+  --c2-kbd--color: color-mix(in srgb, var(--c2-theme--color-on-surface) 55%, transparent);
+  --c2-kbd--border: 1px solid var(--ntm-line);
+  --c2-kbd--border-radius: 6px;
+  --c2-kbd--font-size: 11px;
+  --c2-kbd--letter-spacing: 0.06em;
+}
+
+.navbar__searching {
+  --c2-spinner--size: 16px;
   --c2-spinner--stroke-width: 2px;
   --c2-spinner--color: var(--ntm-accent);
 }
@@ -69,22 +103,11 @@
 
 .navbar__new-button {
   --c2-button__container--border-radius: 999px;
+  --c2-button__icon--size: 16px;
 }
 
 .navbar__spacer {
   flex: 1;
-}
-
-.navbar__sync {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-}
-
-.navbar__synced {
-  --c2-feather-icon--size: 20px;
-  --c2-feather-icon--color: var(--ntm-muted);
 }
 
 .navbar__logo {
@@ -96,10 +119,27 @@
   padding: 8px 16px 32px;
 }
 
+// The Archive's list and preview reach the edges and the bottom of the screen.
+.board--archive {
+  padding: 0;
+}
+
+// The empty board and archive: a spot illustration and a line of help, in the middle of the screen below the bar
+// (72px) and the board's padding (40px), with no box of its own.
 .board__empty {
-  margin: 64px 0;
-  text-align: center;
-  color: var(--ntm-muted);
+  --c2-status-panel__container--min-height: calc(100dvh - 112px);
+  --c2-status-panel__container--padding: 24px;
+  --c2-status-panel__container--gap: 20px;
+  --c2-status-panel__container--max-width: 100%;
+  --c2-status-panel__illustration--size: 140px;
+  --c2-status-panel__title--font-size: 18px;
+  --c2-status-panel__title--line-height: 26px;
+  --c2-status-panel__description--color: var(--ntm-muted);
+}
+
+.board__empty-action {
+  --c2-button__container--border-radius: 999px;
+  --c2-button__icon--size: 16px;
 }
 
 .board__grid {
@@ -108,14 +148,43 @@
   --c2-masonry-item--border-radius: var(--c2-theme--radius-lg, 8px);
 }
 
-// While arranging, outline every card and keep its move handle visible, so the mode is obvious.
-.board__grid--arranging {
-  --c2-masonry-item--border: 1px dashed var(--ntm-accent);
+// Cards on the Notes view always move and resize: a card shows its move handle when pointed at. Its resize edges stay
+// unmarked (the right and bottom edges still resize; the cursor changes over them).
+.board__grid {
   --c2-masonry-item__handle--background: var(--c2-theme--color-surface-container, #3d4046);
   --c2-masonry-item__handle--color: var(--ntm-accent);
+  --c2-masonry-item__resize-edge__hover--color: transparent;
 }
 
-// Phones: the Notes | Archive switch, the search and the Arrange button get a row of their own, so nothing
+// A flow keeps the built-in handle, in the top left corner. A note has its own move button among its actions, and a
+// page in the tile's top-right corner, before its menu.
+.board__grid c2-masonry-item::part(move-handle) {
+  right: auto;
+  left: var(--c2-masonry-item__controls--gap, 4px);
+}
+
+// A page's move button and menu, the size of a note's.
+.board__tile-action {
+  --c2-icon-button__icon--width: 14px;
+  --c2-icon-button__icon--height: 14px;
+  --c2-icon-button__state-layer--size: 28px;
+  --c2-icon-button__icon--color: var(--ntm-muted);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
+}
+
+.board__grid {
+  --c2-masonry-item__actions--gap: 0px;
+}
+
+.board__tile-move {
+  touch-action: none;
+}
+
+.board__tile-move::part(button) {
+  cursor: grab;
+}
+
+// Phones: the Notes | Archive switch and the search get a row of their own, so nothing
 // scrolls sideways.
 @media (max-width: 640px) {
   .navbar {
@@ -125,8 +194,7 @@
   }
 
   .navbar__views,
-  .navbar__search,
-  .navbar__arrange {
+  .navbar__search {
     order: 2;
   }
 
@@ -146,4 +214,234 @@
   .board {
     padding: 8px 12px 24px;
   }
+}
+
+// Older notes: the header button that opens the sheet, quieter than New.
+.navbar__older {
+  flex: none;
+  --c2-button__container--height: 36px;
+  --c2-button__container--padding-left: 14px;
+  --c2-button__container--padding-right: 10px;
+  --c2-button__container--gap: 8px;
+  --c2-button__container--border-radius: 999px;
+  --c2-button__container--border: 1px solid var(--ntm-line);
+  --c2-button__container--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-button__container--color: var(--c2-theme--color-on-surface);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__container__active--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__icon--size: 16px;
+}
+
+.navbar__older-count {
+  --c2-badge--height: 18px;
+  --c2-badge--font-size: 11px;
+  --c2-badge__neutral--background: var(--ntm-line);
+  --c2-badge__neutral--color: var(--c2-theme--color-on-surface);
+}
+
+// A pinned card's push-pin, in its top-left corner, over the card. The tile is positioned; the pin is its own child.
+.board__pin {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  z-index: 4;
+  display: grid;
+  color: var(--ntm-accent);
+  // Pressed in at an angle, as a pin is, with a little shadow to lift it off the paper.
+  rotate: -20deg;
+  filter: drop-shadow(1px 2px 1px rgb(0 0 0 / 40%));
+  pointer-events: none;
+  --c2-phosphor-icon--size: 17px;
+}
+
+// A pinned card's unpin button, among its actions: the pin in the accent colour, pressed in.
+.board__tile-unpin {
+  --c2-icon-button__icon--color: var(--ntm-accent);
+  --c2-icon-button__icon__hover--color: var(--ntm-accent);
+}
+
+// The Older notes sheet.
+.older {
+  --c2-sheet--size: min(460px, 100vw);
+  --c2-sheet__body--padding-top: 4px;
+  --c2-sheet__body--padding-right: 16px;
+  --c2-sheet__body--padding-left: 16px;
+}
+
+.older__count {
+  color: var(--ntm-muted);
+  font-weight: 500;
+}
+
+.older__intro {
+  margin: 0 8px 12px;
+  color: var(--ntm-muted);
+  font-size: 13px;
+}
+
+.older__kinds {
+  display: flex;
+  margin: 0 8px 10px;
+  width: fit-content;
+}
+
+.older__filter {
+  display: block;
+  margin: 0 8px 4px;
+}
+
+.older__month {
+  margin: 18px 8px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ntm-muted);
+}
+
+// One framed list per month: the accordion draws the frame and the lines between notes; the open one is tinted.
+.older__list {
+  --c2-accordion--border-color: var(--ntm-line);
+  --c2-accordion--border-radius: 10px;
+}
+
+.older__note {
+  --c2-details--background: transparent;
+  --c2-details__header--padding-top: 8px;
+  --c2-details__header--padding-bottom: 8px;
+  --c2-details__header--padding-left: 10px;
+  --c2-details__header--padding-right: 10px;
+  --c2-details__header--gap: 8px;
+  --c2-details__header__icon--width: 16px;
+  --c2-details__header__icon--height: 16px;
+  --c2-details__header__hover--background: var(--c2-theme--color-surface-container-low);
+  --c2-details__content--padding-left: 10px;
+  --c2-details__content--padding-right: 10px;
+  --c2-details__content--padding-bottom: 12px;
+}
+
+.older__note--open {
+  --c2-details--background: var(--c2-theme--color-surface-container-low);
+}
+
+// Fills the title, which is a flex row, so the date sits at its end, by the chevron.
+.older__summary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.older__kind {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--c2-theme--color-surface-container);
+  color: var(--c2-theme--color-on-surface);
+  --c2-feather-icon--size: 14px;
+}
+
+// A quick note on its paper's colour, as on the board.
+.older__kind[data-kind='Note'] {
+  background: color-mix(in srgb, #ffd23f 22%, var(--c2-theme--color-surface));
+}
+
+.older__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.older__date {
+  flex: none;
+  color: var(--ntm-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.older__paper {
+  display: block;
+  max-height: 320px;
+  overflow: hidden auto;
+  --c2-notepad__sheet--min-height: 0px;
+  --c2-notepad__sheet--rotate: 0deg;
+  --c2-notepad__stack--display: none;
+  --c2-notepad__focus--outline: none;
+}
+
+.older__excerpt {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--c2-theme--color-surface-container);
+  color: var(--c2-theme--color-on-surface);
+  line-height: 1.5;
+}
+
+.older__meta {
+  margin: 10px 2px;
+  color: var(--ntm-muted);
+  font-size: 12px;
+}
+
+.older__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.older__pin {
+  --c2-button__container--height: 32px;
+  --c2-button__container--padding-left: 12px;
+  --c2-button__container--padding-right: 14px;
+  --c2-button__container--gap: 6px;
+  --c2-button__container--border-radius: 999px;
+  --c2-button__icon--size: 14px;
+}
+
+.older__secondary {
+  --c2-button__container--height: 32px;
+  --c2-button__container--padding-left: 12px;
+  --c2-button__container--padding-right: 12px;
+  --c2-button__container--gap: 6px;
+  --c2-button__container--border-radius: 999px;
+  --c2-button__container--border: 1px solid var(--ntm-line);
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__container__active--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__icon--size: 14px;
+}
+
+.older__more {
+  margin-left: auto;
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+  --c2-icon-button__state-layer--size: 32px;
+  --c2-icon-button__icon--color: var(--ntm-muted);
+}
+
+.older__none {
+  margin: 24px 8px;
+  color: var(--ntm-muted);
+}
+
+// The pin message: on the surface, its Undo in the accent colour.
+.board__toasts {
+  --c2-toast-region__container--width: auto;
+  --c2-toast__container--background: var(--c2-theme--color-surface-container);
+  --c2-toast__container--border: 1px solid var(--ntm-line);
+  --c2-toast__container--box-shadow: 0 12px 32px rgb(0 0 0 / 35%);
+  --c2-toast__action--color: var(--ntm-accent);
+  --c2-toast__action--font-weight: 600;
+  --c2-toast__progress--color: var(--ntm-accent);
+  --c2-toast__progress--background: color-mix(in srgb, var(--ntm-accent) 20%, transparent);
 }

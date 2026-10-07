@@ -1,0 +1,196 @@
+<ng-template #list>
+  <div class="archive__tools">
+    <c2-checkbox
+      class="archive__all"
+      aria-label="Select every note listed"
+      [checked]="allChecked()"
+      [indeterminate]="checkedNotes().length > 0 && !allChecked()"
+      (change)="toggleAll($event)"
+    ></c2-checkbox>
+    <c2-button-group
+      class="archive__kinds"
+      selection="single"
+      appearance="segmented"
+      size="s"
+      aria-label="Kind of note"
+      [value]="kind()"
+      (change)="onKind($event)"
+    >
+      <c2-button value="all">All · {{ notes().length }}</c2-button>
+      <c2-button value="Note">Notes · {{ counts().Note }}</c2-button>
+      <c2-button value="Page">Pages · {{ counts().Page }}</c2-button>
+      <c2-button value="Flow">Flows · {{ counts().Flow }}</c2-button>
+    </c2-button-group>
+    <c2-menu class="archive__sort" placement="bottom-end" aria-label="Sort by" (menu-select)="onSort($event)">
+      <c2-button slot="trigger" class="archive__sort-button">
+        {{ sortLabels[sort()] }}
+        <c2-feather-chevron-down slot="suffix-icon"></c2-feather-chevron-down>
+      </c2-button>
+      @for (option of sorts; track option) {
+        <c2-menu-item type="radio" name="sort" [value]="option" [checked]="sort() === option">{{
+          sortLabels[option]
+        }}</c2-menu-item>
+      }
+    </c2-menu>
+  </div>
+
+  @if (shown().length === 0) {
+    <p class="archive__none">No archived {{ kind() === 'all' ? 'note' : kind().toLowerCase() }} here.</p>
+  } @else {
+    <c2-list
+      class="archive__list"
+      aria-label="Archived notes"
+      required
+      [value]="preview() ? [preview()!.id] : []"
+      (selection-change)="onPick($event)"
+    >
+      @for (group of groups(); track group.label) {
+        @if (group.label) {
+          <h6>{{ group.label }}</h6>
+        }
+        @for (note of group.items; track note.id) {
+          <c2-list-item class="archive__row" [value]="note.id" (click)="onRowClick(note.id, $event)">
+            <c2-checkbox
+              slot="prefix-icon"
+              [attr.aria-label]="'Select ' + note.label"
+              [checked]="checked().has(note.id)"
+              (change)="toggle(note.id, $event)"
+            ></c2-checkbox>
+            <span
+              slot="prefix-icon"
+              class="archive__kind"
+              [attr.data-kind]="note.kind"
+              [attr.data-paper]="note.kind === 'Note' ? paperColor(note.item) : null"
+            >
+              @switch (note.kind) {
+                @case ('Page') {
+                  <c2-feather-file-text></c2-feather-file-text>
+                }
+                @case ('Flow') {
+                  <c2-feather-share-2></c2-feather-share-2>
+                }
+                @default {
+                  <c2-feather-edit-3></c2-feather-edit-3>
+                }
+              }
+            </span>
+            <span class="archive__label">{{ note.label }}</span>
+            <span slot="description" class="archive__excerpt">{{ note.excerpt || '—' }}</span>
+            <span slot="suffix-icon" class="archive__date">{{
+              shortDate(sort() === 'edited' ? note.edited : note.archived)
+            }}</span>
+          </c2-list-item>
+        }
+      }
+    </c2-list>
+  }
+
+  @if (checkedNotes().length > 0) {
+    <div class="archive__bulk" role="toolbar" aria-label="Selected notes">
+      <span class="archive__bulk-count">{{ checkedNotes().length }} selected</span>
+      <c2-button class="archive__restore" (click)="restoreNotes(checkedNotes())">
+        <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+        Restore
+      </c2-button>
+      <c2-button class="archive__delete" (click)="askRemove(checkedNotes())">
+        <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+        Delete
+      </c2-button>
+      <c2-icon-button aria-label="Clear the selection" tooltip="Clear" (click)="clearChecked()">
+        <c2-feather-x></c2-feather-x>
+      </c2-icon-button>
+    </div>
+  }
+</ng-template>
+
+<ng-template #previewPane let-note>
+  <article class="archive__preview" [attr.aria-label]="note.label">
+    <header class="archive__preview-head">
+      <span
+        class="archive__kind"
+        [attr.data-kind]="note.kind"
+        [attr.data-paper]="note.kind === 'Note' ? paperColor(note.item) : null"
+      >
+        @switch (note.kind) {
+          @case ('Page') {
+            <c2-feather-file-text></c2-feather-file-text>
+          }
+          @case ('Flow') {
+            <c2-feather-share-2></c2-feather-share-2>
+          }
+          @default {
+            <c2-feather-edit-3></c2-feather-edit-3>
+          }
+        }
+      </span>
+      <h2 class="archive__title" [attr.title]="note.label">{{ note.label }}</h2>
+    </header>
+    <p class="archive__meta">
+      {{ note.kind }} · edited {{ edited(note.edited) }} · archived {{ shortDate(note.archived) }}
+    </p>
+    @if (note.kind === 'Note') {
+      <c2-notepad
+        class="archive__paper"
+        readonly
+        [attr.aria-label]="note.label"
+        [attr.pad]="note.item.properties['pad'] ?? 'notebook'"
+        [attr.paper]="note.item.properties['paper'] ?? 'lined'"
+        [attr.paper-color]="paperColor(note.item)"
+        [value]="markdown(note.id)"
+      ></c2-notepad>
+    } @else {
+      <div class="archive__doc">
+        @for (line of lines(note.id); track $index) {
+          <p>{{ line }}</p>
+        } @empty {
+          <p class="archive__empty-doc">Nothing written yet.</p>
+        }
+      </div>
+    }
+    <div class="archive__actions">
+      <c2-button class="archive__restore" (click)="restoreNotes([note])">
+        <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+        Restore to the board
+      </c2-button>
+      @if (note.kind !== 'Note') {
+        <c2-button class="archive__secondary" (click)="open.emit(note.item)">Open</c2-button>
+      }
+      <c2-button class="archive__delete" (click)="askRemove([note])">
+        <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+        Delete forever
+      </c2-button>
+    </div>
+  </article>
+</ng-template>
+
+@if (narrow()) {
+  <section class="archive archive--narrow" aria-label="Archive">
+    <ng-container *ngTemplateOutlet="list"></ng-container>
+  </section>
+  <c2-sheet class="archive__sheet" side="bottom" [open]="previewOpen() && !!preview()" (close)="previewOpen.set(false)">
+    <span slot="title">{{ preview()?.kind ?? 'Note' }}</span>
+    @if (preview(); as note) {
+      <ng-container *ngTemplateOutlet="previewPane; context: { $implicit: note }"></ng-container>
+    }
+  </c2-sheet>
+} @else {
+  <c2-split-panel class="archive" position="42" min="28" max="62" primary="start" label="Resize the list">
+    <section slot="start" class="archive__side" aria-label="Archive">
+      <ng-container *ngTemplateOutlet="list"></ng-container>
+    </section>
+    <div slot="end" class="archive__main">
+      @if (preview(); as note) {
+        <ng-container *ngTemplateOutlet="previewPane; context: { $implicit: note }"></ng-container>
+      }
+    </div>
+  </c2-split-panel>
+}
+
+<c2-modal class="archive__confirm" [open]="!!confirming()" (close)="confirming.set(null)">
+  @if (confirming(); as items) {
+    <span slot="title">{{ confirmText(items) }}</span>
+    <p>{{ items.length === 1 ? 'It' : 'They' }} can’t be brought back.</p>
+    <c2-button slot="footer" class="archive__secondary" (click)="confirming.set(null)">Cancel</c2-button>
+    <c2-button slot="footer" class="archive__confirm-delete" (click)="confirmRemove()">Delete forever</c2-button>
+  }
+</c2-modal>

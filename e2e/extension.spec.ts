@@ -204,9 +204,10 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
   await expect
     .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
     .toBe('Synced across devices');
-  await expect(page.getByRole('button', { name: 'Synchronize again' })).toBeVisible({ timeout: 10_000 });
+  // Sync has no indicator: nothing to see on the board.
+  await expect(page.getByRole('button', { name: 'Synchronize again' })).toHaveCount(0);
 
-  // A note written by another device, then a manual re-sync.
+  // A note written by another device, pulled in when the tab comes back into view.
   await seed(page, 'sync', {
     ART_BOARD_ITEM__remote: {
       id: 'remote',
@@ -227,7 +228,7 @@ test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ 
       sourceId: 'other-device',
     },
   });
-  await page.getByRole('button', { name: 'Synchronize again' }).click();
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   await expect(page.locator('ntm-note-card')).toHaveCount(2);
   await expect(page.locator('c2-notepad .ProseMirror', { hasText: 'Written on my laptop' })).toBeVisible();
   await shot(page, '12-extension-synced');

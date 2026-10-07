@@ -17,6 +17,7 @@ import type { Notepad, NotepadPaperChangeEventDetail } from '@c2n/components/not
 import { filter } from 'rxjs/operators';
 
 import { colorIndexFor, paperColorFor } from '../note-config';
+import { getCurrentDate } from '../services/utils';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { ArtBoardItem } from '../store/models';
@@ -48,20 +49,41 @@ export class NoteCard {
   readonly item = input.required<ArtBoardItem>();
   /** Shown in the Archive view: the menu restores the note instead of archiving it. */
   readonly archived = input(false);
+  /** Pinned: it stays on the board, first, until unpinned. */
+  readonly pinned = input(false);
   /** Focus the editor once it is rendered (a note that was just created). */
   readonly autofocus = input(false);
 
   readonly archive = output<void>();
   readonly restore = output<void>();
   readonly remove = output<void>();
+  readonly pin = output<void>();
+  readonly unpin = output<void>();
 
   readonly value = signal('');
   readonly blinking = signal(false);
+  /** A page is being torn off: its copy falls out of the note while it animates. */
+  readonly tearing = signal(false);
 
   private readonly itemId = computed(() => this.item().id);
   readonly paperColor = computed(() => paperColorFor(this.item().colorIndex));
   readonly pad = computed(() => (this.item().properties['pad'] as string | undefined) ?? 'notebook');
   readonly paper = computed(() => (this.item().properties['paper'] as string | undefined) ?? 'lined');
+  /**
+   * A sticky note leans by 1–1.5deg either way, the same each time for a note (picked from its id), and less than the
+   * notepad's own 1–4deg, which would not fit its tile. Other pads stand straight.
+   */
+  readonly tilt = computed(() => {
+    if (this.pad() !== 'sticky') {
+      return null;
+    }
+    let hash = 0;
+    for (const char of this.item().id) {
+      hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+    }
+    const degrees = 1 + (hash % 101) / 200;
+    return `${hash & 0x10000 ? -degrees : degrees}deg`;
+  });
   constructor() {
     // Bind the stored data once, then only apply changes made elsewhere (another tab or device): re-applying our
     // own saves would move the caret while the user types.
@@ -103,21 +125,35 @@ export class NoteCard {
     }
   }
 
-  /** Scroll the note into view and blink its outline, after picking it from the search results. */
+  /** Scroll the note into view and run a light around its border, after picking it from the search results. */
   highlight(): void {
     this.host.nativeElement.closest('c2-masonry-item')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     this.blinking.set(true);
   }
 
+  /** The beam has faded out (or, with reduced motion, the still ring has): the highlight is over. */
   onAnimationEnd(event: AnimationEvent): void {
-    if (event.target === this.host.nativeElement) {
+    // By its element: Angular scopes the keyframes' names to the component.
+    if ((event.target as Element).classList.contains('note__beam')) {
       this.blinking.set(false);
     }
   }
 
+  /** Each edit, and a torn-off page, which clears the notepad with a `change` but no `input`. */
   onTextInput(event: Event): void {
     const value = (event.target as Notepad).value;
     this.dataService.updateDataItem({ id: this.item().id, data: value, dataType: DataType.MARKDOWN });
+  }
+
+  /** Hide the note's overflow until the torn page's animation is over (none under reduced motion). */
+  onPageTear(event: Event): void {
+    const notepad = event.target as Notepad;
+    this.tearing.set(true);
+    // The torn copy and its animation start right after page-tear.
+    requestAnimationFrame(async () => {
+      await Promise.allSettled((notepad.shadowRoot?.getAnimations() ?? []).map((animation) => animation.finished));
+      this.tearing.set(false);
+    });
   }
 
   /** The paper picker sets pad, ruling and colour together; the colour keeps living in `colorIndex` as in 2.x. */
@@ -127,7 +163,8 @@ export class NoteCard {
     this.dataService.updateArtBoardItem({
       ...item,
       colorIndex: colorIndexFor(paperColor),
-      properties: { ...item.properties, pad, paper },
+      // Dated apart from the note, whose date every layout change moves: a new note starts on the paper picked last.
+      properties: { ...item.properties, pad, paper, paperModifiedDate: getCurrentDate() },
     });
   }
 
@@ -139,6 +176,10 @@ export class NoteCard {
       this.restore.emit();
     } else if (value === 'delete') {
       this.remove.emit();
+    } else if (value === 'pin') {
+      this.pin.emit();
+    } else if (value === 'unpin') {
+      this.unpin.emit();
     }
   }
 }

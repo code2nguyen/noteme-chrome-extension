@@ -2,10 +2,15 @@
 // register their own elements when they load (board-elements.ts, settings-elements.ts, page-view.ts,
 // flow-view.ts, plan-view.ts), so a new tab only loads what Home renders. Imported before bootstrap so Angular's
 // first property binding lands on an upgraded element rather than on an unknown tag.
+import '@c2n/components/autocomplete';
 import '@c2n/components/button';
 import '@c2n/components/icon-button';
+import '@c2n/components/kbd';
 import '@c2n/components/tooltip';
 
+import '@c2n/feather-icons/icons/calendar.js';
+import '@c2n/feather-icons/icons/edit-3.js';
+import '@c2n/feather-icons/icons/layout.js';
 import '@c2n/feather-icons/icons/plus.js';
 import '@c2n/feather-icons/icons/search.js';
 import '@c2n/feather-icons/icons/settings.js';

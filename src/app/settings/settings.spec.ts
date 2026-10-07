@@ -15,6 +15,13 @@ describe('parseSettings', () => {
     expect(parseSettings({ photoChange: 'weekly' }).photoChange).toBe(DEFAULT_SETTINGS.photoChange);
   });
 
+  it('keeps the features switched on, known ones only, none included', () => {
+    expect(parseSettings({}).features).toEqual([]);
+    expect(parseSettings({ features: [] }).features).toEqual([]);
+    expect(parseSettings({ features: ['plan', 'teleport'] }).features).toEqual(['plan']);
+    expect(parseSettings({ features: 'plan' }).features).toEqual([]);
+  });
+
   it('keeps valid values and drops bad or unknown ones', () => {
     const parsed = parseSettings({ theme: 'dark', clock: '13h', quote: false, shortcuts: 'yes', extra: 1 });
     expect(parsed).toEqual({ ...DEFAULT_SETTINGS, theme: 'dark', quote: false });

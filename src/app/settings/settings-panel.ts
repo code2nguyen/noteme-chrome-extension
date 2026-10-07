@@ -1,11 +1,19 @@
-import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  CUSTOM_ELEMENTS_SCHEMA,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import './settings-elements';
 import type { Select } from '@c2n/components/select';
 import type { Switch } from '@c2n/components/switch';
 import { PHOTO_THEMES, PhotoTheme } from '../home/background';
 import type { ShownPhoto } from '../home/background.service';
 import { TopSitesService } from '../home/top-sites.service';
-import { formatDate, Settings } from './settings';
+import { Feature, FEATURES, formatDate, hasFeature, Settings } from './settings';
 import { SettingsService } from './settings.service';
 
 /**
@@ -31,6 +39,8 @@ export class SettingsPanel {
   readonly settings = this.service.settings;
   readonly shortcutsSupported = this.topSites.supported;
   readonly themes = PHOTO_THEMES;
+  readonly features = FEATURES;
+  readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
   /** Each date format, shown with today's date. */
   readonly dateFormats = (['long', 'short', 'numeric'] as const).map((format) => ({
     format,
@@ -60,6 +70,11 @@ export class SettingsPanel {
       return;
     }
     this.service.update({ photoThemes: themes });
+  }
+
+  /** Any number of features, none included. */
+  chooseFeatures(event: Event): void {
+    this.service.update({ features: (event.target as Select).value as Feature[] });
   }
 
   toggle(key: 'quote' | 'photos', event: Event): void {

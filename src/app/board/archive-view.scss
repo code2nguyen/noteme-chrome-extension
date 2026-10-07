@@ -1,0 +1,341 @@
+:host {
+  display: block;
+}
+
+// The list beside the preview, under the bar (72px), each scrolling on its own.
+.archive {
+  display: block;
+  height: calc(100dvh - 72px);
+  --c2-split-panel__divider--background: var(--ntm-line);
+  --c2-split-panel__divider--opacity: 1;
+  --c2-split-panel__divider__hover--background: var(--ntm-muted);
+  --c2-split-panel__divider__active--background: var(--ntm-accent);
+  --c2-split-panel__divider__focus--background: var(--ntm-accent);
+  --c2-split-panel__handle--background: var(--c2-theme--color-surface-container);
+  --c2-split-panel__handle--border: 1px solid var(--ntm-line);
+  --c2-split-panel__handle--color: var(--ntm-muted);
+}
+
+.archive--narrow {
+  height: auto;
+}
+
+.archive__side {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// The list's checkboxes: an outline drawn from the text colour, so it shows on the tinted row of the preview too.
+.archive__side,
+.archive--narrow {
+  --c2-checkbox__container--border-top: 1.5px solid var(--_checkbox-line);
+  --c2-checkbox__container--border-right: 1.5px solid var(--_checkbox-line);
+  --c2-checkbox__container--border-bottom: 1.5px solid var(--_checkbox-line);
+  --c2-checkbox__container--border-left: 1.5px solid var(--_checkbox-line);
+  --c2-checkbox__container__selected--background-color: var(--ntm-accent);
+  --c2-checkbox__checkmark--color: var(--c2-theme--color-on-primary);
+  --c2-checkbox__mixedmark--color: var(--c2-theme--color-on-primary);
+  --c2-checkbox__container__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 50%, transparent);
+  --_checkbox-line: color-mix(in srgb, var(--c2-theme--color-on-surface) 45%, transparent);
+}
+
+.archive__main {
+  padding: 24px clamp(20px, 4vw, 48px) 40px;
+}
+
+.archive__tools {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 16px 10px 22px;
+  background: var(--ntm-canvas);
+}
+
+.archive__kinds {
+  display: flex;
+  width: fit-content;
+}
+
+.archive__sort {
+  margin-left: auto;
+  --c2-menu--min-width: 200px;
+}
+
+// Plain text, as a hint of the order rather than a second control.
+.archive__sort-button {
+  --c2-button__container--height: 30px;
+  --c2-button__container--padding-left: 8px;
+  --c2-button__container--padding-right: 6px;
+  --c2-button__container--gap: 4px;
+  --c2-button__container--border-radius: 8px;
+  --c2-button__container--border: none;
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--ntm-muted);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__container__active--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__container--font-size: 12px;
+  --c2-button__icon--size: 14px;
+}
+
+// Square rows; the one in the preview is tinted, with a bar in the accent colour on its left.
+.archive__list {
+  flex: 1;
+  padding-bottom: 72px;
+  --c2-list--background: transparent;
+  --c2-list--padding-top: 0px;
+  --c2-list--padding-right: 0px;
+  --c2-list--padding-bottom: 0px;
+  --c2-list--padding-left: 0px;
+  --c2-list__heading--color: var(--ntm-muted);
+  --c2-list__heading--padding-top: 16px;
+  --c2-list__heading--padding-left: 22px;
+  --c2-list__heading--padding-bottom: 6px;
+  --c2-list-item--min-height: 56px;
+  --c2-list-item--gap: 12px;
+  --c2-list-item--padding-left: 19px;
+  --c2-list-item--padding-right: 18px;
+  --c2-list-item--border-top-left-radius: 0px;
+  --c2-list-item--border-top-right-radius: 0px;
+  --c2-list-item--border-bottom-left-radius: 0px;
+  --c2-list-item--border-bottom-right-radius: 0px;
+  --c2-list-item--border-left: 3px solid transparent;
+  --c2-list-item--color: var(--c2-theme--color-on-surface);
+  --c2-list-item__description--color: var(--ntm-muted);
+  --c2-list-item__hover--background: var(--c2-theme--color-surface-container-low);
+  --c2-list-item__selected--background: var(--c2-theme--color-surface-container);
+  --c2-list-item__selected__hover--background: var(--c2-theme--color-surface-container);
+  --c2-list-item__selected--color: var(--c2-theme--color-on-surface);
+  --c2-list-item__selected--border-left: 3px solid var(--ntm-accent);
+}
+
+.archive__label,
+.archive__excerpt {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.archive__label {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.archive__date {
+  color: var(--ntm-muted);
+  font-size: 12px;
+}
+
+.archive__none {
+  margin: 24px 22px;
+  color: var(--ntm-muted);
+}
+
+// What kind of note: a pencil on the note's own paper, a page, a flow.
+.archive__kind {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--c2-theme--color-surface-container);
+  color: var(--c2-theme--color-on-surface);
+  --c2-feather-icon--size: 14px;
+}
+
+.archive__kind[data-kind='Page'] {
+  background: color-mix(in srgb, #7aa2e8 18%, var(--c2-theme--color-surface));
+  color: color-mix(in srgb, #7aa2e8 75%, var(--c2-theme--color-on-surface));
+}
+
+.archive__kind[data-kind='Flow'] {
+  background: color-mix(in srgb, #5fb3a1 18%, var(--c2-theme--color-surface));
+  color: color-mix(in srgb, #5fb3a1 75%, var(--c2-theme--color-on-surface));
+}
+
+.archive__kind[data-paper='default'] {
+  background: color-mix(in srgb, var(--c2-theme--color-surface) 80%, #f3ead0);
+}
+
+.archive__kind[data-paper='yellow'] {
+  background: color-mix(in srgb, #f5d547 30%, var(--c2-theme--color-surface));
+}
+
+.archive__kind[data-paper='green'] {
+  background: color-mix(in srgb, #bddcb2 30%, var(--c2-theme--color-surface));
+}
+
+.archive__kind[data-paper='blue'] {
+  background: color-mix(in srgb, #b8ceee 30%, var(--c2-theme--color-surface));
+}
+
+.archive__kind[data-paper='pink'] {
+  background: color-mix(in srgb, #f4b8c3 30%, var(--c2-theme--color-surface));
+}
+
+.archive__kind[data-paper='night'] {
+  background: #232a33;
+  color: #e9e4d4;
+}
+
+// The checked rows' actions, floating at the bottom of the list: compact, so it covers little of the list.
+.archive__bulk {
+  position: sticky;
+  bottom: 14px;
+  z-index: 3;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -44px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--ntm-line);
+  border-radius: 12px;
+  background: var(--c2-theme--color-surface-container);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 38%);
+  font-size: 13px;
+  --c2-icon-button__icon--width: 14px;
+  --c2-icon-button__icon--height: 14px;
+  --c2-icon-button__state-layer--size: 28px;
+  --c2-icon-button__icon--color: var(--ntm-muted);
+
+  .archive__restore,
+  .archive__delete {
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--gap: 5px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__icon--size: 13px;
+  }
+}
+
+.archive__bulk-count {
+  margin-right: 2px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.archive__preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 760px;
+}
+
+.archive__preview-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// A note's first line can be a whole paragraph: two lines at most here, the paper below has the rest.
+.archive__title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.archive__meta {
+  margin: -6px 0 0;
+  color: var(--ntm-muted);
+  font-size: 13px;
+}
+
+.archive__paper {
+  display: block;
+  --c2-notepad__sheet--min-height: 280px;
+  --c2-notepad__sheet--rotate: 0deg;
+  --c2-notepad__stack--display: none;
+  --c2-notepad__focus--outline: none;
+}
+
+.archive__doc {
+  padding: 16px 20px;
+  border: 1px solid var(--ntm-line);
+  border-radius: 12px;
+  background: var(--c2-theme--color-surface-container-low);
+  line-height: 1.55;
+
+  p {
+    margin: 0 0 6px;
+  }
+}
+
+.archive__empty-doc {
+  color: var(--ntm-muted);
+}
+
+.archive__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.archive__restore {
+  --c2-button__container--height: 34px;
+  --c2-button__container--padding-left: 12px;
+  --c2-button__container--padding-right: 14px;
+  --c2-button__container--gap: 6px;
+  --c2-button__container--border-radius: 999px;
+  --c2-button__icon--size: 14px;
+}
+
+.archive__secondary,
+.archive__delete {
+  --c2-button__container--height: 34px;
+  --c2-button__container--padding-left: 12px;
+  --c2-button__container--padding-right: 14px;
+  --c2-button__container--gap: 6px;
+  --c2-button__container--border-radius: 999px;
+  --c2-button__container--border: 1px solid var(--ntm-line);
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__container__active--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__icon--size: 14px;
+}
+
+.archive__delete {
+  --c2-button__container--color: var(--c2-theme--color-error);
+}
+
+.archive__confirm-delete {
+  --c2-button__container--border-radius: 999px;
+  --c2-button__container--background-color: var(--c2-theme--color-error);
+  --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-error) 85%, black);
+  --c2-button__container--color: var(--c2-theme--color-on-fill);
+}
+
+// On a phone: the list alone, the preview in a sheet that slides up.
+.archive--narrow .archive__tools {
+  flex-wrap: wrap;
+  padding: 4px 12px 10px;
+}
+
+.archive--narrow .archive__list {
+  --c2-list-item--padding-left: 9px;
+  --c2-list-item--padding-right: 12px;
+  --c2-list__heading--padding-left: 12px;
+}
+
+.archive__sheet {
+  --c2-sheet--size: 88dvh;
+  --c2-sheet--border-radius: 16px;
+  --c2-sheet--background: var(--c2-theme--color-surface);
+  --c2-sheet--color: var(--c2-theme--color-on-surface);
+}
