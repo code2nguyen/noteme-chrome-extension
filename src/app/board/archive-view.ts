@@ -169,9 +169,20 @@ export class ArchiveView {
     });
   }
 
+  /** Ticks or unticks every note listed; notes a filter hides keep whatever state they had. */
   toggleAll(event: Event): void {
     const on = (event.target as HTMLInputElement).checked;
-    this.checked.set(on ? new Set(this.shown().map((note) => note.id)) : new Set());
+    this.checked.update((ids) => {
+      const next = new Set(ids);
+      for (const note of this.shown()) {
+        if (on) {
+          next.add(note.id);
+        } else {
+          next.delete(note.id);
+        }
+      }
+      return next;
+    });
   }
 
   clearChecked(): void {

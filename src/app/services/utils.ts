@@ -116,3 +116,14 @@ export const IndexableItemTypes: string[] = [DataType.HTML, DataType.MARKDOWN, D
 export function without<T>(values: T[], value: T): T[] {
   return values.filter((item) => item !== value);
 }
+
+/**
+ * A line without its markdown list marker or checkbox: "- [ ] oat milk", "1. [x] oat milk" and "[ ] oat milk" (a task
+ * whose number the page editor already dropped) all read "oat milk".
+ */
+export function plainLine(line: string): string {
+  return line
+    .trim()
+    .replace(/^(?:[-*+]\s+|\d+[.)]\s+)?(?:\[[ xX]\]\s+)?/, '')
+    .trim();
+}

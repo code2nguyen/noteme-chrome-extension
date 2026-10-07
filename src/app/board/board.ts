@@ -22,7 +22,7 @@ import type { SearchFieldSearchDetail } from '@c2n/components/search-field';
 import type { ToastRegion } from '@c2n/components/toast';
 import { Dictionary } from '@ngrx/entity';
 import { combineLatest, of, ReplaySubject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith, switchMap, take } from 'rxjs/operators';
 
 import './board-elements';
 import { ExtensionId } from '../extension-id';
@@ -33,7 +33,7 @@ import { FULL_SCREEN, SearchSuggestion, searchShortcut, searchSuggestions } from
 import { editedLabel, getCurrentDate, pageMarkdownToText, uuid } from '../services/utils';
 import { ArtBoardItemApiActions, ItemDataActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
-import { selectIsAllLoadedItemDatas, selectItemDataEntities } from '../store/reducers';
+import { selectIsAllLoadedItemDatas, selectItemDataEntities, selectItemDatasLoadFailed } from '../store/reducers';
 import { hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
@@ -121,8 +121,11 @@ export class Board {
     { initialValue: [] as ArtBoardItem[] },
   );
 
-  /** What the Archive view shows: everything archived, oldest edit first, or what matches the search. */
-  private readonly archivedItems = toSignal(
+  /**
+   * What the Archive view shows: everything archived, oldest edit first, or what matches the search; `null` while it is
+   * read, so the view never says the archive is empty before it knows.
+   */
+  private readonly archivedItems = toSignal<ArtBoardItem[] | null>(
     combineLatest([toObservable(this.view), toObservable(this.searchQuery)]).pipe(
       // Typing on the Notes view must not reload the archive, and the archive is only read once it is opened.
       map(([view, query]) => (view === 'archive' ? query : null)),
@@ -131,38 +134,52 @@ export class Board {
         if (query === null) {
           return of([]);
         }
-        if (query) {
-          return this.dataService.getSearchResults().pipe(map((items) => items.filter((item) => !item.boardId)));
-        }
-        return this.dataService
-          .getArchivedArtBoardItems()
-          .pipe(
-            map((items) =>
-              [...items].sort((a, b) =>
-                (a.dataModifiedDate || a.modifiedDate).localeCompare(b.dataModifiedDate || b.modifiedDate),
-              ),
-            ),
-          );
+        const items = query
+          ? this.dataService.getSearchResults().pipe(map((items) => items.filter((item) => !item.boardId)))
+          : this.dataService
+              .getArchivedArtBoardItems()
+              .pipe(
+                map((items) =>
+                  [...items].sort((a, b) =>
+                    (a.dataModifiedDate || a.modifiedDate).localeCompare(b.dataModifiedDate || b.modifiedDate),
+                  ),
+                ),
+              );
+        return items.pipe(startWith(null));
       }),
     ),
-    { initialValue: [] as ArtBoardItem[] },
+    { initialValue: null },
   );
 
   protected readonly itemData = toSignal(this.store.select(selectItemDataEntities), { requireSync: true });
   /** Every note's stored text is read: each one's last edit is known, and with it which notes the board shows. */
   private readonly dataLoaded = toSignal(this.store.select(selectIsAllLoadedItemDatas), { initialValue: false });
+  /** Reading the notes' text failed: the board shows every note rather than staying blank. */
+  private readonly dataFailed = toSignal(this.store.select(selectItemDatasLoadFailed), { initialValue: false });
   /** Notes shown on the board on purpose this session, recent or not: picked in the search, or just unpinned. */
   private readonly revealed = signal<ReadonlySet<string>>(new Set());
 
   /** The board's notes split: pinned and recent ones on the board, the rest in the Older notes sheet. */
   private readonly split = computed(() => splitBoard(this.boardItems(), this.itemData(), this.revealed()));
 
-  /** Whether the view has what it shows: the Notes view waits for the notes' dates, or it would show them all first. */
-  readonly ready = computed(() => !this.inNotesView() || this.dataLoaded());
-
-  readonly items = computed(() =>
-    this.inNotesView() ? (this.dataLoaded() ? this.split().shown : []) : this.archivedItems(),
+  /**
+   * Whether the view has what it shows: the Notes view waits for the notes' dates, or it would show them all first (or
+   * gives up waiting when they cannot be read); the Archive waits for what is archived.
+   */
+  readonly ready = computed(() =>
+    this.inNotesView() ? this.dataLoaded() || this.dataFailed() : this.archivedItems() !== null,
   );
+
+  readonly items = computed(() => {
+    if (!this.inNotesView()) {
+      return this.archivedItems() ?? [];
+    }
+    if (this.dataLoaded()) {
+      return this.split().shown;
+    }
+    // Without the notes' dates there is no telling recent from older: every note stays on the board.
+    return this.dataFailed() ? this.boardItems() : [];
+  });
 
   readonly olderOpen = signal(false);
   /** The Older notes sheet's filters: a kind (or all of them) and words. */
@@ -208,10 +225,15 @@ export class Board {
     toObservable(this.view).pipe(
       switchMap((view) =>
         view === 'notes'
-          ? combineLatest([this.dataService.getSearchResults(), this.store.select(selectItemDataEntities)])
-          : of<[ArtBoardItem[], Dictionary<ItemData>]>([[], {}]),
+          ? combineLatest([
+              this.dataService.getSearchResults(),
+              this.store.select(selectItemDataEntities),
+              this.dataService.selectArtBoardItemSearchLoading(),
+            ])
+          : of<[ArtBoardItem[], Dictionary<ItemData>, boolean]>([[], {}, false]),
       ),
-      map(([items, data]) => searchSuggestions(items, data)),
+      // None while a search is pending: a quick pick must never open a match of the previous query.
+      map(([items, data, loading]) => (loading ? [] : searchSuggestions(items, data))),
     ),
     { initialValue: [] as SearchSuggestion[] },
   );
@@ -436,8 +458,6 @@ export class Board {
     const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
     if (value === 'archive') {
       this.archive(item);
-    } else if (value === 'restore') {
-      this.restore(item);
     } else if (value === 'delete') {
       this.removeNote(item);
     } else if (value === 'pin') {

@@ -80,10 +80,13 @@ export class Home {
   /** What the search field holds, as typed. */
   readonly query = signal('');
   private readonly results = toSignal(this.dataService.getSearchResults(), { initialValue: [] });
+  /** The results as rows; none while a search is pending, so a quick pick never opens a match of the last query. */
   readonly suggestions = toSignal(
-    combineLatest([this.dataService.getSearchResults(), this.store.select(selectItemDataEntities)]).pipe(
-      map(([items, data]) => searchSuggestions(items, data)),
-    ),
+    combineLatest([
+      this.dataService.getSearchResults(),
+      this.store.select(selectItemDataEntities),
+      this.dataService.selectArtBoardItemSearchLoading(),
+    ]).pipe(map(([items, data, loading]) => (loading ? [] : searchSuggestions(items, data)))),
     { initialValue: [] as SearchSuggestion[] },
   );
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */

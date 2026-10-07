@@ -8,6 +8,8 @@ export const dataItemsFeatureKey = 'itemDatas';
 
 export interface State extends EntityState<ItemData> {
   isAllLoaded: boolean;
+  /** Reading every note's data failed: views that wait for it show what they can without it. */
+  loadFailed: boolean;
 }
 
 export const adapter: EntityAdapter<ItemData> = createEntityAdapter<ItemData>({
@@ -17,6 +19,7 @@ export const adapter: EntityAdapter<ItemData> = createEntityAdapter<ItemData>({
 
 export const initialState: State = adapter.getInitialState({
   isAllLoaded: false,
+  loadFailed: false,
 });
 
 export const reducer = createReducer(
@@ -25,9 +28,10 @@ export const reducer = createReducer(
     const newItems = itemDatas.filter((item) => item && !state.entities[item.id]);
     return {
       ...adapter.addMany(newItems, state),
-      ...{ isAllLoaded: true },
+      ...{ isAllLoaded: true, loadFailed: false },
     };
   }),
+  on(ItemDataApiActions.getAllItemDataFailure, (state) => ({ ...state, loadFailed: true })),
   on(ItemDataApiActions.getItemDataSuccess, (state, { itemData }) => {
     return adapter.upsertOne(itemData, state);
   }),

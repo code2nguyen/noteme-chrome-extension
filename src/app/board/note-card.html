@@ -5,7 +5,7 @@
     placeholder="New note..."
     paper-picker
     actions-placement="end"
-    [attr.tearable]="archived() ? null : ''"
+    tearable
     [attr.pad]="pad()"
     [attr.paper]="paper()"
     [attr.paper-color]="paperColor()"
@@ -16,7 +16,7 @@
     (paper-change)="onPaperChange($event)"
     (page-tear)="onPageTear($event)"
   >
-    @if (!archived() && pinned()) {
+    @if (pinned()) {
       <c2-icon-button
         slot="actions"
         class="note__actions note__unpin"
@@ -27,18 +27,16 @@
         <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
       </c2-icon-button>
     }
-    @if (!archived()) {
-      <!-- Moves the note's tile: its c2-masonry-item names this button in move-handle. -->
-      <c2-icon-button
-        slot="actions"
-        class="note__actions note__move"
-        [id]="'move-' + item().id"
-        aria-label="Move note"
-        tooltip="Move"
-      >
-        <c2-feather-move></c2-feather-move>
-      </c2-icon-button>
-    }
+    <!-- Moves the note's tile: its c2-masonry-item names this button in move-handle. -->
+    <c2-icon-button
+      slot="actions"
+      class="note__actions note__move"
+      [id]="'move-' + item().id"
+      aria-label="Move note"
+      tooltip="Move"
+    >
+      <c2-feather-move></c2-feather-move>
+    </c2-icon-button>
     <c2-menu
       slot="actions"
       class="note__actions"
@@ -49,28 +47,21 @@
       <c2-icon-button slot="trigger" aria-label="Note actions" tooltip="More">
         <c2-feather-more-vertical></c2-feather-more-vertical>
       </c2-icon-button>
-      @if (archived()) {
-        <c2-menu-item value="restore">
-          <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
-          Restore to the board
+      @if (pinned()) {
+        <c2-menu-item value="unpin">
+          <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
+          Unpin from the board
         </c2-menu-item>
       } @else {
-        @if (pinned()) {
-          <c2-menu-item value="unpin">
-            <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
-            Unpin from the board
-          </c2-menu-item>
-        } @else {
-          <c2-menu-item value="pin">
-            <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
-            Pin to the board
-          </c2-menu-item>
-        }
-        <c2-menu-item value="archive">
-          <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
-          Archive
+        <c2-menu-item value="pin">
+          <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
+          Pin to the board
         </c2-menu-item>
       }
+      <c2-menu-item value="archive">
+        <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
+        Archive
+      </c2-menu-item>
       <c2-menu-item value="delete" destructive>
         <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
         Delete this note

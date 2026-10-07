@@ -2,7 +2,7 @@ import { Dictionary } from '@ngrx/entity';
 
 import { ExtensionId } from '../extension-id';
 import { ArtBoardItem, ItemData } from '../store/models';
-import { editedLabel, getText } from './utils';
+import { editedLabel, getText, plainLine } from './utils';
 
 /** A search result as a row of the search field: its first line, and what it is and when it was edited. */
 export interface SearchSuggestion {
@@ -24,7 +24,8 @@ export function searchSuggestions(items: ArtBoardItem[], data: Dictionary<ItemDa
   return items.map((item) => {
     const itemData = data[item.id];
     const text = itemData ? getText(itemData.data, itemData.dataType, itemData.properties) : '';
-    const firstLine = text.split('\n').find((line) => line.trim()) ?? '';
+    // Its first line as text: "1. Pack" reads "Pack", as in the Older notes and the Archive.
+    const firstLine = text.split('\n').map(plainLine).find(Boolean) ?? '';
     const kind =
       item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note';
     const label = firstLine || (kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`);

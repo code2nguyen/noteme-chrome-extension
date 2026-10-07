@@ -1,7 +1,7 @@
 import { Dictionary } from '@ngrx/entity';
 
 import { ExtensionId } from '../extension-id';
-import { getText } from '../services/utils';
+import { getText, plainLine } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 
 /** The board keeps this many unpinned notes on it, the most recently edited; the rest wait in the Older notes sheet. */
@@ -89,10 +89,7 @@ export function summarize(item: ArtBoardItem, data: Dictionary<ItemData>): NoteS
   };
 }
 
-/** A line without its markdown list marker: "- [ ] oat milk" reads "oat milk". */
-export function plainLine(line: string): string {
-  return line.trim().replace(/^(?:[-*+]\s+(?:\[[ xX]\]\s+)?|\d+[.)]\s+)/, '');
-}
+export { plainLine };
 
 export interface MonthGroup<T> {
   /** "October" this year, "October 2025" before. */

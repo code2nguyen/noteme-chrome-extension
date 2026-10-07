@@ -4,8 +4,19 @@ import { Home } from './home/home';
 import { hasFeature } from './settings/settings';
 import { SettingsService } from './settings/settings.service';
 
-/** An optional feature switched off in Settings: its link or bookmark leads Home. */
-const planOn = () => hasFeature(inject(SettingsService).settings(), 'plan') || inject(Router).createUrlTree(['/']);
+/**
+ * An optional feature switched off in Settings: its link or bookmark leads Home. Off in the local mirror is only
+ * believed once the synced settings are read: a new profile has no mirror yet, and Plan may be on in the sync.
+ */
+const planOn = async () => {
+  const settings = inject(SettingsService);
+  const home = inject(Router).createUrlTree(['/']);
+  if (hasFeature(settings.settings(), 'plan')) {
+    return true;
+  }
+  await settings.loaded;
+  return hasFeature(settings.settings(), 'plan') || home;
+};
 
 export const routes: Routes = [
   { path: '', component: Home, pathMatch: 'full' },
