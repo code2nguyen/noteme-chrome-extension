@@ -2,9 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { ActionsSubject, Store } from '@ngrx/store';
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, mergeMap, shareReplay, startWith, take } from 'rxjs/operators';
+import { filter, first, map, mergeMap, shareReplay, startWith, take, tap } from 'rxjs/operators';
 
-import { selectAllItemDatas, selectIsAllLoadedItemDatas } from '../store/reducers';
+import { selectAllItemDatas, selectIsAllLoadedItemDatas, selectItemDatasLoadFailed } from '../store/reducers';
 import { getText, IndexableItemTypes } from './utils';
 import { ItemDataActions, ItemDataApiActions } from '../store/actions';
 import { ItemData } from '../store/models';
@@ -41,11 +41,24 @@ export class SearchService {
     );
   }
 
+  /**
+   * The index of every note, once they are all read. If reading them fails, it is built from what was read so a search
+   * still answers, and dropped after that answer: the next search reads them again.
+   */
   private createIndex(): Observable<Fuse<FuseDocument>> {
     this.store.dispatch(ItemDataActions.getAllItemData());
-    return combineLatest([this.store.select(selectAllItemDatas), this.store.select(selectIsAllLoadedItemDatas)]).pipe(
-      filter(([, isAllLoaded]) => isAllLoaded),
+    return combineLatest([
+      this.store.select(selectAllItemDatas),
+      this.store.select(selectIsAllLoadedItemDatas),
+      this.store.select(selectItemDatasLoadFailed),
+    ]).pipe(
+      filter(([, isAllLoaded, failed]) => isAllLoaded || failed),
       first(),
+      tap(([, isAllLoaded]) => {
+        if (!isAllLoaded) {
+          queueMicrotask(() => (this.fuse$ = undefined));
+        }
+      }),
       map(
         ([items]) =>
           new Fuse(
