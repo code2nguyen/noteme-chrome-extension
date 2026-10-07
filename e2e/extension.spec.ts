@@ -261,16 +261,17 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
 test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
   const page = await newTab();
   await page.goto(page.url() + '?settings=1');
+  const synced = () =>
+    page.evaluate(() =>
+      chrome.storage.sync.get('NOTEME_SETTINGS').then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}'))),
+    );
+  // Plan is off until chosen under Features; its week settings come with it.
+  await page.locator('ntm-settings-panel c2-select.settings__features').click();
+  await page.locator('c2-list-item', { hasText: 'A week and month calendar' }).click();
+  await page.keyboard.press('Escape');
+  await expect.poll(async () => (await synced()).features).toEqual(['plan']);
   await page.locator('ntm-settings-panel c2-button', { hasText: 'Sunday' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        chrome.storage.sync
-          .get('NOTEME_SETTINGS')
-          .then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}')).weekStart),
-      ),
-    )
-    .toBe('sunday');
+  await expect.poll(async () => (await synced()).weekStart).toBe('sunday');
 });
 
 test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {
