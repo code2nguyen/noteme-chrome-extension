@@ -32,11 +32,13 @@ if (process.argv.includes('--unlink')) {
   execFileSync('npm', ['install'], { cwd: root, stdio: 'inherit' });
   console.log('@c2n packages are the published ones again');
 } else {
+  // Every build is checked before anything is replaced: a missing one must not leave half the packages linked.
+  const unbuilt = Object.values(links).filter((path) => !existsSync(resolve(repo, path, 'dist')));
+  if (unbuilt.length > 0) {
+    throw new Error(`No build in ${repo} for ${unbuilt.join(', ')}: run npm run build -w <path> there first`);
+  }
   for (const [name, path] of Object.entries(links)) {
     const source = resolve(repo, path);
-    if (!existsSync(resolve(source, 'dist'))) {
-      throw new Error(`${source} has no build: run npm run build -w ${path} in ${repo}`);
-    }
     rmSync(target(name), { recursive: true, force: true });
     symlinkSync(source, target(name), 'dir');
     console.log(`@c2n/${name} -> ${source}`);
