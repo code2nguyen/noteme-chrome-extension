@@ -17,6 +17,10 @@ export interface StorageApi {
   syncRemoteToLocal(): Promise<void>;
   remove(key: string | string[]): Observable<void>;
   getRemoteSyncStatus(): Observable<boolean>;
+  /** Switch syncing through the Chrome profile on or off for this tab (Settings › Sync). */
+  setSyncEnabled(enabled: boolean): void;
+  /** Send every record that syncs and is not on the remote yet: what was written while sync was off. */
+  pushLocalToRemote(): Promise<void>;
 }
 
 export function artBoardArtBoardItemIdsKey(boardId: string): string {

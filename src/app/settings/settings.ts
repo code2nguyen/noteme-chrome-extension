@@ -1,6 +1,9 @@
 import { PHOTO_THEME_IDS, PhotoChange, PhotoTheme } from '../home/background';
 
-/** What a person can set up. Stored as one small record, so it fits chrome.storage.sync and follows the profile. */
+/**
+ * What a person can set up. Stored as one small record, so it fits chrome.storage.sync and follows the profile once
+ * sync is switched on.
+ */
 export type ThemeSetting = 'auto' | 'light' | 'dark';
 export type ClockSetting = '24h' | '12h';
 export type DateFormat = 'long' | 'short' | 'numeric';
@@ -32,6 +35,11 @@ export interface Settings {
   weekStart: WeekStart;
   /** The optional features switched on; may be none. */
   features: Feature[];
+  /**
+   * Notes and settings sync through the Chrome profile (chrome.storage.sync). Chosen on each device: it never comes
+   * from the synced copy.
+   */
+  sync: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -47,6 +55,8 @@ export const DEFAULT_SETTINGS: Settings = {
   weekStart: 'monday',
   // Every feature is opt-in: switched on in Settings.
   features: [],
+  // Nothing leaves the device until sync is switched on in Settings.
+  sync: false,
 };
 
 const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
