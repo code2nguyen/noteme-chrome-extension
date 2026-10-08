@@ -42,23 +42,53 @@ import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
 import { cardRows, storedRows } from './card-rows';
 import { PageCard } from './page-card';
-import { groupByMonth, NoteSummary, rearrange, splitBoard, summarize } from './older-notes';
+import { TodoCard } from './todo-card';
+import {
+  countKinds,
+  groupByMonth,
+  isNoteKind,
+  NoteKind,
+  NoteSummary,
+  rearrange,
+  splitBoard,
+  summarize,
+} from './older-notes';
 
 type BoardView = 'notes' | 'archive';
 
 /** Keys that start something new from anywhere on the board, as shown in the New menu. */
-const NEW_KEYS: Record<string, ExtensionId> = { n: ExtensionId.TextNote, p: ExtensionId.Page, f: ExtensionId.Flow };
+const NEW_KEYS: Record<string, ExtensionId> = {
+  n: ExtensionId.TextNote,
+  p: ExtensionId.Page,
+  f: ExtensionId.Flow,
+  t: ExtensionId.TodoList,
+};
+
+const TILE_LABELS: Record<ExtensionId, string> = {
+  [ExtensionId.TextNote]: 'Note',
+  [ExtensionId.Page]: 'Page',
+  [ExtensionId.Flow]: 'Flow',
+  [ExtensionId.TodoList]: 'To-do list',
+};
+
+/** The New menu's values. */
+const NEW_KINDS: Record<string, ExtensionId> = {
+  note: ExtensionId.TextNote,
+  page: ExtensionId.Page,
+  flow: ExtensionId.Flow,
+  todo: ExtensionId.TodoList,
+};
 
 /**
- * Every note in one place, newest first. Quick notes are written right on their card; pages and flows show a card and
- * open full screen. Notes, pages and flows put away land in the Archive view (`?view=archive`); the search on the
+ * Every note in one place, newest first. Quick notes and to-do lists are worked on right on their card; pages and
+ * flows show a card and open full screen. Notes, pages, flows and lists put away land in the Archive view (`?view=archive`); the search on the
  * Notes view covers everything, archived or not.
  */
 @Component({
   selector: 'ntm-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [ArchiveView, NoteCard, PageCard, FlowCard, RouterLink, SettingsPanel],
+  imports: [ArchiveView, NoteCard, PageCard, FlowCard, TodoCard, RouterLink, SettingsPanel],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {
@@ -76,6 +106,7 @@ export class Board {
   private readonly dataService = inject(DataService);
   private readonly deviceSync = inject(DeviceSyncService);
   private readonly cards = viewChildren(NoteCard);
+  private readonly todoCards = viewChildren(TodoCard);
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
   private readonly toasts = viewChild<ElementRef<ToastRegion>>('toasts');
   private readonly route = inject(ActivatedRoute);
@@ -183,7 +214,7 @@ export class Board {
 
   readonly olderOpen = signal(false);
   /** The Older notes sheet's filters: a kind (or all of them) and words. */
-  readonly olderKind = signal<'all' | 'Note' | 'Page' | 'Flow'>('all');
+  readonly olderKind = signal<'all' | NoteKind>('all');
   readonly olderQuery = signal('');
   /** The note open in the sheet. */
   readonly olderOpenId = signal<string | null>(null);
@@ -198,13 +229,7 @@ export class Board {
     return this.older().map((item) => ({ item, ...summarize(item, data) }));
   });
   /** How many older notes there are of each kind, for the filter. */
-  readonly olderCounts = computed(() => {
-    const counts = { Note: 0, Page: 0, Flow: 0 };
-    for (const note of this.olderSummaries()) {
-      counts[note.kind]++;
-    }
-    return counts;
-  });
+  readonly olderCounts = computed(() => countKinds(this.olderSummaries()));
   readonly olderGroups = computed(() => {
     const kind = this.olderKind();
     const words = this.olderQuery().trim().toLowerCase();
@@ -352,10 +377,10 @@ export class Board {
 
   onNewMenu(event: Event): void {
     const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
-    this.create(value === 'page' ? ExtensionId.Page : value === 'flow' ? ExtensionId.Flow : ExtensionId.TextNote);
+    this.create(NEW_KINDS[value] ?? ExtensionId.TextNote);
   }
 
-  /** N for a note, P for a page, F for a flow (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
+  /** N for a note, P for a page, F for a flow, T for a to-do list (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
   onKey(event: KeyboardEvent): void {
     // The settings sheet has the keyboard: N in it must not start a note behind it.
     if (this.settingsOpen()) {
@@ -546,11 +571,21 @@ export class Board {
 
   onOlderKind(event: Event): void {
     const value = (event as CustomEvent<{ value: string }>).detail.value;
-    this.olderKind.set(value === 'Note' || value === 'Page' || value === 'Flow' ? value : 'all');
+    this.olderKind.set(isNoteKind(value) ? value : 'all');
   }
 
   onOlderSearch(event: Event): void {
     this.olderQuery.set((event as CustomEvent<SearchFieldSearchDetail>).detail.value);
+  }
+
+  /** What a tile is called, for screen readers. */
+  tileLabel(item: ArtBoardItem): string {
+    return TILE_LABELS[item.extensionId] ?? 'Note';
+  }
+
+  /** Whether a note opens full screen (a page or a flow), rather than being worked on on its card. */
+  opensFullScreen(item: ArtBoardItem): boolean {
+    return !!FULL_SCREEN[item.extensionId];
   }
 
   /** Open a page or a flow of the sheet, full screen. */
@@ -675,7 +710,9 @@ export class Board {
    * brought into view.
    */
   private highlight(id: string, attempts = 20): void {
-    const card = this.cards().find((candidate) => candidate.item().id === id);
+    const card =
+      this.cards().find((candidate) => candidate.item().id === id) ??
+      this.todoCards().find((candidate) => candidate.item().id === id);
     const tile = document.querySelector<HTMLElement>(`ntm-board c2-masonry-item[item-id="${CSS.escape(id)}"]`);
     if (card) {
       card.highlight();

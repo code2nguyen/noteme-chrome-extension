@@ -10,6 +10,8 @@ export enum DataType {
   PAGE = 'page',
   /** A flow note: `{ nodes, edges }` as JSON; the title is in `properties.title`. */
   FLOW = 'flow',
+  /** A to-do list: its tasks as a JSON array (c2-todo-list's `TodoTask`); the title is in `properties.title`. */
+  TODO = 'todo',
   BLOB = 'blob',
   NA = 'NA',
 }

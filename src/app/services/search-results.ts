@@ -1,6 +1,7 @@
 import { Dictionary } from '@ngrx/entity';
 
 import { ExtensionId } from '../extension-id';
+import { kindOf, untitled } from '../board/older-notes';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { editedLabel, getText, plainLine } from './utils';
 
@@ -13,7 +14,7 @@ export interface SearchSuggestion {
 
 const PREVIEW_LENGTH = 80;
 
-/** The notes that open full screen, and their route; a quick note is shown on the board instead. */
+/** The notes that open full screen, and their route; a quick note and a to-do list are shown on the board instead. */
 export const FULL_SCREEN: Partial<Record<ExtensionId, string>> = {
   [ExtensionId.Page]: '/page',
   [ExtensionId.Flow]: '/flow',
@@ -26,9 +27,8 @@ export function searchSuggestions(items: ArtBoardItem[], data: Dictionary<ItemDa
     const text = itemData ? getText(itemData.data, itemData.dataType, itemData.properties) : '';
     // Its first line as text: "1. Pack" reads "Pack", as in the Older notes and the Archive.
     const firstLine = text.split('\n').map(plainLine).find(Boolean) ?? '';
-    const kind =
-      item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note';
-    const label = firstLine || (kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`);
+    const kind = kindOf(item);
+    const label = firstLine || untitled(kind);
     const dataModified = itemData?.empty ? undefined : itemData?.modifiedDate;
     const edited = editedLabel(dataModified ?? item.dataModifiedDate ?? item.modifiedDate);
     return {

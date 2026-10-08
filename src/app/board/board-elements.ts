@@ -28,6 +28,7 @@ import '@c2n/symbols/symbols/create-new.js';
 import '@c2n/symbols/symbols/no-results.js';
 
 import '@c2n/feather-icons/icons/archive.js';
+import '@c2n/feather-icons/icons/check-square.js';
 import '@c2n/feather-icons/icons/chevron-down.js';
 import '@c2n/feather-icons/icons/clock.js';
 import '@c2n/feather-icons/icons/edit-3.js';

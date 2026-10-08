@@ -131,12 +131,13 @@ export function normalizeItemData(itemData: ItemData): ItemData {
   return itemData;
 }
 
-/** Notes and pages; 2.x code and vocabulary notes are not carried over and stay out of the app. */
+/** Notes, pages, flows and to-do lists; 2.x code and vocabulary notes are not carried over and stay out of the app. */
 export function isSupportedNote(artBoardItem: ArtBoardItem): boolean {
   return (
     artBoardItem.extensionId === ExtensionId.TextNote ||
     artBoardItem.extensionId === ExtensionId.Page ||
-    artBoardItem.extensionId === ExtensionId.Flow
+    artBoardItem.extensionId === ExtensionId.Flow ||
+    artBoardItem.extensionId === ExtensionId.TodoList
   );
 }
 

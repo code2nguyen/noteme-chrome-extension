@@ -6,6 +6,7 @@ Noteme is a Chrome extension that replaces the new tab page with a personal note
 
 - Text notes (a ruled notepad with bold, italic, underline, strike, highlights, inks and checklists) and code notes
   (syntax highlighting for JavaScript, TypeScript, JSX/TSX, HTML, CSS and JSON)
+- To-do lists (`c2-todo-list`), checked off right on their card: drag to reorder, swipe to archive, a progress ring
 - A board you can arrange: move notes by their handle and resize them by their edges
 - Archive, full-text search across notes and archive
 - Sync between your Chrome profiles through `chrome.storage.sync`, once switched on in Settings (off by default)

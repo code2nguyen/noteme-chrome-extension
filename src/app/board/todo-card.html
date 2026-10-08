@@ -1,0 +1,94 @@
+<div class="todo__body">
+  <c2-todo-list
+    class="todo__list"
+    customizable
+    progress="ring"
+    placeholder="Add a task — a note after a dash"
+    [attr.heading]="title() || null"
+    [tasks]="tasks()"
+    [look]="look()"
+    (tasks-change)="onTasksChange($event)"
+    (look-change)="onLookChange($event)"
+  >
+    @if (pinned()) {
+      <c2-icon-button
+        slot="actions"
+        class="todo__actions todo__unpin"
+        aria-label="Unpin from the board"
+        tooltip="Unpin from the board"
+        (click)="unpin.emit()"
+      >
+        <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
+      </c2-icon-button>
+    }
+    <!-- Moves the list's tile: its c2-masonry-item names this button in move-handle. -->
+    <c2-icon-button
+      slot="actions"
+      class="todo__actions todo__move"
+      [id]="'move-' + item().id"
+      aria-label="Move to-do list"
+      tooltip="Move"
+    >
+      <c2-feather-move></c2-feather-move>
+    </c2-icon-button>
+    <c2-menu
+      slot="actions"
+      class="todo__actions"
+      placement="bottom-end"
+      aria-label="To-do list actions"
+      (menu-select)="onMenu($event)"
+    >
+      <c2-icon-button slot="trigger" aria-label="To-do list actions" tooltip="More">
+        <c2-feather-more-vertical></c2-feather-more-vertical>
+      </c2-icon-button>
+      <c2-menu-item value="rename">
+        <c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>
+        Rename
+      </c2-menu-item>
+      @if (pinned()) {
+        <c2-menu-item value="unpin">
+          <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
+          Unpin from the board
+        </c2-menu-item>
+      } @else {
+        <c2-menu-item value="pin">
+          <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
+          Pin to the board
+        </c2-menu-item>
+      }
+      <c2-menu-item value="archive">
+        <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
+        Archive
+      </c2-menu-item>
+      <c2-menu-item value="delete" destructive>
+        <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+        Delete this list
+      </c2-menu-item>
+    </c2-menu>
+  </c2-todo-list>
+</div>
+@if (blinking()) {
+  <!-- Picked from the search: a light runs twice around the list, then fades (as on a note). -->
+  <span class="todo__beam">
+    <c2-border-beam class="todo__beam-light"></c2-border-beam>
+  </span>
+}
+
+<!-- The list's title: c2-todo-list shows it but does not edit it. -->
+<c2-modal class="todo__rename" [open]="draftTitle() !== null" (close)="draftTitle.set(null)">
+  @if (draftTitle() !== null) {
+    <span slot="title">{{ title() ? 'Rename the list' : 'Name the list' }}</span>
+    <c2-text-field
+      #titleField
+      class="todo__rename-field"
+      aria-label="Title"
+      placeholder="Groceries, This week, Trip to Lisbon…"
+      [value]="draftTitle() ?? ''"
+      (input)="onTitleInput($event)"
+      (keydown)="onTitleKeydown($event)"
+    ></c2-text-field>
+    <p class="todo__rename-hint">The list picks its icon from the title.</p>
+    <c2-button slot="footer" class="todo__rename-cancel" (click)="draftTitle.set(null)">Cancel</c2-button>
+    <c2-button slot="footer" class="todo__rename-save" (click)="saveTitle()">Save</c2-button>
+  }
+</c2-modal>

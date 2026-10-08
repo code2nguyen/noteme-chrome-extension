@@ -123,6 +123,8 @@ describe('normalizeArtBoardItem', () => {
     const kind = (extensionId: string) => normalizeArtBoardItem({ ...base, extensionId } as unknown as ArtBoardItem);
     expect(isSupportedNote(kind(ExtensionId.TextNote))).toBe(true);
     expect(isSupportedNote(kind(ExtensionId.Page))).toBe(true);
+    expect(isSupportedNote(kind(ExtensionId.Flow))).toBe(true);
+    expect(isSupportedNote(kind(ExtensionId.TodoList))).toBe(true);
     expect(isSupportedNote(kind('ntm-code-note-element'))).toBe(false);
     expect(isSupportedNote(kind('vocabulary-extension'))).toBe(false);
   });
