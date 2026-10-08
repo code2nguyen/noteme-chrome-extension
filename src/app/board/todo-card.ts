@@ -14,8 +14,13 @@ import {
   viewChild,
 } from '@angular/core';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
-import type { TextField } from '@c2n/components/text-field';
-import type { TodoListLook, TodoLookChangeEventDetail, TodoTasksChangeEventDetail } from '@c2n/components/todo-list';
+import type {
+  TodoHeadingChangeEventDetail,
+  TodoList,
+  TodoListLook,
+  TodoLookChangeEventDetail,
+  TodoTasksChangeEventDetail,
+} from '@c2n/components/todo-list';
 import { filter } from 'rxjs/operators';
 
 import { DataService } from '../services/data.service';
@@ -25,23 +30,19 @@ import { DataType } from '../store/models/data-type';
 import { parseTasks, serializeTasks, TodoTask } from '../todo/todo-doc';
 
 /**
- * The list and its rename field load with the first list on the board: c2-todo-list brings every task icon with it,
- * which a board without a list has no use for.
+ * The list loads with the first list on the board: c2-todo-list brings every task icon with it, which a board without
+ * a list has no use for.
  */
 let elements: Promise<unknown> | undefined;
 function loadElements(): Promise<unknown> {
-  elements ??= Promise.all([
-    import('@c2n/components/todo-list'),
-    import('@c2n/components/text-field'),
-    import('@c2n/feather-icons/icons/edit-2.js'),
-  ]);
+  elements ??= Promise.all([import('@c2n/components/todo-list'), import('@c2n/feather-icons/icons/edit-2.js')]);
   return elements;
 }
 
 /**
- * A to-do list, worked through right on the board: a c2-todo-list whose tasks are stored as they change, with the
- * tile's actions (unpin, move, its menu) in the list's header. The title is set in a small dialog, which a new list
- * opens with.
+ * A to-do list, worked through right on the board: a c2-todo-list whose tasks and title are stored as they change,
+ * with the tile's actions (unpin, move, its menu) in the list's header, after its palette button as on a note. The
+ * title is renamed in place, and a new list opens with its title ready for writing.
  * Rendered inside the c2-masonry-item that places it.
  */
 @Component({
@@ -61,7 +62,7 @@ export class TodoCard {
   private readonly instanceId = inject(INSTANCE_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
-  private readonly titleField = viewChild<ElementRef<TextField>>('titleField');
+  private readonly list = viewChild<ElementRef<TodoList>>('list');
 
   readonly item = input.required<ArtBoardItem>();
   /** Pinned: it stays on the board, first, until unpinned. */
@@ -77,8 +78,6 @@ export class TodoCard {
   readonly title = signal('');
   readonly tasks = signal<TodoTask[]>([]);
   readonly blinking = signal(false);
-  /** The title being written in the rename dialog; null while it is closed. */
-  readonly draftTitle = signal<string | null>(null);
 
   private readonly itemId = computed(() => this.item().id);
   /** The look picked in the list's customize panel, kept with the note as a text note keeps its paper. */
@@ -104,7 +103,7 @@ export class TodoCard {
 
     effect(() => {
       if (this.autofocus()) {
-        afterNextRender(() => this.rename(), { injector: this.injector });
+        afterNextRender(() => void this.rename(), { injector: this.injector });
       }
     });
   }
@@ -137,7 +136,7 @@ export class TodoCard {
   onMenu(event: Event): void {
     const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
     if (value === 'rename') {
-      this.rename();
+      void this.rename();
     } else if (value === 'archive') {
       this.archive.emit();
     } else if (value === 'delete') {
@@ -149,29 +148,14 @@ export class TodoCard {
     }
   }
 
-  /** Open the rename dialog, its field focused. */
-  rename(): void {
-    this.draftTitle.set(this.title());
-    afterNextRender(() => void this.focusTitleField(), { injector: this.injector });
+  /** Open the title for writing, once the list is defined (a new list renders before its module has loaded). */
+  async rename(): Promise<void> {
+    await loadElements();
+    await this.list()?.nativeElement.editHeading();
   }
 
-  onTitleInput(event: Event): void {
-    this.draftTitle.set((event.target as TextField).value);
-  }
-
-  onTitleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.isComposing) {
-      event.preventDefault();
-      this.saveTitle();
-    }
-  }
-
-  saveTitle(): void {
-    const title = this.draftTitle()?.trim();
-    this.draftTitle.set(null);
-    if (title === undefined || title === this.title()) {
-      return;
-    }
+  onHeadingChange(event: Event): void {
+    const { heading: title } = (event as CustomEvent<TodoHeadingChangeEventDetail>).detail;
     this.title.set(title);
     // With the tasks: a new list's data is a placeholder until then, and the search reads it by its type.
     this.dataService.updateDataItem({
@@ -180,16 +164,5 @@ export class TodoCard {
       dataType: DataType.TODO,
       properties: { title },
     });
-  }
-
-  private async focusTitleField(): Promise<void> {
-    const field = this.titleField()?.nativeElement;
-    if (!field) {
-      return;
-    }
-    await customElements.whenDefined('c2-text-field');
-    await field.updateComplete;
-    field.focus();
-    field.select();
   }
 }

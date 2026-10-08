@@ -331,14 +331,19 @@ test('a to-do list is named, filled and checked off on its card, and kept after 
   await page.keyboard.press('t');
   const list = page.locator('ntm-todo-card');
   await expect(list).toHaveCount(1);
-  // A new list asks for its title first.
-  const title = list.locator('c2-text-field.todo__rename-field');
-  await expect(title).toBeVisible();
-  await expect.poll(() => focusedTag(page)).toBe('c2-text-field');
+  // A new list opens with its title ready for writing, in place.
+  const title = list.getByRole('textbox', { name: 'List title' });
+  await expect(title).toBeFocused();
   await page.keyboard.type('Groceries');
   await page.keyboard.press('Enter');
   await expect(title).toHaveCount(0);
-  await expect(list.locator('c2-todo-list .heading')).toHaveText('Groceries');
+  await expect(list.getByRole('heading', { name: 'Groceries' })).toBeVisible();
+
+  // The tile's actions come after the list's palette button, as on a note.
+  const order = await list
+    .locator('c2-todo-list .actions')
+    .evaluate((actions) => [...actions.children].map((child) => child.localName));
+  expect(order).toEqual(['button', 'slot']);
 
   const add = list.getByRole('textbox', { name: 'New task' });
   for (const task of ['Oat milk - the barista one', 'Bread']) {
@@ -374,7 +379,16 @@ test('a to-do list is named, filled and checked off on its card, and kept after 
     ]);
 
   await page.reload();
-  await expect(list.locator('c2-todo-list .heading')).toHaveText('Groceries');
+  await expect(list.getByRole('heading', { name: 'Groceries' })).toBeVisible();
+
+  // Renamed in place from its menu.
+  await list.getByRole('button', { name: 'To-do list actions' }).click();
+  await list.locator('c2-menu-item[value="rename"]').click();
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Weekend shopping');
+  await page.keyboard.press('Enter');
+  await expect(list.getByRole('heading', { name: 'Weekend shopping' })).toBeVisible();
+  await saved(page, 'Weekend shopping');
   await expect(list.getByRole('checkbox')).toHaveCount(2);
   await expect(list.getByRole('checkbox').last()).toHaveAttribute('aria-checked', 'true');
 
@@ -382,7 +396,7 @@ test('a to-do list is named, filled and checked off on its card, and kept after 
   const search = page.locator('c2-autocomplete input');
   await search.click();
   await search.pressSequentially('oat milk');
-  const result = page.locator('c2-autocomplete c2-list-item', { hasText: 'Groceries' });
+  const result = page.locator('c2-autocomplete c2-list-item', { hasText: 'Weekend shopping' });
   await expect(result).toContainText('List ·');
   await result.click();
   await expect(list).toHaveClass(/todo--blink/);

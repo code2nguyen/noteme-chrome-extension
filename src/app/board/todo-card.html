@@ -1,14 +1,19 @@
 <div class="todo__body">
   <c2-todo-list
+    #list
     class="todo__list"
     customizable
+    heading-editable
+    heading-placeholder="Untitled list"
+    actions-placement="end"
     progress="ring"
     placeholder="Add a task — a note after a dash"
-    [attr.heading]="title() || null"
+    [heading]="title()"
     [tasks]="tasks()"
     [look]="look()"
     (tasks-change)="onTasksChange($event)"
     (look-change)="onLookChange($event)"
+    (heading-change)="onHeadingChange($event)"
   >
     @if (pinned()) {
       <c2-icon-button
@@ -73,22 +78,3 @@
     <c2-border-beam class="todo__beam-light"></c2-border-beam>
   </span>
 }
-
-<!-- The list's title: c2-todo-list shows it but does not edit it. -->
-<c2-modal class="todo__rename" [open]="draftTitle() !== null" (close)="draftTitle.set(null)">
-  @if (draftTitle() !== null) {
-    <span slot="title">{{ title() ? 'Rename the list' : 'Name the list' }}</span>
-    <c2-text-field
-      #titleField
-      class="todo__rename-field"
-      aria-label="Title"
-      placeholder="Groceries, This week, Trip to Lisbon…"
-      [value]="draftTitle() ?? ''"
-      (input)="onTitleInput($event)"
-      (keydown)="onTitleKeydown($event)"
-    ></c2-text-field>
-    <p class="todo__rename-hint">The list picks its icon from the title.</p>
-    <c2-button slot="footer" class="todo__rename-cancel" (click)="draftTitle.set(null)">Cancel</c2-button>
-    <c2-button slot="footer" class="todo__rename-save" (click)="saveTitle()">Save</c2-button>
-  }
-</c2-modal>
