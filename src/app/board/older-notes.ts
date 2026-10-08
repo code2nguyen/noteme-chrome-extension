@@ -7,7 +7,22 @@ import { ArtBoardItem, ItemData } from '../store/models';
 /** The board keeps this many unpinned notes on it, the most recently edited; the rest wait in the Older notes sheet. */
 export const RECENT_COUNT = 10;
 
-export type NoteKind = 'Note' | 'Page' | 'Flow';
+export type NoteKind = 'Note' | 'Page' | 'Flow' | 'List';
+
+export const NOTE_KINDS: readonly NoteKind[] = ['Note', 'Page', 'Flow', 'List'];
+
+export function isNoteKind(value: unknown): value is NoteKind {
+  return NOTE_KINDS.includes(value as NoteKind);
+}
+
+/** How many notes there are of each kind, for the filters. */
+export function countKinds(notes: readonly { kind: NoteKind }[]): Record<NoteKind, number> {
+  const counts: Record<NoteKind, number> = { Note: 0, Page: 0, Flow: 0, List: 0 };
+  for (const note of notes) {
+    counts[note.kind]++;
+  }
+  return counts;
+}
 
 /** What the Older notes sheet (and the search) says about a note: its kind, first line and the rest of its text. */
 export interface NoteSummary {
@@ -27,8 +42,20 @@ export interface BoardSplit {
   older: ArtBoardItem[];
 }
 
+const KINDS: Record<ExtensionId, NoteKind> = {
+  [ExtensionId.TextNote]: 'Note',
+  [ExtensionId.Page]: 'Page',
+  [ExtensionId.Flow]: 'Flow',
+  [ExtensionId.TodoList]: 'List',
+};
+
 export function kindOf(item: ArtBoardItem): NoteKind {
-  return item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note';
+  return KINDS[item.extensionId] ?? 'Note';
+}
+
+/** What a note with nothing written in it is called. */
+export function untitled(kind: NoteKind): string {
+  return kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`;
 }
 
 /**
@@ -83,7 +110,7 @@ export function summarize(item: ArtBoardItem, data: Dictionary<ItemData>): NoteS
   return {
     id: item.id,
     kind,
-    label: lines[0] || (kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`),
+    label: lines[0] || untitled(kind),
     excerpt: lines.slice(1).join(' · '),
     edited: lastEdited(item, data),
   };

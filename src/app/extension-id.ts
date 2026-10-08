@@ -6,4 +6,6 @@ export enum ExtensionId {
   Page = 'ntm-page',
   /** Boxes and arrows (c2-flow), opened full screen. */
   Flow = 'ntm-flow',
+  /** Tasks to check off (c2-todo-list), worked through right on its card. */
+  TodoList = 'ntm-todo-list',
 }

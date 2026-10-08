@@ -20,6 +20,7 @@
       <c2-button value="Note">Notes · {{ counts().Note }}</c2-button>
       <c2-button value="Page">Pages · {{ counts().Page }}</c2-button>
       <c2-button value="Flow">Flows · {{ counts().Flow }}</c2-button>
+      <c2-button value="List">Lists · {{ counts().List }}</c2-button>
     </c2-button-group>
     <c2-menu class="archive__sort" placement="bottom-end" aria-label="Sort by" (menu-select)="onSort($event)">
       <c2-button slot="trigger" class="archive__sort-button">
@@ -68,6 +69,9 @@
                 }
                 @case ('Flow') {
                   <c2-feather-share-2></c2-feather-share-2>
+                }
+                @case ('List') {
+                  <c2-feather-check-square></c2-feather-check-square>
                 }
                 @default {
                   <c2-feather-edit-3></c2-feather-edit-3>
@@ -118,6 +122,9 @@
           @case ('Flow') {
             <c2-feather-share-2></c2-feather-share-2>
           }
+          @case ('List') {
+            <c2-feather-check-square></c2-feather-check-square>
+          }
           @default {
             <c2-feather-edit-3></c2-feather-edit-3>
           }
@@ -152,7 +159,7 @@
         <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
         Restore to the board
       </c2-button>
-      @if (note.kind !== 'Note') {
+      @if (opensFullScreen(note.item)) {
         <c2-button class="archive__secondary" (click)="open.emit(note.item)">Open</c2-button>
       }
       <c2-button class="archive__delete" (click)="askRemove([note])">

@@ -1,0 +1,99 @@
+// The list fills its masonry tile, and scrolls inside it once it has more tasks than fit.
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--c2-theme--radius-lg, 8px);
+}
+
+.todo__body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden auto;
+  border-radius: inherit;
+}
+
+.todo__list {
+  // A card among cards: the tile clips a shadow, and the board's cards are drawn tighter than a page-sized list.
+  --c2-todo-list__container--box-shadow: none;
+  --c2-todo-list__container--border: 1px solid var(--ntm-line);
+  --c2-todo-list__container--border-radius: var(--c2-theme--radius-lg, 8px);
+  --c2-todo-list__container--padding: 14px 16px;
+  --c2-todo-list__container--gap: 12px;
+  --c2-todo-list__heading--font-size: 17px;
+  --c2-todo-list__ring--size: 40px;
+}
+
+// Picked from the search: a light runs twice around the list, as around a note (note-card.scss).
+.todo__beam {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: todo-beam 6.6s ease-out forwards;
+}
+
+.todo__beam-light {
+  --c2-border-beam__beam--width: 2px;
+  --c2-border-beam__beam--size: 120px;
+  --c2-border-beam__beam--radius: var(--c2-theme--radius-lg, 8px);
+  --c2-border-beam__beam--color-from: var(--ntm-accent);
+  --c2-border-beam__beam--color-to: color-mix(in srgb, var(--ntm-accent) 30%, white);
+  --c2-border-beam__beam--opacity: 1;
+  --c2-border-beam__beam--filter: drop-shadow(0 0 6px color-mix(in srgb, var(--ntm-accent) 70%, transparent));
+  --c2-border-beam__beam--duration: 3s;
+}
+
+@keyframes todo-beam {
+  from {
+    opacity: 0;
+  }
+  8%,
+  85% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .todo__beam {
+    animation-name: todo-ring;
+  }
+}
+
+@keyframes todo-ring {
+  from,
+  85% {
+    box-shadow: inset 0 0 0 2px var(--ntm-accent);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}
+
+// The tile's actions in the list's header, the size of a note's.
+.todo__actions {
+  --c2-icon-button__icon--width: 14px;
+  --c2-icon-button__icon--height: 14px;
+  --c2-icon-button__state-layer--size: 28px;
+  --c2-icon-button__icon--color: var(--ntm-muted);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
+}
+
+// The move button drags the tile: a grab hand, and a touch drag moves it rather than scrolling the board.
+.todo__move {
+  touch-action: none;
+}
+
+.todo__move::part(button) {
+  cursor: grab;
+}
+
+.todo__unpin {
+  --c2-icon-button__icon--color: var(--ntm-accent);
+  --c2-icon-button__icon__hover--color: var(--ntm-accent);
+}

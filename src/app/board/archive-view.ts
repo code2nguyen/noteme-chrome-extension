@@ -15,9 +15,19 @@ import type { SelectionChangeEventDetail } from '@c2n/components/list';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 
 import { paperColorFor } from '../note-config';
+import { FULL_SCREEN } from '../services/search-results';
 import { editedLabel, getText } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
-import { archivedOn, groupByMonth, NoteKind, NoteSummary, plainLine, summarize } from './older-notes';
+import {
+  archivedOn,
+  countKinds,
+  groupByMonth,
+  isNoteKind,
+  NoteKind,
+  NoteSummary,
+  plainLine,
+  summarize,
+} from './older-notes';
 
 /** An archived note as the list shows it: its summary, and when it was archived. */
 export interface ArchivedNote extends NoteSummary {
@@ -58,6 +68,11 @@ export class ArchiveView {
   /** A page or a flow to open full screen. */
   readonly open = output<ArtBoardItem>();
 
+  /** Whether a note opens full screen (a page or a flow): a note or a to-do list is restored to be worked on. */
+  opensFullScreen(item: ArtBoardItem): boolean {
+    return !!FULL_SCREEN[item.extensionId];
+  }
+
   readonly kind = signal<'all' | NoteKind>('all');
   readonly sort = signal<ArchiveSort>('archived');
   readonly sortLabels = SORT_LABELS;
@@ -78,13 +93,7 @@ export class ArchiveView {
     return this.items().map((item) => ({ ...summarize(item, data), item, archived: archivedOn(item, data) }));
   });
 
-  readonly counts = computed(() => {
-    const counts = { Note: 0, Page: 0, Flow: 0 };
-    for (const note of this.notes()) {
-      counts[note.kind]++;
-    }
-    return counts;
-  });
+  readonly counts = computed(() => countKinds(this.notes()));
 
   /** The notes listed: of the chosen kind, in the chosen order. */
   readonly shown = computed(() => {
@@ -125,7 +134,7 @@ export class ArchiveView {
 
   onKind(event: Event): void {
     const value = (event as CustomEvent<{ value: string }>).detail.value;
-    this.kind.set(value === 'Note' || value === 'Page' || value === 'Flow' ? value : 'all');
+    this.kind.set(isNoteKind(value) ? value : 'all');
   }
 
   onSort(event: Event): void {

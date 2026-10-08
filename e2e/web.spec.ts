@@ -92,7 +92,7 @@ test('home shows the clock, a photo and the quote, and opens the board', async (
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(page.locator('.board__empty [slot="title"]')).toHaveText('Nothing here yet');
   await expect(page.locator('.board__empty [slot="description"]')).toHaveText(
-    'Press N for a note, P for a page or F for a flow.',
+    'Press N for a note, P for a page, F for a flow or T for a to-do list.',
   );
   await shot(page, '02-board-empty');
 });
@@ -324,6 +324,87 @@ test('N and P start a note or a page from the keyboard', async ({ page }) => {
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press('p');
   await expect(page).toHaveURL(/#\/page\//);
+});
+
+test('a to-do list is named, filled and checked off on its card, and kept after a reload', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await expect(list).toHaveCount(1);
+  // A new list opens with its title ready for writing, in place.
+  const title = list.getByRole('textbox', { name: 'List title' });
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Groceries');
+  await page.keyboard.press('Enter');
+  await expect(title).toHaveCount(0);
+  await expect(list.getByRole('heading', { name: 'Groceries' })).toBeVisible();
+
+  // The tile's actions come after the list's palette button, as on a note.
+  const order = await list
+    .locator('c2-todo-list .actions')
+    .evaluate((actions) => [...actions.children].map((child) => child.localName));
+  expect(order).toEqual(['button', 'slot']);
+
+  const add = list.getByRole('textbox', { name: 'New task' });
+  for (const task of ['Oat milk - the barista one', 'Bread']) {
+    await add.fill(task);
+    await add.press('Enter');
+  }
+  await expect(list.getByRole('checkbox')).toHaveCount(2);
+  await list.getByRole('checkbox').last().click();
+  await expect(list.getByRole('checkbox').last()).toHaveAttribute('aria-checked', 'true');
+  await shot(page, 'todo-list-card');
+
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage)
+          .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+          .map(([, value]) => JSON.parse(value))
+          .filter((data) => data.dataType === 'todo')
+          .map((data) => [
+            data.properties?.title,
+            JSON.parse(data.data).map((task: { label: string; done?: boolean }) => [task.label, !!task.done]),
+          ]),
+      ),
+    )
+    .toEqual([
+      [
+        'Groceries',
+        [
+          ['Oat milk', false],
+          ['Bread', true],
+        ],
+      ],
+    ]);
+
+  await page.reload();
+  await expect(list.getByRole('heading', { name: 'Groceries' })).toBeVisible();
+
+  // Renamed in place from its menu.
+  await list.getByRole('button', { name: 'To-do list actions' }).click();
+  await list.locator('c2-menu-item[value="rename"]').click();
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Weekend shopping');
+  await page.keyboard.press('Enter');
+  await expect(list.getByRole('heading', { name: 'Weekend shopping' })).toBeVisible();
+  await saved(page, 'Weekend shopping');
+  await expect(list.getByRole('checkbox')).toHaveCount(2);
+  await expect(list.getByRole('checkbox').last()).toHaveAttribute('aria-checked', 'true');
+
+  // The search finds it by a task, and lights it up on the board.
+  const search = page.locator('c2-autocomplete input');
+  await search.click();
+  await search.pressSequentially('oat milk');
+  const result = page.locator('c2-autocomplete c2-list-item', { hasText: 'Weekend shopping' });
+  await expect(result).toContainText('List ·');
+  await result.click();
+  await expect(list).toHaveClass(/todo--blink/);
+
+  // Deleted from its menu.
+  await list.getByRole('button', { name: 'To-do list actions' }).click();
+  await list.locator('c2-menu-item[value="delete"]').click();
+  await expect(list).toHaveCount(0);
 });
 
 test('delete a note', async ({ page }) => {

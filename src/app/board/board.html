@@ -84,6 +84,12 @@
       <span slot="description">Boxes and arrows</span>
       <span slot="shortcut">F</span>
     </c2-menu-item>
+    <c2-menu-item value="todo">
+      <c2-feather-check-square slot="prefix-icon"></c2-feather-check-square>
+      To-do list
+      <span slot="description">Tasks to check off</span>
+      <span slot="shortcut">T</span>
+    </c2-menu-item>
   </c2-menu>
 
   <c2-icon-button aria-label="Settings" tooltip="Settings" (click)="openSettings()">
@@ -97,7 +103,7 @@
       @if (inNotesView()) {
         <c2-symbol-create-new slot="media"></c2-symbol-create-new>
         <span slot="title">Nothing here yet</span>
-        <span slot="description">Press N for a note, P for a page or F for a flow.</span>
+        <span slot="description">Press N for a note, P for a page, F for a flow or T for a to-do list.</span>
         <c2-button slot="actions" class="board__empty-action" (click)="create(ExtensionId.TextNote)">
           <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
           Write a note
@@ -133,9 +139,7 @@
       @for (item of items(); track item.id) {
         <c2-masonry-item
           [attr.item-id]="item.id"
-          [attr.label]="
-            item.extensionId === ExtensionId.Page ? 'Page' : item.extensionId === ExtensionId.Flow ? 'Flow' : 'Note'
-          "
+          [attr.label]="tileLabel(item)"
           [rows]="rowsOf(item)"
           [cols]="item.gridPosition.screenColumns.Large"
           [colsLg]="item.gridPosition.screenColumns.Large"
@@ -212,6 +216,16 @@
                 {{ item.extensionId === ExtensionId.Page ? 'Delete this page' : 'Delete this flow' }}
               </c2-menu-item>
             </c2-menu>
+          } @else if (item.extensionId === ExtensionId.TodoList) {
+            <ntm-todo-card
+              [item]="item"
+              [pinned]="!!item.starred"
+              [autofocus]="item.id === focusItemId()"
+              (archive)="archive(item)"
+              (remove)="removeNote(item)"
+              (pin)="pin(item)"
+              (unpin)="unpin(item)"
+            />
           } @else {
             <ntm-note-card
               [item]="item"
@@ -253,6 +267,7 @@
     <c2-button value="Note">Notes · {{ olderCounts().Note }}</c2-button>
     <c2-button value="Page">Pages · {{ olderCounts().Page }}</c2-button>
     <c2-button value="Flow">Flows · {{ olderCounts().Flow }}</c2-button>
+    <c2-button value="List">Lists · {{ olderCounts().List }}</c2-button>
   </c2-button-group>
   <c2-search-field
     class="older__filter"
@@ -280,6 +295,9 @@
                 }
                 @case ('Flow') {
                   <c2-feather-share-2></c2-feather-share-2>
+                }
+                @case ('List') {
+                  <c2-feather-check-square></c2-feather-check-square>
                 }
                 @default {
                   <c2-feather-edit-3></c2-feather-edit-3>
@@ -310,7 +328,7 @@
                   <c2-phosphor-push-pin slot="prefix-icon" weight="fill"></c2-phosphor-push-pin>
                   Pin to the board
                 </c2-button>
-                @if (note.kind !== 'Note') {
+                @if (opensFullScreen(note.item)) {
                   <c2-button class="older__secondary" (click)="openOlder(note.item)">Open</c2-button>
                 }
                 <c2-button class="older__secondary" (click)="archive(note.item)">

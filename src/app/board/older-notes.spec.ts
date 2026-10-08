@@ -3,7 +3,7 @@ import { ExtensionId } from '../extension-id';
 import { noteDefaultProperties } from '../note-config';
 import { DataType } from '../store/models/data-type';
 import { ArtBoardItem, ItemData } from '../store/models';
-import { groupByMonth, plainLine, rearrange, splitBoard, summarize } from './older-notes';
+import { countKinds, groupByMonth, kindOf, plainLine, rearrange, splitBoard, summarize } from './older-notes';
 
 const day = (n: number) => `2026-09-${String(n).padStart(2, '0')}T10:00:00.000Z`;
 
@@ -87,5 +87,43 @@ describe('rearrange', () => {
       ['c', 5],
       ['b', 9],
     ]);
+  });
+});
+
+describe('to-do lists', () => {
+  const list = note('t', 0, false, ExtensionId.TodoList);
+  const tasks = JSON.stringify([
+    { id: '1', label: 'Oat milk', note: 'the barista one' },
+    { id: '2', label: 'Bread', done: true },
+    { id: '3', label: 'Old receipt', archived: true },
+  ]);
+  const data = (title?: string): ItemData =>
+    ({
+      id: 't',
+      data: tasks,
+      dataType: DataType.TODO,
+      properties: title ? { title } : {},
+      modifiedDate: day(3),
+      empty: false,
+    }) as ItemData;
+
+  it('are lists, counted apart from the other kinds', () => {
+    expect(kindOf(list)).toBe('List');
+    expect(countKinds([{ kind: 'List' }, { kind: 'Note' }, { kind: 'List' }])).toEqual({
+      Note: 1,
+      Page: 0,
+      Flow: 0,
+      List: 2,
+    });
+  });
+
+  it('are named by their title, then their tasks; archived tasks are left out', () => {
+    expect(summarize(list, { t: data('Groceries') })).toMatchObject({
+      kind: 'List',
+      label: 'Groceries',
+      excerpt: 'Oat milk — the barista one · Bread',
+    });
+    expect(summarize(list, { t: data() }).label).toBe('Oat milk — the barista one');
+    expect(summarize(list, {}).label).toBe('Untitled list');
   });
 });

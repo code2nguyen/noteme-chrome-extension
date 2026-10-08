@@ -56,6 +56,17 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
     colorIndex: 0,
     properties: {},
   },
+  // A to-do list is worked through right on its card, like a note: its tasks scroll inside the card.
+  [ExtensionId.TodoList]: {
+    extensionId: ExtensionId.TodoList,
+    gridPosition: {
+      order: -1,
+      rows: 10,
+      screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 },
+    },
+    colorIndex: 0,
+    properties: {},
+  },
 };
 
 /** What a note's paper is made of: its colour, and the pad and ruling picked in the paper picker. */

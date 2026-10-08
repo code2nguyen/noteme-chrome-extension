@@ -11,6 +11,12 @@ describe('syncsWithChromeProfile', () => {
     expect(syncsWithChromeProfile('ITEM_DATA__a', { dataType: DataType.DELTA, empty: false })).toBe(true);
   });
 
+  it('syncs to-do lists, once they hold something', () => {
+    expect(syncsWithChromeProfile('ART_BOARD_ITEM__t', { extensionId: ExtensionId.TodoList })).toBe(true);
+    expect(syncsWithChromeProfile('ITEM_DATA__t', { dataType: DataType.TODO, empty: false })).toBe(true);
+    expect(syncsWithChromeProfile('ITEM_DATA__t', { dataType: DataType.TODO, empty: true })).toBe(false);
+  });
+
   it('keeps pages and flows on the device', () => {
     expect(syncsWithChromeProfile('ART_BOARD_ITEM__f', { extensionId: ExtensionId.Flow })).toBe(false);
     expect(syncsWithChromeProfile('ITEM_DATA__f', { dataType: DataType.FLOW, empty: false })).toBe(false);
