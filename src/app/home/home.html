@@ -91,8 +91,8 @@
 
   <footer class="home__footer">
     @if (quote(); as q) {
-      <figure class="home__quote">
-        <blockquote>“{{ q.text }}”</blockquote>
+      <figure class="home__quote" [attr.lang]="q.lang">
+        <blockquote>{{ quoteMarks()[0] }}{{ q.text }}{{ quoteMarks()[1] }}</blockquote>
         <figcaption>{{ q.author }}</figcaption>
       </figure>
     }
