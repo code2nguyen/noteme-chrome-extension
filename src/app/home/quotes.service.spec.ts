@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadQuotes, Quote, quoteId, THEME_GAP } from './quotes';
+import { loadQuotes, Quote, QUOTE_LANGUAGES, quoteId, THEME_GAP } from './quotes';
 import { QUOTE_CHANGE_MS, QuoteService } from './quotes.service';
 
 const STATE_KEY = 'noteme-quote';
 const MINUTE = 60_000;
+// Going through a whole list takes a few seconds: a pick reads and writes the state each time, as a new tab does.
 
 let storage: Map<string, string>;
 
@@ -69,18 +70,39 @@ describe('QuoteService', () => {
     expect(stored.recent).toHaveLength(THEME_GAP);
   });
 
-  it('shows every quote once before any comes back', async () => {
+  it('shows every quote of a language once before any of them comes back', async () => {
     const service = new QuoteService();
     const quotes = await loadQuotes();
-    const shown = new Set<string>();
+    const sizes = new Map(QUOTE_LANGUAGES.map((lang) => [lang, quotes.filter((q) => q.lang === lang).length]));
+    const shown = new Map(QUOTE_LANGUAGES.map((lang) => [lang, new Set<string>()]));
+    let rounds = 0;
+    // Vietnamese, the shortest list, comes round first when it is the preferred one.
     for (let i = 0; i < quotes.length; i++) {
-      shown.add(quoteId((await service.current(i * QUOTE_CHANGE_MS))!));
+      const quote = (await service.current(i * QUOTE_CHANGE_MS, Math.random, 'vi'))!;
+      const inLanguage = shown.get(quote.lang)!;
+      if (inLanguage.has(quoteId(quote))) {
+        // A quote comes back only once all of its language have shown.
+        expect(inLanguage.size).toBe(sizes.get(quote.lang));
+        inLanguage.clear();
+        rounds++;
+      }
+      inLanguage.add(quoteId(quote));
     }
-    expect(shown.size).toBe(quotes.length);
-    expect(JSON.parse(storage.get(STATE_KEY)!).seen).toHaveLength(quotes.length);
-    await service.current(quotes.length * QUOTE_CHANGE_MS);
-    expect(JSON.parse(storage.get(STATE_KEY)!).seen).toHaveLength(1);
-  });
+    expect(rounds).toBeGreaterThan(0);
+  }, 20_000);
+
+  it('shows the preferred language about 70% of the time', async () => {
+    const service = new QuoteService();
+    const picks = 1000;
+    let preferred = 0;
+    for (let i = 0; i < picks; i++) {
+      if ((await service.current(i * QUOTE_CHANGE_MS, Math.random, 'vi'))!.lang === 'vi') {
+        preferred++;
+      }
+    }
+    expect(preferred / picks).toBeGreaterThan(0.64);
+    expect(preferred / picks).toBeLessThan(0.76);
+  }, 20_000);
 
   it('starts over from unreadable or broken storage', async () => {
     storage.set(STATE_KEY, '{not json');

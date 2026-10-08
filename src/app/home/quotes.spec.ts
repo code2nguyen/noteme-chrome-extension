@@ -1,10 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { loadQuotes, pickQuote, Quote, QUOTE_LANGUAGES, QUOTE_THEMES, quoteId, THEME_GAP } from './quotes';
+import {
+  loadQuotes,
+  pickQuote,
+  preferredQuoteLanguage,
+  PREFERRED_SHARE,
+  Quote,
+  QUOTE_LANGUAGES,
+  QUOTE_THEMES,
+  quoteId,
+  THEME_GAP,
+} from './quotes';
 
-const quote = (text: string, author: string, theme: Quote['theme'], tags = [text]): Quote => ({
+const quote = (
+  text: string,
+  author: string,
+  theme: Quote['theme'],
+  tags = [text],
+  lang: Quote['lang'] = 'en',
+): Quote => ({
   text,
   author,
-  lang: 'en',
+  lang,
   theme,
   tags,
 });
@@ -88,5 +104,30 @@ describe('pickQuote', () => {
     const previous = quote('p', 'A', 'time');
     const only = quote('q', 'A', 'time', ['p']);
     expect(pickQuote([only], [previous])).toBe(only);
+  });
+
+  it('draws the preferred language PREFERRED_SHARE of the time, and the others the rest', () => {
+    const en = quote('a', 'A', 'time', ['a'], 'en');
+    const fr = quote('b', 'B', 'hope', ['b'], 'fr');
+    const vi = quote('c', 'C', 'mind', ['c'], 'vi');
+    expect(pickQuote([en, fr, vi], [], sequence(PREFERRED_SHARE - 0.01, 0), 'fr')).toBe(fr);
+    expect(pickQuote([en, fr, vi], [], sequence(PREFERRED_SHARE, 0), 'fr')).toBe(en);
+    expect(pickQuote([en, fr, vi], [], sequence(PREFERRED_SHARE, 0.99), 'fr')).toBe(vi);
+  });
+
+  it('takes any language when the side drawn has no quote left', () => {
+    const en = quote('a', 'A', 'time', ['a'], 'en');
+    expect(pickQuote([en], [], sequence(0), 'fr')).toBe(en);
+    expect(pickQuote([en], [], sequence(0.99), 'en')).toBe(en);
+  });
+});
+
+describe('preferredQuoteLanguage', () => {
+  it('takes the first browser language it has quotes in, else English', () => {
+    expect(preferredQuoteLanguage(['fr-FR', 'en-US'])).toBe('fr');
+    expect(preferredQuoteLanguage(['de-DE', 'vi'])).toBe('vi');
+    expect(preferredQuoteLanguage(['VI-vn'])).toBe('vi');
+    expect(preferredQuoteLanguage(['de-DE'])).toBe('en');
+    expect(preferredQuoteLanguage([])).toBe('en');
   });
 });

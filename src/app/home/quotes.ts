@@ -76,6 +76,22 @@ async function readLists(): Promise<Quote[]> {
   ];
 }
 
+/** The share of new quotes in the preferred language; the rest are in the others. */
+export const PREFERRED_SHARE = 0.7;
+
+/** The quote language the browser asks for first (navigator.languages), English when it asks for none of them. */
+export function preferredQuoteLanguage(
+  locales: readonly string[] = typeof navigator === 'undefined' ? [] : navigator.languages,
+): QuoteLanguage {
+  for (const locale of locales) {
+    const lang = QUOTE_LANGUAGES.find((candidate) => locale.toLowerCase().split('-')[0] === candidate);
+    if (lang) {
+      return lang;
+    }
+  }
+  return 'en';
+}
+
 /** A short, stable id for a quote (FNV-1a of its language and text), so the shown ones fit in localStorage. */
 export function quoteId(quote: Pick<Quote, 'lang' | 'text'>): string {
   let hash = 0x811c9dc5;
@@ -108,12 +124,21 @@ function fits(quote: Quote, recent: readonly Quote[], gap: number, rule: Rule): 
  * A random quote of `candidates` that keeps the change from `recent` visible: of the candidates that meet the
  * strictest rule some of them meet, any one, at random. The rules give up the shared tag, then the theme's distance a
  * quote at a time, then the author; a theme other than the previous quote's goes last. Null with no candidates.
+ *
+ * With a `preferred` language, the pick is first narrowed to that language PREFERRED_SHARE of the time and to the
+ * others the rest of the time, unless no candidate is left in the side drawn.
  */
 export function pickQuote(
   candidates: readonly Quote[],
   recent: readonly Quote[],
   random: () => number = Math.random,
+  preferred?: QuoteLanguage,
 ): Quote | null {
+  if (preferred) {
+    const inPreferred = random() < PREFERRED_SHARE;
+    const side = candidates.filter((quote) => (quote.lang === preferred) === inPreferred);
+    candidates = side.length > 0 ? side : candidates;
+  }
   const any = (quotes: readonly Quote[]) => quotes[Math.floor(random() * quotes.length)];
   const rules: [number, Rule][] = [];
   for (let gap = THEME_GAP; gap > 0; gap--) {

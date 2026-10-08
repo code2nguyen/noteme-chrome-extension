@@ -1,5 +1,14 @@
 import { Injectable } from '@angular/core';
-import { loadQuotes, pickQuote, Quote, quoteId, THEME_GAP } from './quotes';
+import {
+  loadQuotes,
+  pickQuote,
+  preferredQuoteLanguage,
+  Quote,
+  QUOTE_LANGUAGES,
+  quoteId,
+  QuoteLanguage,
+  THEME_GAP,
+} from './quotes';
 
 const STATE_KEY = 'noteme-quote';
 /** How long a quote stays: tabs opened one after another keep it, a tab opened later brings a new one. */
@@ -10,7 +19,7 @@ interface State {
   shownAt: number;
   /** The last quotes shown, latest last: the one on screen, and the ones the next quote should differ from. */
   recent: Quote[];
-  /** Ids of the quotes shown since the list was last gone through, so none comes back before all have shown. */
+  /** Ids of the quotes shown since their language's list was last gone through: none comes back before the rest. */
   seen: string[];
 }
 
@@ -18,7 +27,7 @@ const EMPTY: State = { shownAt: 0, recent: [], seen: [] };
 
 /**
  * The quote on the new tab: a new one, at random, when a tab opens more than ten minutes after the last one changed,
- * else the same one. The state lives in localStorage, per device, like the background photo's.
+ * else the same one. New ones are mostly in the browser's language (PREFERRED_SHARE), the rest in the others. The state lives in localStorage, per device, like the background photo's.
  */
 @Injectable({ providedIn: 'root' })
 export class QuoteService {
@@ -30,12 +39,20 @@ export class QuoteService {
   }
 
   /** The quote to show now: the kept one, else a new one, which loads the lists first. */
-  async current(now = Date.now(), random: () => number = Math.random): Promise<Quote | null> {
-    return this.kept(now) ?? this.next(now, random);
+  async current(
+    now = Date.now(),
+    random: () => number = Math.random,
+    preferred: QuoteLanguage = preferredQuoteLanguage(),
+  ): Promise<Quote | null> {
+    return this.kept(now) ?? this.next(now, random, preferred);
   }
 
   /** A new quote, picked at random among those not shown yet this round, and remembered as shown at `now`. */
-  async next(now = Date.now(), random: () => number = Math.random): Promise<Quote | null> {
+  async next(
+    now = Date.now(),
+    random: () => number = Math.random,
+    preferred: QuoteLanguage = preferredQuoteLanguage(),
+  ): Promise<Quote | null> {
     const quotes = await loadQuotes();
     // Another tab may have picked while the lists loaded: both then show its quote.
     const picked = this.kept(now);
@@ -45,16 +62,23 @@ export class QuoteService {
     const state = readState();
     const ids = quotes.map(quoteId);
     const bundled = new Set(ids);
-    // Ids of quotes no longer bundled drop out; once every quote has shown, a new round starts.
+    // Ids of quotes no longer bundled drop out. A language whose quotes have all shown starts a new round on its own,
+    // so the preferred one, shown most, does not run out and leave only the others until every quote has shown.
     let seen = state.seen.filter((id) => bundled.has(id));
-    if (seen.length >= bundled.size) {
-      seen = [];
+    const seenSet = new Set(seen);
+    for (const lang of QUOTE_LANGUAGES) {
+      const inLanguage = ids.filter((_, i) => quotes[i].lang === lang);
+      if (inLanguage.every((id) => seenSet.has(id))) {
+        const done = new Set(inLanguage);
+        seen = seen.filter((id) => !done.has(id));
+      }
     }
     const shown = new Set(seen);
     const quote = pickQuote(
       quotes.filter((_, i) => !shown.has(ids[i])),
       state.recent,
       random,
+      preferred,
     );
     if (!quote) {
       return state.recent.at(-1) ?? null;
