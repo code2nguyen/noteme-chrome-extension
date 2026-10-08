@@ -33,6 +33,20 @@ describe('QuoteService', () => {
     expect(await service.current(start + QUOTE_CHANGE_MS + 9 * MINUTE)).toEqual(second);
   });
 
+  it('reads the kept quote at once, without loading the lists, and none once ten minutes have passed', async () => {
+    const service = new QuoteService();
+    expect(service.kept(0)).toBeNull();
+    const first = await service.next(0);
+    expect(service.kept(QUOTE_CHANGE_MS - 1)).toEqual(first);
+    expect(service.kept(QUOTE_CHANGE_MS)).toBeNull();
+  });
+
+  it('shows the quote another tab picked while the lists loaded', async () => {
+    const service = new QuoteService();
+    const other = await new QuoteService().next(0);
+    expect(await service.next(0)).toEqual(other);
+  });
+
   it('picks a new quote when the clock went back', async () => {
     const service = new QuoteService();
     const start = Date.UTC(2026, 9, 8, 9);

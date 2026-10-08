@@ -120,7 +120,7 @@ export class Home {
     const quoteOn = computed(() => this.settings().quote);
     effect(() => {
       const on = quoteOn();
-      untracked(() => void this.showQuote(on));
+      untracked(() => this.showQuote(on));
     });
 
     effect(() => {
@@ -166,13 +166,23 @@ export class Home {
     await this.present(this.backgrounds.next(options), options, (task) => void task());
   }
 
-  /** A new quote when the last one is over ten minutes old, else the same one; none while it is switched off. */
-  private async showQuote(on: boolean): Promise<void> {
+  /**
+   * The quote kept from the last ten minutes shows at once; a new one waits until the page has settled, so loading the
+   * lists never holds up the first paint, and fades in a moment later. None while it is switched off.
+   */
+  private showQuote(on: boolean): void {
     const run = ++this.quoteRun;
-    const quote = on ? await this.quotes.current().catch(() => null) : null;
-    if (run === this.quoteRun) {
-      this.quote.set(quote);
+    const kept = on ? this.quotes.kept() : null;
+    this.quote.set(kept);
+    if (!on || kept) {
+      return;
     }
+    afterIdle(async () => {
+      const quote = await this.quotes.next().catch(() => null);
+      if (run === this.quoteRun) {
+        this.quote.set(quote);
+      }
+    });
   }
 
   private showPhoto(options: BackgroundOptions): Promise<void> {

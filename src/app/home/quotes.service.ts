@@ -22,14 +22,27 @@ const EMPTY: State = { shownAt: 0, recent: [], seen: [] };
  */
 @Injectable({ providedIn: 'root' })
 export class QuoteService {
-  async current(now = Date.now(), random: () => number = Math.random): Promise<Quote | null> {
+  /** The quote still on screen when it is under ten minutes old, read at once; else null, and next() is due. */
+  kept(now = Date.now()): Quote | null {
     const state = readState();
     const last = state.recent.at(-1);
-    if (last && now >= state.shownAt && now - state.shownAt < QUOTE_CHANGE_MS) {
-      return last;
-    }
+    return last && now >= state.shownAt && now - state.shownAt < QUOTE_CHANGE_MS ? last : null;
+  }
 
+  /** The quote to show now: the kept one, else a new one, which loads the lists first. */
+  async current(now = Date.now(), random: () => number = Math.random): Promise<Quote | null> {
+    return this.kept(now) ?? this.next(now, random);
+  }
+
+  /** A new quote, picked at random among those not shown yet this round, and remembered as shown at `now`. */
+  async next(now = Date.now(), random: () => number = Math.random): Promise<Quote | null> {
     const quotes = await loadQuotes();
+    // Another tab may have picked while the lists loaded: both then show its quote.
+    const picked = this.kept(now);
+    if (picked) {
+      return picked;
+    }
+    const state = readState();
     const ids = new Set(quotes.map(quoteId));
     // Ids of quotes no longer bundled drop out; once every quote has shown, a new round starts.
     let seen = state.seen.filter((id) => ids.has(id));
@@ -43,7 +56,7 @@ export class QuoteService {
       random,
     );
     if (!quote) {
-      return last ?? null;
+      return state.recent.at(-1) ?? null;
     }
     writeState({
       shownAt: now,
