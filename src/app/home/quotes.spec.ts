@@ -13,4 +13,8 @@ describe('quoteOfTheDay', () => {
       expect(quote.author.length).toBeGreaterThan(0);
     }
   });
+
+  it('has no quote twice', () => {
+    expect(new Set(QUOTES.map((quote) => quote.text)).size).toBe(QUOTES.length);
+  });
 });
