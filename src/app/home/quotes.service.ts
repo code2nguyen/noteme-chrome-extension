@@ -43,15 +43,16 @@ export class QuoteService {
       return picked;
     }
     const state = readState();
-    const ids = new Set(quotes.map(quoteId));
+    const ids = quotes.map(quoteId);
+    const bundled = new Set(ids);
     // Ids of quotes no longer bundled drop out; once every quote has shown, a new round starts.
-    let seen = state.seen.filter((id) => ids.has(id));
-    if (seen.length >= ids.size) {
+    let seen = state.seen.filter((id) => bundled.has(id));
+    if (seen.length >= bundled.size) {
       seen = [];
     }
-    const unseen = new Set(seen);
+    const shown = new Set(seen);
     const quote = pickQuote(
-      quotes.filter((candidate) => !unseen.has(quoteId(candidate))),
+      quotes.filter((_, i) => !shown.has(ids[i])),
       state.recent,
       random,
     );
@@ -61,7 +62,7 @@ export class QuoteService {
     writeState({
       shownAt: now,
       recent: [...state.recent, quote].slice(-THEME_GAP),
-      seen: [...seen, quoteId(quote)],
+      seen: [...seen, ids[quotes.indexOf(quote)]],
     });
     return quote;
   }

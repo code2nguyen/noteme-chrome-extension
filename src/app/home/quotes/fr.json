@@ -1,1 +1,1917 @@
-[]
+[
+  {
+    "text": "Nos vertus ne sont, le plus souvent, que des vices déguisés.",
+    "author": "François de La Rochefoucauld",
+    "theme": "character",
+    "tags": ["virtue", "self-knowledge"]
+  },
+  {
+    "text": "La philosophie triomphe aisément des maux passés et des maux à venir ; mais les maux présents triomphent d'elle.",
+    "author": "François de La Rochefoucauld",
+    "theme": "mind",
+    "tags": ["adversity", "wisdom"]
+  },
+  {
+    "text": "Si nous n'avions point de défauts, nous ne prendrions pas tant de plaisir à en remarquer dans les autres.",
+    "author": "François de La Rochefoucauld",
+    "theme": "character",
+    "tags": ["judgement", "humility"]
+  },
+  {
+    "text": "On n'est jamais si heureux ni si malheureux qu'on s'imagine.",
+    "author": "François de La Rochefoucauld",
+    "theme": "mind",
+    "tags": ["happiness", "perception"]
+  },
+  {
+    "text": "C'est une grande folie de vouloir être sage tout seul.",
+    "author": "François de La Rochefoucauld",
+    "theme": "learning",
+    "tags": ["wisdom", "humility"]
+  },
+  {
+    "text": "Il est plus honteux de se défier de ses amis que d'en être trompé.",
+    "author": "François de La Rochefoucauld",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  {
+    "text": "Tout le monde se plaint de sa mémoire, et personne ne se plaint de son jugement.",
+    "author": "François de La Rochefoucauld",
+    "theme": "mind",
+    "tags": ["judgement", "humor"]
+  },
+  {
+    "text": "Il est plus aisé d'être sage pour les autres que de l'être pour soi-même.",
+    "author": "François de La Rochefoucauld",
+    "theme": "mind",
+    "tags": ["wisdom", "self-knowledge"]
+  },
+  {
+    "text": "On ne donne rien si libéralement que ses conseils.",
+    "author": "François de La Rochefoucauld",
+    "theme": "character",
+    "tags": ["wisdom", "humor"]
+  },
+  {
+    "text": "L'absence diminue les médiocres passions, et augmente les grandes, comme le vent éteint les bougies et allume le feu.",
+    "author": "François de La Rochefoucauld",
+    "theme": "character",
+    "tags": ["love"]
+  },
+  {
+    "text": "La véritable éloquence consiste à dire tout ce qu'il faut, et à ne dire que ce qu'il faut.",
+    "author": "François de La Rochefoucauld",
+    "theme": "simplicity",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Il faut de plus grandes vertus pour soutenir la bonne fortune que la mauvaise.",
+    "author": "François de La Rochefoucauld",
+    "theme": "character",
+    "tags": ["fortune", "virtue"]
+  },
+  {
+    "text": "L'esprit est toujours la dupe du cœur.",
+    "author": "François de La Rochefoucauld",
+    "theme": "mind",
+    "tags": ["heart"]
+  },
+  {
+    "text": "Nous promettons selon nos espérances, et nous tenons selon nos craintes.",
+    "author": "François de La Rochefoucauld",
+    "theme": "character",
+    "tags": ["integrity", "fear"]
+  },
+  {
+    "text": "La parfaite valeur est de faire sans témoins ce qu'on serait capable de faire devant tout le monde.",
+    "author": "François de La Rochefoucauld",
+    "theme": "courage",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Le vrai moyen d'être trompé, c'est de se croire plus fin que les autres.",
+    "author": "François de La Rochefoucauld",
+    "theme": "mind",
+    "tags": ["humility", "pride"]
+  },
+  {
+    "text": "Il n'y a point de déguisement qui puisse longtemps cacher l'amour où il est, ni le feindre où il n'est pas.",
+    "author": "François de La Rochefoucauld",
+    "theme": "kindness",
+    "tags": ["love", "truth"]
+  },
+  {
+    "text": "Peu de gens savent être vieux.",
+    "author": "François de La Rochefoucauld",
+    "theme": "time",
+    "tags": ["aging"]
+  },
+  {
+    "text": "Rien n'empêche tant d'être naturel que l'envie de le paraître.",
+    "author": "François de La Rochefoucauld",
+    "theme": "simplicity",
+    "tags": ["vanity"]
+  },
+  {
+    "text": "Les vieillards aiment à donner de bons préceptes, pour se consoler de n'être plus en état de donner de mauvais exemples.",
+    "author": "François de La Rochefoucauld",
+    "theme": "time",
+    "tags": ["aging", "humor"]
+  },
+  {
+    "text": "La constance des sages n'est que l'art de renfermer leur agitation dans le cœur.",
+    "author": "François de La Rochefoucauld",
+    "theme": "perseverance",
+    "tags": ["self-mastery", "wisdom"]
+  },
+  {
+    "text": "Rien ne sert de courir ; il faut partir à point.",
+    "author": "Jean de La Fontaine",
+    "theme": "perseverance",
+    "tags": ["haste", "patience"]
+  },
+  {
+    "text": "Patience et longueur de temps font plus que force ni que rage.",
+    "author": "Jean de La Fontaine",
+    "theme": "perseverance",
+    "tags": ["patience"]
+  },
+  {
+    "text": "Il faut, autant qu'on peut, obliger tout le monde : on a souvent besoin d'un plus petit que soi.",
+    "author": "Jean de La Fontaine",
+    "theme": "kindness",
+    "tags": ["humility"]
+  },
+  { "text": "Aide-toi, le Ciel t'aidera.", "author": "Jean de La Fontaine", "theme": "action", "tags": ["diligence"] },
+  {
+    "text": "Tout flatteur vit aux dépens de celui qui l'écoute.",
+    "author": "Jean de La Fontaine",
+    "theme": "character",
+    "tags": ["vanity"]
+  },
+  {
+    "text": "Travaillez, prenez de la peine : c'est le fonds qui manque le moins.",
+    "author": "Jean de La Fontaine",
+    "theme": "perseverance",
+    "tags": ["work", "diligence"]
+  },
+  {
+    "text": "Il se faut entr'aider ; c'est la loi de nature.",
+    "author": "Jean de La Fontaine",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Plus fait douceur que violence.",
+    "author": "Jean de La Fontaine",
+    "theme": "kindness",
+    "tags": ["patience"]
+  },
+  {
+    "text": "Je plie, et ne romps pas.",
+    "author": "Jean de La Fontaine",
+    "theme": "perseverance",
+    "tags": ["resilience", "adversity"]
+  },
+  {
+    "text": "Il ne faut jamais vendre la peau de l'ours qu'on ne l'ait mis par terre.",
+    "author": "Jean de La Fontaine",
+    "theme": "action",
+    "tags": ["haste"]
+  },
+  {
+    "text": "Qu'un ami véritable est une douce chose !",
+    "author": "Jean de La Fontaine",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  {
+    "text": "En toute chose il faut considérer la fin.",
+    "author": "Jean de La Fontaine",
+    "theme": "action",
+    "tags": ["judgement", "purpose"]
+  },
+  {
+    "text": "L'avarice perd tout en voulant tout gagner.",
+    "author": "Jean de La Fontaine",
+    "theme": "simplicity",
+    "tags": ["wealth", "desire"]
+  },
+  {
+    "text": "Rien n'est si dangereux qu'un ignorant ami ; mieux vaudrait un sage ennemi.",
+    "author": "Jean de La Fontaine",
+    "theme": "learning",
+    "tags": ["friendship", "wisdom"]
+  },
+  {
+    "text": "Ne forçons point notre talent, nous ne ferions rien avec grâce.",
+    "author": "Jean de La Fontaine",
+    "theme": "simplicity",
+    "tags": ["self-knowledge"]
+  },
+  {
+    "text": "Laissez dire les sots : le savoir a son prix.",
+    "author": "Jean de La Fontaine",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Petit poisson deviendra grand, pourvu que Dieu lui prête vie.",
+    "author": "Jean de La Fontaine",
+    "theme": "time",
+    "tags": ["patience", "growth"]
+  },
+  {
+    "text": "Ne t'attends qu'à toi seul : c'est un commun proverbe.",
+    "author": "Jean de La Fontaine",
+    "theme": "action",
+    "tags": ["self-mastery"]
+  },
+  {
+    "text": "La mort ne surprend point le sage ; il est toujours prêt à partir.",
+    "author": "Jean de La Fontaine",
+    "theme": "time",
+    "tags": ["mortality", "wisdom"]
+  },
+  {
+    "text": "Garde-toi, tant que tu vivras, de juger des gens sur la mine.",
+    "author": "Jean de La Fontaine",
+    "theme": "character",
+    "tags": ["judgement"]
+  },
+  {
+    "text": "Il est bon de parler, et meilleur de se taire, mais tous deux sont mauvais alors qu'ils sont outrés.",
+    "author": "Jean de La Fontaine",
+    "theme": "simplicity",
+    "tags": ["balance"]
+  },
+  {
+    "text": "Tout est dit, et l'on vient trop tard depuis plus de sept mille ans qu'il y a des hommes et qui pensent.",
+    "author": "Jean de La Bruyère",
+    "theme": "learning",
+    "tags": ["writing", "humility"]
+  },
+  {
+    "text": "Le plaisir de la critique nous ôte celui d'être vivement touchés de très belles choses.",
+    "author": "Jean de La Bruyère",
+    "theme": "mind",
+    "tags": ["beauty", "judgement"]
+  },
+  {
+    "text": "C'est un métier que de faire un livre, comme de faire une pendule.",
+    "author": "Jean de La Bruyère",
+    "theme": "perseverance",
+    "tags": ["writing", "work"]
+  },
+  {
+    "text": "Il faut rire avant que d'être heureux, de peur de mourir sans avoir ri.",
+    "author": "Jean de La Bruyère",
+    "theme": "hope",
+    "tags": ["laughter", "happiness"]
+  },
+  {
+    "text": "Il n'y a pour l'homme que trois événements : naître, vivre et mourir. Il ne se sent pas naître, il souffre à mourir, et il oublie de vivre.",
+    "author": "Jean de La Bruyère",
+    "theme": "time",
+    "tags": ["life", "mortality"]
+  },
+  {
+    "text": "La plupart des hommes emploient la première partie de leur vie à rendre l'autre misérable.",
+    "author": "Jean de La Bruyère",
+    "theme": "time",
+    "tags": ["life", "habits"]
+  },
+  {
+    "text": "L'esprit de la conversation consiste bien moins à en montrer beaucoup qu'à en faire trouver aux autres.",
+    "author": "Jean de La Bruyère",
+    "theme": "kindness",
+    "tags": ["humility"]
+  },
+  {
+    "text": "Ceux qui emploient mal leur temps sont les premiers à se plaindre de sa brièveté.",
+    "author": "Jean de La Bruyère",
+    "theme": "time",
+    "tags": ["focus"]
+  },
+  {
+    "text": "La modestie est au mérite ce que les ombres sont aux figures dans un tableau : elle lui donne de la force et du relief.",
+    "author": "Jean de La Bruyère",
+    "theme": "character",
+    "tags": ["modesty"]
+  },
+  {
+    "text": "L'on ne vit point assez pour profiter de ses fautes.",
+    "author": "Jean de La Bruyère",
+    "theme": "learning",
+    "tags": ["mistakes", "life"]
+  },
+  {
+    "text": "Les enfants n'ont ni passé ni avenir, et, ce qui ne nous arrive guère, ils jouissent du présent.",
+    "author": "Jean de La Bruyère",
+    "theme": "time",
+    "tags": ["now", "joy"]
+  },
+  {
+    "text": "L'on espère de vieillir, et l'on craint la vieillesse ; c'est-à-dire l'on aime la vie et l'on fuit la mort.",
+    "author": "Jean de La Bruyère",
+    "theme": "time",
+    "tags": ["aging", "life"]
+  },
+  {
+    "text": "Être avec des gens qu'on aime, cela suffit.",
+    "author": "Jean de La Bruyère",
+    "theme": "simplicity",
+    "tags": ["love", "happiness"]
+  },
+  {
+    "text": "Le cœur a ses raisons que la raison ne connaît point.",
+    "author": "Blaise Pascal",
+    "theme": "mind",
+    "tags": ["heart"]
+  },
+  {
+    "text": "L'homme n'est qu'un roseau, le plus faible de la nature ; mais c'est un roseau pensant.",
+    "author": "Blaise Pascal",
+    "theme": "mind",
+    "tags": ["thoughts"]
+  },
+  {
+    "text": "Tout le malheur des hommes vient d'une seule chose, qui est de ne savoir pas demeurer en repos dans une chambre.",
+    "author": "Blaise Pascal",
+    "theme": "simplicity",
+    "tags": ["solitude", "peace"]
+  },
+  {
+    "text": "Travaillons donc à bien penser : voilà le principe de la morale.",
+    "author": "Blaise Pascal",
+    "theme": "mind",
+    "tags": ["thoughts", "virtue"]
+  },
+  {
+    "text": "Le silence éternel de ces espaces infinis m'effraie.",
+    "author": "Blaise Pascal",
+    "theme": "nature",
+    "tags": ["reflection"]
+  },
+  {
+    "text": "L'homme n'est ni ange ni bête, et le malheur veut que qui veut faire l'ange fait la bête.",
+    "author": "Blaise Pascal",
+    "theme": "character",
+    "tags": ["humility"]
+  },
+  {
+    "text": "Je n'ai fait celle-ci plus longue que parce que je n'ai pas eu le loisir de la faire plus courte.",
+    "author": "Blaise Pascal",
+    "theme": "simplicity",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Le présent n'est jamais notre fin ; le passé et le présent sont nos moyens ; le seul avenir est notre fin. Ainsi nous ne vivons jamais, mais nous espérons de vivre.",
+    "author": "Blaise Pascal",
+    "theme": "time",
+    "tags": ["now"]
+  },
+  {
+    "text": "On se persuade mieux, pour l'ordinaire, par les raisons qu'on a soi-même trouvées, que par celles qui sont venues dans l'esprit des autres.",
+    "author": "Blaise Pascal",
+    "theme": "learning",
+    "tags": ["experience"]
+  },
+  {
+    "text": "Peu de chose nous console, parce que peu de chose nous afflige.",
+    "author": "Blaise Pascal",
+    "theme": "simplicity",
+    "tags": ["perception"]
+  },
+  {
+    "text": "Quand on voit le style naturel, on est tout étonné et ravi ; car on s'attendait de voir un auteur, et on trouve un homme.",
+    "author": "Blaise Pascal",
+    "theme": "simplicity",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Par l'espace, l'univers me comprend et m'engloutit comme un point ; par la pensée, je le comprends.",
+    "author": "Blaise Pascal",
+    "theme": "mind",
+    "tags": ["thoughts", "greatness"]
+  },
+  {
+    "text": "Le temps guérit les douleurs et les querelles, parce qu'on change : on n'est plus la même personne.",
+    "author": "Blaise Pascal",
+    "theme": "time",
+    "tags": ["change"]
+  },
+  {
+    "text": "Notre nature est dans le mouvement ; le repos entier est la mort.",
+    "author": "Blaise Pascal",
+    "theme": "action",
+    "tags": ["change"]
+  },
+  {
+    "text": "La nature a des perfections pour montrer qu'elle est l'image de Dieu, et des défauts pour montrer qu'elle n'en est que l'image.",
+    "author": "Blaise Pascal",
+    "theme": "nature",
+    "tags": ["beauty"]
+  },
+  {
+    "text": "Parce que c'était lui, parce que c'était moi.",
+    "author": "Michel de Montaigne",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  { "text": "Que sais-je ?", "author": "Michel de Montaigne", "theme": "learning", "tags": ["doubt", "humility"] },
+  {
+    "text": "Je voudrais qu'on fût soigneux de lui choisir un conducteur qui eût plutôt la tête bien faite que bien pleine.",
+    "author": "Michel de Montaigne",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Chaque homme porte la forme entière de l'humaine condition.",
+    "author": "Michel de Montaigne",
+    "theme": "character",
+    "tags": ["self-knowledge"]
+  },
+  {
+    "text": "Je ne peins pas l'être. Je peins le passage.",
+    "author": "Michel de Montaigne",
+    "theme": "time",
+    "tags": ["change", "writing"]
+  },
+  {
+    "text": "Je suis moi-même la matière de mon livre.",
+    "author": "Michel de Montaigne",
+    "theme": "learning",
+    "tags": ["self-knowledge", "writing"]
+  },
+  {
+    "text": "Quand je danse, je danse ; quand je dors, je dors.",
+    "author": "Michel de Montaigne",
+    "theme": "simplicity",
+    "tags": ["focus", "now"]
+  },
+  {
+    "text": "Il faut être toujours botté et prêt à partir.",
+    "author": "Michel de Montaigne",
+    "theme": "time",
+    "tags": ["mortality"]
+  },
+  {
+    "text": "La plus grande chose du monde, c'est de savoir être à soi.",
+    "author": "Michel de Montaigne",
+    "theme": "character",
+    "tags": ["self-knowledge", "solitude"]
+  },
+  {
+    "text": "Savoir par cœur n'est pas savoir.",
+    "author": "Michel de Montaigne",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Qui craint de souffrir, il souffre déjà de ce qu'il craint.",
+    "author": "Michel de Montaigne",
+    "theme": "courage",
+    "tags": ["fear", "worry"]
+  },
+  {
+    "text": "Mon métier et mon art, c'est vivre.",
+    "author": "Michel de Montaigne",
+    "theme": "action",
+    "tags": ["life", "purpose"]
+  },
+  {
+    "text": "Nul vent ne fait pour celui qui n'a point de port destiné.",
+    "author": "Michel de Montaigne",
+    "theme": "action",
+    "tags": ["purpose"]
+  },
+  {
+    "text": "L'utilité du vivre n'est pas en l'espace, elle est en l'usage.",
+    "author": "Michel de Montaigne",
+    "theme": "time",
+    "tags": ["life"]
+  },
+  {
+    "text": "Il se faut prêter à autrui et ne se donner qu'à soi-même.",
+    "author": "Michel de Montaigne",
+    "theme": "character",
+    "tags": ["balance", "self-mastery"]
+  },
+  {
+    "text": "Laissons faire un peu à nature : elle entend mieux ses affaires que nous.",
+    "author": "Michel de Montaigne",
+    "theme": "nature",
+    "tags": ["health", "patience"]
+  },
+  {
+    "text": "Les abeilles pillotent deçà delà les fleurs, mais elles en font après le miel, qui est tout leur ; ce n'est plus thym ni marjolaine.",
+    "author": "Michel de Montaigne",
+    "theme": "learning",
+    "tags": ["reading", "growth"]
+  },
+  {
+    "text": "La parole est moitié à celui qui parle, moitié à celui qui l'écoute.",
+    "author": "Michel de Montaigne",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  {
+    "text": "Il n'est désir plus naturel que le désir de connaissance.",
+    "author": "Michel de Montaigne",
+    "theme": "learning",
+    "tags": ["knowledge", "desire"]
+  },
+  {
+    "text": "La vieillesse nous attache plus de rides en l'esprit qu'au visage.",
+    "author": "Michel de Montaigne",
+    "theme": "time",
+    "tags": ["aging"]
+  },
+  { "text": "Il faut cultiver notre jardin.", "author": "Voltaire", "theme": "action", "tags": ["work", "simplicity"] },
+  { "text": "Le mieux est l'ennemi du bien.", "author": "Voltaire", "theme": "simplicity", "tags": ["excellence"] },
+  {
+    "text": "Le travail éloigne de nous trois grands maux : l'ennui, le vice et le besoin.",
+    "author": "Voltaire",
+    "theme": "action",
+    "tags": ["work"]
+  },
+  {
+    "text": "Le secret d'ennuyer est celui de tout dire.",
+    "author": "Voltaire",
+    "theme": "simplicity",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Le doute n'est pas une condition agréable, mais la certitude est absurde.",
+    "author": "Voltaire",
+    "theme": "mind",
+    "tags": ["doubt"]
+  },
+  {
+    "text": "Les mortels sont égaux ; ce n'est point la naissance, c'est la seule vertu qui fait la différence.",
+    "author": "Voltaire",
+    "theme": "character",
+    "tags": ["virtue"]
+  },
+  {
+    "text": "Travaillons sans raisonner, c'est le seul moyen de rendre la vie supportable.",
+    "author": "Voltaire",
+    "theme": "action",
+    "tags": ["work"]
+  },
+  {
+    "text": "L'écriture est la peinture de la voix ; plus elle est ressemblante, meilleure elle est.",
+    "author": "Voltaire",
+    "theme": "learning",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Les livres les plus utiles sont ceux dont les lecteurs font eux-mêmes la moitié.",
+    "author": "Voltaire",
+    "theme": "learning",
+    "tags": ["reading"]
+  },
+  {
+    "text": "Le paradis terrestre est où je suis.",
+    "author": "Voltaire",
+    "theme": "hope",
+    "tags": ["happiness", "now"]
+  },
+  {
+    "text": "Qui n'a pas l'esprit de son âge, de son âge a tout le malheur.",
+    "author": "Voltaire",
+    "theme": "time",
+    "tags": ["aging"]
+  },
+  {
+    "text": "Vivre, ce n'est pas respirer, c'est agir.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "action",
+    "tags": ["life"]
+  },
+  {
+    "text": "L'homme qui a le plus vécu n'est pas celui qui a compté le plus d'années, mais celui qui a le plus senti la vie.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "time",
+    "tags": ["life"]
+  },
+  {
+    "text": "On façonne les plantes par la culture, et les hommes par l'éducation.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "learning",
+    "tags": ["growth"]
+  },
+  {
+    "text": "Jamais la nature ne nous trompe ; c'est toujours nous qui nous trompons.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "nature",
+    "tags": ["mistakes"]
+  },
+  {
+    "text": "La marche a quelque chose qui anime et avive mes idées : je ne puis presque penser quand je reste en place.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "nature",
+    "tags": ["thoughts", "journey"]
+  },
+  {
+    "text": "Le plus lent à promettre est toujours le plus fidèle à tenir.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Malheur à qui n'a plus rien à désirer !",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "hope",
+    "tags": ["desire"]
+  },
+  {
+    "text": "On n'est curieux qu'à proportion qu'on est instruit.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Le pays des chimères est en ce monde le seul digne d'être habité.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "hope",
+    "tags": ["dreams", "imagination"]
+  },
+  {
+    "text": "Il n'y a point de bonheur sans courage, ni de vertu sans combat.",
+    "author": "Jean-Jacques Rousseau",
+    "theme": "courage",
+    "tags": ["happiness", "virtue"]
+  },
+  {
+    "text": "Il faut tout examiner, tout remuer sans exception et sans ménagement.",
+    "author": "Denis Diderot",
+    "theme": "learning",
+    "tags": ["knowledge", "boldness"]
+  },
+  {
+    "text": "On avale à pleine gorgée le mensonge qui nous flatte, et l'on boit goutte à goutte une vérité qui nous est amère.",
+    "author": "Denis Diderot",
+    "theme": "mind",
+    "tags": ["truth"]
+  },
+  {
+    "text": "Ce qu'on n'a jamais mis en question n'a point été prouvé.",
+    "author": "Denis Diderot",
+    "theme": "mind",
+    "tags": ["doubt"]
+  },
+  {
+    "text": "On doit exiger de moi que je cherche la vérité, mais non que je la trouve.",
+    "author": "Denis Diderot",
+    "theme": "learning",
+    "tags": ["truth"]
+  },
+  {
+    "text": "Il n'y a que les passions, et les grandes passions, qui puissent élever l'âme aux grandes choses.",
+    "author": "Denis Diderot",
+    "theme": "courage",
+    "tags": ["desire", "greatness"]
+  },
+  {
+    "text": "Les grandes pensées viennent du cœur.",
+    "author": "Vauvenargues",
+    "theme": "mind",
+    "tags": ["heart", "thoughts"]
+  },
+  {
+    "text": "La clarté est la bonne foi des philosophes.",
+    "author": "Vauvenargues",
+    "theme": "simplicity",
+    "tags": ["honesty"]
+  },
+  {
+    "text": "Pour exécuter de grandes choses, il faut vivre comme si on ne devait jamais mourir.",
+    "author": "Vauvenargues",
+    "theme": "action",
+    "tags": ["ambition"]
+  },
+  { "text": "La patience est l'art d'espérer.", "author": "Vauvenargues", "theme": "hope", "tags": ["patience"] },
+  {
+    "text": "L'espérance anime le sage, et leurre le présomptueux et l'indolent, qui se reposent inconsidérément sur ses promesses.",
+    "author": "Vauvenargues",
+    "theme": "hope",
+    "tags": ["wisdom"]
+  },
+  {
+    "text": "La raison nous trompe plus souvent que la nature.",
+    "author": "Vauvenargues",
+    "theme": "nature",
+    "tags": ["judgement"]
+  },
+  {
+    "text": "On ne peut être juste si on n'est humain.",
+    "author": "Vauvenargues",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Le sentiment de nos forces les augmente.",
+    "author": "Vauvenargues",
+    "theme": "courage",
+    "tags": ["growth"]
+  },
+  {
+    "text": "La pensée de la mort nous trompe, car elle nous fait oublier de vivre.",
+    "author": "Vauvenargues",
+    "theme": "time",
+    "tags": ["mortality", "life"]
+  },
+  {
+    "text": "Les conseils de la vieillesse éclairent sans échauffer, comme le soleil de l'hiver.",
+    "author": "Vauvenargues",
+    "theme": "time",
+    "tags": ["aging", "wisdom"]
+  },
+  {
+    "text": "Qui sait tout souffrir peut tout oser.",
+    "author": "Vauvenargues",
+    "theme": "courage",
+    "tags": ["boldness", "resilience"]
+  },
+  {
+    "text": "La générosité donne moins de conseils que de secours.",
+    "author": "Vauvenargues",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "L'activité fait plus de fortunes que la prudence.",
+    "author": "Vauvenargues",
+    "theme": "action",
+    "tags": ["fortune", "boldness"]
+  },
+  {
+    "text": "La plus perdue de toutes les journées est celle où l'on n'a pas ri.",
+    "author": "Nicolas de Chamfort",
+    "theme": "hope",
+    "tags": ["laughter", "today"]
+  },
+  {
+    "text": "Le plaisir peut s'appuyer sur l'illusion ; mais le bonheur repose sur la vérité.",
+    "author": "Nicolas de Chamfort",
+    "theme": "hope",
+    "tags": ["happiness", "truth"]
+  },
+  {
+    "text": "En vivant et en voyant les hommes, il faut que le cœur se brise ou se bronze.",
+    "author": "Nicolas de Chamfort",
+    "theme": "courage",
+    "tags": ["heart", "resilience"]
+  },
+  {
+    "text": "Il faut être juste avant d'être généreux, comme on a des chemises avant d'avoir des dentelles.",
+    "author": "Nicolas de Chamfort",
+    "theme": "kindness",
+    "tags": ["goodness", "humor"]
+  },
+  {
+    "text": "L'homme arrive novice à chaque âge de la vie.",
+    "author": "Nicolas de Chamfort",
+    "theme": "learning",
+    "tags": ["aging", "experience"]
+  },
+  {
+    "text": "Le bonheur n'est pas chose aisée : il est très difficile de le trouver en nous, et impossible de le trouver ailleurs.",
+    "author": "Nicolas de Chamfort",
+    "theme": "simplicity",
+    "tags": ["happiness", "self-knowledge"]
+  },
+  {
+    "text": "Jouis et fais jouir, sans faire de mal ni à toi, ni à personne, voilà, je crois, toute la morale.",
+    "author": "Nicolas de Chamfort",
+    "theme": "kindness",
+    "tags": ["joy", "goodness"]
+  },
+  {
+    "text": "Enseigner, c'est apprendre deux fois.",
+    "author": "Joseph Joubert",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Le but de la dispute ou de la discussion ne doit pas être la victoire, mais l'amélioration.",
+    "author": "Joseph Joubert",
+    "theme": "learning",
+    "tags": ["growth", "humility"]
+  },
+  {
+    "text": "Il vaut mieux remuer une question sans la décider, que la décider sans la remuer.",
+    "author": "Joseph Joubert",
+    "theme": "mind",
+    "tags": ["reflection", "doubt"]
+  },
+  {
+    "text": "Les enfants ont plus besoin de modèles que de critiques.",
+    "author": "Joseph Joubert",
+    "theme": "kindness",
+    "tags": ["learning"]
+  },
+  {
+    "text": "La politesse est la fleur de l'humanité.",
+    "author": "Joseph Joubert",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Une pensée est une chose aussi réelle qu'un boulet de canon.",
+    "author": "Joseph Joubert",
+    "theme": "mind",
+    "tags": ["thoughts"]
+  },
+  {
+    "text": "Pour bien écrire, il faut une facilité naturelle et une difficulté acquise.",
+    "author": "Joseph Joubert",
+    "theme": "perseverance",
+    "tags": ["writing", "practice"]
+  },
+  {
+    "text": "Ce n'est pas ma phrase que je polis, mais mon idée.",
+    "author": "Joseph Joubert",
+    "theme": "mind",
+    "tags": ["writing", "thoughts"]
+  },
+  { "text": "L'imagination est l'œil de l'âme.", "author": "Joseph Joubert", "theme": "mind", "tags": ["imagination"] },
+  {
+    "text": "Tout ce qui est exquis mûrit lentement.",
+    "author": "Joseph Joubert",
+    "theme": "perseverance",
+    "tags": ["patience", "excellence"]
+  },
+  {
+    "text": "Je n'ai jamais eu de chagrin qu'une heure de lecture ne m'ait ôté.",
+    "author": "Montesquieu",
+    "theme": "hope",
+    "tags": ["reading"]
+  },
+  {
+    "text": "Pour faire de grandes choses, il ne faut pas être un si grand génie ; il ne faut pas être au-dessus des hommes, il faut être avec eux.",
+    "author": "Montesquieu",
+    "theme": "kindness",
+    "tags": ["greatness", "humility"]
+  },
+  {
+    "text": "Il ne s'agit pas de faire lire, mais de faire penser.",
+    "author": "Montesquieu",
+    "theme": "learning",
+    "tags": ["writing", "thoughts"]
+  },
+  {
+    "text": "L'amour de l'étude est presque en nous la seule passion éternelle.",
+    "author": "Montesquieu",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Le succès de la plupart des choses dépend de savoir combien il faut de temps pour réussir.",
+    "author": "Montesquieu",
+    "theme": "perseverance",
+    "tags": ["patience"]
+  },
+  {
+    "text": "Ce que l'on conçoit bien s'énonce clairement, et les mots pour le dire arrivent aisément.",
+    "author": "Nicolas Boileau",
+    "theme": "simplicity",
+    "tags": ["writing", "thoughts"]
+  },
+  {
+    "text": "Hâtez-vous lentement, et, sans perdre courage, vingt fois sur le métier remettez votre ouvrage.",
+    "author": "Nicolas Boileau",
+    "theme": "perseverance",
+    "tags": ["patience", "practice"]
+  },
+  {
+    "text": "Polissez-le sans cesse et le repolissez ; ajoutez quelquefois, et souvent effacez.",
+    "author": "Nicolas Boileau",
+    "theme": "perseverance",
+    "tags": ["writing", "practice"]
+  },
+  {
+    "text": "Qui ne sait se borner ne sut jamais écrire.",
+    "author": "Nicolas Boileau",
+    "theme": "simplicity",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Rien n'est beau que le vrai : le vrai seul est aimable.",
+    "author": "Nicolas Boileau",
+    "theme": "simplicity",
+    "tags": ["truth", "beauty"]
+  },
+  {
+    "text": "Le moment où je parle est déjà loin de moi.",
+    "author": "Nicolas Boileau",
+    "theme": "time",
+    "tags": ["now"]
+  },
+  {
+    "text": "Souvent la peur d'un mal nous conduit dans un pire.",
+    "author": "Nicolas Boileau",
+    "theme": "courage",
+    "tags": ["fear"]
+  },
+  {
+    "text": "Avant donc que d'écrire, apprenez à penser.",
+    "author": "Nicolas Boileau",
+    "theme": "mind",
+    "tags": ["writing", "thoughts"]
+  },
+  {
+    "text": "Qui vit content de rien possède toute chose.",
+    "author": "Nicolas Boileau",
+    "theme": "simplicity",
+    "tags": ["wealth", "happiness"]
+  },
+  {
+    "text": "Il faut manger pour vivre, et non pas vivre pour manger.",
+    "author": "Molière",
+    "theme": "simplicity",
+    "tags": ["balance", "health"]
+  },
+  {
+    "text": "On doit se regarder soi-même un fort long temps, avant que de songer à condamner les autres.",
+    "author": "Molière",
+    "theme": "character",
+    "tags": ["judgement", "self-knowledge"]
+  },
+  {
+    "text": "Plus on aime quelqu'un, moins il faut qu'on le flatte : à ne rien pardonner le pur amour éclate.",
+    "author": "Molière",
+    "theme": "kindness",
+    "tags": ["love", "honesty"]
+  },
+  { "text": "Le temps ne fait rien à l'affaire.", "author": "Molière", "theme": "time", "tags": ["excellence"] },
+  {
+    "text": "Je vis de bonne soupe, et non de beau langage.",
+    "author": "Molière",
+    "theme": "simplicity",
+    "tags": ["humor"]
+  },
+  {
+    "text": "Les arbres tardifs sont ceux qui portent les meilleurs fruits.",
+    "author": "Molière",
+    "theme": "perseverance",
+    "tags": ["patience", "growth"]
+  },
+  {
+    "text": "Un sot savant est sot plus qu'un sot ignorant.",
+    "author": "Molière",
+    "theme": "learning",
+    "tags": ["knowledge", "humility"]
+  },
+  {
+    "text": "La parfaite raison fuit toute extrémité, et veut que l'on soit sage avec sobriété.",
+    "author": "Molière",
+    "theme": "simplicity",
+    "tags": ["balance", "wisdom"]
+  },
+  {
+    "text": "Il faut, parmi le monde, une vertu traitable.",
+    "author": "Molière",
+    "theme": "kindness",
+    "tags": ["virtue", "balance"]
+  },
+  {
+    "text": "Je veux qu'on soit sincère, et qu'en homme d'honneur, on ne lâche aucun mot qui ne parte du cœur.",
+    "author": "Molière",
+    "theme": "character",
+    "tags": ["honesty", "heart"]
+  },
+  {
+    "text": "À vaincre sans péril, on triomphe sans gloire.",
+    "author": "Pierre Corneille",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Je suis jeune, il est vrai ; mais aux âmes bien nées la valeur n'attend point le nombre des années.",
+    "author": "Pierre Corneille",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Faites votre devoir et laissez faire aux dieux.",
+    "author": "Pierre Corneille",
+    "theme": "action",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Le temps assez souvent a rendu légitime ce qui semblait d'abord ne se pouvoir sans crime.",
+    "author": "Pierre Corneille",
+    "theme": "time",
+    "tags": ["change", "patience"]
+  },
+  {
+    "text": "Je suis maître de moi comme de l'univers.",
+    "author": "Pierre Corneille",
+    "theme": "character",
+    "tags": ["self-mastery"]
+  },
+  {
+    "text": "Pour grands que soient les rois, ils sont ce que nous sommes : ils peuvent se tromper comme les autres hommes.",
+    "author": "Pierre Corneille",
+    "theme": "character",
+    "tags": ["humility", "mistakes"]
+  },
+  {
+    "text": "La façon de donner vaut mieux que ce qu'on donne.",
+    "author": "Pierre Corneille",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Soyons amis, Cinna, c'est moi qui t'en convie.",
+    "author": "Pierre Corneille",
+    "theme": "kindness",
+    "tags": ["forgiveness", "friendship"]
+  },
+  {
+    "text": "Un bienfait reproché tient toujours lieu d'offense.",
+    "author": "Jean Racine",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Il n'est point de secrets que le temps ne révèle.",
+    "author": "Jean Racine",
+    "theme": "time",
+    "tags": ["truth"]
+  },
+  {
+    "text": "La principale règle est de plaire et de toucher.",
+    "author": "Jean Racine",
+    "theme": "simplicity",
+    "tags": ["art", "writing"]
+  },
+  {
+    "text": "Toute l'invention consiste à faire quelque chose de rien.",
+    "author": "Jean Racine",
+    "theme": "mind",
+    "tags": ["imagination", "art"]
+  },
+  {
+    "text": "Le jour n'est pas plus pur que le fond de mon cœur.",
+    "author": "Jean Racine",
+    "theme": "character",
+    "tags": ["integrity", "heart"]
+  },
+  {
+    "text": "Qui veut voyager loin ménage sa monture.",
+    "author": "Jean Racine",
+    "theme": "perseverance",
+    "tags": ["patience", "balance"]
+  },
+  {
+    "text": "On résiste à l'invasion des armées ; on ne résiste pas à l'invasion des idées.",
+    "author": "Victor Hugo",
+    "theme": "mind",
+    "tags": ["thoughts", "change"]
+  },
+  {
+    "text": "La musique exprime ce qui ne peut être dit et sur quoi il est impossible de rester silencieux.",
+    "author": "Victor Hugo",
+    "theme": "nature",
+    "tags": ["art"]
+  },
+  {
+    "text": "Il n'y a ni mauvaises herbes ni mauvais hommes. Il n'y a que de mauvais cultivateurs.",
+    "author": "Victor Hugo",
+    "theme": "kindness",
+    "tags": ["goodness", "growth"]
+  },
+  {
+    "text": "Demain, dès l'aube, à l'heure où blanchit la campagne, je partirai.",
+    "author": "Victor Hugo",
+    "theme": "nature",
+    "tags": ["journey"]
+  },
+  {
+    "text": "La forme, c'est le fond qui remonte à la surface.",
+    "author": "Victor Hugo",
+    "theme": "simplicity",
+    "tags": ["art", "writing"]
+  },
+  {
+    "text": "Les mots sont les passants mystérieux de l'âme.",
+    "author": "Victor Hugo",
+    "theme": "mind",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Le bonheur suprême de la vie, c'est la conviction qu'on est aimé ; aimé pour soi-même, disons mieux, aimé malgré soi-même.",
+    "author": "Victor Hugo",
+    "theme": "kindness",
+    "tags": ["love", "happiness"]
+  },
+  {
+    "text": "Aimer ou avoir aimé, cela suffit. Ne demandez rien ensuite.",
+    "author": "Victor Hugo",
+    "theme": "simplicity",
+    "tags": ["love"]
+  },
+  {
+    "text": "Ceux qui vivent, ce sont ceux qui luttent.",
+    "author": "Victor Hugo",
+    "theme": "perseverance",
+    "tags": ["life", "adversity"]
+  },
+  { "text": "Je suis une force qui va !", "author": "Victor Hugo", "theme": "action", "tags": ["purpose"] },
+  {
+    "text": "Rien n'est stupide comme vaincre ; la vraie gloire est convaincre.",
+    "author": "Victor Hugo",
+    "theme": "kindness",
+    "tags": ["humility"]
+  },
+  {
+    "text": "Il y a un spectacle plus grand que la mer, c'est le ciel ; il y a un spectacle plus grand que le ciel, c'est l'intérieur de l'âme.",
+    "author": "Victor Hugo",
+    "theme": "mind",
+    "tags": ["reflection", "self-knowledge"]
+  },
+  {
+    "text": "Toute puissance humaine est un composé de patience et de temps.",
+    "author": "Honoré de Balzac",
+    "theme": "perseverance",
+    "tags": ["patience"]
+  },
+  {
+    "text": "L'espérance est une mémoire qui désire.",
+    "author": "Honoré de Balzac",
+    "theme": "hope",
+    "tags": ["desire"]
+  },
+  {
+    "text": "Le hasard est le plus grand romancier du monde : pour être fécond, il n'y a qu'à l'étudier.",
+    "author": "Honoré de Balzac",
+    "theme": "learning",
+    "tags": ["chance", "writing"]
+  },
+  {
+    "text": "Le travail constant est la loi de l'art comme celle de la vie.",
+    "author": "Honoré de Balzac",
+    "theme": "perseverance",
+    "tags": ["work", "art"]
+  },
+  {
+    "text": "La reconnaissance est une dette que les enfants n'acceptent pas toujours à l'inventaire.",
+    "author": "Honoré de Balzac",
+    "theme": "kindness",
+    "tags": ["gratitude", "humor"]
+  },
+  {
+    "text": "Ne lisez pas, comme les enfants lisent, pour vous amuser, ni comme les ambitieux lisent, pour vous instruire. Non, lisez pour vivre.",
+    "author": "Gustave Flaubert",
+    "theme": "learning",
+    "tags": ["reading", "life"]
+  },
+  {
+    "text": "Pour qu'une chose soit intéressante, il suffit de la regarder longtemps.",
+    "author": "Gustave Flaubert",
+    "theme": "nature",
+    "tags": ["focus", "perception"]
+  },
+  {
+    "text": "La bêtise consiste à vouloir conclure.",
+    "author": "Gustave Flaubert",
+    "theme": "mind",
+    "tags": ["doubt"]
+  },
+  {
+    "text": "La parole humaine est comme un chaudron fêlé où nous battons des mélodies à faire danser les ours, quand on voudrait attendrir les étoiles.",
+    "author": "Gustave Flaubert",
+    "theme": "learning",
+    "tags": ["writing", "art"]
+  },
+  {
+    "text": "Les perles ne font pas le collier ; c'est le fil.",
+    "author": "Gustave Flaubert",
+    "theme": "perseverance",
+    "tags": ["writing"]
+  },
+  {
+    "text": "Il n'y a qu'un bonheur dans la vie, c'est d'aimer et d'être aimé.",
+    "author": "George Sand",
+    "theme": "kindness",
+    "tags": ["love", "happiness"]
+  },
+  {
+    "text": "La simplicité est ce qu'il y a de plus difficile au monde : c'est le dernier résultat de l'expérience, le dernier effort du génie.",
+    "author": "George Sand",
+    "theme": "simplicity",
+    "tags": ["experience", "excellence"]
+  },
+  {
+    "text": "Le vrai est trop simple, il faut y arriver toujours par le compliqué.",
+    "author": "George Sand",
+    "theme": "simplicity",
+    "tags": ["truth"]
+  },
+  {
+    "text": "La nature est une œuvre d'art, mais Dieu est le seul artiste qui existe, et l'homme n'est qu'un arrangeur de mauvais goût.",
+    "author": "George Sand",
+    "theme": "nature",
+    "tags": ["art", "humility"]
+  },
+  {
+    "text": "La beauté n'est que la promesse du bonheur.",
+    "author": "Stendhal",
+    "theme": "hope",
+    "tags": ["beauty", "happiness"]
+  },
+  {
+    "text": "Un roman est un miroir qui se promène sur une grande route.",
+    "author": "Stendhal",
+    "theme": "nature",
+    "tags": ["writing", "journey"]
+  },
+  {
+    "text": "L'amour est une fleur délicieuse, mais il faut avoir le courage d'aller la cueillir sur les bords d'un précipice affreux.",
+    "author": "Stendhal",
+    "theme": "courage",
+    "tags": ["love"]
+  },
+  {
+    "text": "La nature est un temple où de vivants piliers laissent parfois sortir de confuses paroles.",
+    "author": "Charles Baudelaire",
+    "theme": "nature",
+    "tags": ["perception"]
+  },
+  {
+    "text": "Le génie n'est que l'enfance retrouvée à volonté.",
+    "author": "Charles Baudelaire",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "Là, tout n'est qu'ordre et beauté, luxe, calme et volupté.",
+    "author": "Charles Baudelaire",
+    "theme": "nature",
+    "tags": ["beauty", "peace"]
+  },
+  {
+    "text": "Souviens-toi que le Temps est un joueur avide qui gagne sans tricher, à tout coup ! C'est la loi.",
+    "author": "Charles Baudelaire",
+    "theme": "time",
+    "tags": ["mortality"]
+  },
+  {
+    "text": "Mais les vrais voyageurs sont ceux-là seuls qui partent pour partir.",
+    "author": "Charles Baudelaire",
+    "theme": "nature",
+    "tags": ["journey", "freedom"]
+  },
+  {
+    "text": "Homme libre, toujours tu chériras la mer !",
+    "author": "Charles Baudelaire",
+    "theme": "nature",
+    "tags": ["freedom"]
+  },
+  {
+    "text": "L'imagination est la reine du vrai, et le possible est une des provinces du vrai.",
+    "author": "Charles Baudelaire",
+    "theme": "mind",
+    "tags": ["imagination", "truth"]
+  },
+  {
+    "text": "Il faut travailler, sinon par goût, au moins par désespoir, puisque, tout bien vérifié, travailler est moins ennuyeux que s'amuser.",
+    "author": "Charles Baudelaire",
+    "theme": "action",
+    "tags": ["work", "humor"]
+  },
+  { "text": "La musique creuse le ciel.", "author": "Charles Baudelaire", "theme": "nature", "tags": ["art"] },
+  {
+    "text": "Qu'importe le flacon, pourvu qu'on ait l'ivresse ?",
+    "author": "Alfred de Musset",
+    "theme": "simplicity",
+    "tags": ["joy"]
+  },
+  {
+    "text": "Il faut qu'une porte soit ouverte ou fermée.",
+    "author": "Alfred de Musset",
+    "theme": "action",
+    "tags": ["focus"]
+  },
+  {
+    "text": "Mon verre n'est pas grand, mais je bois dans mon verre.",
+    "author": "Alfred de Musset",
+    "theme": "simplicity",
+    "tags": ["humility", "modesty"]
+  },
+  {
+    "text": "Rien ne nous rend si grands qu'une grande douleur.",
+    "author": "Alfred de Musset",
+    "theme": "courage",
+    "tags": ["adversity", "greatness"]
+  },
+  {
+    "text": "Les plus désespérés sont les chants les plus beaux, et j'en sais d'immortels qui sont de purs sanglots.",
+    "author": "Alfred de Musset",
+    "theme": "hope",
+    "tags": ["art", "adversity"]
+  },
+  {
+    "text": "J'ai souffert souvent, je me suis trompé quelquefois, mais j'ai aimé.",
+    "author": "Alfred de Musset",
+    "theme": "courage",
+    "tags": ["love", "mistakes"]
+  },
+  {
+    "text": "L'homme est un apprenti, la douleur est son maître.",
+    "author": "Alfred de Musset",
+    "theme": "learning",
+    "tags": ["adversity", "growth"]
+  },
+  {
+    "text": "Un seul être vous manque, et tout est dépeuplé.",
+    "author": "Alphonse de Lamartine",
+    "theme": "kindness",
+    "tags": ["loss", "love"]
+  },
+  {
+    "text": "Ô temps ! suspends ton vol, et vous, heures propices ! Suspendez votre cours.",
+    "author": "Alphonse de Lamartine",
+    "theme": "time",
+    "tags": ["now"]
+  },
+  {
+    "text": "Objets inanimés, avez-vous donc une âme qui s'attache à notre âme et la force d'aimer ?",
+    "author": "Alphonse de Lamartine",
+    "theme": "nature",
+    "tags": ["heart"]
+  },
+  {
+    "text": "Borné dans sa nature, infini dans ses vœux, l'homme est un dieu tombé qui se souvient des cieux.",
+    "author": "Alphonse de Lamartine",
+    "theme": "hope",
+    "tags": ["desire", "greatness"]
+  },
+  {
+    "text": "Le livre de la vie est le livre suprême qu'on ne peut ni fermer ni rouvrir à son choix.",
+    "author": "Alphonse de Lamartine",
+    "theme": "time",
+    "tags": ["life"]
+  },
+  {
+    "text": "Les utopies ne sont souvent que des vérités prématurées.",
+    "author": "Alphonse de Lamartine",
+    "theme": "hope",
+    "tags": ["dreams", "truth"]
+  },
+  {
+    "text": "L'homme n'a point de port, le temps n'a point de rive ; il coule, et nous passons !",
+    "author": "Alphonse de Lamartine",
+    "theme": "time",
+    "tags": ["mortality", "change"]
+  },
+  {
+    "text": "Seul le silence est grand ; tout le reste est faiblesse.",
+    "author": "Alfred de Vigny",
+    "theme": "courage",
+    "tags": ["greatness"]
+  },
+  {
+    "text": "Gémir, pleurer, prier est également lâche. Fais énergiquement ta longue et lourde tâche.",
+    "author": "Alfred de Vigny",
+    "theme": "perseverance",
+    "tags": ["work", "resilience"]
+  },
+  {
+    "text": "Qu'est-ce qu'une grande vie ? C'est une pensée de la jeunesse exécutée par l'âge mûr.",
+    "author": "Alfred de Vigny",
+    "theme": "perseverance",
+    "tags": ["dreams", "purpose"]
+  },
+  {
+    "text": "Dieu ! que le son du cor est triste au fond des bois !",
+    "author": "Alfred de Vigny",
+    "theme": "nature",
+    "tags": ["beauty"]
+  },
+  {
+    "text": "Aimez ce que jamais on ne verra deux fois.",
+    "author": "Alfred de Vigny",
+    "theme": "time",
+    "tags": ["love", "now"]
+  },
+  {
+    "text": "On ne voit bien qu'avec le cœur. L'essentiel est invisible pour les yeux.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "kindness",
+    "tags": ["heart", "perception"]
+  },
+  {
+    "text": "C'est le temps que tu as perdu pour ta rose qui fait ta rose si importante.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "time",
+    "tags": ["love"]
+  },
+  {
+    "text": "Tu deviens responsable pour toujours de ce que tu as apprivoisé.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  {
+    "text": "Toutes les grandes personnes ont d'abord été des enfants. (Mais peu d'entre elles s'en souviennent.)",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "mind",
+    "tags": ["imagination", "aging"]
+  },
+  {
+    "text": "Ce qui embellit le désert, c'est qu'il cache un puits quelque part.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "hope",
+    "tags": ["beauty"]
+  },
+  {
+    "text": "Il semble que la perfection soit atteinte non quand il n'y a plus rien à ajouter, mais quand il n'y a plus rien à retrancher.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "simplicity",
+    "tags": ["excellence"]
+  },
+  {
+    "text": "Aimer, ce n'est point nous regarder l'un l'autre, mais regarder ensemble dans la même direction.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "kindness",
+    "tags": ["love", "purpose"]
+  },
+  {
+    "text": "Être homme, c'est précisément être responsable.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Ce que j'ai fait, je te le jure, jamais aucune bête ne l'aurait fait.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "courage",
+    "tags": ["resilience"]
+  },
+  {
+    "text": "Il est bien plus difficile de se juger soi-même que de juger autrui.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "character",
+    "tags": ["self-knowledge", "judgement"]
+  },
+  {
+    "text": "Pour ce qui est de l'avenir, il ne s'agit pas de le prévoir, mais de le rendre possible.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "action",
+    "tags": ["hope"]
+  },
+  {
+    "text": "La terre nous en apprend plus long sur nous que tous les livres. Parce qu'elle nous résiste.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "nature",
+    "tags": ["adversity", "self-knowledge"]
+  },
+  {
+    "text": "Je me demande si les étoiles sont éclairées afin que chacun puisse un jour retrouver la sienne.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "C'est véritablement utile puisque c'est joli.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "simplicity",
+    "tags": ["beauty"]
+  },
+  {
+    "text": "Moi, si j'avais cinquante-trois minutes à dépenser, je marcherais tout doucement vers une fontaine.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "simplicity",
+    "tags": ["now", "peace"]
+  },
+  {
+    "text": "Vivre, c'est naître lentement.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "time",
+    "tags": ["growth", "life"]
+  },
+  {
+    "text": "On est de son enfance comme on est d'un pays.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "time",
+    "tags": ["beginning"]
+  },
+  {
+    "text": "La grandeur d'un métier est peut-être, avant tout, d'unir des hommes.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "kindness",
+    "tags": ["work", "friendship"]
+  },
+  {
+    "text": "Ce qui sauve, c'est de faire un pas. Encore un pas.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "perseverance",
+    "tags": ["small-steps", "resilience"]
+  },
+  {
+    "text": "Le pessimisme est d'humeur ; l'optimisme est de volonté.",
+    "author": "Alain",
+    "theme": "hope",
+    "tags": ["self-mastery"]
+  },
+  {
+    "text": "Il faut vouloir être heureux et y mettre du sien.",
+    "author": "Alain",
+    "theme": "hope",
+    "tags": ["happiness"]
+  },
+  { "text": "Penser, c'est dire non.", "author": "Alain", "theme": "mind", "tags": ["thoughts"] },
+  {
+    "text": "Rien n'est plus dangereux qu'une idée, quand on n'a qu'une idée.",
+    "author": "Alain",
+    "theme": "mind",
+    "tags": ["thoughts"]
+  },
+  {
+    "text": "Le bonheur est une récompense qui vient à ceux qui ne l'ont pas cherchée.",
+    "author": "Alain",
+    "theme": "simplicity",
+    "tags": ["happiness"]
+  },
+  { "text": "Le doute est le sel de l'esprit.", "author": "Alain", "theme": "mind", "tags": ["doubt"] },
+  {
+    "text": "Le hasard, c'est peut-être le pseudonyme de Dieu, quand il ne veut pas signer.",
+    "author": "Anatole France",
+    "theme": "mind",
+    "tags": ["chance", "humor"]
+  },
+  {
+    "text": "L'art d'enseigner n'est que l'art d'éveiller la curiosité des jeunes âmes pour la satisfaire ensuite.",
+    "author": "Anatole France",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Tous les changements, même les plus souhaités, ont leur mélancolie ; car ce que nous quittons, c'est une partie de nous-mêmes.",
+    "author": "Anatole France",
+    "theme": "time",
+    "tags": ["change", "loss"]
+  },
+  {
+    "text": "Je préfère la folie des passions à la sagesse de l'indifférence.",
+    "author": "Anatole France",
+    "theme": "courage",
+    "tags": ["desire"]
+  },
+  {
+    "text": "L'ironie et la pitié sont deux bonnes conseillères ; l'une, en souriant, nous rend la vie aimable ; l'autre, qui pleure, nous la rend sacrée.",
+    "author": "Anatole France",
+    "theme": "kindness",
+    "tags": ["humor", "goodness"]
+  },
+  {
+    "text": "Le seul véritable voyage, le seul bain de Jouvence, ce ne serait pas d'aller vers de nouveaux paysages, mais d'avoir d'autres yeux.",
+    "author": "Marcel Proust",
+    "theme": "mind",
+    "tags": ["perception", "journey"]
+  },
+  {
+    "text": "Les vrais paradis sont les paradis qu'on a perdus.",
+    "author": "Marcel Proust",
+    "theme": "time",
+    "tags": ["loss"]
+  },
+  {
+    "text": "On ne reçoit pas la sagesse, il faut la découvrir soi-même après un trajet que personne ne peut faire pour nous, ne peut nous épargner.",
+    "author": "Marcel Proust",
+    "theme": "learning",
+    "tags": ["wisdom", "journey"]
+  },
+  {
+    "text": "Le bonheur est salutaire pour les corps, mais c'est le chagrin qui développe les forces de l'esprit.",
+    "author": "Marcel Proust",
+    "theme": "courage",
+    "tags": ["adversity", "growth"]
+  },
+  {
+    "text": "La vraie vie, la vie enfin découverte et éclaircie, la seule vie par conséquent réellement vécue, c'est la littérature.",
+    "author": "Marcel Proust",
+    "theme": "learning",
+    "tags": ["reading", "writing"]
+  },
+  {
+    "text": "Chaque lecteur est, quand il lit, le propre lecteur de soi-même.",
+    "author": "Marcel Proust",
+    "theme": "learning",
+    "tags": ["reading", "self-knowledge"]
+  },
+  {
+    "text": "Les beaux livres sont écrits dans une sorte de langue étrangère.",
+    "author": "Marcel Proust",
+    "theme": "learning",
+    "tags": ["writing", "art"]
+  },
+  {
+    "text": "Le temps dont nous disposons chaque jour est élastique ; les passions que nous ressentons le dilatent, celles que nous inspirons le rétrécissent, et l'habitude le remplit.",
+    "author": "Marcel Proust",
+    "theme": "time",
+    "tags": ["habits"]
+  },
+  {
+    "text": "Si l'on bâtissait la maison du bonheur, la plus grande pièce en serait la salle d'attente.",
+    "author": "Jules Renard",
+    "theme": "hope",
+    "tags": ["happiness", "patience"]
+  },
+  {
+    "text": "L'ironie est la pudeur de l'humanité.",
+    "author": "Jules Renard",
+    "theme": "character",
+    "tags": ["humor", "modesty"]
+  },
+  {
+    "text": "Le style, c'est l'oubli de tous les styles.",
+    "author": "Jules Renard",
+    "theme": "simplicity",
+    "tags": ["writing"]
+  },
+  {
+    "text": "La clarté est la politesse de l'homme de lettres.",
+    "author": "Jules Renard",
+    "theme": "simplicity",
+    "tags": ["writing", "kindness"]
+  },
+  {
+    "text": "Il y a des moments où tout réussit : il ne faut pas s'effrayer, ça passe.",
+    "author": "Jules Renard",
+    "theme": "hope",
+    "tags": ["humor", "luck"]
+  },
+  {
+    "text": "L'homme vraiment libre est celui qui sait refuser une invitation à dîner sans donner de prétexte.",
+    "author": "Jules Renard",
+    "theme": "courage",
+    "tags": ["freedom", "humor"]
+  },
+  {
+    "text": "Écrire, c'est une façon de parler sans être interrompu.",
+    "author": "Jules Renard",
+    "theme": "learning",
+    "tags": ["writing", "humor"]
+  },
+  {
+    "text": "Le talent est une question de quantité. Le talent, ce n'est pas d'écrire une page, c'est d'en écrire trois cents.",
+    "author": "Jules Renard",
+    "theme": "perseverance",
+    "tags": ["writing", "work"]
+  },
+  {
+    "text": "Quand je pense à tous les livres qu'il me reste à lire, j'ai la certitude d'être encore heureux.",
+    "author": "Jules Renard",
+    "theme": "hope",
+    "tags": ["reading", "happiness"]
+  },
+  {
+    "text": "Un héros, c'est celui qui fait ce qu'il peut.",
+    "author": "Romain Rolland",
+    "theme": "courage",
+    "tags": ["action"]
+  },
+  {
+    "text": "Il n'y a qu'un héroïsme au monde : c'est de voir le monde tel qu'il est, et de l'aimer.",
+    "author": "Romain Rolland",
+    "theme": "courage",
+    "tags": ["truth", "love"]
+  },
+  {
+    "text": "Il faut agir en homme de pensée et penser en homme d'action.",
+    "author": "Henri Bergson",
+    "theme": "action",
+    "tags": ["thoughts", "balance"]
+  },
+  {
+    "text": "Le temps est invention ou il n'est rien du tout.",
+    "author": "Henri Bergson",
+    "theme": "time",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "Exister consiste à changer, changer à mûrir, mûrir à se créer indéfiniment soi-même.",
+    "author": "Henri Bergson",
+    "theme": "time",
+    "tags": ["change", "growth"]
+  },
+  {
+    "text": "Le rire est du mécanique plaqué sur du vivant.",
+    "author": "Henri Bergson",
+    "theme": "mind",
+    "tags": ["laughter"]
+  },
+  { "text": "Je pense, donc je suis.", "author": "René Descartes", "theme": "mind", "tags": ["thoughts"] },
+  {
+    "text": "Le bon sens est la chose du monde la mieux partagée.",
+    "author": "René Descartes",
+    "theme": "mind",
+    "tags": ["judgement", "humor"]
+  },
+  {
+    "text": "Ce n'est pas assez d'avoir l'esprit bon, mais le principal est de l'appliquer bien.",
+    "author": "René Descartes",
+    "theme": "action",
+    "tags": ["practice"]
+  },
+  {
+    "text": "La lecture de tous les bons livres est comme une conversation avec les plus honnêtes gens des siècles passés.",
+    "author": "René Descartes",
+    "theme": "learning",
+    "tags": ["reading"]
+  },
+  {
+    "text": "Les plus grandes âmes sont capables des plus grands vices, aussi bien que des plus grandes vertus.",
+    "author": "René Descartes",
+    "theme": "character",
+    "tags": ["virtue", "greatness"]
+  },
+  {
+    "text": "Tâcher toujours plutôt à me vaincre que la fortune, et à changer mes désirs que l'ordre du monde.",
+    "author": "René Descartes",
+    "theme": "character",
+    "tags": ["self-mastery", "desire"]
+  },
+  {
+    "text": "Ceux qui ne marchent que fort lentement peuvent avancer beaucoup davantage, s'ils suivent toujours le droit chemin, que ne font ceux qui courent et qui s'en éloignent.",
+    "author": "René Descartes",
+    "theme": "perseverance",
+    "tags": ["patience", "haste"]
+  },
+  {
+    "text": "Il n'y a rien qui soit entièrement en notre pouvoir que nos pensées.",
+    "author": "René Descartes",
+    "theme": "mind",
+    "tags": ["thoughts", "self-mastery"]
+  },
+  {
+    "text": "Pour examiner la vérité, il est besoin, une fois dans sa vie, de mettre toutes choses en doute autant qu'il se peut.",
+    "author": "René Descartes",
+    "theme": "learning",
+    "tags": ["doubt", "truth"]
+  },
+  {
+    "text": "Petit à petit, l'oiseau fait son nid.",
+    "author": "Proverbe",
+    "theme": "perseverance",
+    "tags": ["small-steps", "patience"]
+  },
+  { "text": "Après la pluie, le beau temps.", "author": "Proverbe", "theme": "hope", "tags": ["adversity"] },
+  {
+    "text": "Paris ne s'est pas fait en un jour.",
+    "author": "Proverbe",
+    "theme": "perseverance",
+    "tags": ["patience"]
+  },
+  {
+    "text": "Tout vient à point à qui sait attendre.",
+    "author": "Proverbe",
+    "theme": "perseverance",
+    "tags": ["patience"]
+  },
+  {
+    "text": "Il faut battre le fer pendant qu'il est chaud.",
+    "author": "Proverbe",
+    "theme": "action",
+    "tags": ["now"]
+  },
+  {
+    "text": "C'est en forgeant qu'on devient forgeron.",
+    "author": "Proverbe",
+    "theme": "learning",
+    "tags": ["practice"]
+  },
+  { "text": "La nuit porte conseil.", "author": "Proverbe", "theme": "mind", "tags": ["reflection", "patience"] },
+  { "text": "Mieux vaut tard que jamais.", "author": "Proverbe", "theme": "action", "tags": ["beginning"] },
+  { "text": "L'habit ne fait pas le moine.", "author": "Proverbe", "theme": "character", "tags": ["judgement"] },
+  { "text": "Vouloir, c'est pouvoir.", "author": "Proverbe", "theme": "courage", "tags": ["self-mastery"] },
+  { "text": "Chaque chose en son temps.", "author": "Proverbe", "theme": "time", "tags": ["patience"] },
+  {
+    "text": "Il ne faut pas remettre au lendemain ce qu'on peut faire le jour même.",
+    "author": "Proverbe",
+    "theme": "action",
+    "tags": ["today"]
+  },
+  { "text": "Qui ne risque rien n'a rien.", "author": "Proverbe", "theme": "courage", "tags": ["boldness"] },
+  {
+    "text": "Les petits ruisseaux font les grandes rivières.",
+    "author": "Proverbe",
+    "theme": "perseverance",
+    "tags": ["small-steps"]
+  },
+  { "text": "L'union fait la force.", "author": "Proverbe", "theme": "kindness", "tags": ["friendship"] },
+  {
+    "text": "À cœur vaillant rien d'impossible.",
+    "author": "Proverbe",
+    "theme": "courage",
+    "tags": ["heart", "boldness"]
+  },
+  {
+    "text": "Il n'est jamais trop tard pour bien faire.",
+    "author": "Proverbe",
+    "theme": "hope",
+    "tags": ["beginning", "change"]
+  },
+  { "text": "On récolte ce que l'on sème.", "author": "Proverbe", "theme": "action", "tags": ["growth"] },
+  { "text": "Chose promise, chose due.", "author": "Proverbe", "theme": "character", "tags": ["integrity"] },
+  {
+    "text": "La parole est d'argent, mais le silence est d'or.",
+    "author": "Proverbe",
+    "theme": "simplicity",
+    "tags": ["wisdom"]
+  },
+  {
+    "text": "Le vent se lève !… il faut tenter de vivre !",
+    "author": "Paul Valéry",
+    "theme": "courage",
+    "tags": ["life", "beginning"]
+  },
+  {
+    "text": "Il est grand temps de rallumer les étoiles.",
+    "author": "Guillaume Apollinaire",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "Vienne la nuit sonne l'heure, les jours s'en vont je demeure.",
+    "author": "Guillaume Apollinaire",
+    "theme": "time",
+    "tags": ["change"]
+  },
+  {
+    "text": "Il faut être absolument moderne.",
+    "author": "Arthur Rimbaud",
+    "theme": "action",
+    "tags": ["change", "boldness"]
+  },
+  {
+    "text": "Par les soirs bleus d'été, j'irai dans les sentiers, picoté par les blés, fouler l'herbe menue.",
+    "author": "Arthur Rimbaud",
+    "theme": "nature",
+    "tags": ["journey"]
+  },
+  {
+    "text": "Il pleure dans mon cœur comme il pleut sur la ville.",
+    "author": "Paul Verlaine",
+    "theme": "nature",
+    "tags": ["heart"]
+  },
+  {
+    "text": "Vivez, si m'en croyez, n'attendez à demain : cueillez dès aujourd'hui les roses de la vie.",
+    "author": "Pierre de Ronsard",
+    "theme": "time",
+    "tags": ["today", "now"]
+  },
+  {
+    "text": "Heureux qui, comme Ulysse, a fait un beau voyage.",
+    "author": "Joachim du Bellay",
+    "theme": "nature",
+    "tags": ["journey", "happiness"]
+  },
+  {
+    "text": "Science sans conscience n'est que ruine de l'âme.",
+    "author": "François Rabelais",
+    "theme": "learning",
+    "tags": ["knowledge", "integrity"]
+  },
+  { "text": "Rire est le propre de l'homme.", "author": "François Rabelais", "theme": "hope", "tags": ["laughter"] },
+  {
+    "text": "Toute la sagesse humaine sera dans ces deux mots : attendre et espérer !",
+    "author": "Alexandre Dumas",
+    "theme": "hope",
+    "tags": ["patience", "wisdom"]
+  },
+  { "text": "Tous pour un, un pour tous.", "author": "Alexandre Dumas", "theme": "kindness", "tags": ["friendship"] },
+  {
+    "text": "Dans les champs de l'observation, le hasard ne favorise que les esprits préparés.",
+    "author": "Louis Pasteur",
+    "theme": "learning",
+    "tags": ["chance", "practice"]
+  },
+  {
+    "text": "La gloire est le deuil éclatant du bonheur.",
+    "author": "Germaine de Staël",
+    "theme": "mind",
+    "tags": ["ambition", "happiness"]
+  },
+  {
+    "text": "L'écrivain original n'est pas celui qui n'imite personne, mais celui que personne ne peut imiter.",
+    "author": "François-René de Chateaubriand",
+    "theme": "character",
+    "tags": ["writing", "excellence"]
+  },
+  {
+    "text": "Je me presse de rire de tout, de peur d'être obligé d'en pleurer.",
+    "author": "Beaumarchais",
+    "theme": "hope",
+    "tags": ["laughter", "resilience"]
+  },
+  { "text": "Le style est l'homme même.", "author": "Buffon", "theme": "character", "tags": ["writing"] }
+]

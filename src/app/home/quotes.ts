@@ -40,7 +40,7 @@ export const QUOTE_MARKS: Readonly<Record<QuoteLanguage, readonly [string, strin
 
 /**
  * Every bundled quote, in English, French and Vietnamese. The lists are a chunk of their own, read only when a new
- * quote is due, so most new tabs never load them.
+ * quote is due, so most new tabs never load them; read once per page.
  *
  * - en.json: classical texts in their public-domain translations (Legge, Long, Gummere, Ross, Jowett, Müller, Burnet,
  *   Florio, Elwes) and writers whose work entered the public domain long ago, popular misattributions left out.
@@ -49,7 +49,17 @@ export const QUOTE_MARKS: Readonly<Record<QuoteLanguage, readonly [string, strin
  * - fr.json: French writers in the public domain and French proverbs, in the original French.
  * - vi.json: Vietnamese proverbs (tục ngữ), folk verse (ca dao) and classical Vietnamese writers.
  */
-export async function loadQuotes(): Promise<Quote[]> {
+export function loadQuotes(): Promise<readonly Quote[]> {
+  // A failed read is not kept: the next new quote tries again.
+  return (loaded ??= readLists().catch((error: unknown) => {
+    loaded = undefined;
+    throw error;
+  }));
+}
+
+let loaded: Promise<readonly Quote[]> | undefined;
+
+async function readLists(): Promise<Quote[]> {
   const [en, enCollected, fr, vi] = await Promise.all([
     import('./quotes/en.json'),
     import('./quotes/en-collected.json'),
