@@ -1,1 +1,1301 @@
-[]
+[
+  {
+    "text": "Có công mài sắt, có ngày nên kim.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["diligence", "small-steps"]
+  },
+  { "text": "Nước chảy đá mòn.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["patience", "small-steps"] },
+  {
+    "text": "Kiến tha lâu cũng đầy tổ.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["small-steps", "diligence"]
+  },
+  {
+    "text": "Thất bại là mẹ thành công.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["mistakes", "resilience"]
+  },
+  {
+    "text": "Chớ thấy sóng cả mà ngã tay chèo.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["adversity", "resilience"]
+  },
+  {
+    "text": "Ai ơi đã quyết thì hành, đã đan thì lận tròn vành mới thôi.",
+    "author": "Ca dao",
+    "theme": "perseverance",
+    "tags": ["purpose", "striving"]
+  },
+  {
+    "text": "Ai ơi giữ chí cho bền, dù ai xoay hướng đổi nền mặc ai.",
+    "author": "Ca dao",
+    "theme": "perseverance",
+    "tags": ["purpose", "resilience"]
+  },
+  { "text": "Năng nhặt chặt bị.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["small-steps", "thrift"] },
+  { "text": "Tích tiểu thành đại.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["small-steps", "growth"] },
+  { "text": "Góp gió thành bão.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["small-steps", "unity"] },
+  {
+    "text": "Lửa thử vàng, gian nan thử sức.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["adversity", "character"]
+  },
+  { "text": "Mưa dầm thấm lâu.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["patience", "small-steps"] },
+  { "text": "Có chí thì nên.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["purpose", "striving"] },
+  {
+    "text": "Thua keo này, bày keo khác.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["resilience", "mistakes"]
+  },
+  {
+    "text": "Người có chí thì nên, nhà có nền thì vững.",
+    "author": "Tục ngữ",
+    "theme": "perseverance",
+    "tags": ["purpose", "striving"]
+  },
+  {
+    "text": "Nước lã mà vã nên hồ, tay không mà nổi cơ đồ mới ngoan.",
+    "author": "Ca dao",
+    "theme": "perseverance",
+    "tags": ["striving", "diligence"]
+  },
+  {
+    "text": "Rủ nhau đi cấy đi cày, bây giờ khó nhọc có ngày phong lưu.",
+    "author": "Ca dao",
+    "theme": "perseverance",
+    "tags": ["work", "hope"]
+  },
+  { "text": "Mưa lâu thấm đất.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["patience", "small-steps"] },
+  { "text": "Còn nước còn tát.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["resilience", "hope"] },
+  {
+    "text": "Lặn lội thân cò khi quãng vắng, eo sèo mặt nước buổi đò đông.",
+    "author": "Trần Tế Xương",
+    "theme": "perseverance",
+    "tags": ["adversity", "diligence"]
+  },
+  {
+    "text": "Một duyên hai nợ âu đành phận, năm nắng mười mưa dám quản công.",
+    "author": "Trần Tế Xương",
+    "theme": "perseverance",
+    "tags": ["adversity", "family"]
+  },
+  {
+    "text": "Chữ nhẫn là chữ tương vàng, ai mà nhẫn được thì càng sống lâu.",
+    "author": "Ca dao",
+    "theme": "perseverance",
+    "tags": ["patience", "heart"]
+  },
+  { "text": "Chậm mà chắc.", "author": "Tục ngữ", "theme": "time", "tags": ["patience", "haste"] },
+  { "text": "Làm đến đâu chắc đến đấy.", "author": "Tục ngữ", "theme": "perseverance", "tags": ["work", "diligence"] },
+  {
+    "text": "Mồ hôi mà đổ xuống đồng, lúa mọc trùng trùng sáng cả đồi nương.",
+    "author": "Ca dao",
+    "theme": "perseverance",
+    "tags": ["work", "diligence"]
+  },
+  {
+    "text": "Rắn nát mặc dầu tay kẻ nặn, mà em vẫn giữ tấm lòng son.",
+    "author": "Hồ Xuân Hương",
+    "theme": "perseverance",
+    "tags": ["integrity", "resilience"]
+  },
+  {
+    "text": "Thân em vừa trắng lại vừa tròn, bảy nổi ba chìm với nước non.",
+    "author": "Hồ Xuân Hương",
+    "theme": "perseverance",
+    "tags": ["adversity", "resilience"]
+  },
+  { "text": "Muốn ăn thì lăn vào bếp.", "author": "Tục ngữ", "theme": "action", "tags": ["work", "diligence"] },
+  {
+    "text": "Tay làm hàm nhai, tay quai miệng trễ.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["work", "diligence"]
+  },
+  {
+    "text": "Có làm thì mới có ăn, không dưng ai dễ mang phần đến cho.",
+    "author": "Ca dao",
+    "theme": "action",
+    "tags": ["work", "diligence"]
+  },
+  { "text": "Muốn ăn hét phải đào giun.", "author": "Tục ngữ", "theme": "action", "tags": ["work", "striving"] },
+  { "text": "Có bột mới gột nên hồ.", "author": "Tục ngữ", "theme": "action", "tags": ["beginning", "practice"] },
+  {
+    "text": "Trăm nghe không bằng một thấy.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["experience", "practice"]
+  },
+  { "text": "Cờ đến tay ai người ấy phất.", "author": "Tục ngữ", "theme": "action", "tags": ["now", "luck"] },
+  { "text": "Vạn sự khởi đầu nan.", "author": "Tục ngữ", "theme": "action", "tags": ["beginning", "courage"] },
+  { "text": "Đầu xuôi đuôi lọt.", "author": "Tục ngữ", "theme": "action", "tags": ["beginning", "small-steps"] },
+  { "text": "Đâm lao phải theo lao.", "author": "Tục ngữ", "theme": "action", "tags": ["purpose", "focus"] },
+  { "text": "Đánh rắn phải đánh dập đầu.", "author": "Tục ngữ", "theme": "action", "tags": ["focus", "courage"] },
+  {
+    "text": "Có đi mới đến, có học mới biết.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["learning", "practice"]
+  },
+  {
+    "text": "Chuông có đánh mới kêu, đèn có khêu mới tỏ.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["practice", "learning"]
+  },
+  {
+    "text": "Siêng làm thì có, siêng học thì hay.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["diligence", "learning"]
+  },
+  { "text": "Làm khi lành, để dành khi đau.", "author": "Tục ngữ", "theme": "action", "tags": ["work", "thrift"] },
+  { "text": "Mất bò mới lo làm chuồng.", "author": "Tục ngữ", "theme": "time", "tags": ["now", "mistakes"] },
+  { "text": "Nước đến chân mới nhảy.", "author": "Tục ngữ", "theme": "time", "tags": ["now", "haste"] },
+  {
+    "text": "Nói chín thì nên làm mười, nói mười làm chín kẻ cười người chê.",
+    "author": "Ca dao",
+    "theme": "action",
+    "tags": ["words", "integrity"]
+  },
+  {
+    "text": "Một nghề thì sống, đống nghề thì chết.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["focus", "work"]
+  },
+  { "text": "Nhất nghệ tinh, nhất thân vinh.", "author": "Tục ngữ", "theme": "action", "tags": ["focus", "talent"] },
+  {
+    "text": "Một nghề cho chín còn hơn chín nghề.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["focus", "practice"]
+  },
+  { "text": "Quen tay hay việc.", "author": "Tục ngữ", "theme": "action", "tags": ["practice", "habits"] },
+  {
+    "text": "Hay học thì sang, hay làm thì có.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["work", "diligence"]
+  },
+  { "text": "Của một đồng, công một nén.", "author": "Tục ngữ", "theme": "action", "tags": ["work", "gratitude"] },
+  { "text": "Việc hôm nay chớ để ngày mai.", "author": "Tục ngữ", "theme": "time", "tags": ["now", "today"] },
+  {
+    "text": "Làm ruộng ăn cơm nằm, chăn tằm ăn cơm đứng.",
+    "author": "Tục ngữ",
+    "theme": "action",
+    "tags": ["work", "farming"]
+  },
+  { "text": "Dục tốc bất đạt.", "author": "Tục ngữ", "theme": "time", "tags": ["haste", "patience"] },
+  {
+    "text": "Đi đâu mà vội mà vàng, mà vấp phải đá mà quàng phải dây.",
+    "author": "Ca dao",
+    "theme": "time",
+    "tags": ["haste", "mistakes"]
+  },
+  { "text": "Cây ngay không sợ chết đứng.", "author": "Tục ngữ", "theme": "courage", "tags": ["integrity", "truth"] },
+  {
+    "text": "Không vào hang cọp sao bắt được cọp con.",
+    "author": "Tục ngữ",
+    "theme": "courage",
+    "tags": ["fear", "striving"]
+  },
+  { "text": "Vàng thật không sợ lửa.", "author": "Tục ngữ", "theme": "courage", "tags": ["integrity", "truth"] },
+  {
+    "text": "Thuốc đắng dã tật, sự thật mất lòng.",
+    "author": "Tục ngữ",
+    "theme": "courage",
+    "tags": ["truth", "honesty"]
+  },
+  { "text": "Mất lòng trước, được lòng sau.", "author": "Tục ngữ", "theme": "courage", "tags": ["truth", "honesty"] },
+  { "text": "Cái khó ló cái khôn.", "author": "Tục ngữ", "theme": "courage", "tags": ["adversity", "wisdom"] },
+  {
+    "text": "Giang hồ quen thú vẫy vùng, gươm đàn nửa gánh non sông một chèo.",
+    "author": "Nguyễn Du",
+    "theme": "courage",
+    "tags": ["dreams", "purpose"]
+  },
+  {
+    "text": "Nếu bệ hạ muốn hàng, xin hãy chém đầu thần trước đã.",
+    "author": "Trần Hưng Đạo",
+    "theme": "courage",
+    "tags": ["integrity", "purpose"]
+  },
+  {
+    "text": "Ta thường tới bữa quên ăn, nửa đêm vỗ gối, ruột đau như cắt, nước mắt đầm đìa.",
+    "author": "Trần Hưng Đạo",
+    "theme": "courage",
+    "tags": ["purpose", "heart"]
+  },
+  {
+    "text": "Súng giặc đất rền, lòng dân trời tỏ.",
+    "author": "Nguyễn Đình Chiểu",
+    "theme": "courage",
+    "tags": ["community", "truth"]
+  },
+  {
+    "text": "Nhớ câu kiến nghĩa bất vi, làm người thế ấy cũng phi anh hùng.",
+    "author": "Nguyễn Đình Chiểu",
+    "theme": "courage",
+    "tags": ["virtue", "integrity"]
+  },
+  {
+    "text": "Chở bao nhiêu đạo thuyền không khẳm, đâm mấy thằng gian bút chẳng tà.",
+    "author": "Nguyễn Đình Chiểu",
+    "theme": "courage",
+    "tags": ["integrity", "words"]
+  },
+  {
+    "text": "Đem đại nghĩa để thắng hung tàn, lấy chí nhân để thay cường bạo.",
+    "author": "Nguyễn Trãi",
+    "theme": "courage",
+    "tags": ["virtue", "kindness"]
+  },
+  {
+    "text": "Tướng sĩ một lòng phụ tử, hòa nước sông chén rượu ngọt ngào.",
+    "author": "Nguyễn Trãi",
+    "theme": "courage",
+    "tags": ["unity", "community"]
+  },
+  {
+    "text": "Nói gần nói xa chẳng qua nói thật.",
+    "author": "Tục ngữ",
+    "theme": "courage",
+    "tags": ["truth", "honesty"]
+  },
+  {
+    "text": "Ăn ngay nói thật, mọi tật mọi lành.",
+    "author": "Tục ngữ",
+    "theme": "courage",
+    "tags": ["honesty", "truth"]
+  },
+  {
+    "text": "Thuận vợ thuận chồng, tát bể Đông cũng cạn.",
+    "author": "Tục ngữ",
+    "theme": "courage",
+    "tags": ["unity", "family"]
+  },
+  {
+    "text": "Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi cao.",
+    "author": "Ca dao",
+    "theme": "courage",
+    "tags": ["adversity", "unity"]
+  },
+  { "text": "Tốt gỗ hơn tốt nước sơn.", "author": "Tục ngữ", "theme": "character", "tags": ["virtue", "integrity"] },
+  { "text": "Cái nết đánh chết cái đẹp.", "author": "Tục ngữ", "theme": "character", "tags": ["virtue", "beauty"] },
+  {
+    "text": "Đói cho sạch, rách cho thơm.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["integrity", "virtue"]
+  },
+  {
+    "text": "Giấy rách phải giữ lấy lề.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["integrity", "adversity"]
+  },
+  { "text": "Tốt danh hơn lành áo.", "author": "Tục ngữ", "theme": "character", "tags": ["virtue", "integrity"] },
+  {
+    "text": "Gần mực thì đen, gần đèn thì rạng.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["friendship", "growth"]
+  },
+  { "text": "Hữu xạ tự nhiên hương.", "author": "Tục ngữ", "theme": "character", "tags": ["virtue", "humility"] },
+  { "text": "Đường dài mới biết ngựa hay.", "author": "Tục ngữ", "theme": "time", "tags": ["experience", "patience"] },
+  { "text": "Gieo nhân nào, gặt quả nấy.", "author": "Tục ngữ", "theme": "character", "tags": ["virtue", "kindness"] },
+  {
+    "text": "Một lần bất tín, vạn lần bất tin.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["honesty", "integrity"]
+  },
+  { "text": "Chữ tín còn quý hơn vàng.", "author": "Tục ngữ", "theme": "character", "tags": ["honesty", "integrity"] },
+  {
+    "text": "Đường đi hay tối, nói dối hay cùng.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["honesty", "truth"]
+  },
+  { "text": "Có tật giật mình.", "author": "Tục ngữ", "theme": "character", "tags": ["honesty", "heart"] },
+  {
+    "text": "Khôn ngoan chẳng lọ thật thà, lường thưng tráo đấu chẳng qua đong đầy.",
+    "author": "Ca dao",
+    "theme": "character",
+    "tags": ["honesty", "integrity"]
+  },
+  {
+    "text": "Mua danh ba vạn, bán danh ba đồng.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["virtue", "integrity"]
+  },
+  {
+    "text": "Trăm năm bia đá thì mòn, nghìn năm bia miệng vẫn còn trơ trơ.",
+    "author": "Ca dao",
+    "theme": "character",
+    "tags": ["virtue", "words"]
+  },
+  {
+    "text": "Hổ chết để da, người ta chết để tiếng.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["virtue", "purpose"]
+  },
+  {
+    "text": "Một con sâu làm rầu nồi canh.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["virtue", "community"]
+  },
+  { "text": "Thùng rỗng kêu to.", "author": "Tục ngữ", "theme": "character", "tags": ["humility", "modesty"] },
+  {
+    "text": "Ếch ngồi đáy giếng coi trời bằng vung.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["humility", "self-knowledge"]
+  },
+  { "text": "Núi cao còn có núi cao hơn.", "author": "Tục ngữ", "theme": "character", "tags": ["humility", "modesty"] },
+  {
+    "text": "Cười người hôm trước, hôm sau người cười.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["humility", "kindness"]
+  },
+  {
+    "text": "Ai ơi chớ vội cười nhau, ngẫm mình cho tỏ trước sau hãy cười.",
+    "author": "Ca dao",
+    "theme": "character",
+    "tags": ["humility", "self-knowledge"]
+  },
+  { "text": "Trèo cao ngã đau.", "author": "Tục ngữ", "theme": "character", "tags": ["humility", "haste"] },
+  {
+    "text": "Tiên trách kỷ, hậu trách nhân.",
+    "author": "Tục ngữ",
+    "theme": "character",
+    "tags": ["self-knowledge", "mistakes"]
+  },
+  {
+    "text": "Thiện căn ở tại lòng ta, chữ tâm kia mới bằng ba chữ tài.",
+    "author": "Nguyễn Du",
+    "theme": "character",
+    "tags": ["heart", "virtue"]
+  },
+  {
+    "text": "Có tài mà cậy chi tài, chữ tài liền với chữ tai một vần.",
+    "author": "Nguyễn Du",
+    "theme": "character",
+    "tags": ["talent", "humility"]
+  },
+  {
+    "text": "Việc nhân nghĩa cốt ở yên dân, quân điếu phạt trước lo trừ bạo.",
+    "author": "Nguyễn Trãi",
+    "theme": "character",
+    "tags": ["virtue", "heart"]
+  },
+  {
+    "text": "Bui một tấc lòng ưu ái cũ, đêm ngày cuồn cuộn nước triều đông.",
+    "author": "Nguyễn Trãi",
+    "theme": "character",
+    "tags": ["purpose", "heart"]
+  },
+  {
+    "text": "Vì chưng hay ghét cũng là hay thương.",
+    "author": "Nguyễn Đình Chiểu",
+    "theme": "character",
+    "tags": ["compassion", "heart"]
+  },
+  {
+    "text": "Của phi nghĩa có giàu đâu, ở cho có đức mới giàu mới sang.",
+    "author": "Ca dao",
+    "theme": "character",
+    "tags": ["wealth", "virtue"]
+  },
+  { "text": "Tham thì thâm.", "author": "Tục ngữ", "theme": "character", "tags": ["wealth", "virtue"] },
+  { "text": "Uống nước nhớ nguồn.", "author": "Tục ngữ", "theme": "kindness", "tags": ["gratitude", "family"] },
+  { "text": "Ăn quả nhớ kẻ trồng cây.", "author": "Tục ngữ", "theme": "kindness", "tags": ["gratitude", "work"] },
+  { "text": "Lá lành đùm lá rách.", "author": "Tục ngữ", "theme": "kindness", "tags": ["sharing", "compassion"] },
+  {
+    "text": "Thương người như thể thương thân.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["compassion", "love"]
+  },
+  {
+    "text": "Một con ngựa đau, cả tàu bỏ cỏ.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["community", "compassion"]
+  },
+  {
+    "text": "Nhiễu điều phủ lấy giá gương, người trong một nước phải thương nhau cùng.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["community", "unity"]
+  },
+  {
+    "text": "Bầu ơi thương lấy bí cùng, tuy rằng khác giống nhưng chung một giàn.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["community", "unity"]
+  },
+  {
+    "text": "Công cha như núi Thái Sơn, nghĩa mẹ như nước trong nguồn chảy ra.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "gratitude"]
+  },
+  {
+    "text": "Một lòng thờ mẹ kính cha, cho tròn chữ hiếu mới là đạo con.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "family"]
+  },
+  {
+    "text": "Anh em như thể tay chân, rách lành đùm bọc dở hay đỡ đần.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["family", "love"]
+  },
+  {
+    "text": "Bán anh em xa, mua láng giềng gần.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["neighbours", "community"]
+  },
+  {
+    "text": "Một miếng khi đói bằng một gói khi no.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["sharing", "compassion"]
+  },
+  { "text": "Chị ngã em nâng.", "author": "Tục ngữ", "theme": "kindness", "tags": ["family", "love"] },
+  { "text": "Môi hở răng lạnh.", "author": "Tục ngữ", "theme": "kindness", "tags": ["unity", "community"] },
+  { "text": "Máu chảy ruột mềm.", "author": "Tục ngữ", "theme": "kindness", "tags": ["family", "compassion"] },
+  {
+    "text": "Khôn ngoan đá đáp người ngoài, gà cùng một mẹ chớ hoài đá nhau.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["family", "unity"]
+  },
+  {
+    "text": "Ngó lên nuộc lạt mái nhà, bao nhiêu nuộc lạt nhớ ông bà bấy nhiêu.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["gratitude", "family"]
+  },
+  {
+    "text": "Con người có tổ có tông, như cây có cội như sông có nguồn.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["family", "gratitude"]
+  },
+  {
+    "text": "Ơn cha nặng lắm ai ơi, nghĩa mẹ bằng trời chín tháng cưu mang.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "gratitude"]
+  },
+  {
+    "text": "Mẹ già như chuối ba hương, như xôi nếp một, như đường mía lau.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "love"]
+  },
+  {
+    "text": "Có nuôi con mới biết lòng cha mẹ.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["parents", "gratitude"]
+  },
+  { "text": "Con có cha như nhà có nóc.", "author": "Tục ngữ", "theme": "kindness", "tags": ["parents", "family"] },
+  { "text": "Một giọt máu đào hơn ao nước lã.", "author": "Tục ngữ", "theme": "kindness", "tags": ["family", "love"] },
+  { "text": "Lời chào cao hơn mâm cỗ.", "author": "Tục ngữ", "theme": "kindness", "tags": ["words", "kindness"] },
+  {
+    "text": "Một điều nhịn, chín điều lành.",
+    "author": "Tục ngữ",
+    "theme": "mind",
+    "tags": ["patience", "forgiveness"]
+  },
+  { "text": "Dĩ hòa vi quý.", "author": "Tục ngữ", "theme": "mind", "tags": ["forgiveness", "community"] },
+  {
+    "text": "Đánh kẻ chạy đi, không ai đánh người chạy lại.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["forgiveness", "compassion"]
+  },
+  { "text": "Của cho không bằng cách cho.", "author": "Tục ngữ", "theme": "kindness", "tags": ["sharing", "heart"] },
+  {
+    "text": "Ai ơi bưng bát cơm đầy, dẻo thơm một hạt đắng cay muôn phần.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["gratitude", "farming"]
+  },
+  {
+    "text": "Người trồng cây hạnh người chơi, ta trồng cây đức để đời về sau.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["virtue"]
+  },
+  {
+    "text": "Cây xanh thì lá cũng xanh, cha mẹ hiền lành để đức cho con.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "virtue"]
+  },
+  {
+    "text": "Ở hiền thì lại gặp lành, những người nhân đức trời dành phúc cho.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["virtue", "luck"]
+  },
+  { "text": "Ở hiền gặp lành.", "author": "Tục ngữ", "theme": "kindness", "tags": ["virtue", "luck"] },
+  {
+    "text": "Ăn ở có nhân, mười phần chẳng thiệt.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["virtue", "compassion"]
+  },
+  {
+    "text": "Hàng xóm tối lửa tắt đèn có nhau.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["neighbours", "community"]
+  },
+  { "text": "Của ít lòng nhiều.", "author": "Tục ngữ", "theme": "kindness", "tags": ["sharing", "heart"] },
+  { "text": "Ăn ở như bát nước đầy.", "author": "Tục ngữ", "theme": "kindness", "tags": ["virtue", "heart"] },
+  { "text": "Lòng vả cũng như lòng sung.", "author": "Tục ngữ", "theme": "kindness", "tags": ["compassion", "truth"] },
+  {
+    "text": "Có đi có lại mới toại lòng nhau.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["friendship", "sharing"]
+  },
+  {
+    "text": "Lên non mới biết non cao, nuôi con mới biết công lao mẹ thầy.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["gratitude", "parents"]
+  },
+  {
+    "text": "Mẹ nuôi con biển hồ lai láng, con nuôi mẹ tính tháng tính ngày.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "love"]
+  },
+  {
+    "text": "Cha mẹ nuôi con bằng trời bằng bể, con nuôi cha mẹ con kể từng ngày.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["parents", "love"]
+  },
+  {
+    "text": "Mồng một tết cha, mồng hai tết mẹ, mồng ba tết thầy.",
+    "author": "Tục ngữ",
+    "theme": "time",
+    "tags": ["gratitude", "teachers"]
+  },
+  { "text": "Kính lão đắc thọ.", "author": "Tục ngữ", "theme": "kindness", "tags": ["humility", "health"] },
+  {
+    "text": "Làm ơn há dễ trông người trả ơn.",
+    "author": "Nguyễn Đình Chiểu",
+    "theme": "kindness",
+    "tags": ["kindness", "compassion"]
+  },
+  {
+    "text": "Khoan thư sức dân để làm kế sâu rễ bền gốc, đó là thượng sách giữ nước.",
+    "author": "Trần Hưng Đạo",
+    "theme": "kindness",
+    "tags": ["compassion", "community"]
+  },
+  {
+    "text": "Quanh năm buôn bán ở mom sông, nuôi đủ năm con với một chồng.",
+    "author": "Trần Tế Xương",
+    "theme": "kindness",
+    "tags": ["family", "love"]
+  },
+  {
+    "text": "Đã bấy lâu nay bác tới nhà, trẻ thời đi vắng, chợ thời xa.",
+    "author": "Nguyễn Khuyến",
+    "theme": "kindness",
+    "tags": ["friendship", "simplicity"]
+  },
+  {
+    "text": "Đầu trò tiếp khách trầu không có, bác đến chơi đây ta với ta.",
+    "author": "Nguyễn Khuyến",
+    "theme": "kindness",
+    "tags": ["friendship", "joy"]
+  },
+  {
+    "text": "Có phải duyên nhau thì thắm lại, đừng xanh như lá bạc như vôi.",
+    "author": "Hồ Xuân Hương",
+    "theme": "kindness",
+    "tags": ["friendship", "love"]
+  },
+  {
+    "text": "Năng mưa thì giếng năng đầy, anh năng đi lại mẹ thầy năng thương.",
+    "author": "Ca dao",
+    "theme": "kindness",
+    "tags": ["love", "habits"]
+  },
+  {
+    "text": "Ngựa chạy có bầy, chim bay có bạn.",
+    "author": "Tục ngữ",
+    "theme": "kindness",
+    "tags": ["friendship", "community"]
+  },
+  { "text": "Ăn cho đều, kêu cho sòng.", "author": "Tục ngữ", "theme": "kindness", "tags": ["sharing"] },
+  {
+    "text": "Học thầy không tày học bạn.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["teachers", "friendship"]
+  },
+  { "text": "Không thầy đố mày làm nên.", "author": "Tục ngữ", "theme": "learning", "tags": ["teachers", "gratitude"] },
+  {
+    "text": "Muốn sang thì bắc cầu Kiều, muốn con hay chữ thì yêu lấy thầy.",
+    "author": "Ca dao",
+    "theme": "learning",
+    "tags": ["teachers", "gratitude"]
+  },
+  { "text": "Tiên học lễ, hậu học văn.", "author": "Tục ngữ", "theme": "learning", "tags": ["virtue", "knowledge"] },
+  {
+    "text": "Học ăn, học nói, học gói, học mở.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["practice", "words"]
+  },
+  { "text": "Học một biết mười.", "author": "Tục ngữ", "theme": "learning", "tags": ["knowledge", "growth"] },
+  {
+    "text": "Đi một ngày đàng, học một sàng khôn.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["experience", "knowledge"]
+  },
+  {
+    "text": "Biết thì thưa thốt, không biết thì dựa cột mà nghe.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["humility", "words"]
+  },
+  {
+    "text": "Một chữ cũng là thầy, nửa chữ cũng là thầy.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["teachers", "humility"]
+  },
+  { "text": "Trăm hay không bằng tay quen.", "author": "Tục ngữ", "theme": "learning", "tags": ["practice", "habits"] },
+  { "text": "Văn ôn võ luyện.", "author": "Tục ngữ", "theme": "learning", "tags": ["practice", "diligence"] },
+  {
+    "text": "Dốt đến đâu học lâu cũng biết.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["patience", "diligence"]
+  },
+  {
+    "text": "Một kho vàng không bằng một nang chữ.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["knowledge", "wealth"]
+  },
+  {
+    "text": "Dao có mài mới sắc, người có học mới khôn.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["knowledge", "growth"]
+  },
+  {
+    "text": "Người không học như ngọc không mài.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["knowledge", "growth"]
+  },
+  {
+    "text": "Học như đi thuyền ngược nước, không tiến ắt lùi.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["knowledge", "striving"]
+  },
+  {
+    "text": "Muốn biết phải hỏi, muốn giỏi phải học.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["knowledge", "humility"]
+  },
+  {
+    "text": "Muốn lành nghề, chớ nề học hỏi.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["practice", "humility"]
+  },
+  {
+    "text": "Đi hỏi già, về nhà hỏi trẻ.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["experience", "humility"]
+  },
+  { "text": "Bé không vin, cả gãy cành.", "author": "Tục ngữ", "theme": "learning", "tags": ["habits", "parents"] },
+  {
+    "text": "Uốn cây từ thuở còn non, dạy con từ thuở con còn ngây thơ.",
+    "author": "Ca dao",
+    "theme": "learning",
+    "tags": ["parents", "habits"]
+  },
+  {
+    "text": "Cá không ăn muối cá ươn, con cãi cha mẹ trăm đường con hư.",
+    "author": "Ca dao",
+    "theme": "learning",
+    "tags": ["parents", "learning"]
+  },
+  { "text": "Con hơn cha là nhà có phúc.", "author": "Tục ngữ", "theme": "learning", "tags": ["growth", "family"] },
+  { "text": "Sai một li, đi một dặm.", "author": "Tục ngữ", "theme": "learning", "tags": ["mistakes", "growth"] },
+  { "text": "Nhân vô thập toàn.", "author": "Tục ngữ", "theme": "learning", "tags": ["mistakes", "humility"] },
+  {
+    "text": "Trọng thầy mới được làm thầy.",
+    "author": "Tục ngữ",
+    "theme": "learning",
+    "tags": ["teachers", "gratitude"]
+  },
+  { "text": "Gừng càng già càng cay.", "author": "Tục ngữ", "theme": "time", "tags": ["growth", "experience"] },
+  { "text": "Giận quá mất khôn.", "author": "Tục ngữ", "theme": "mind", "tags": ["heart", "self-knowledge"] },
+  { "text": "Khôn ba năm, dại một giờ.", "author": "Tục ngữ", "theme": "mind", "tags": ["mistakes", "focus"] },
+  { "text": "Cẩn tắc vô áy náy.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "haste"] },
+  { "text": "Rút dây động rừng.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "change"] },
+  { "text": "Tránh voi chẳng xấu mặt nào.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "humility"] },
+  { "text": "Mật ngọt thì chết ruồi.", "author": "Tục ngữ", "theme": "mind", "tags": ["words", "wisdom"] },
+  { "text": "Mạnh dùng sức, yếu dùng chước.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "adversity"] },
+  { "text": "Ăn trông nồi, ngồi trông hướng.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "focus"] },
+  { "text": "Tùy cơ ứng biến.", "author": "Tục ngữ", "theme": "mind", "tags": ["change", "wisdom"] },
+  { "text": "Nhập gia tùy tục.", "author": "Tục ngữ", "theme": "mind", "tags": ["humility", "community"] },
+  { "text": "Ở bầu thì tròn, ở ống thì dài.", "author": "Tục ngữ", "theme": "mind", "tags": ["change", "wisdom"] },
+  { "text": "Chọn mặt gửi vàng.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "honesty"] },
+  { "text": "Già néo đứt dây.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "patience"] },
+  { "text": "Lòng tham không đáy.", "author": "Tục ngữ", "theme": "mind", "tags": ["heart", "wealth"] },
+  { "text": "Cây muốn lặng mà gió chẳng dừng.", "author": "Tục ngữ", "theme": "mind", "tags": ["change", "adversity"] },
+  {
+    "text": "Cảnh nào cảnh chẳng đeo sầu, người buồn cảnh có vui đâu bao giờ.",
+    "author": "Nguyễn Du",
+    "theme": "mind",
+    "tags": ["heart", "beauty"]
+  },
+  {
+    "text": "Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau.",
+    "author": "Nguyễn Du",
+    "theme": "mind",
+    "tags": ["fate", "talent"]
+  },
+  {
+    "text": "Đã mang lấy nghiệp vào thân, cũng đừng trách lẫn trời gần trời xa.",
+    "author": "Nguyễn Du",
+    "theme": "mind",
+    "tags": ["fate", "self-knowledge"]
+  },
+  {
+    "text": "Mưu sự tại nhân, thành sự tại thiên.",
+    "author": "Tục ngữ",
+    "theme": "mind",
+    "tags": ["fate", "striving"]
+  },
+  { "text": "Uốn lưỡi bảy lần trước khi nói.", "author": "Tục ngữ", "theme": "mind", "tags": ["words", "wisdom"] },
+  {
+    "text": "Lời nói chẳng mất tiền mua, lựa lời mà nói cho vừa lòng nhau.",
+    "author": "Ca dao",
+    "theme": "mind",
+    "tags": ["words", "kindness"]
+  },
+  { "text": "Ăn có nhai, nói có nghĩ.", "author": "Tục ngữ", "theme": "mind", "tags": ["words", "wisdom"] },
+  { "text": "Nói phải củ cải cũng nghe.", "author": "Tục ngữ", "theme": "mind", "tags": ["words", "truth"] },
+  { "text": "Tai vách mạch rừng.", "author": "Tục ngữ", "theme": "mind", "tags": ["words", "wisdom"] },
+  {
+    "text": "Chim khôn kêu tiếng rảnh rang, người khôn nói tiếng dịu dàng dễ nghe.",
+    "author": "Ca dao",
+    "theme": "mind",
+    "tags": ["words", "kindness"]
+  },
+  {
+    "text": "Vàng thì thử lửa thử than, chuông kêu thử tiếng, người ngoan thử lời.",
+    "author": "Ca dao",
+    "theme": "mind",
+    "tags": ["words", "character"]
+  },
+  {
+    "text": "Người thanh tiếng nói cũng thanh, chuông kêu khẽ đánh bên thành cũng kêu.",
+    "author": "Ca dao",
+    "theme": "mind",
+    "tags": ["words", "character"]
+  },
+  {
+    "text": "Rượu nhạt uống lắm cũng say, người khôn nói lắm dẫu hay cũng nhàm.",
+    "author": "Ca dao",
+    "theme": "mind",
+    "tags": ["words", "modesty"]
+  },
+  { "text": "Ăn bớt bát, nói bớt lời.", "author": "Tục ngữ", "theme": "mind", "tags": ["words", "modesty"] },
+  {
+    "text": "Chim khôn chọn cành mà đậu, người khôn chọn bạn mà chơi.",
+    "author": "Tục ngữ",
+    "theme": "mind",
+    "tags": ["friendship", "wisdom"]
+  },
+  { "text": "Nước xa không cứu được lửa gần.", "author": "Tục ngữ", "theme": "mind", "tags": ["wisdom", "neighbours"] },
+  { "text": "Phòng bệnh hơn chữa bệnh.", "author": "Tục ngữ", "theme": "mind", "tags": ["health", "wisdom"] },
+  { "text": "Sau cơn mưa trời lại sáng.", "author": "Tục ngữ", "theme": "hope", "tags": ["adversity", "resilience"] },
+  {
+    "text": "Hết cơn bĩ cực, tới hồi thái lai.",
+    "author": "Tục ngữ",
+    "theme": "hope",
+    "tags": ["adversity", "change"]
+  },
+  { "text": "Trong cái rủi có cái may.", "author": "Tục ngữ", "theme": "hope", "tags": ["luck", "adversity"] },
+  {
+    "text": "Còn da lông mọc, còn chồi nảy cây.",
+    "author": "Tục ngữ",
+    "theme": "hope",
+    "tags": ["resilience", "growth"]
+  },
+  { "text": "Tre già măng mọc.", "author": "Tục ngữ", "theme": "time", "tags": ["growth", "change"] },
+  {
+    "text": "Không ai giàu ba họ, không ai khó ba đời.",
+    "author": "Tục ngữ",
+    "theme": "hope",
+    "tags": ["change", "wealth"]
+  },
+  { "text": "Sông có khúc, người có lúc.", "author": "Tục ngữ", "theme": "time", "tags": ["change", "patience"] },
+  {
+    "text": "Người có lúc vinh lúc nhục, nước có lúc đục lúc trong.",
+    "author": "Tục ngữ",
+    "theme": "hope",
+    "tags": ["change", "patience"]
+  },
+  {
+    "text": "Trông cho chân cứng đá mềm, trời êm biển lặng mới yên tấm lòng.",
+    "author": "Ca dao",
+    "theme": "hope",
+    "tags": ["love", "family"]
+  },
+  {
+    "text": "Trời còn để có hôm nay, tan sương đầu ngõ vén mây giữa trời.",
+    "author": "Nguyễn Du",
+    "theme": "hope",
+    "tags": ["adversity", "joy"]
+  },
+  {
+    "text": "Hoa tàn mà lại thêm tươi, trăng tàn mà lại hơn mười rằm xưa.",
+    "author": "Nguyễn Du",
+    "theme": "hope",
+    "tags": ["change", "joy"]
+  },
+  {
+    "text": "Kiền khôn bĩ rồi lại thái, nhật nguyệt hối rồi lại minh.",
+    "author": "Nguyễn Trãi",
+    "theme": "hope",
+    "tags": ["change", "resilience"]
+  },
+  {
+    "text": "Xã tắc từ đây vững bền, giang sơn từ đây đổi mới.",
+    "author": "Nguyễn Trãi",
+    "theme": "hope",
+    "tags": ["change", "beginning"]
+  },
+  {
+    "text": "Tuy mạnh yếu từng lúc khác nhau, song hào kiệt đời nào cũng có.",
+    "author": "Nguyễn Trãi",
+    "theme": "hope",
+    "tags": ["talent", "community"]
+  },
+  { "text": "Khổ trước sướng sau.", "author": "Tục ngữ", "theme": "hope", "tags": ["patience", "striving"] },
+  { "text": "Đất lành chim đậu.", "author": "Tục ngữ", "theme": "hope", "tags": ["home", "community"] },
+  { "text": "Người ta là hoa đất.", "author": "Tục ngữ", "theme": "hope", "tags": ["community", "beauty"] },
+  { "text": "Trước lạ sau quen.", "author": "Tục ngữ", "theme": "time", "tags": ["beginning", "friendship"] },
+  {
+    "text": "Thuyền về có nhớ bến chăng, bến thì một dạ khăng khăng đợi thuyền.",
+    "author": "Ca dao",
+    "theme": "hope",
+    "tags": ["love", "patience"]
+  },
+  { "text": "Một nụ cười bằng mười thang thuốc bổ.", "author": "Tục ngữ", "theme": "hope", "tags": ["joy", "health"] },
+  {
+    "text": "Chuồn chuồn bay thấp thì mưa, bay cao thì nắng, bay vừa thì râm.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  { "text": "Ráng mỡ gà, có nhà thì giữ.", "author": "Tục ngữ", "theme": "nature", "tags": ["weather", "home"] },
+  {
+    "text": "Tháng bảy kiến bò, chỉ lo lại lụt.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "seasons"]
+  },
+  {
+    "text": "Nhất nước, nhì phân, tam cần, tứ giống.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["farming", "work"]
+  },
+  {
+    "text": "Trông trời, trông đất, trông mây, trông mưa, trông gió, trông ngày, trông đêm.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "weather"]
+  },
+  {
+    "text": "Được mùa chớ phụ ngô khoai, đến khi thất bát lấy ai bạn cùng.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "thrift"]
+  },
+  {
+    "text": "Mau sao thì nắng, vắng sao thì mưa.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  {
+    "text": "Ai ơi chớ bỏ ruộng hoang, bao nhiêu tấc đất tấc vàng bấy nhiêu.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "diligence"]
+  },
+  { "text": "Tấc đất tấc vàng.", "author": "Tục ngữ", "theme": "nature", "tags": ["farming", "wealth"] },
+  {
+    "text": "Đêm tháng năm chưa nằm đã sáng, ngày tháng mười chưa cười đã tối.",
+    "author": "Tục ngữ",
+    "theme": "time",
+    "tags": ["seasons", "time"]
+  },
+  { "text": "Nắng tốt dưa, mưa tốt lúa.", "author": "Tục ngữ", "theme": "nature", "tags": ["farming", "weather"] },
+  {
+    "text": "Lúa chiêm lấp ló đầu bờ, hễ nghe tiếng sấm phất cờ mà lên.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "weather"]
+  },
+  {
+    "text": "Cơn đằng Đông vừa trông vừa chạy, cơn đằng Nam vừa làm vừa chơi.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  { "text": "Tháng tám nắng rám trái bưởi.", "author": "Tục ngữ", "theme": "nature", "tags": ["weather", "seasons"] },
+  {
+    "text": "Trăng quầng thì hạn, trăng tán thì mưa.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  {
+    "text": "Ráng vàng thì nắng, ráng trắng thì mưa.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  {
+    "text": "Quạ tắm thì ráo, sáo tắm thì mưa.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  {
+    "text": "Kiến đen tha trứng lên cao, thế nào cũng có mưa rào rất to.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "wisdom"]
+  },
+  {
+    "text": "Mưa tháng ba hoa đất, mưa tháng tư hư đất.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["weather", "farming"]
+  },
+  {
+    "text": "Cấy thưa thừa thóc, cấy dày cóc được ăn.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["farming", "practice"]
+  },
+  {
+    "text": "Ăn kỹ no lâu, cày sâu tốt lúa.",
+    "author": "Tục ngữ",
+    "theme": "nature",
+    "tags": ["farming", "diligence"]
+  },
+  {
+    "text": "Muốn cho lúa nảy bông to, cày sâu bừa kỹ phân gio cho nhiều.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "diligence"]
+  },
+  { "text": "Con trâu là đầu cơ nghiệp.", "author": "Tục ngữ", "theme": "nature", "tags": ["farming", "work"] },
+  {
+    "text": "Tháng chạp là tháng trồng khoai, tháng giêng trồng đậu, tháng hai trồng cà.",
+    "author": "Ca dao",
+    "theme": "time",
+    "tags": ["farming", "seasons"]
+  },
+  {
+    "text": "Trên đồng cạn, dưới đồng sâu, chồng cày vợ cấy, con trâu đi bừa.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "family"]
+  },
+  {
+    "text": "Trâu ơi ta bảo trâu này, trâu ra ngoài ruộng trâu cày với ta.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["farming", "friendship"]
+  },
+  { "text": "Cây có cội, nước có nguồn.", "author": "Tục ngữ", "theme": "nature", "tags": ["family", "home"] },
+  { "text": "Lá rụng về cội.", "author": "Tục ngữ", "theme": "nature", "tags": ["home", "family"] },
+  {
+    "text": "Đường vô xứ Nghệ quanh quanh, non xanh nước biếc như tranh họa đồ.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["home", "beauty"]
+  },
+  {
+    "text": "Gió đưa cành trúc la đà, tiếng chuông Trấn Vũ, canh gà Thọ Xương.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["beauty", "home"]
+  },
+  {
+    "text": "Rủ nhau xem cảnh Kiếm Hồ, xem cầu Thê Húc, xem chùa Ngọc Sơn.",
+    "author": "Ca dao",
+    "theme": "nature",
+    "tags": ["beauty", "home"]
+  },
+  {
+    "text": "Cỏ non xanh tận chân trời, cành lê trắng điểm một vài bông hoa.",
+    "author": "Nguyễn Du",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Dưới trăng quyên đã gọi hè, đầu tường lửa lựu lập lòe đâm bông.",
+    "author": "Nguyễn Du",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Long lanh đáy nước in trời, thành xây khói biếc non phơi bóng vàng.",
+    "author": "Nguyễn Du",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Người lên ngựa kẻ chia bào, rừng phong thu đã nhuốm màu quan san.",
+    "author": "Nguyễn Du",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Gần xa nô nức yến anh, chị em sắm sửa bộ hành chơi xuân.",
+    "author": "Nguyễn Du",
+    "theme": "nature",
+    "tags": ["seasons", "joy"]
+  },
+  {
+    "text": "Ao thu lạnh lẽo nước trong veo, một chiếc thuyền câu bé tẻo teo.",
+    "author": "Nguyễn Khuyến",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Sóng biếc theo làn hơi gợn tí, lá vàng trước gió khẽ đưa vèo.",
+    "author": "Nguyễn Khuyến",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Trời thu xanh ngắt mấy tầng cao, cần trúc lơ phơ gió hắt hiu.",
+    "author": "Nguyễn Khuyến",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Nước biếc trông như tầng khói phủ, song thưa để mặc bóng trăng vào.",
+    "author": "Nguyễn Khuyến",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Tầng mây lơ lửng trời xanh ngắt, ngõ trúc quanh co khách vắng teo.",
+    "author": "Nguyễn Khuyến",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Lưng giậu phất phơ màu khói nhạt, làn ao lóng lánh bóng trăng loe.",
+    "author": "Nguyễn Khuyến",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Thạch lựu hiên còn phun thức đỏ, hồng liên trì đã tiễn mùi hương.",
+    "author": "Nguyễn Trãi",
+    "theme": "nature",
+    "tags": ["beauty", "seasons"]
+  },
+  {
+    "text": "Lao xao chợ cá làng ngư phủ, dắt dỏi cầm ve lầu tịch dương.",
+    "author": "Nguyễn Trãi",
+    "theme": "nature",
+    "tags": ["community", "joy"]
+  },
+  {
+    "text": "Một mai, một cuốc, một cần câu, thơ thẩn dầu ai vui thú nào.",
+    "author": "Nguyễn Bỉnh Khiêm",
+    "theme": "simplicity",
+    "tags": ["simplicity", "joy"]
+  },
+  {
+    "text": "Ta dại, ta tìm nơi vắng vẻ, người khôn, người đến chốn lao xao.",
+    "author": "Nguyễn Bỉnh Khiêm",
+    "theme": "simplicity",
+    "tags": ["simplicity", "wisdom"]
+  },
+  {
+    "text": "Thu ăn măng trúc, đông ăn giá, xuân tắm hồ sen, hạ tắm ao.",
+    "author": "Nguyễn Bỉnh Khiêm",
+    "theme": "simplicity",
+    "tags": ["seasons", "simplicity"]
+  },
+  {
+    "text": "Rượu, đến cội cây, ta sẽ uống, nhìn xem phú quý tựa chiêm bao.",
+    "author": "Nguyễn Bỉnh Khiêm",
+    "theme": "simplicity",
+    "tags": ["wealth", "simplicity"]
+  },
+  {
+    "text": "Tựa gối ôm cần lâu chẳng được, cá đâu đớp động dưới chân bèo.",
+    "author": "Nguyễn Khuyến",
+    "theme": "simplicity",
+    "tags": ["patience", "simplicity"]
+  },
+  {
+    "text": "Năm gian nhà cỏ thấp le te, ngõ tối đêm sâu đóm lập lòe.",
+    "author": "Nguyễn Khuyến",
+    "theme": "simplicity",
+    "tags": ["home", "simplicity"]
+  },
+  {
+    "text": "Ta về ta tắm ao ta, dù trong dù đục ao nhà vẫn hơn.",
+    "author": "Ca dao",
+    "theme": "simplicity",
+    "tags": ["home", "simplicity"]
+  },
+  {
+    "text": "Anh đi anh nhớ quê nhà, nhớ canh rau muống nhớ cà dầm tương.",
+    "author": "Ca dao",
+    "theme": "simplicity",
+    "tags": ["home", "simplicity"]
+  },
+  {
+    "text": "Râu tôm nấu với ruột bầu, chồng chan vợ húp gật đầu khen ngon.",
+    "author": "Ca dao",
+    "theme": "simplicity",
+    "tags": ["family", "joy"]
+  },
+  { "text": "Ăn lấy chắc, mặc lấy bền.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["thrift", "simplicity"] },
+  {
+    "text": "Nhà sạch thì mát, bát sạch ngon cơm.",
+    "author": "Tục ngữ",
+    "theme": "simplicity",
+    "tags": ["home", "health"]
+  },
+  { "text": "Có thực mới vực được đạo.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["health", "simplicity"] },
+  {
+    "text": "Khéo ăn thì no, khéo co thì ấm.",
+    "author": "Tục ngữ",
+    "theme": "simplicity",
+    "tags": ["thrift", "wisdom"]
+  },
+  { "text": "Liệu cơm gắp mắm.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["thrift", "wisdom"] },
+  { "text": "Ăn cần ở kiệm.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["thrift", "diligence"] },
+  { "text": "Ăn ít ngon nhiều.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["thrift", "simplicity"] },
+  {
+    "text": "Buôn tàu buôn bè không bằng ăn dè hà tiện.",
+    "author": "Tục ngữ",
+    "theme": "simplicity",
+    "tags": ["thrift", "wealth"]
+  },
+  {
+    "text": "Ít chắt chiu hơn nhiều phung phí.",
+    "author": "Tục ngữ",
+    "theme": "simplicity",
+    "tags": ["thrift", "small-steps"]
+  },
+  { "text": "Của bền tại người.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["thrift", "wealth"] },
+  { "text": "Tham bát bỏ mâm.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["wealth", "virtue"] },
+  {
+    "text": "Ăn được ngủ được là tiên, không ăn không ngủ mất tiền thêm lo.",
+    "author": "Ca dao",
+    "theme": "simplicity",
+    "tags": ["health", "joy"]
+  },
+  { "text": "Ăn chín uống sôi.", "author": "Tục ngữ", "theme": "simplicity", "tags": ["health", "habits"] },
+  {
+    "text": "Tích cốc phòng cơ, tích y phòng hàn.",
+    "author": "Tục ngữ",
+    "theme": "simplicity",
+    "tags": ["thrift", "work"]
+  },
+  {
+    "text": "Của làm ra để trên gác, của cờ bạc để ngoài sân, của phù vân để ngoài ngõ.",
+    "author": "Tục ngữ",
+    "theme": "simplicity",
+    "tags": ["work", "wealth"]
+  },
+  {
+    "text": "Thế gian biến cải vũng nên đồi, mặn nhạt chua cay lẫn ngọt bùi.",
+    "author": "Nguyễn Bỉnh Khiêm",
+    "theme": "simplicity",
+    "tags": ["change", "simplicity"]
+  },
+  { "text": "Ăn hôm nay, lo ngày mai.", "author": "Tục ngữ", "theme": "time", "tags": ["now", "today"] },
+  { "text": "Nhất thì, nhì thục.", "author": "Tục ngữ", "theme": "time", "tags": ["farming", "practice"] },
+  { "text": "Ăn theo thuở, ở theo thì.", "author": "Tục ngữ", "theme": "time", "tags": ["change", "habits"] },
+  { "text": "Mùa nào thức nấy.", "author": "Tục ngữ", "theme": "time", "tags": ["seasons", "simplicity"] },
+  { "text": "Đời người như bóng câu qua cửa sổ.", "author": "Tục ngữ", "theme": "time", "tags": ["life", "change"] },
+  {
+    "text": "Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng.",
+    "author": "Nguyễn Du",
+    "theme": "time",
+    "tags": ["change", "life"]
+  },
+  {
+    "text": "Ngày xuân con én đưa thoi, thiều quang chín chục đã ngoài sáu mươi.",
+    "author": "Nguyễn Du",
+    "theme": "time",
+    "tags": ["seasons", "life"]
+  },
+  {
+    "text": "Sen tàn cúc lại nở hoa, sầu dài ngày ngắn đông đà sang xuân.",
+    "author": "Nguyễn Du",
+    "theme": "time",
+    "tags": ["seasons", "change"]
+  },
+  {
+    "text": "Ngán nỗi xuân đi xuân lại lại, mảnh tình san sẻ tí con con.",
+    "author": "Hồ Xuân Hương",
+    "theme": "time",
+    "tags": ["seasons", "life"]
+  },
+  { "text": "Chờ được vạ thì má đã sưng.", "author": "Tục ngữ", "theme": "time", "tags": ["haste", "patience"] },
+  { "text": "Ngủ ngày quen mắt, ăn vặt quen mồm.", "author": "Tục ngữ", "theme": "time", "tags": ["habits", "health"] },
+  { "text": "Trẻ cậy cha, già cậy con.", "author": "Tục ngữ", "theme": "time", "tags": ["parents", "family"] },
+  {
+    "text": "Vầng trăng ai xẻ làm đôi, nửa in gối chiếc nửa soi dặm trường.",
+    "author": "Nguyễn Du",
+    "theme": "time",
+    "tags": ["beauty", "life"]
+  }
+]
