@@ -22,6 +22,12 @@ describe('parseSettings', () => {
     expect(parseSettings({ features: 'plan' }).features).toEqual([]);
   });
 
+  it('does not sync until switched on', () => {
+    expect(parseSettings(null).sync).toBe(false);
+    expect(parseSettings({ sync: true }).sync).toBe(true);
+    expect(parseSettings({ sync: 'yes' }).sync).toBe(false);
+  });
+
   it('keeps valid values and drops bad or unknown ones', () => {
     const parsed = parseSettings({ theme: 'dark', clock: '13h', quote: false, shortcuts: 'yes', extra: 1 });
     expect(parsed).toEqual({ ...DEFAULT_SETTINGS, theme: 'dark', quote: false });

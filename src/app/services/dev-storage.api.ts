@@ -30,6 +30,14 @@ export class DevStorageApi implements StorageApi {
     return of(true);
   }
 
+  setSyncEnabled(): void {
+    // No remote to switch.
+  }
+
+  pushLocalToRemote(): Promise<void> {
+    return Promise.resolve();
+  }
+
   syncRemoteToLocal(): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, 1000));
   }

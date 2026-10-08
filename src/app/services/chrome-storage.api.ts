@@ -4,7 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
 import { INSTANCE_ID } from './instance-id';
-import { fitsChromeSyncItem, syncsWithChromeProfile } from './sync-policy';
+import { fitsChromeSyncItem, SYNC_ENABLED, syncsWithChromeProfile } from './sync-policy';
 import { getTime } from './utils';
 
 type StoredRecord = Record<string, unknown> & { sourceId?: string; trust?: string; modifiedDate?: string };
@@ -26,9 +26,14 @@ export class ChromeStorageApi implements StorageApi {
   remoteDataQueue: Array<{ key: string | string[]; value?: string; action: 'remove' | 'set' }> = [];
   writingToRemoteSubscription: Subscription | null = null;
   remoteSync$ = new BehaviorSubject(false);
+  /** Off: chrome.storage.sync is neither written nor read, and its changes are ignored. */
+  private syncEnabled = inject(SYNC_ENABLED);
 
   constructor() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === 'sync' && !this.syncEnabled) {
+        return;
+      }
       // Room freed in chrome.storage.sync, by another device too: send what it refused again.
       if (areaName === 'sync' && Object.values(changes).some((change) => change.newValue === undefined)) {
         void this.retryRefusedWrites();
@@ -43,7 +48,43 @@ export class ChromeStorageApi implements StorageApi {
       }
     });
     // What was refused before a restart.
-    void this.retryRefusedWrites();
+    if (this.syncEnabled) {
+      void this.retryRefusedWrites();
+    }
+  }
+
+  setSyncEnabled(enabled: boolean): void {
+    if (enabled === this.syncEnabled) {
+      return;
+    }
+    this.syncEnabled = enabled;
+    if (enabled) {
+      void this.retryRefusedWrites();
+    } else {
+      // What is queued stays on the device; the remote keeps what it has.
+      this.remoteDataQueue = [];
+    }
+  }
+
+  /**
+   * Queue every record that syncs, as chrome.storage.local holds it: run when sync is switched on, after the remote has
+   * been pulled in, so what was written while sync was off reaches the profile. A record that came from the remote is
+   * there already.
+   */
+  async pushLocalToRemote(): Promise<void> {
+    if (!this.syncEnabled) {
+      return;
+    }
+    const stored = (await this.localStorageApi.get(null)) as Record<string, unknown>;
+    const before = this.remoteDataQueue.length;
+    for (const [key, valueStr] of Object.entries(stored)) {
+      if (!key.startsWith(SYNC_RETRY_PREFIX) && this.sendable(key, valueStr)) {
+        this.remoteDataQueue.push({ key, value: valueStr as string, action: 'set' });
+      }
+    }
+    if (this.remoteDataQueue.length > before) {
+      this.syncToRemote();
+    }
   }
 
   getRemoteSyncStatus(): Observable<boolean> {
@@ -98,7 +139,12 @@ export class ChromeStorageApi implements StorageApi {
     }
     const valueStr = JSON.stringify(value);
     await this.localStorageApi.set({ [key]: valueStr });
-    if (trust === 'local' && syncsWithChromeProfile(key, value) && fitsChromeSyncItem(key, valueStr)) {
+    if (
+      this.syncEnabled &&
+      trust === 'local' &&
+      syncsWithChromeProfile(key, value) &&
+      fitsChromeSyncItem(key, valueStr)
+    ) {
       const oldActionIndex = this.remoteDataQueue.findIndex((item) => item.key === key);
       if (oldActionIndex > -1) {
         this.remoteDataQueue.splice(oldActionIndex, 1);
@@ -135,7 +181,7 @@ export class ChromeStorageApi implements StorageApi {
     const records = (await this.read(this.localStorageApi, keys)) as unknown[];
     const remoteKeys = keys.filter((itemKey, index) => syncsWithChromeProfile(itemKey, records[index]));
     await this.localStorageApi.remove(key);
-    if (remoteKeys.length > 0) {
+    if (this.syncEnabled && remoteKeys.length > 0) {
       this.remoteDataQueue.push({ key: remoteKeys, action: 'remove' });
       this.syncToRemote();
     }
@@ -148,6 +194,9 @@ export class ChromeStorageApi implements StorageApi {
    * once may both send a record, which writes the same value twice.
    */
   async retryRefusedWrites(): Promise<void> {
+    if (!this.syncEnabled) {
+      return;
+    }
     // Keys only, never the values: getKeys is Chrome 130+, and the build targets the last two versions (.browserslistrc).
     const markers = (await this.localStorageApi.getKeys()).filter((key) => key.startsWith(SYNC_RETRY_PREFIX));
     if (markers.length === 0) {
@@ -159,23 +208,27 @@ export class ChromeStorageApi implements StorageApi {
     const before = this.remoteDataQueue.length;
     for (const key of keys) {
       const valueStr = stored[key];
-      const record = this.jsonParse(valueStr) as StoredRecord | unknown[] | null;
-      if (
-        typeof valueStr !== 'string' ||
-        !record ||
-        // Id lists carry no trust: only this device writes them.
-        (!Array.isArray(record) && record.trust !== 'local') ||
-        !syncsWithChromeProfile(key, record) ||
-        !fitsChromeSyncItem(key, valueStr) ||
-        this.queued(key)
-      ) {
-        continue;
+      if (this.sendable(key, valueStr)) {
+        this.remoteDataQueue.push({ key, value: valueStr as string, action: 'set' });
       }
-      this.remoteDataQueue.push({ key, value: valueStr, action: 'set' });
     }
     if (this.remoteDataQueue.length > before) {
       this.syncToRemote();
     }
+  }
+
+  /** A record this device wrote, that syncs, fits one item and is not queued already. */
+  private sendable(key: string, valueStr: unknown): boolean {
+    const record = this.jsonParse(valueStr) as StoredRecord | unknown[] | null;
+    return (
+      typeof valueStr === 'string' &&
+      !!record &&
+      // Id lists carry no trust: only this device writes them.
+      (Array.isArray(record) || record.trust === 'local') &&
+      syncsWithChromeProfile(key, record) &&
+      fitsChromeSyncItem(key, valueStr) &&
+      !this.queued(key)
+    );
   }
 
   private queued(key: string): boolean {
@@ -212,6 +265,9 @@ export class ChromeStorageApi implements StorageApi {
    *  - Not found => if trust = remote => remove from local
    */
   async syncRemoteToLocal(): Promise<void> {
+    if (!this.syncEnabled) {
+      return;
+    }
     const remoteItems = ((await this.getRemote(null)) as Record<string, unknown>) || {};
     const localItems = ((await this.getPromise(null)) as Record<string, unknown>) || {};
     const remoteKeys = Object.keys(remoteItems);

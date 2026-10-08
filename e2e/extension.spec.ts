@@ -54,6 +54,13 @@ async function stored(page: Page, area: 'local' | 'sync', key: string) {
   return raw ? JSON.parse(raw) : undefined;
 }
 
+/** Sync is off until switched on in Settings. */
+async function switchOnSync(page: Page): Promise<void> {
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await page.keyboard.press('Escape');
+}
+
 const board = (ids: string[]) => ({
   _ART_BOARD__ART_BOARD_ITEM_IDS__defaultArtBoard: ids,
   _ART_BOARD_ITEM__IDS: ids,
@@ -193,8 +200,28 @@ test('2.x text notes open migrated, and are only rewritten when edited', async (
   );
 });
 
+test('nothing reaches chrome.storage.sync until sync is switched on, then what was written goes up', async ({
+  newTab,
+}) => {
+  const page = await newTab();
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Kept on this computer');
+  const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
+  await expect.poll(async () => (await stored(page, 'local', `ITEM_DATA__${id}`))?.data).toBe('Kept on this computer');
+  await page.waitForTimeout(1500);
+  expect(await page.evaluate(() => chrome.storage.sync.get(null))).toEqual({});
+
+  await switchOnSync(page);
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
+    .toBe('Kept on this computer');
+  await expect.poll(async () => (await stored(page, 'sync', 'NOTEME_SETTINGS'))?.sync).toBe(true);
+});
+
 test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ newTab }) => {
   const page = await newTab();
+  await switchOnSync(page);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Synced across devices');
@@ -258,9 +285,10 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
   await expect(second.locator('ntm-note-card')).toHaveCount(2);
 });
 
-test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
+test('settings are kept in chrome.storage.sync once sync is on', async ({ newTab }) => {
   const page = await newTab();
-  await page.goto(page.url() + '?settings=1');
+  await switchOnSync(page);
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
   const synced = () =>
     page.evaluate(() =>
       chrome.storage.sync.get('NOTEME_SETTINGS').then((r) => JSON.parse(String(r['NOTEME_SETTINGS'] ?? '{}'))),
@@ -276,6 +304,7 @@ test('settings are kept in chrome.storage.sync', async ({ newTab }) => {
 
 test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {
   const page = await newTab();
+  await switchOnSync(page);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Synced note');

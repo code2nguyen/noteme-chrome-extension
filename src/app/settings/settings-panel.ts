@@ -77,7 +77,7 @@ export class SettingsPanel {
     this.service.update({ features: (event.target as Select).value as Feature[] });
   }
 
-  toggle(key: 'quote' | 'photos', event: Event): void {
+  toggle(key: 'quote' | 'photos' | 'sync', event: Event): void {
     this.service.update({ [key]: (event.target as Switch).checked });
   }
 

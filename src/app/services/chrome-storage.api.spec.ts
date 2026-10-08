@@ -8,6 +8,7 @@ import { DataType } from '../store/models/data-type';
 import { ChromeStorageApi, SYNC_RETRY_PREFIX } from './chrome-storage.api';
 import { INSTANCE_ID } from './instance-id';
 import { StoreSyncService } from './store-sync.service';
+import { SYNC_ENABLED } from './sync-policy';
 
 /** A storage area that keeps its records in a map. */
 function area(records: Record<string, string> = {}) {
@@ -29,7 +30,7 @@ function area(records: Record<string, string> = {}) {
 
 type ChangeListener = (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void;
 
-function setUp(localRecords: Record<string, string> = {}, { drain = false } = {}) {
+function setUp(localRecords: Record<string, string> = {}, { drain = false, syncEnabled = true } = {}) {
   const local = area(localRecords);
   const sync = area();
   const listeners: ChangeListener[] = [];
@@ -40,6 +41,7 @@ function setUp(localRecords: Record<string, string> = {}, { drain = false } = {}
     providers: [
       { provide: INSTANCE_ID, useValue: 'tab' },
       { provide: StoreSyncService, useValue: { sync: () => undefined } },
+      { provide: SYNC_ENABLED, useValue: syncEnabled },
     ],
   });
   const api = runInInjectionContext(injector, () => new ChromeStorageApi());
@@ -68,6 +70,44 @@ describe('ChromeStorageApi', () => {
       empty: false,
     });
     expect(api.remoteDataQueue.map(({ key }) => key)).toEqual(['ITEM_DATA__a']);
+  });
+
+  describe('with sync switched off', () => {
+    const note = { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false };
+
+    it('keeps notes on the device and ignores chrome.storage.sync', async () => {
+      const { api, local, sync, listeners } = setUp({}, { syncEnabled: false });
+      const storeSync = vi.fn();
+      (api as unknown as { storeSync: { sync: unknown } }).storeSync.sync = storeSync;
+      await api.setPromise('ITEM_DATA__a', note);
+      await api.removePromise('ITEM_DATA__a');
+      await api.syncRemoteToLocal();
+      listeners.forEach((listener) => listener({ ITEM_DATA__b: { newValue: '{"id":"b"}' } }, 'sync'));
+      expect(api.remoteDataQueue).toEqual([]);
+      expect(sync.get).not.toHaveBeenCalled();
+      expect(local.getKeys).not.toHaveBeenCalled();
+      expect(storeSync).not.toHaveBeenCalled();
+    });
+
+    it('sends what was written meanwhile once switched on', async () => {
+      const { api } = setUp({}, { syncEnabled: false });
+      await api.setPromise('ITEM_DATA__a', note);
+      await api.setPromise('ITEM_DATA__p', { id: 'p', dataType: DataType.PAGE, data: 'Long', empty: false });
+      await api.setPromise('ITEM_DATA__r', { ...note, id: 'r' }, 'remote', 'other-device');
+      await api.pushLocalToRemote();
+      expect(api.remoteDataQueue).toEqual([]);
+      api.setSyncEnabled(true);
+      await api.pushLocalToRemote();
+      await api.pushLocalToRemote();
+      expect(api.remoteDataQueue.map(({ key }) => key)).toEqual(['ITEM_DATA__a']);
+    });
+
+    it('drops what was queued when switched off', async () => {
+      const { api } = setUp();
+      await api.setPromise('ITEM_DATA__a', note);
+      api.setSyncEnabled(false);
+      expect(api.remoteDataQueue).toEqual([]);
+    });
   });
 
   it('removes from chrome.storage.sync only what the policy syncs', async () => {
@@ -162,6 +202,7 @@ describe('ChromeStorageApi', () => {
           providers: [
             { provide: INSTANCE_ID, useValue: 'other-tab' },
             { provide: StoreSyncService, useValue: { sync: () => undefined } },
+            { provide: SYNC_ENABLED, useValue: true },
           ],
         }),
         () => new ChromeStorageApi(),
