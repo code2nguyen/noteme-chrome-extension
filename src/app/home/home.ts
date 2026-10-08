@@ -26,7 +26,8 @@ import { formatDate, formatTime, hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
 import { BackgroundOptions, BackgroundService, ShownPhoto } from './background.service';
-import { quoteOfTheDay } from './quotes';
+import { Quote, QUOTE_MARKS } from './quotes';
+import { QuoteService } from './quotes.service';
 import { Site, TopSitesService } from './top-sites.service';
 
 type ShortcutsState = 'hidden' | 'ask' | 'shown';
@@ -49,6 +50,7 @@ type ShortcutsState = 'hidden' | 'ask' | 'shown';
 export class Home {
   private readonly settingsService = inject(SettingsService);
   private readonly backgrounds = inject(BackgroundService);
+  private readonly quotes = inject(QuoteService);
   private readonly topSites = inject(TopSitesService);
   private readonly router = inject(Router);
   private readonly dataService = inject(DataService);
@@ -59,7 +61,11 @@ export class Home {
   readonly settings = this.settingsService.settings;
   readonly time = computed(() => formatTime(this.now(), this.settings().clock));
   readonly date = computed(() => formatDate(this.now(), this.settings().dateFormat));
-  readonly quote = computed(() => (this.settings().quote ? quoteOfTheDay(this.now()) : null));
+  readonly quote = signal<Quote | null>(null);
+  /** The quotation marks of the quote's language. */
+  readonly quoteMarks = computed(() => QUOTE_MARKS[this.quote()?.lang ?? 'en']);
+  /** Bumped by every quote shown, so turning the quote off wins over one still loading. */
+  private quoteRun = 0;
   /** Plan is optional: its link shows only while it is switched on in Settings. */
   readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
 
@@ -111,6 +117,12 @@ export class Home {
       untracked(() => void this.showPhoto(options));
     });
 
+    const quoteOn = computed(() => this.settings().quote);
+    effect(() => {
+      const on = quoteOn();
+      untracked(() => this.showQuote(on));
+    });
+
     effect(() => {
       const wanted = this.settings().shortcuts;
       untracked(() => void this.refreshShortcuts(wanted));
@@ -152,6 +164,25 @@ export class Home {
   async changePhoto(): Promise<void> {
     const options = this.photoOptions();
     await this.present(this.backgrounds.next(options), options, (task) => void task());
+  }
+
+  /**
+   * The quote kept from the last ten minutes shows at once; a new one waits until the page has settled, so loading the
+   * lists never holds up the first paint, and fades in a moment later. None while it is switched off.
+   */
+  private showQuote(on: boolean): void {
+    const run = ++this.quoteRun;
+    const kept = on ? this.quotes.kept() : null;
+    this.quote.set(kept);
+    if (!on || kept) {
+      return;
+    }
+    afterIdle(async () => {
+      const quote = await this.quotes.next().catch(() => null);
+      if (run === this.quoteRun) {
+        this.quote.set(quote);
+      }
+    });
   }
 
   private showPhoto(options: BackgroundOptions): Promise<void> {

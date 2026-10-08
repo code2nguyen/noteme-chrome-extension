@@ -1,0 +1,4686 @@
+[
+  {
+    "text": "Genius is one percent inspiration and ninety-nine percent perspiration.",
+    "author": "Thomas Edison",
+    "theme": "perseverance",
+    "tags": ["work", "genius"]
+  },
+  {
+    "text": "You can observe a lot just by watching.",
+    "author": "Yogi Berra",
+    "theme": "mind",
+    "tags": ["perception", "humor"]
+  },
+  {
+    "text": "Difficulties increase the nearer we get to the goal.",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "perseverance",
+    "tags": ["difficulty", "striving"]
+  },
+  { "text": "Be the chief but never the lord.", "author": "Lao Tzu", "theme": "character", "tags": ["humility"] },
+  {
+    "text": "Nothing happens unless first we dream.",
+    "author": "Carl Sandburg",
+    "theme": "hope",
+    "tags": ["dreams", "beginning"]
+  },
+  { "text": "Well begun is half done.", "author": "Aristotle", "theme": "action", "tags": ["beginning"] },
+  {
+    "text": "Self-complacency is fatal to progress.",
+    "author": "Margaret Sangster",
+    "theme": "learning",
+    "tags": ["growth", "humility"]
+  },
+  {
+    "text": "We can only learn to love by loving.",
+    "author": "Iris Murdoch",
+    "theme": "kindness",
+    "tags": ["love", "practice"]
+  },
+  {
+    "text": "You'll see it when you believe it.",
+    "author": "Wayne Dyer",
+    "theme": "mind",
+    "tags": ["belief", "perception"]
+  },
+  {
+    "text": "Trouble is only opportunity in work clothes.",
+    "author": "Henry J. Kaiser",
+    "theme": "perseverance",
+    "tags": ["adversity", "work"]
+  },
+  {
+    "text": "Ideas are the beginning points of all fortunes.",
+    "author": "Napoleon Hill",
+    "theme": "mind",
+    "tags": ["imagination", "beginning"]
+  },
+  {
+    "text": "Trust yourself. You know more than you think you do.",
+    "author": "Benjamin Spock",
+    "theme": "character",
+    "tags": ["self-trust", "confidence"]
+  },
+  {
+    "text": "Study the past, if you would divine the future.",
+    "author": "Confucius",
+    "theme": "learning",
+    "tags": ["knowledge", "future"]
+  },
+  {
+    "text": "From error to error one discovers the entire truth.",
+    "author": "Sigmund Freud",
+    "theme": "learning",
+    "tags": ["mistakes", "truth"]
+  },
+  {
+    "text": "Bite off more than you can chew, then chew it.",
+    "author": "Ella Williams",
+    "theme": "courage",
+    "tags": ["boldness", "ambition"]
+  },
+  {
+    "text": "One today is worth two tomorrows.",
+    "author": "Benjamin Franklin",
+    "theme": "time",
+    "tags": ["today", "procrastination"]
+  },
+  {
+    "text": "Once you choose hope, anything's possible.",
+    "author": "Christopher Reeve",
+    "theme": "hope",
+    "tags": ["hope", "belief"]
+  },
+  {
+    "text": "One fails forward toward success.",
+    "author": "Charles Kettering",
+    "theme": "perseverance",
+    "tags": ["failure", "success"]
+  },
+  {
+    "text": "Learning is a treasure that will follow its owner everywhere.",
+    "author": "Chinese proverb",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Be as you wish to seem.",
+    "author": "Socrates",
+    "theme": "character",
+    "tags": ["integrity", "authenticity"]
+  },
+  {
+    "text": "Never mistake activity for achievement.",
+    "author": "John Wooden",
+    "theme": "action",
+    "tags": ["work", "focus"]
+  },
+  {
+    "text": "What worries you masters you.",
+    "author": "Haddon Robinson",
+    "theme": "mind",
+    "tags": ["worry", "self-mastery"]
+  },
+  {
+    "text": "One faces the future with one's past.",
+    "author": "Pearl S. Buck",
+    "theme": "time",
+    "tags": ["future", "experience"]
+  },
+  {
+    "text": "Who sows virtue reaps honour.",
+    "author": "Leonardo da Vinci",
+    "theme": "character",
+    "tags": ["virtue", "deeds"]
+  },
+  {
+    "text": "Be kind whenever possible. It is always possible.",
+    "author": "Dalai Lama",
+    "theme": "kindness",
+    "tags": ["compassion"]
+  },
+  { "text": "Talk doesn't cook rice.", "author": "Chinese proverb", "theme": "action", "tags": ["deeds", "words"] },
+  {
+    "text": "To succeed, we must first believe that we can.",
+    "author": "Michael Korda",
+    "theme": "courage",
+    "tags": ["belief", "confidence"]
+  },
+  {
+    "text": "A weed is no more than a flower in disguise.",
+    "author": "James Russell Lowell",
+    "theme": "nature",
+    "tags": ["perception", "beauty"]
+  },
+  { "text": "Do, or do not. There is no try.", "author": "Yoda", "theme": "action", "tags": ["will", "striving"] },
+  {
+    "text": "All serious daring starts from within.",
+    "author": "Harriet Beecher Stowe",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Think how hard physics would be if particles could think.",
+    "author": "Murray Gell-Mann",
+    "theme": "learning",
+    "tags": ["humor", "wonder"]
+  },
+  {
+    "text": "Love is a flower you've got to let grow.",
+    "author": "John Lennon",
+    "theme": "kindness",
+    "tags": ["love", "growth"]
+  },
+  {
+    "text": "Don't wait. The time will never be just right.",
+    "author": "Napoleon Hill",
+    "theme": "action",
+    "tags": ["procrastination", "now"]
+  },
+  {
+    "text": "Time is the wisest counsellor of all.",
+    "author": "Pericles",
+    "theme": "time",
+    "tags": ["wisdom", "patience"]
+  },
+  { "text": "Wisdom begins in wonder.", "author": "Socrates", "theme": "learning", "tags": ["wonder", "wisdom"] },
+  {
+    "text": "Without courage, wisdom bears no fruit.",
+    "author": "Baltasar Gracian",
+    "theme": "courage",
+    "tags": ["wisdom"]
+  },
+  { "text": "Change in all things is sweet.", "author": "Aristotle", "theme": "time", "tags": ["change"] },
+  {
+    "text": "When performance exceeds ambition, the overlap is called success.",
+    "author": "Cullen Hightower",
+    "theme": "action",
+    "tags": ["success", "ambition"]
+  },
+  {
+    "text": "When deeds speak, words are nothing.",
+    "author": "African proverb",
+    "theme": "action",
+    "tags": ["deeds", "words"]
+  },
+  {
+    "text": "Real magic in relationships means an absence of judgement of others.",
+    "author": "Wayne Dyer",
+    "theme": "kindness",
+    "tags": ["judgement", "love"]
+  },
+  {
+    "text": "I never think of the future. It comes soon enough.",
+    "author": "Albert Einstein",
+    "theme": "time",
+    "tags": ["future", "now"]
+  },
+  {
+    "text": "Skill to do comes of doing.",
+    "author": "Ralph Waldo Emerson",
+    "theme": "learning",
+    "tags": ["practice", "skill"]
+  },
+  {
+    "text": "Wisdom is the supreme part of happiness.",
+    "author": "Sophocles",
+    "theme": "mind",
+    "tags": ["wisdom", "happiness"]
+  },
+  {
+    "text": "I believe that every person is born with talent.",
+    "author": "Maya Angelou",
+    "theme": "hope",
+    "tags": ["potential"]
+  },
+  {
+    "text": "Important principles may, and must, be inflexible.",
+    "author": "Abraham Lincoln",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "The undertaking of a new action brings new strength.",
+    "author": "Richard L. Evans",
+    "theme": "action",
+    "tags": ["beginning", "strength"]
+  },
+  {
+    "text": "Our distrust is very expensive.",
+    "author": "Ralph Waldo Emerson",
+    "theme": "kindness",
+    "tags": ["trust"]
+  },
+  {
+    "text": "The two most powerful warriors are patience and time.",
+    "author": "Leo Tolstoy",
+    "theme": "perseverance",
+    "tags": ["patience", "time"]
+  },
+  {
+    "text": "Anticipate the difficult by managing the easy.",
+    "author": "Lao Tzu",
+    "theme": "action",
+    "tags": ["small-steps", "preparation"]
+  },
+  {
+    "text": "A short saying often contains much wisdom.",
+    "author": "Sophocles",
+    "theme": "simplicity",
+    "tags": ["brevity", "wisdom"]
+  },
+  {
+    "text": "Argue for your limitations, and sure enough they're yours.",
+    "author": "Richard Bach",
+    "theme": "mind",
+    "tags": ["belief", "potential"]
+  },
+  {
+    "text": "Victory belongs to the most persevering.",
+    "author": "Napoleon Bonaparte",
+    "theme": "perseverance",
+    "tags": ["striving"]
+  },
+  {
+    "text": "Smile, breathe, and go slowly.",
+    "author": "Thich Nhat Hanh",
+    "theme": "simplicity",
+    "tags": ["stillness", "haste"]
+  },
+  {
+    "text": "Do more than dream: work.",
+    "author": "William Arthur Ward",
+    "theme": "action",
+    "tags": ["dreams", "work"]
+  },
+  {
+    "text": "No man was ever wise by chance.",
+    "author": "Seneca",
+    "theme": "learning",
+    "tags": ["wisdom", "diligence"]
+  },
+  {
+    "text": "He that is giddy thinks the world turns round.",
+    "author": "William Shakespeare",
+    "theme": "mind",
+    "tags": ["perception", "humor"]
+  },
+  {
+    "text": "Don't ruin the present with the ruined past.",
+    "author": "Ellen Gilchrist",
+    "theme": "time",
+    "tags": ["letting-go", "now"]
+  },
+  {
+    "text": "Do something wonderful, people may imitate it.",
+    "author": "Albert Schweitzer",
+    "theme": "kindness",
+    "tags": ["example", "deeds"]
+  },
+  {
+    "text": "Who looks outside, dreams; who looks inside, awakes.",
+    "author": "Carl Jung",
+    "theme": "mind",
+    "tags": ["self-knowledge", "reflection"]
+  },
+  { "text": "The shortest answer is doing.", "author": "George Herbert", "theme": "action", "tags": ["deeds"] },
+  {
+    "text": "All our knowledge has its origin in our perceptions.",
+    "author": "Leonardo da Vinci",
+    "theme": "learning",
+    "tags": ["perception", "knowledge"]
+  },
+  {
+    "text": "Trusting our intuition often saves us from disaster.",
+    "author": "Anne Wilson Schaef",
+    "theme": "mind",
+    "tags": ["trust", "perception"]
+  },
+  {
+    "text": "Truth is powerful and it prevails.",
+    "author": "Sojourner Truth",
+    "theme": "character",
+    "tags": ["truth", "strength"]
+  },
+  {
+    "text": "Light tomorrow with today!",
+    "author": "Elizabeth Barrett Browning",
+    "theme": "hope",
+    "tags": ["today", "future"]
+  },
+  {
+    "text": "Silence is a fence around wisdom.",
+    "author": "German proverb",
+    "theme": "mind",
+    "tags": ["words", "wisdom"]
+  },
+  {
+    "text": "Society develops wit, but its contemplation alone forms genius.",
+    "author": "Madame de Stael",
+    "theme": "mind",
+    "tags": ["solitude", "genius"]
+  },
+  {
+    "text": "The simplest things are often the truest.",
+    "author": "Richard Bach",
+    "theme": "simplicity",
+    "tags": ["truth"]
+  },
+  {
+    "text": "Yesterday I dared to struggle. Today I dare to win.",
+    "author": "Bernadette Devlin",
+    "theme": "courage",
+    "tags": ["striving", "today"]
+  },
+  {
+    "text": "Life shrinks or expands in proportion to one's courage.",
+    "author": "Anais Nin",
+    "theme": "courage",
+    "tags": ["life"]
+  },
+  {
+    "text": "Character develops itself in the stream of life.",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "character",
+    "tags": ["growth", "experience"]
+  },
+  {
+    "text": "From little acorns mighty oaks do grow.",
+    "author": "American proverb",
+    "theme": "perseverance",
+    "tags": ["small-steps", "growth"]
+  },
+  {
+    "text": "You can't stop the waves, but you can learn to surf.",
+    "author": "Jon Kabat-Zinn",
+    "theme": "perseverance",
+    "tags": ["resilience", "acceptance"]
+  },
+  {
+    "text": "Speak low, if you speak love.",
+    "author": "William Shakespeare",
+    "theme": "kindness",
+    "tags": ["love", "words"]
+  },
+  {
+    "text": "A really great talent finds its happiness in execution.",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "action",
+    "tags": ["work", "skill"]
+  },
+  {
+    "text": "Reality leaves a lot to the imagination.",
+    "author": "John Lennon",
+    "theme": "mind",
+    "tags": ["imagination", "humor"]
+  },
+  {
+    "text": "The greatest remedy for anger is delay.",
+    "author": "Seneca",
+    "theme": "mind",
+    "tags": ["patience", "self-mastery"]
+  },
+  {
+    "text": "Growth itself contains the germ of happiness.",
+    "author": "Pearl S. Buck",
+    "theme": "hope",
+    "tags": ["growth", "happiness"]
+  },
+  {
+    "text": "Good luck is another name for tenacity of purpose.",
+    "author": "Ralph Waldo Emerson",
+    "theme": "perseverance",
+    "tags": ["luck", "purpose"]
+  },
+  {
+    "text": "Rainbows apologize for angry skies.",
+    "author": "Sylvia Voirol",
+    "theme": "hope",
+    "tags": ["adversity", "beauty"]
+  },
+  {
+    "text": "Time is the most valuable thing a man can spend.",
+    "author": "Theophrastus",
+    "theme": "time",
+    "tags": ["wealth"]
+  },
+  {
+    "text": "Experience is simply the name we give our mistakes.",
+    "author": "Oscar Wilde",
+    "theme": "learning",
+    "tags": ["mistakes", "experience", "humor"]
+  },
+  {
+    "text": "While we stop to think, we often miss our opportunity.",
+    "author": "Publilius Syrus",
+    "theme": "action",
+    "tags": ["haste", "chance"]
+  },
+  {
+    "text": "Everything you can imagine is real.",
+    "author": "Pablo Picasso",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "The truest wisdom is a resolute determination.",
+    "author": "Napoleon Bonaparte",
+    "theme": "perseverance",
+    "tags": ["will", "wisdom"]
+  },
+  {
+    "text": "Life is the flower for which love is the honey.",
+    "author": "Victor Hugo",
+    "theme": "kindness",
+    "tags": ["love", "life"]
+  },
+  {
+    "text": "Freedom is the right to live as we wish.",
+    "author": "Epictetus",
+    "theme": "character",
+    "tags": ["freedom"]
+  },
+  {
+    "text": "Never ignore a gut feeling, but never believe that it's enough.",
+    "author": "Robert Heller",
+    "theme": "mind",
+    "tags": ["judgement", "doubt"]
+  },
+  {
+    "text": "Loss is nothing else but change, and change is Nature's delight.",
+    "author": "Marcus Aurelius",
+    "theme": "nature",
+    "tags": ["change", "loss"]
+  },
+  {
+    "text": "There is no way to happiness, happiness is the way.",
+    "author": "Thich Nhat Hanh",
+    "theme": "hope",
+    "tags": ["happiness", "journey"]
+  },
+  {
+    "text": "He who talks more is sooner exhausted.",
+    "author": "Lao Tzu",
+    "theme": "simplicity",
+    "tags": ["words", "rest"]
+  },
+  {
+    "text": "He who is contented is rich.",
+    "author": "Lao Tzu",
+    "theme": "simplicity",
+    "tags": ["wealth", "gratitude"]
+  },
+  {
+    "text": "Our strength grows out of our weaknesses.",
+    "author": "Ralph Waldo Emerson",
+    "theme": "perseverance",
+    "tags": ["strength", "adversity"]
+  },
+  { "text": "Fortune favours the brave.", "author": "Virgil", "theme": "courage", "tags": ["boldness", "fortune"] },
+  {
+    "text": "The best way out is always through.",
+    "author": "Robert Frost",
+    "theme": "perseverance",
+    "tags": ["adversity", "resilience"]
+  },
+  {
+    "text": "The mind unlearns with difficulty what it has long learned.",
+    "author": "Seneca",
+    "theme": "learning",
+    "tags": ["habits", "change"]
+  },
+  { "text": "No garden is without its weeds.", "author": "Thomas Fuller", "theme": "nature", "tags": ["acceptance"] },
+  {
+    "text": "There is no failure except in no longer trying.",
+    "author": "Elbert Hubbard",
+    "theme": "perseverance",
+    "tags": ["failure", "striving"]
+  },
+  {
+    "text": "Kind words will unlock an iron door.",
+    "author": "Turkish proverb",
+    "theme": "kindness",
+    "tags": ["words"]
+  },
+  {
+    "text": "Problems are only opportunities with thorns on them.",
+    "author": "Hugh Miller",
+    "theme": "perseverance",
+    "tags": ["adversity", "difficulty"]
+  },
+  {
+    "text": "Life is just a chance to grow a soul.",
+    "author": "A. Powell Davies",
+    "theme": "character",
+    "tags": ["growth", "soul"]
+  },
+  {
+    "text": "Mountains cannot be surmounted except by winding paths.",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "perseverance",
+    "tags": ["mountains", "journey"]
+  },
+  {
+    "text": "Fortune befriends the bold.",
+    "author": "John Dryden",
+    "theme": "courage",
+    "tags": ["boldness", "fortune"]
+  },
+  {
+    "text": "Keep true to the dreams of thy youth.",
+    "author": "Friedrich von Schiller",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "You're never a loser until you quit trying.",
+    "author": "Mike Ditka",
+    "theme": "perseverance",
+    "tags": ["failure"]
+  },
+  {
+    "text": "Knowing is not enough; we must apply!",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "action",
+    "tags": ["knowledge", "deeds"]
+  },
+  {
+    "text": "Autumn is a second spring when every leaf is a flower.",
+    "author": "Albert Camus",
+    "theme": "nature",
+    "tags": ["beauty", "aging"]
+  },
+  {
+    "text": "If you surrender to the wind, you can ride it.",
+    "author": "Toni Morrison",
+    "theme": "courage",
+    "tags": ["letting-go", "trust"]
+  },
+  {
+    "text": "Keep yourself to the sunshine and you cannot see the shadow.",
+    "author": "Helen Keller",
+    "theme": "hope",
+    "tags": ["light"]
+  },
+  {
+    "text": "Inspiration exists, but it has to find us working.",
+    "author": "Pablo Picasso",
+    "theme": "action",
+    "tags": ["work", "art"]
+  },
+  {
+    "text": "Pick battles big enough to matter, small enough to win.",
+    "author": "Jonathan Kozol",
+    "theme": "action",
+    "tags": ["focus", "ambition"]
+  },
+  {
+    "text": "Don't compromise yourself. You are all you've got.",
+    "author": "Janis Joplin",
+    "theme": "character",
+    "tags": ["authenticity", "integrity"]
+  },
+  {
+    "text": "Difficulties are things that show a person what they are.",
+    "author": "Epictetus",
+    "theme": "perseverance",
+    "tags": ["difficulty", "self-knowledge"]
+  },
+  {
+    "text": "The cause is hidden. The effect is visible to all.",
+    "author": "Ovid",
+    "theme": "mind",
+    "tags": ["perception"]
+  },
+  {
+    "text": "A prudent question is one half of wisdom.",
+    "author": "Francis Bacon",
+    "theme": "learning",
+    "tags": ["wisdom", "knowledge"]
+  },
+  {
+    "text": "Nature takes away any faculty that is not used.",
+    "author": "William R. Inge",
+    "theme": "learning",
+    "tags": ["practice", "habits"]
+  },
+  {
+    "text": "If you wish to be a writer, write.",
+    "author": "Epictetus",
+    "theme": "action",
+    "tags": ["writing", "practice"]
+  },
+  {
+    "text": "Either you run the day or the day runs you.",
+    "author": "Jim Rohn",
+    "theme": "time",
+    "tags": ["today", "control"]
+  },
+  {
+    "text": "Better be ignorant of a matter than half know it.",
+    "author": "Publilius Syrus",
+    "theme": "learning",
+    "tags": ["knowledge", "humility"]
+  },
+  {
+    "text": "There never was a good knife made of bad steel.",
+    "author": "Benjamin Franklin",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "To accomplish great things, we must dream as well as act.",
+    "author": "Anatole France",
+    "theme": "action",
+    "tags": ["dreams", "deeds"]
+  },
+  {
+    "text": "Patience is the companion of wisdom.",
+    "author": "Saint Augustine",
+    "theme": "perseverance",
+    "tags": ["patience", "wisdom"]
+  },
+  {
+    "text": "To enjoy life, we must touch much of it lightly.",
+    "author": "Voltaire",
+    "theme": "simplicity",
+    "tags": ["letting-go", "joy"]
+  },
+  {
+    "text": "To fly, we have to have resistance.",
+    "author": "Maya Lin",
+    "theme": "perseverance",
+    "tags": ["adversity", "resilience"]
+  },
+  {
+    "text": "Be great in act, as you have been in thought.",
+    "author": "William Shakespeare",
+    "theme": "action",
+    "tags": ["deeds", "greatness"]
+  },
+  {
+    "text": "Imagination rules the world.",
+    "author": "Napoleon Bonaparte",
+    "theme": "mind",
+    "tags": ["imagination", "power"]
+  },
+  {
+    "text": "Intuition will tell the thinking mind where to look next.",
+    "author": "Jonas Salk",
+    "theme": "mind",
+    "tags": ["thought", "discovery"]
+  },
+  {
+    "text": "Efficiency is doing things right; effectiveness is doing the right things.",
+    "author": "Peter Drucker",
+    "theme": "action",
+    "tags": ["work", "focus"]
+  },
+  {
+    "text": "No is easier to do. Yes is easier to say.",
+    "author": "Jason Fried",
+    "theme": "simplicity",
+    "tags": ["focus"]
+  },
+  {
+    "text": "Yesterday's home runs don't win today's games.",
+    "author": "Babe Ruth",
+    "theme": "perseverance",
+    "tags": ["today", "success"]
+  },
+  {
+    "text": "Silence is deep as Eternity, speech is shallow as Time.",
+    "author": "Thomas Carlyle",
+    "theme": "mind",
+    "tags": ["stillness", "words"]
+  },
+  {
+    "text": "Don't smother each other. No one can grow in the shade.",
+    "author": "Leo Buscaglia",
+    "theme": "kindness",
+    "tags": ["love", "freedom"]
+  },
+  {
+    "text": "You can't shake hands with a clenched fist.",
+    "author": "Indira Gandhi",
+    "theme": "kindness",
+    "tags": ["peace", "forgiveness"]
+  },
+  {
+    "text": "A good decision is based on knowledge and not on numbers.",
+    "author": "Plato",
+    "theme": "mind",
+    "tags": ["judgement", "knowledge"]
+  },
+  {
+    "text": "The cautious seldom err.",
+    "author": "Confucius",
+    "theme": "character",
+    "tags": ["steadiness", "judgement"]
+  },
+  {
+    "text": "If there is no struggle, there is no progress.",
+    "author": "Frederick Douglass",
+    "theme": "perseverance",
+    "tags": ["striving", "adversity"]
+  },
+  {
+    "text": "Where there is great love, there are always miracles.",
+    "author": "Willa Cather",
+    "theme": "kindness",
+    "tags": ["love", "wonder"]
+  },
+  {
+    "text": "Every problem has a gift for you in its hands.",
+    "author": "Richard Bach",
+    "theme": "perseverance",
+    "tags": ["adversity", "growth"]
+  },
+  {
+    "text": "Sadness flies away on the wings of time.",
+    "author": "Jean de la Fontaine",
+    "theme": "time",
+    "tags": ["loss", "hope"]
+  },
+  {
+    "text": "I have often regretted my speech, never my silence.",
+    "author": "Publilius Syrus",
+    "theme": "mind",
+    "tags": ["words", "stillness"]
+  },
+  {
+    "text": "Never put off till tomorrow what you can do today.",
+    "author": "Thomas Jefferson",
+    "theme": "action",
+    "tags": ["procrastination", "today"]
+  },
+  {
+    "text": "Minds are like parachutes. They only function when open.",
+    "author": "Thomas Dewar",
+    "theme": "mind",
+    "tags": ["humor", "growth"]
+  },
+  {
+    "text": "If a man does his best, what else is there?",
+    "author": "George Patton",
+    "theme": "character",
+    "tags": ["diligence"]
+  },
+  {
+    "text": "The secret of success is constancy to purpose.",
+    "author": "Benjamin Disraeli",
+    "theme": "perseverance",
+    "tags": ["purpose", "success"]
+  },
+  {
+    "text": "Life is a progress, and not a station.",
+    "author": "Ralph Waldo Emerson",
+    "theme": "learning",
+    "tags": ["growth", "journey"]
+  },
+  {
+    "text": "All seasons are beautiful for the person who carries happiness within.",
+    "author": "Horace Friess",
+    "theme": "hope",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "To avoid criticism, do nothing, say nothing, be nothing.",
+    "author": "Elbert Hubbard",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "All things change; nothing perishes.",
+    "author": "Ovid",
+    "theme": "nature",
+    "tags": ["change", "transience"]
+  },
+  {
+    "text": "Absence makes the heart grow fonder.",
+    "author": "Thomas Haynes Bayly",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "Imagination is the highest kite one can fly.",
+    "author": "Lauren Bacall",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "The beginning of knowledge is the discovery of something we do not understand.",
+    "author": "Frank Herbert",
+    "theme": "learning",
+    "tags": ["discovery", "knowledge"]
+  },
+  {
+    "text": "Whenever you have eliminated the impossible, whatever remains, however improbable, must be the truth.",
+    "author": "Arthur Conan Doyle",
+    "theme": "mind",
+    "tags": ["truth", "judgement"]
+  },
+  {
+    "text": "Good timber does not grow with ease; the stronger the wind, the stronger the trees.",
+    "author": "J. Willard Marriott",
+    "theme": "perseverance",
+    "tags": ["adversity", "strength"]
+  },
+  {
+    "text": "I believe that we are fundamentally the same and have the same basic potential.",
+    "author": "Dalai Lama",
+    "theme": "kindness",
+    "tags": ["potential", "connection"]
+  },
+  {
+    "text": "The winds and waves are always on the side of the ablest navigators.",
+    "author": "Edward Gibbon",
+    "theme": "action",
+    "tags": ["skill", "preparation"]
+  },
+  {
+    "text": "Strength does not come from physical capacity. It comes from an indomitable will.",
+    "author": "Mahatma Gandhi",
+    "theme": "perseverance",
+    "tags": ["will", "strength"]
+  },
+  {
+    "text": "Each misfortune you encounter will carry in it the seed of tomorrow's good luck.",
+    "author": "Og Mandino",
+    "theme": "hope",
+    "tags": ["adversity", "luck"]
+  },
+  {
+    "text": "To forgive is to set a prisoner free and realize that prisoner was you.",
+    "author": "Lewis B. Smedes",
+    "theme": "kindness",
+    "tags": ["forgiveness", "freedom"]
+  },
+  {
+    "text": "By believing passionately in something that does not yet exist, we create it.",
+    "author": "Nikos Kazantzakis",
+    "theme": "hope",
+    "tags": ["belief", "imagination"]
+  },
+  {
+    "text": "One of the advantages of being disorderly is that one is constantly making exciting discoveries.",
+    "author": "A. A. Milne",
+    "theme": "learning",
+    "tags": ["humor", "discovery"]
+  },
+  {
+    "text": "I never see what has been done; I only see what remains to be done.",
+    "author": "Marie Curie",
+    "theme": "perseverance",
+    "tags": ["striving", "work"]
+  },
+  {
+    "text": "If you don't know where you are going, you will probably end up somewhere else.",
+    "author": "Laurence J. Peter",
+    "theme": "action",
+    "tags": ["direction", "plans", "humor"]
+  },
+  {
+    "text": "It is not so important to know everything as to appreciate what we learn.",
+    "author": "Hannah More",
+    "theme": "learning",
+    "tags": ["gratitude", "knowledge"]
+  },
+  {
+    "text": "The bird of paradise alights only upon the hand that does not grasp.",
+    "author": "John Berry",
+    "theme": "simplicity",
+    "tags": ["letting-go", "desire"]
+  },
+  {
+    "text": "Think as a wise man but communicate in the language of the people.",
+    "author": "William Butler Yeats",
+    "theme": "learning",
+    "tags": ["words", "wisdom"]
+  },
+  {
+    "text": "Practice yourself, for heaven's sake, in little things, and then proceed to greater.",
+    "author": "Epictetus",
+    "theme": "learning",
+    "tags": ["practice", "small-steps"]
+  },
+  {
+    "text": "If one does not know to which port one is sailing, no wind is favorable.",
+    "author": "Seneca",
+    "theme": "action",
+    "tags": ["direction", "purpose"]
+  },
+  {
+    "text": "To be upset over what you don't have is to waste what you do have.",
+    "author": "Ken Keyes Jr.",
+    "theme": "simplicity",
+    "tags": ["gratitude", "desire"]
+  },
+  {
+    "text": "If we did the things we are capable of, we would astound ourselves.",
+    "author": "Thomas Edison",
+    "theme": "hope",
+    "tags": ["potential"]
+  },
+  {
+    "text": "Nothing in life is to be feared. It is only to be understood.",
+    "author": "Marie Curie",
+    "theme": "courage",
+    "tags": ["fear", "knowledge"]
+  },
+  {
+    "text": "I think somehow we learn who we really are and then live with that decision.",
+    "author": "Eleanor Roosevelt",
+    "theme": "character",
+    "tags": ["self-knowledge"]
+  },
+  {
+    "text": "We learn what we have said from those who listen to our speaking.",
+    "author": "Kenneth Patton",
+    "theme": "learning",
+    "tags": ["words", "connection"]
+  },
+  {
+    "text": "A little knowledge that acts is worth infinitely more than much knowledge that is idle.",
+    "author": "Kahlil Gibran",
+    "theme": "action",
+    "tags": ["knowledge", "deeds"]
+  },
+  {
+    "text": "The doors we open and close each day decide the lives we live.",
+    "author": "Flora Whittemore",
+    "theme": "time",
+    "tags": ["habits", "life"]
+  },
+  {
+    "text": "The worst bankrupt in the world is the person who has lost his enthusiasm.",
+    "author": "H. W. Arnold",
+    "theme": "character",
+    "tags": ["enthusiasm"]
+  },
+  {
+    "text": "The universe is full of magical things, patiently waiting for our wits to grow sharper.",
+    "author": "Eden Phillpotts",
+    "theme": "nature",
+    "tags": ["wonder", "growth"]
+  },
+  {
+    "text": "A thing long expected takes the form of the unexpected when at last it comes.",
+    "author": "Mark Twain",
+    "theme": "time",
+    "tags": ["patience"]
+  },
+  {
+    "text": "Action may not always bring happiness; but there is no happiness without action.",
+    "author": "Benjamin Disraeli",
+    "theme": "action",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "Short words are best and the old words when short are best of all.",
+    "author": "Winston Churchill",
+    "theme": "simplicity",
+    "tags": ["words", "brevity"]
+  },
+  {
+    "text": "I have done my best: that is about all the philosophy of living one needs.",
+    "author": "Lin Yutang",
+    "theme": "perseverance",
+    "tags": ["striving", "simplicity"]
+  },
+  {
+    "text": "Through perseverance many people win success out of what seemed destined to be certain failure.",
+    "author": "Benjamin Disraeli",
+    "theme": "perseverance",
+    "tags": ["failure", "success"]
+  },
+  {
+    "text": "The secret to a rich life is to have more beginnings than endings.",
+    "author": "Dave Weinbaum",
+    "theme": "hope",
+    "tags": ["beginning", "life"]
+  },
+  {
+    "text": "If you don't like something, change it. If you can't change it, change your attitude.",
+    "author": "Maya Angelou",
+    "theme": "mind",
+    "tags": ["change", "acceptance"]
+  },
+  {
+    "text": "So long as a person is capable of self-renewal they are a living being.",
+    "author": "Henri-Frederic Amiel",
+    "theme": "learning",
+    "tags": ["growth", "change"]
+  },
+  {
+    "text": "Think for yourselves and let others enjoy the privilege to do so too.",
+    "author": "Voltaire",
+    "theme": "mind",
+    "tags": ["freedom", "thought"]
+  },
+  {
+    "text": "How we spend our days is, of course, how we spend our lives.",
+    "author": "Annie Dillard",
+    "theme": "time",
+    "tags": ["habits", "life"]
+  },
+  {
+    "text": "It has never been my object to record my dreams, just to realize them.",
+    "author": "Man Ray",
+    "theme": "action",
+    "tags": ["dreams", "deeds"]
+  },
+  {
+    "text": "The most complicated achievements of thought are possible without the assistance of consciousness.",
+    "author": "Sigmund Freud",
+    "theme": "mind",
+    "tags": ["thought"]
+  },
+  {
+    "text": "Everyone thinks of changing the world, but no one thinks of changing himself.",
+    "author": "Leo Tolstoy",
+    "theme": "character",
+    "tags": ["change", "self-knowledge"]
+  },
+  {
+    "text": "Slow down and everything you are chasing will come around and catch you.",
+    "author": "John De Paola",
+    "theme": "simplicity",
+    "tags": ["haste", "patience"]
+  },
+  {
+    "text": "Knowledge is a process of piling up facts; wisdom lies in their simplification.",
+    "author": "Martin H. Fischer",
+    "theme": "learning",
+    "tags": ["knowledge", "wisdom", "simplicity"]
+  },
+  {
+    "text": "Life is like riding a bicycle. To keep your balance you must keep moving.",
+    "author": "Albert Einstein",
+    "theme": "perseverance",
+    "tags": ["balance", "life"]
+  },
+  {
+    "text": "We should all be thankful for those people who rekindle the inner spirit.",
+    "author": "Albert Schweitzer",
+    "theme": "kindness",
+    "tags": ["gratitude", "community"]
+  },
+  {
+    "text": "Never bend your head. Always hold it high. Look the world right in the eye.",
+    "author": "Helen Keller",
+    "theme": "courage",
+    "tags": ["confidence"]
+  },
+  {
+    "text": "One who gains strength by overcoming obstacles possesses the only strength which can overcome adversity.",
+    "author": "Albert Schweitzer",
+    "theme": "perseverance",
+    "tags": ["adversity", "strength"]
+  },
+  {
+    "text": "We cannot do everything at once, but we can do something at once.",
+    "author": "Calvin Coolidge",
+    "theme": "action",
+    "tags": ["small-steps"]
+  },
+  {
+    "text": "Be what you are. This is the first step toward becoming better than you are.",
+    "author": "Julius Charles Hare",
+    "theme": "character",
+    "tags": ["authenticity", "growth"]
+  },
+  {
+    "text": "There is nothing in a caterpillar that tells you it's going to be a butterfly.",
+    "author": "Buckminster Fuller",
+    "theme": "hope",
+    "tags": ["potential", "change"]
+  },
+  {
+    "text": "Love and compassion open our own inner life, reducing stress, distrust and loneliness.",
+    "author": "Dalai Lama",
+    "theme": "kindness",
+    "tags": ["compassion", "love", "peace"]
+  },
+  {
+    "text": "Ideals are an imaginative understanding of that which is desirable in that which is possible.",
+    "author": "Walter Lippmann",
+    "theme": "mind",
+    "tags": ["vision", "imagination"]
+  },
+  {
+    "text": "If you spend too much time thinking about a thing, you'll never get it done.",
+    "author": "Bruce Lee",
+    "theme": "action",
+    "tags": ["procrastination"]
+  },
+  {
+    "text": "More often than not, anger is actually an indication of weakness rather than of strength.",
+    "author": "Dalai Lama",
+    "theme": "character",
+    "tags": ["strength", "self-mastery"]
+  },
+  {
+    "text": "Before you put on a frown, make absolutely sure there are no smiles available.",
+    "author": "Jim Beggs",
+    "theme": "hope",
+    "tags": ["joy", "laughter"]
+  },
+  {
+    "text": "It is not uncommon for people to spend their whole life waiting to start living.",
+    "author": "Eckhart Tolle",
+    "theme": "time",
+    "tags": ["now", "procrastination"]
+  },
+  {
+    "text": "Don't be afraid to go out on a limb. That's where the fruit is.",
+    "author": "H. Jackson Brown Jr.",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Wicked people are always surprised to find ability in those that are good.",
+    "author": "Marquis de Vauvenargues",
+    "theme": "character",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Life is so constructed that an event does not, cannot, will not, match the expectation.",
+    "author": "Charlotte Bronte",
+    "theme": "mind",
+    "tags": ["experience", "perception"]
+  },
+  {
+    "text": "They say that time changes things, but you actually have to change them yourself.",
+    "author": "Andy Warhol",
+    "theme": "action",
+    "tags": ["change", "responsibility"]
+  },
+  {
+    "text": "Never apologize for showing feelings. When you do so, you apologize for the truth.",
+    "author": "Benjamin Disraeli",
+    "theme": "character",
+    "tags": ["honesty", "authenticity"]
+  },
+  {
+    "text": "The truth you believe and cling to makes you unavailable to hear anything new.",
+    "author": "Pema Chodron",
+    "theme": "mind",
+    "tags": ["truth", "humility"]
+  },
+  {
+    "text": "Adversity has the effect of eliciting talents, which in prosperous circumstances would have lain dormant.",
+    "author": "Horace",
+    "theme": "perseverance",
+    "tags": ["adversity", "potential"]
+  },
+  {
+    "text": "If you spend your whole life waiting for the storm, you'll never enjoy the sunshine.",
+    "author": "Morris West",
+    "theme": "hope",
+    "tags": ["worry", "now"]
+  },
+  {
+    "text": "The only limit to our realization of tomorrow will be our doubts of today.",
+    "author": "Franklin D. Roosevelt",
+    "theme": "hope",
+    "tags": ["doubt", "future"]
+  },
+  {
+    "text": "Every action of our lives touches on some chord that will vibrate in eternity.",
+    "author": "Edwin Hubbell Chapin",
+    "theme": "action",
+    "tags": ["deeds"]
+  },
+  {
+    "text": "Shoot for the moon. Even if you miss, you'll land among the stars.",
+    "author": "Les Brown",
+    "theme": "hope",
+    "tags": ["ambition", "dreams"]
+  },
+  {
+    "text": "It is on our failures that we base a new and different and better success.",
+    "author": "Havelock Ellis",
+    "theme": "perseverance",
+    "tags": ["failure", "success"]
+  },
+  {
+    "text": "Quality is never an accident; it is always the result of intelligent effort.",
+    "author": "John Ruskin",
+    "theme": "action",
+    "tags": ["excellence", "diligence"]
+  },
+  {
+    "text": "Time changes everything except something within us which is always surprised by change.",
+    "author": "Thomas Hardy",
+    "theme": "time",
+    "tags": ["change"]
+  },
+  {
+    "text": "The free man is he who does not fear to go to the end of his thought.",
+    "author": "Leon Blum",
+    "theme": "mind",
+    "tags": ["freedom", "thought"]
+  },
+  {
+    "text": "A life spent making mistakes is not only more honourable but more useful than a life spent in doing nothing.",
+    "author": "George Bernard Shaw",
+    "theme": "courage",
+    "tags": ["mistakes"]
+  },
+  {
+    "text": "By going beyond your own problems and taking care of others, you gain inner strength, self-confidence, courage, and a greater sense of calm.",
+    "author": "Dalai Lama",
+    "theme": "kindness",
+    "tags": ["compassion", "strength"]
+  },
+  {
+    "text": "We come to love not by finding a perfect person, but by learning to see an imperfect person perfectly.",
+    "author": "Sam Keen",
+    "theme": "kindness",
+    "tags": ["love", "acceptance"]
+  },
+  {
+    "text": "A little more persistence, a little more effort, and what seemed hopeless failure may turn to glorious success.",
+    "author": "Elbert Hubbard",
+    "theme": "perseverance",
+    "tags": ["striving", "success"]
+  },
+  {
+    "text": "There is no retirement for an artist, it's your way of living so there is no end to it.",
+    "author": "Henry Moore",
+    "theme": "time",
+    "tags": ["art", "aging"]
+  },
+  {
+    "text": "Be not afraid of greatness: some are born great, some achieve greatness, and some have greatness thrust upon them.",
+    "author": "William Shakespeare",
+    "theme": "courage",
+    "tags": ["greatness"]
+  },
+  {
+    "text": "Success means having the courage, the determination, and the will to become the person you believe you were meant to be.",
+    "author": "George Sheehan",
+    "theme": "courage",
+    "tags": ["success", "will"]
+  },
+  {
+    "text": "It is only with the heart that one can see rightly; what is essential is invisible to the eye.",
+    "author": "Antoine de Saint-Exupery",
+    "theme": "mind",
+    "tags": ["heart", "perception"]
+  },
+  {
+    "text": "Let us be grateful to people who make us happy; they are the charming gardeners who make our souls blossom.",
+    "author": "Marcel Proust",
+    "theme": "kindness",
+    "tags": ["gratitude", "friendship"]
+  },
+  {
+    "text": "Make the best use of what is in your power, and take the rest as it happens.",
+    "author": "Epictetus",
+    "theme": "mind",
+    "tags": ["control", "stoic", "acceptance"]
+  },
+  {
+    "text": "The thoughts we choose to think are the tools we use to paint the canvas of our lives.",
+    "author": "Louise Hay",
+    "theme": "mind",
+    "tags": ["thoughts"]
+  },
+  {
+    "text": "No matter how carefully you plan your goals they will never be more than pipe dreams unless you pursue them with gusto.",
+    "author": "W. Clement Stone",
+    "theme": "action",
+    "tags": ["plans", "enthusiasm"]
+  },
+  {
+    "text": "The reason most goals are not achieved is that we spend our time doing second things first.",
+    "author": "Robert McKain",
+    "theme": "action",
+    "tags": ["focus", "purpose"]
+  },
+  {
+    "text": "Good people are good because they've come to wisdom through failure. We get very little wisdom from success, you know.",
+    "author": "William Saroyan",
+    "theme": "learning",
+    "tags": ["failure", "wisdom"]
+  },
+  {
+    "text": "Iron rusts from disuse; water loses its purity from stagnation... even so does inaction sap the vigour of the mind.",
+    "author": "Leonardo da Vinci",
+    "theme": "action",
+    "tags": ["practice", "diligence"]
+  },
+  {
+    "text": "A subtle thought that is in error may yet give rise to fruitful inquiry that can establish truths of great value.",
+    "author": "Isaac Asimov",
+    "theme": "mind",
+    "tags": ["mistakes", "truth"]
+  },
+  {
+    "text": "Be glad of life because it gives you the chance to love, to work, to play, and to look up at the stars.",
+    "author": "Henry van Dyke",
+    "theme": "hope",
+    "tags": ["joy", "gratitude", "wonder"]
+  },
+  {
+    "text": "You got to be careful if you don't know where you're going, because you might not get there.",
+    "author": "Yogi Berra",
+    "theme": "action",
+    "tags": ["direction", "humor"]
+  },
+  {
+    "text": "You can tell whether a man is clever by his answers. You can tell whether a man is wise by his questions.",
+    "author": "Naguib Mahfouz",
+    "theme": "learning",
+    "tags": ["wisdom", "knowledge"]
+  },
+  {
+    "text": "You can't let praise or criticism get to you. It's a weakness to get caught up in either one.",
+    "author": "John Wooden",
+    "theme": "character",
+    "tags": ["steadiness", "humility"]
+  },
+  {
+    "text": "I will love the light for it shows me the way, yet I will endure the darkness because it shows me the stars.",
+    "author": "Og Mandino",
+    "theme": "hope",
+    "tags": ["light", "adversity"]
+  },
+  {
+    "text": "By nature man hates change; seldom will he quit his old home till it has actually fallen around his ears.",
+    "author": "Thomas Carlyle",
+    "theme": "mind",
+    "tags": ["change"]
+  },
+  {
+    "text": "Until you value yourself, you won't value your time. Until you value your time, you won't do anything with it.",
+    "author": "M. Scott Peck",
+    "theme": "time",
+    "tags": ["self-worth", "purpose"]
+  },
+  {
+    "text": "The minute you settle for less than you deserve, you get even less than you settled for.",
+    "author": "Maureen Dowd",
+    "theme": "character",
+    "tags": ["self-worth", "ambition"]
+  },
+  {
+    "text": "The highest possible stage in moral culture is when we recognize that we ought to control our thoughts.",
+    "author": "Charles Darwin",
+    "theme": "mind",
+    "tags": ["thoughts", "self-mastery"]
+  },
+  {
+    "text": "If we have a positive mental attitude, then even when surrounded by hostility, we shall not lack inner peace.",
+    "author": "Dalai Lama",
+    "theme": "mind",
+    "tags": ["peace"]
+  },
+  {
+    "text": "There is only one success — to be able to spend your life in your own way.",
+    "author": "Christopher Morley",
+    "theme": "character",
+    "tags": ["success", "freedom"]
+  },
+  {
+    "text": "Promises are the uniquely human way of ordering the future, making it predictable and reliable to the extent that this is humanly possible.",
+    "author": "Hannah Arendt",
+    "theme": "character",
+    "tags": ["integrity", "future"]
+  },
+  {
+    "text": "There is only one corner of the universe you can be certain of improving, and that's your own self.",
+    "author": "Aldous Huxley",
+    "theme": "character",
+    "tags": ["self-mastery", "growth"]
+  },
+  {
+    "text": "You're not obligated to win. You're obligated to keep trying to do the best you can every day.",
+    "author": "Marian Wright Edelman",
+    "theme": "perseverance",
+    "tags": ["striving"]
+  },
+  {
+    "text": "Deep listening is miraculous for both listener and speaker. When someone receives us with open-hearted, non-judging, intensely interested listening, our spirits expand.",
+    "author": "Sue Patton Thoele",
+    "theme": "kindness",
+    "tags": ["listening", "connection"]
+  },
+  {
+    "text": "You may be deceived if you trust too much, but you will live in torment if you don't trust enough.",
+    "author": "Frank Crane",
+    "theme": "kindness",
+    "tags": ["trust"]
+  },
+  {
+    "text": "All that is necessary is to accept the impossible, do without the indispensable, and bear the intolerable.",
+    "author": "Kathleen Norris",
+    "theme": "perseverance",
+    "tags": ["acceptance", "adversity"]
+  },
+  {
+    "text": "You cannot find yourself by going into the past. You can find yourself by coming into the present.",
+    "author": "Eckhart Tolle",
+    "theme": "time",
+    "tags": ["now", "self-knowledge"]
+  },
+  {
+    "text": "All our talents increase in the using, and every faculty, both good and bad, strengthens by exercise.",
+    "author": "Anne Bronte",
+    "theme": "learning",
+    "tags": ["practice", "growth"]
+  },
+  {
+    "text": "Of course there is no formula for success except perhaps an unconditional acceptance of life and what it brings.",
+    "author": "Arthur Rubinstein",
+    "theme": "hope",
+    "tags": ["acceptance", "success"]
+  },
+  {
+    "text": "Let me tell you the secret that has led me to my goal: my strength lies solely in my tenacity.",
+    "author": "Louis Pasteur",
+    "theme": "perseverance",
+    "tags": ["resilience", "striving"]
+  },
+  {
+    "text": "True silence is the rest of the mind; it is to the spirit what sleep is to the body, nourishment and refreshment.",
+    "author": "William Penn",
+    "theme": "simplicity",
+    "tags": ["stillness", "rest"]
+  },
+  {
+    "text": "All our knowledge begins with the senses, proceeds then to the understanding, and ends with reason. There is nothing higher than reason.",
+    "author": "Immanuel Kant",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Any of us can achieve virtue, if by virtue we merely mean the avoidance of the vices that do not attract us.",
+    "author": "Robert Lynd",
+    "theme": "character",
+    "tags": ["virtue", "humor"]
+  },
+  {
+    "text": "Friendship with oneself is all important because without it one cannot be friends with anybody else in the world.",
+    "author": "Eleanor Roosevelt",
+    "theme": "character",
+    "tags": ["friendship", "self-knowledge"]
+  },
+  {
+    "text": "Peace is not something you wish for. It's something you make, something you do, something you are, and something you give away.",
+    "author": "Robert Fulghum",
+    "theme": "kindness",
+    "tags": ["peace"]
+  },
+  {
+    "text": "A wise man can learn more from a foolish question than a fool can learn from a wise answer.",
+    "author": "Bruce Lee",
+    "theme": "learning",
+    "tags": ["wisdom", "humility"]
+  },
+  {
+    "text": "Every man takes the limits of his own field of vision for the limits of the world.",
+    "author": "Arthur Schopenhauer",
+    "theme": "mind",
+    "tags": ["perception", "vision"]
+  },
+  {
+    "text": "One does not discover new lands without consenting to lose sight of the shore for a very long time.",
+    "author": "Andre Gide",
+    "theme": "courage",
+    "tags": ["adventure", "discovery"]
+  },
+  {
+    "text": "Notice that the stiffest tree is most easily cracked, while the bamboo or willow survives by bending with the wind.",
+    "author": "Bruce Lee",
+    "theme": "nature",
+    "tags": ["resilience", "strength"]
+  },
+  {
+    "text": "Learn all you can from the mistakes of others. You won't have time to make them all yourself.",
+    "author": "Alfred Sheinwold",
+    "theme": "learning",
+    "tags": ["mistakes", "humor"]
+  },
+  {
+    "text": "Judge nothing, you will be happy. Forgive everything, you will be happier. Love everything, you will be happiest.",
+    "author": "Sri Chinmoy",
+    "theme": "kindness",
+    "tags": ["forgiveness", "happiness"]
+  },
+  {
+    "text": "We are either progressing or retrograding all the while. There is no such thing as remaining stationary in this life.",
+    "author": "James Freeman Clarke",
+    "theme": "action",
+    "tags": ["growth", "change"]
+  },
+  {
+    "text": "The possession of knowledge does not kill the sense of wonder and mystery. There is always more mystery.",
+    "author": "Anais Nin",
+    "theme": "learning",
+    "tags": ["wonder", "knowledge"]
+  },
+  {
+    "text": "Everything that happens happens as it should, and if you observe carefully, you will find this to be so.",
+    "author": "Marcus Aurelius",
+    "theme": "mind",
+    "tags": ["acceptance", "stoic"]
+  },
+  {
+    "text": "It is the greatest of all mistakes to do nothing because you can only do little — do what you can.",
+    "author": "Sydney Smith",
+    "theme": "action",
+    "tags": ["small-steps"]
+  },
+  {
+    "text": "Aerodynamically the bumblebee shouldn't be able to fly, but the bumblebee doesn't know that so it goes on flying anyway.",
+    "author": "Mary Kay Ash",
+    "theme": "courage",
+    "tags": ["belief"]
+  },
+  {
+    "text": "Those who try to do something and fail are infinitely better than those who try nothing and succeed.",
+    "author": "Lloyd Jones",
+    "theme": "courage",
+    "tags": ["failure", "striving"]
+  },
+  {
+    "text": "Snowflakes are one of nature's most fragile things, but just look what they can do when they stick together.",
+    "author": "Vista Kelly",
+    "theme": "kindness",
+    "tags": ["community"]
+  },
+  {
+    "text": "The first step to getting the things you want out of life is this: decide what you want.",
+    "author": "Ben Stein",
+    "theme": "action",
+    "tags": ["direction", "desire"]
+  },
+  {
+    "text": "Experience is not what happens to a man. It is what a man does with what happens to him.",
+    "author": "Aldous Huxley",
+    "theme": "learning",
+    "tags": ["experience"]
+  },
+  {
+    "text": "The only thing to do with good advice is to pass it on. It is never of any use to oneself.",
+    "author": "Oscar Wilde",
+    "theme": "learning",
+    "tags": ["humor", "sharing"]
+  },
+  {
+    "text": "Consider how hard it is to change yourself and you'll understand what little chance you have in trying to change others.",
+    "author": "Jacob Braude",
+    "theme": "character",
+    "tags": ["change", "humility"]
+  },
+  {
+    "text": "There is nothing like returning to a place that remains unchanged to find the ways in which you yourself have altered.",
+    "author": "Nelson Mandela",
+    "theme": "time",
+    "tags": ["change", "reflection"]
+  },
+  {
+    "text": "Forget about all the reasons why something may not work. You only need to find one good reason why it will.",
+    "author": "Robert Anthony",
+    "theme": "hope",
+    "tags": ["belief"]
+  },
+  {
+    "text": "Love is never lost. If not reciprocated, it will flow back and soften and purify the heart.",
+    "author": "Washington Irving",
+    "theme": "kindness",
+    "tags": ["love", "heart"]
+  },
+  {
+    "text": "We all live with the objective of being happy; our lives are all different and yet the same.",
+    "author": "Anne Frank",
+    "theme": "hope",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "To be beautiful means to be yourself. You don't need to be accepted by others. You need to accept yourself.",
+    "author": "Thich Nhat Hanh",
+    "theme": "character",
+    "tags": ["authenticity", "acceptance"]
+  },
+  {
+    "text": "It is very easy to forgive others their mistakes; it takes more grit to forgive them for having witnessed your own.",
+    "author": "Jessamyn West",
+    "theme": "kindness",
+    "tags": ["forgiveness"]
+  },
+  {
+    "text": "Bodily exercise, when compulsory, does no harm to the body; but knowledge which is acquired under compulsion obtains no hold on the mind.",
+    "author": "Plato",
+    "theme": "learning",
+    "tags": ["teaching", "freedom"]
+  },
+  {
+    "text": "Always be yourself, express yourself, have faith in yourself, do not go out and look for a successful personality and duplicate it.",
+    "author": "Bruce Lee",
+    "theme": "character",
+    "tags": ["authenticity"]
+  },
+  {
+    "text": "Every time you smile at someone, it is an action of love, a gift to that person, a beautiful thing.",
+    "author": "Mother Teresa",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "Silences make the real conversations between friends. Not the saying but the never needing to say is what counts.",
+    "author": "Margaret Lee Runbeck",
+    "theme": "kindness",
+    "tags": ["friendship", "stillness"]
+  },
+  {
+    "text": "Chance is always powerful. Let your hook be always cast; in the pool where you least expect it, there will be a fish.",
+    "author": "Ovid",
+    "theme": "action",
+    "tags": ["chance", "luck"]
+  },
+  {
+    "text": "We never understand how little we need in this world until we know the loss of it.",
+    "author": "J. M. Barrie",
+    "theme": "simplicity",
+    "tags": ["gratitude", "loss"]
+  },
+  {
+    "text": "I am a man of fixed and unbending principles, the first of which is to be flexible at all times.",
+    "author": "Everett Dirksen",
+    "theme": "character",
+    "tags": ["humor"]
+  },
+  {
+    "text": "The moment one gives close attention to anything, even a blade of grass, it becomes a mysterious, awesome, indescribably magnificent world in itself.",
+    "author": "Henry Miller",
+    "theme": "nature",
+    "tags": ["wonder", "focus"]
+  },
+  {
+    "text": "How wonderful that we have met with a paradox. Now we have some hope of making progress.",
+    "author": "Niels Bohr",
+    "theme": "learning",
+    "tags": ["discovery"]
+  },
+  {
+    "text": "Everyone is a genius at least once a year. A real genius has his original ideas closer together.",
+    "author": "Georg Christoph Lichtenberg",
+    "theme": "mind",
+    "tags": ["genius", "humor"]
+  },
+  {
+    "text": "Dreams pass into the reality of action. From the actions stems the dream again; and this interdependence produces the highest form of living.",
+    "author": "Anais Nin",
+    "theme": "action",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "Without leaps of imagination, or dreaming, we lose the excitement of possibilities. Dreaming, after all, is a form of planning.",
+    "author": "Gloria Steinem",
+    "theme": "hope",
+    "tags": ["imagination", "dreams"]
+  },
+  {
+    "text": "Nature gave us one tongue and two ears so we could hear twice as much as we speak.",
+    "author": "Epictetus",
+    "theme": "learning",
+    "tags": ["listening", "humility"]
+  },
+  {
+    "text": "Don't wait for your feelings to change to take the action. Take the action and your feelings will change.",
+    "author": "Barbara Baron",
+    "theme": "action",
+    "tags": ["change", "will"]
+  },
+  {
+    "text": "You were not born a winner, and you were not born a loser. You are what you make yourself be.",
+    "author": "Lou Holtz",
+    "theme": "character",
+    "tags": ["responsibility"]
+  },
+  {
+    "text": "To be what we are, and to become what we are capable of becoming, is the only end of life.",
+    "author": "Robert Louis Stevenson",
+    "theme": "character",
+    "tags": ["potential", "purpose"]
+  },
+  {
+    "text": "The road leading to a goal does not separate you from the destination; it is essentially a part of it.",
+    "author": "Charles de Lint",
+    "theme": "perseverance",
+    "tags": ["journey"]
+  },
+  {
+    "text": "Mind is everything. Muscle — pieces of rubber. All that I am, I am because of my mind.",
+    "author": "Paavo Nurmi",
+    "theme": "mind",
+    "tags": ["will", "strength"]
+  },
+  {
+    "text": "How wonderful it is that nobody need wait a single moment before starting to improve the world.",
+    "author": "Anne Frank",
+    "theme": "hope",
+    "tags": ["change", "now"]
+  },
+  {
+    "text": "He that never changes his opinions, never corrects his mistakes, and will never be wiser on the morrow than he is today.",
+    "author": "Tryon Edwards",
+    "theme": "learning",
+    "tags": ["mistakes", "change", "humility"]
+  },
+  {
+    "text": "One must be fond of people and trust them if one is not to make a mess of life.",
+    "author": "E. M. Forster",
+    "theme": "kindness",
+    "tags": ["trust", "connection"]
+  },
+  {
+    "text": "We cannot change our memories, but we can change their meaning and the power they have over us.",
+    "author": "David Seamands",
+    "theme": "mind",
+    "tags": ["reflection", "change"]
+  },
+  {
+    "text": "I'd rather regret the things that I have done than the things that I have not done.",
+    "author": "Lucille Ball",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "The past has no power to stop you from being present now. Only your grievance about the past can do that.",
+    "author": "Eckhart Tolle",
+    "theme": "time",
+    "tags": ["letting-go", "now"]
+  },
+  {
+    "text": "There are two kinds of failures: those who thought and never did, and those who did and never thought.",
+    "author": "Laurence J. Peter",
+    "theme": "action",
+    "tags": ["thought", "deeds"]
+  },
+  {
+    "text": "I'm not interested in age. People who tell me their age are silly. You're as old as you feel.",
+    "author": "Elizabeth Arden",
+    "theme": "time",
+    "tags": ["aging"]
+  },
+  {
+    "text": "Our virtues and our failings are inseparable, like force and matter. When they separate, man is no more.",
+    "author": "Nikola Tesla",
+    "theme": "character",
+    "tags": ["virtue"]
+  },
+  {
+    "text": "Blessed is the person who is too busy to worry in the daytime, and too sleepy to worry at night.",
+    "author": "Leo Aikman",
+    "theme": "mind",
+    "tags": ["worry", "work"]
+  },
+  {
+    "text": "These days people seek knowledge, not wisdom. Knowledge is of the past, wisdom is of the future.",
+    "author": "Vernon Cooper",
+    "theme": "learning",
+    "tags": ["wisdom", "knowledge"]
+  },
+  {
+    "text": "One secret of success in life is for a man to be ready for his opportunity when it comes.",
+    "author": "Benjamin Disraeli",
+    "theme": "action",
+    "tags": ["preparation", "chance"]
+  },
+  {
+    "text": "The shoe that fits one person pinches another; there is no recipe for living that suits all cases.",
+    "author": "Carl Jung",
+    "theme": "character",
+    "tags": ["authenticity"]
+  },
+  {
+    "text": "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.",
+    "author": "Marcus Aurelius",
+    "theme": "simplicity",
+    "tags": ["happiness", "stoic"]
+  },
+  {
+    "text": "The most precious gift we can offer anyone is our attention. When mindfulness embraces those we love, they will bloom like flowers.",
+    "author": "Thich Nhat Hanh",
+    "theme": "kindness",
+    "tags": ["love", "focus"]
+  },
+  {
+    "text": "If you focus on results, you will never change. If you focus on change, you will get results.",
+    "author": "Jack Dixon",
+    "theme": "action",
+    "tags": ["change"]
+  },
+  {
+    "text": "I would maintain that thanks are the highest form of thought, and that gratitude is happiness doubled by wonder.",
+    "author": "G. K. Chesterton",
+    "theme": "hope",
+    "tags": ["gratitude", "wonder"]
+  },
+  {
+    "text": "There are two primary choices in life: to accept conditions as they exist, or accept the responsibility for changing them.",
+    "author": "Denis Waitley",
+    "theme": "action",
+    "tags": ["responsibility", "change"]
+  },
+  {
+    "text": "All difficult things have their origin in that which is easy, and great things in that which is small.",
+    "author": "Lao Tzu",
+    "theme": "action",
+    "tags": ["small-steps"]
+  },
+  {
+    "text": "To speak gratitude is courteous and pleasant, to enact gratitude is generous and noble, but to live gratitude is to touch Heaven.",
+    "author": "Johannes A. Gaertner",
+    "theme": "kindness",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "Wisdom is the reward you get for a lifetime of listening when you'd have preferred to talk.",
+    "author": "Doug Larson",
+    "theme": "learning",
+    "tags": ["wisdom", "listening"]
+  },
+  {
+    "text": "The greatest pleasure I know is to do a good action by stealth, and to have it found out by accident.",
+    "author": "Charles Lamb",
+    "theme": "kindness",
+    "tags": ["goodness", "humility"]
+  },
+  {
+    "text": "When one tugs at a single thing in nature, he finds it attached to the rest of the world.",
+    "author": "John Muir",
+    "theme": "nature",
+    "tags": ["connection"]
+  },
+  {
+    "text": "The most beautiful things in the world cannot be seen or even touched. They must be felt with the heart.",
+    "author": "Helen Keller",
+    "theme": "kindness",
+    "tags": ["beauty", "heart"]
+  },
+  {
+    "text": "Many of life's failures are people who did not realize how close they were to success when they gave up.",
+    "author": "Thomas Edison",
+    "theme": "perseverance",
+    "tags": ["failure", "success"]
+  },
+  {
+    "text": "When we seek to discover the best in others, we somehow bring out the best in ourselves.",
+    "author": "William Arthur Ward",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "If you accept the expectations of others, especially negative ones, then you never will change the outcome.",
+    "author": "Michael Jordan",
+    "theme": "courage",
+    "tags": ["self-trust"]
+  },
+  {
+    "text": "A man may fulfil the object of his existence by asking a question he cannot answer, and attempting a task he cannot achieve.",
+    "author": "Oliver Wendell Holmes Sr.",
+    "theme": "learning",
+    "tags": ["striving", "wonder"]
+  },
+  {
+    "text": "I am always doing that which I cannot do, in order that I may learn how to do it.",
+    "author": "Pablo Picasso",
+    "theme": "learning",
+    "tags": ["growth", "practice"]
+  },
+  {
+    "text": "The world is round and the place which may seem like the end may also be the beginning.",
+    "author": "Ivy Baker Priest",
+    "theme": "hope",
+    "tags": ["beginning"]
+  },
+  {
+    "text": "You have to take it as it happens, but you should try to make it happen the way you want to take it.",
+    "author": "German proverb",
+    "theme": "action",
+    "tags": ["control", "acceptance"]
+  },
+  {
+    "text": "Nothing is predestined: The obstacles of your past can become the gateways that lead to new beginnings.",
+    "author": "Ralph Blum",
+    "theme": "hope",
+    "tags": ["beginning", "adversity"]
+  },
+  {
+    "text": "Sometimes your joy is the source of your smile, but sometimes your smile can be the source of your joy.",
+    "author": "Thich Nhat Hanh",
+    "theme": "mind",
+    "tags": ["joy"]
+  },
+  {
+    "text": "The greatest way to live with honor in this world is to be what we pretend to be.",
+    "author": "Socrates",
+    "theme": "character",
+    "tags": ["integrity", "honesty"]
+  },
+  {
+    "text": "There is no duty we so underrate as the duty of being happy. By being happy we sow anonymous benefits upon the world.",
+    "author": "Robert Louis Stevenson",
+    "theme": "hope",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "The greatest good you can do for another is not just to share your riches but to reveal to him his own.",
+    "author": "Benjamin Disraeli",
+    "theme": "kindness",
+    "tags": ["potential", "sharing"]
+  },
+  {
+    "text": "You can only grow if you're willing to feel awkward and uncomfortable when you try something new.",
+    "author": "Brian Tracy",
+    "theme": "learning",
+    "tags": ["growth", "fear"]
+  },
+  {
+    "text": "To free us from the expectations of others, to give us back to ourselves — there lies the great, singular power of self-respect.",
+    "author": "Joan Didion",
+    "theme": "character",
+    "tags": ["freedom", "self-trust"]
+  },
+  {
+    "text": "It is more important to know where you are going than to get there quickly. Do not mistake activity for achievement.",
+    "author": "Mabel Newcomer",
+    "theme": "action",
+    "tags": ["direction", "haste"]
+  },
+  {
+    "text": "Intuition is the supra-logic that cuts out all the routine processes of thought and leaps straight from the problem to the answer.",
+    "author": "Robert Graves",
+    "theme": "mind",
+    "tags": ["intuition", "thought"]
+  },
+  {
+    "text": "The thing always happens that you really believe in; and the belief in a thing makes it happen.",
+    "author": "Frank Lloyd Wright",
+    "theme": "hope",
+    "tags": ["belief"]
+  },
+  {
+    "text": "A true friend is the most precious of all possessions and the one we take the least thought about acquiring.",
+    "author": "Francois de La Rochefoucauld",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  {
+    "text": "Appreciation can make a day, even change a life. Your willingness to put it into words is all that is necessary.",
+    "author": "Margaret Cousins",
+    "theme": "kindness",
+    "tags": ["gratitude", "words"]
+  },
+  {
+    "text": "This world, after all our science and sciences, is still a miracle; wonderful, inscrutable, magical and more, to whosoever will think of it.",
+    "author": "Thomas Carlyle",
+    "theme": "nature",
+    "tags": ["wonder"]
+  },
+  {
+    "text": "Every great mistake has a halfway moment, a split second when it can be recalled and perhaps remedied.",
+    "author": "Pearl S. Buck",
+    "theme": "mind",
+    "tags": ["mistakes"]
+  },
+  {
+    "text": "The happiness of a man in this life does not consist in the absence but in the mastery of his passions.",
+    "author": "Alfred, Lord Tennyson",
+    "theme": "character",
+    "tags": ["self-mastery", "happiness"]
+  },
+  {
+    "text": "You get peace of mind not by thinking about it or imagining it, but by quietening and relaxing the restless mind.",
+    "author": "Remez Sasson",
+    "theme": "mind",
+    "tags": ["peace", "stillness"]
+  },
+  {
+    "text": "When you begin to touch your heart or let your heart be touched, you begin to discover that it's bottomless.",
+    "author": "Pema Chodron",
+    "theme": "kindness",
+    "tags": ["heart"]
+  },
+  {
+    "text": "Wisdom is knowing what to do next; skill is knowing how to do it; and virtue is doing it.",
+    "author": "David Starr Jordan",
+    "theme": "character",
+    "tags": ["wisdom", "skill", "virtue"]
+  },
+  {
+    "text": "No valid plans for the future can be made by those who have no capacity for living now.",
+    "author": "Alan Watts",
+    "theme": "time",
+    "tags": ["now", "plans"]
+  },
+  {
+    "text": "The aim of life is self-development. To realize one's nature perfectly — that is what each of us is here for.",
+    "author": "Oscar Wilde",
+    "theme": "character",
+    "tags": ["growth", "self-knowledge"]
+  },
+  {
+    "text": "To accomplish great things, we must not only act, but also dream; not only plan, but also believe.",
+    "author": "Anatole France",
+    "theme": "action",
+    "tags": ["dreams", "belief"]
+  },
+  {
+    "text": "The first requisite for success is the ability to apply your physical and mental energies to one problem incessantly without growing weary.",
+    "author": "Thomas Edison",
+    "theme": "perseverance",
+    "tags": ["focus", "diligence"]
+  },
+  {
+    "text": "If we could learn to like ourselves, even a little, maybe our cruelties and angers might melt away.",
+    "author": "John Steinbeck",
+    "theme": "kindness",
+    "tags": ["acceptance", "compassion"]
+  },
+  {
+    "text": "Remember always that you not only have the right to be an individual, you have an obligation to be one.",
+    "author": "Eleanor Roosevelt",
+    "theme": "character",
+    "tags": ["authenticity", "responsibility"]
+  },
+  {
+    "text": "Through meditation and by giving full attention to one thing at a time, we can learn to direct attention where we choose.",
+    "author": "Eknath Easwaran",
+    "theme": "mind",
+    "tags": ["focus"]
+  },
+  {
+    "text": "We could never learn to be brave and patient if there were only joy in the world.",
+    "author": "Helen Keller",
+    "theme": "courage",
+    "tags": ["patience", "adversity"]
+  },
+  {
+    "text": "If it is not right do not do it; if it is not true do not say it.",
+    "author": "Marcus Aurelius",
+    "theme": "character",
+    "tags": ["integrity", "truth"]
+  },
+  {
+    "text": "The truth of the matter is that you always know the right thing to do. The hard part is doing it.",
+    "author": "Norman Schwarzkopf",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Man is equally incapable of seeing the nothingness from which he emerges and the infinity in which he is engulfed.",
+    "author": "Blaise Pascal",
+    "theme": "mind",
+    "tags": ["wonder"]
+  },
+  {
+    "text": "Arrogance and rudeness are training wheels on the bicycle of life — for weak people who cannot keep their balance without them.",
+    "author": "Laura Teresa Marquez",
+    "theme": "character",
+    "tags": ["humility", "strength"]
+  },
+  {
+    "text": "If you are patient in one moment of anger, you will escape one hundred days of sorrow.",
+    "author": "Chinese proverb",
+    "theme": "character",
+    "tags": ["patience", "self-mastery"]
+  },
+  {
+    "text": "The poor man is not he who is without a cent, but he who is without a dream.",
+    "author": "Harry Kemp",
+    "theme": "hope",
+    "tags": ["dreams", "wealth"]
+  },
+  {
+    "text": "Face your deficiencies and acknowledge them; but do not let them master you. Let them teach you patience, sweetness, insight.",
+    "author": "Helen Keller",
+    "theme": "perseverance",
+    "tags": ["patience", "growth"]
+  },
+  {
+    "text": "Change is the law of life. And those who look only to the past or present are certain to miss the future.",
+    "author": "John F. Kennedy",
+    "theme": "time",
+    "tags": ["change", "future"]
+  },
+  {
+    "text": "You have power over your mind — not outside events. Realize this, and you will find strength.",
+    "author": "Marcus Aurelius",
+    "theme": "mind",
+    "tags": ["stoic", "control"]
+  },
+  {
+    "text": "He that respects himself is safe from others; he wears a coat of mail that none can pierce.",
+    "author": "Henry Wadsworth Longfellow",
+    "theme": "character",
+    "tags": ["self-worth", "strength"]
+  },
+  {
+    "text": "What matters is the value we've created in our lives, the people we've made happy and how much we've grown as people.",
+    "author": "Daisaku Ikeda",
+    "theme": "character",
+    "tags": ["purpose", "growth"]
+  },
+  {
+    "text": "Everyone has been made for some particular work, and the desire for that work has been put in every heart.",
+    "author": "Rumi",
+    "theme": "character",
+    "tags": ["purpose", "work"]
+  },
+  {
+    "text": "Take time to deliberate, but when the time for action has arrived, stop thinking and go in.",
+    "author": "Napoleon Bonaparte",
+    "theme": "action",
+    "tags": ["judgement", "boldness"]
+  },
+  {
+    "text": "Happiness is not in the mere possession of money; it lies in the joy of achievement, in the thrill of creative effort.",
+    "author": "Franklin D. Roosevelt",
+    "theme": "action",
+    "tags": ["work", "happiness"]
+  },
+  {
+    "text": "You cannot make yourself feel something you do not feel, but you can make yourself do right in spite of your feelings.",
+    "author": "Pearl S. Buck",
+    "theme": "character",
+    "tags": ["will", "integrity"]
+  },
+  {
+    "text": "Those who are blessed with the most talent don't necessarily outperform everyone else. It's the people with follow-through who excel.",
+    "author": "Mary Kay Ash",
+    "theme": "perseverance",
+    "tags": ["diligence"]
+  },
+  {
+    "text": "It is not enough to have a good mind; the main thing is to use it well.",
+    "author": "Rene Descartes",
+    "theme": "mind",
+    "tags": ["thought"]
+  },
+  {
+    "text": "Never do things others can do and will do, if there are things others cannot do or will not do.",
+    "author": "Amelia Earhart",
+    "theme": "action",
+    "tags": ["purpose", "boldness"]
+  },
+  {
+    "text": "I can't change the direction of the wind, but I can adjust my sails to always reach my destination.",
+    "author": "Jimmy Dean",
+    "theme": "perseverance",
+    "tags": ["adversity", "control"]
+  },
+  {
+    "text": "People of mediocre ability sometimes achieve outstanding success because they don't know when to quit. Most men succeed because they are determined to.",
+    "author": "George Allen",
+    "theme": "perseverance",
+    "tags": ["will", "success"]
+  },
+  {
+    "text": "A fine quotation is a diamond on the finger of a man of wit, and a pebble in the hand of a fool.",
+    "author": "Joseph Roux",
+    "theme": "mind",
+    "tags": ["words", "humor"]
+  },
+  {
+    "text": "Life's challenges are not supposed to paralyse you, they're supposed to help you discover who you are.",
+    "author": "Bernice Johnson Reagon",
+    "theme": "courage",
+    "tags": ["adversity", "self-knowledge"]
+  },
+  {
+    "text": "To exist is to change, to change is to mature, to mature is to go on creating oneself endlessly.",
+    "author": "Henri Bergson",
+    "theme": "time",
+    "tags": ["change", "growth"]
+  },
+  {
+    "text": "A successful person is one who can lay a firm foundation with the bricks that others throw at him or her.",
+    "author": "David Brinkley",
+    "theme": "perseverance",
+    "tags": ["resilience", "adversity"]
+  },
+  {
+    "text": "Work while you have the light. You are responsible for the talent that has been entrusted to you.",
+    "author": "Henri-Frederic Amiel",
+    "theme": "action",
+    "tags": ["work", "responsibility"]
+  },
+  {
+    "text": "How far that little candle throws its beams! So shines a good deed in a naughty world.",
+    "author": "William Shakespeare",
+    "theme": "kindness",
+    "tags": ["goodness", "light"]
+  },
+  {
+    "text": "It is in your moments of decision that your destiny is shaped.",
+    "author": "Tony Robbins",
+    "theme": "action",
+    "tags": ["decisions"]
+  },
+  {
+    "text": "The pain passes, but the beauty remains.",
+    "author": "Pierre-Auguste Renoir",
+    "theme": "perseverance",
+    "tags": ["beauty", "art"]
+  },
+  {
+    "text": "All I can say about life is, Oh God, enjoy it!",
+    "author": "Bob Newhart",
+    "theme": "hope",
+    "tags": ["joy", "humor"]
+  },
+  {
+    "text": "Creativity comes from trust. Trust your instincts. And never hope more than you work.",
+    "author": "Rita Mae Brown",
+    "theme": "action",
+    "tags": ["trust", "work"]
+  },
+  {
+    "text": "You won't skid if you stay in a rut.",
+    "author": "Kin Hubbard",
+    "theme": "courage",
+    "tags": ["habits", "humor"]
+  },
+  { "text": "Happiness depends upon ourselves.", "author": "Aristotle", "theme": "character", "tags": ["happiness"] },
+  {
+    "text": "Wherever a man turns he can find someone who needs him.",
+    "author": "Albert Schweitzer",
+    "theme": "kindness",
+    "tags": ["community"]
+  },
+  {
+    "text": "If one is lucky, a solitary fantasy can totally transform one million realities.",
+    "author": "Maya Angelou",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "Meaning is not what you start with but what you end up with.",
+    "author": "Peter Elbow",
+    "theme": "learning",
+    "tags": ["purpose", "writing"]
+  },
+  {
+    "text": "No one has ever become poor by giving.",
+    "author": "Anne Frank",
+    "theme": "kindness",
+    "tags": ["sharing"]
+  },
+  {
+    "text": "Be faithful in small things because it is in them that your strength lies.",
+    "author": "Mother Teresa",
+    "theme": "character",
+    "tags": ["small-steps", "strength"]
+  },
+  {
+    "text": "All is flux; nothing stays still.",
+    "author": "Heraclitus",
+    "theme": "nature",
+    "tags": ["change", "transience"]
+  },
+  {
+    "text": "He who is fixed to a star does not change his mind.",
+    "author": "Leonardo da Vinci",
+    "theme": "character",
+    "tags": ["steadiness", "purpose"]
+  },
+  {
+    "text": "Ignorant men don't know what good they hold in their hands until they've flung it away.",
+    "author": "Sophocles",
+    "theme": "mind",
+    "tags": ["gratitude", "perception"]
+  },
+  {
+    "text": "Do not turn back when you are just at the goal.",
+    "author": "Publilius Syrus",
+    "theme": "perseverance",
+    "tags": ["striving"]
+  },
+  {
+    "text": "All perceiving is also thinking, all reasoning is also intuition, all observation is also invention.",
+    "author": "Rudolf Arnheim",
+    "theme": "mind",
+    "tags": ["perception", "thought"]
+  },
+  {
+    "text": "Error is discipline through which we advance.",
+    "author": "William Ellery Channing",
+    "theme": "learning",
+    "tags": ["mistakes", "growth"]
+  },
+  {
+    "text": "The truth is always exciting. Speak it, then. Life is dull without it.",
+    "author": "Pearl S. Buck",
+    "theme": "character",
+    "tags": ["truth", "honesty"]
+  },
+  {
+    "text": "The longer we dwell on our misfortunes, the greater is their power to harm us.",
+    "author": "Voltaire",
+    "theme": "mind",
+    "tags": ["adversity", "worry"]
+  },
+  {
+    "text": "In all things of nature there is something of the marvellous.",
+    "author": "Aristotle",
+    "theme": "nature",
+    "tags": ["wonder"]
+  },
+  {
+    "text": "Beware of little expenses; a small leak will sink a great ship.",
+    "author": "Benjamin Franklin",
+    "theme": "character",
+    "tags": ["thrift", "habits"]
+  },
+  {
+    "text": "Action will remove the doubts that theory cannot solve.",
+    "author": "Tehyi Hsieh",
+    "theme": "action",
+    "tags": ["doubt"]
+  },
+  {
+    "text": "We must not say every mistake is a foolish one.",
+    "author": "Cicero",
+    "theme": "learning",
+    "tags": ["mistakes"]
+  },
+  {
+    "text": "Accept challenges, so that you may feel the exhilaration of victory.",
+    "author": "George S. Patton",
+    "theme": "courage",
+    "tags": ["adversity", "boldness"]
+  },
+  {
+    "text": "It is better to understand a little than to misunderstand a lot.",
+    "author": "Anatole France",
+    "theme": "learning",
+    "tags": ["knowledge", "humility"]
+  },
+  {
+    "text": "Life is 10% what happens to you and 90% how you react to it.",
+    "author": "Charles R. Swindoll",
+    "theme": "mind",
+    "tags": ["perception", "resilience"]
+  },
+  {
+    "text": "To want to be what one can be is purpose in life.",
+    "author": "Cynthia Ozick",
+    "theme": "character",
+    "tags": ["purpose", "potential"]
+  },
+  {
+    "text": "Time stays long enough for anyone who will use it.",
+    "author": "Leonardo da Vinci",
+    "theme": "time",
+    "tags": ["now"]
+  },
+  {
+    "text": "You must welcome change as the rule but not as your ruler.",
+    "author": "Denis Waitley",
+    "theme": "mind",
+    "tags": ["change"]
+  },
+  {
+    "text": "Give whatever you are doing and whoever you are with the gift of your attention.",
+    "author": "Jim Rohn",
+    "theme": "kindness",
+    "tags": ["focus", "connection"]
+  },
+  {
+    "text": "The eye sees only what the mind is prepared to comprehend.",
+    "author": "Robertson Davies",
+    "theme": "mind",
+    "tags": ["perception"]
+  },
+  {
+    "text": "The more light you allow within you, the brighter the world you live in will be.",
+    "author": "Shakti Gawain",
+    "theme": "hope",
+    "tags": ["light"]
+  },
+  {
+    "text": "Nothing diminishes anxiety faster than action.",
+    "author": "Walter Anderson",
+    "theme": "action",
+    "tags": ["worry"]
+  },
+  {
+    "text": "Man cannot discover new oceans unless he has the courage to lose sight of the shore.",
+    "author": "André Gide",
+    "theme": "courage",
+    "tags": ["boldness", "discovery"]
+  },
+  {
+    "text": "Everything that irritates us about others can lead us to an understanding about ourselves.",
+    "author": "Carl Jung",
+    "theme": "mind",
+    "tags": ["self-knowledge"]
+  },
+  {
+    "text": "There are no failures. Just experiences and your reactions to them.",
+    "author": "Tom Krause",
+    "theme": "perseverance",
+    "tags": ["failure", "experience"]
+  },
+  {
+    "text": "Your future depends on many things, but mostly on you.",
+    "author": "Frank Tyger",
+    "theme": "action",
+    "tags": ["future", "responsibility"]
+  },
+  {
+    "text": "Fear grows in darkness; if you think there's a bogeyman around, turn on the light.",
+    "author": "Dorothy Thompson",
+    "theme": "courage",
+    "tags": ["fear"]
+  },
+  {
+    "text": "The most important point is to accept yourself and stand on your two feet.",
+    "author": "Shunryu Suzuki",
+    "theme": "character",
+    "tags": ["acceptance", "self-trust"]
+  },
+  {
+    "text": "Without some goals and some efforts to reach them, no man can live.",
+    "author": "John Dewey",
+    "theme": "action",
+    "tags": ["purpose", "striving"]
+  },
+  {
+    "text": "He who obtains has little. He who scatters has much.",
+    "author": "Richard Braunstein",
+    "theme": "kindness",
+    "tags": ["sharing"]
+  },
+  {
+    "text": "Myths which are believed in tend to become true.",
+    "author": "George Orwell",
+    "theme": "mind",
+    "tags": ["belief"]
+  },
+  {
+    "text": "Not what we have but what we enjoy constitutes our abundance.",
+    "author": "John Petit-Senn",
+    "theme": "simplicity",
+    "tags": ["gratitude", "wealth"]
+  },
+  {
+    "text": "The beginning is always today.",
+    "author": "Mary Wollstonecraft",
+    "theme": "time",
+    "tags": ["beginning", "today"]
+  },
+  {
+    "text": "In the long run we get no more than we have been willing to risk giving.",
+    "author": "Sheldon Kopp",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Don't look back. Something might be gaining on you.",
+    "author": "Satchel Paige",
+    "theme": "time",
+    "tags": ["humor"]
+  },
+  {
+    "text": "Imagination disposes of everything; it creates beauty, justice, and happiness, which are everything in this world.",
+    "author": "Blaise Pascal",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "Trust your own instinct. Your mistakes might as well be your own, instead of someone else's.",
+    "author": "Billy Wilder",
+    "theme": "character",
+    "tags": ["self-trust", "mistakes"]
+  },
+  {
+    "text": "The least movement is of importance to all nature. The entire ocean is affected by a pebble.",
+    "author": "Blaise Pascal",
+    "theme": "nature",
+    "tags": ["wonder", "connection"]
+  },
+  {
+    "text": "I am always doing that which I can not do, in order that I may learn how to do it.",
+    "author": "Pablo Picasso",
+    "theme": "learning",
+    "tags": ["practice", "striving"]
+  },
+  {
+    "text": "Men in general judge more from appearances than from reality. All men have eyes, but few have the gift of penetration.",
+    "author": "Niccolo Machiavelli",
+    "theme": "mind",
+    "tags": ["perception", "judgement"]
+  },
+  {
+    "text": "Every artist dips his brush in his own soul, and paints his own nature into his pictures.",
+    "author": "Henry Ward Beecher",
+    "theme": "character",
+    "tags": ["art", "soul"]
+  },
+  {
+    "text": "If you take each challenge one step at a time, with faith in every footstep, your strength and understanding will increase.",
+    "author": "James E. Faust",
+    "theme": "perseverance",
+    "tags": ["small-steps", "strength"]
+  },
+  {
+    "text": "Everyone should carefully observe which way his heart draws him, and then choose that way with all his strength.",
+    "author": "Hasidic saying",
+    "theme": "character",
+    "tags": ["heart", "direction"]
+  },
+  {
+    "text": "When we quit thinking primarily about ourselves and our own self-preservation, we undergo a truly heroic transformation of consciousness.",
+    "author": "Joseph Campbell",
+    "theme": "kindness",
+    "tags": ["compassion"]
+  },
+  {
+    "text": "Do not give your attention to what others do or fail to do; give it to what you do or fail to do.",
+    "author": "The Dhammapada",
+    "theme": "character",
+    "tags": ["focus", "self-mastery"]
+  },
+  {
+    "text": "Follow effective action with quiet reflection. From the quiet reflection will come even more effective action.",
+    "author": "Peter Drucker",
+    "theme": "action",
+    "tags": ["reflection"]
+  },
+  {
+    "text": "Life's challenges are not supposed to paralyze you, they're supposed to help you discover who you are.",
+    "author": "Bernice Johnson Reagon",
+    "theme": "perseverance",
+    "tags": ["adversity", "self-knowledge"]
+  },
+  {
+    "text": "Your vision will become clear only when you look into your heart. Who looks outside, dreams. Who looks inside, awakens.",
+    "author": "Carl Jung",
+    "theme": "mind",
+    "tags": ["self-knowledge", "vision"]
+  },
+  {
+    "text": "The way we communicate with others and with ourselves ultimately determines the quality of our lives.",
+    "author": "Tony Robbins",
+    "theme": "mind",
+    "tags": ["words", "connection"]
+  },
+  {
+    "text": "Let us always meet each other with a smile, for the smile is the beginning of love.",
+    "author": "Mother Teresa",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "Living at risk is jumping off the cliff and building your wings on the way down.",
+    "author": "Ray Bradbury",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "In the depth of winter, I finally learned that there was within me an invincible summer.",
+    "author": "Albert Camus",
+    "theme": "hope",
+    "tags": ["resilience"]
+  },
+  {
+    "text": "Wit lies in recognizing the resemblance among things which differ and the difference between things which are alike.",
+    "author": "Madame de Stael",
+    "theme": "mind",
+    "tags": ["perception"]
+  },
+  {
+    "text": "A failure is a man who has blundered but is not capable of cashing in on the experience.",
+    "author": "Elbert Hubbard",
+    "theme": "learning",
+    "tags": ["failure", "experience"]
+  },
+  {
+    "text": "I cannot give you the formula for success, but I can give you the formula for failure: try to please everybody.",
+    "author": "Herbert Bayard Swope",
+    "theme": "character",
+    "tags": ["success", "failure"]
+  },
+  {
+    "text": "Friends are those rare people who ask how we are and then wait to hear the answer.",
+    "author": "Ed Cunningham",
+    "theme": "kindness",
+    "tags": ["friendship"]
+  },
+  {
+    "text": "If we learn to open our hearts, anyone, including the people who drive us crazy, can be our teacher.",
+    "author": "Pema Chodron",
+    "theme": "learning",
+    "tags": ["teachers"]
+  },
+  {
+    "text": "While we try to teach our children all about life, our children teach us what life is all about.",
+    "author": "Angela Schwindt",
+    "theme": "learning",
+    "tags": ["teachers"]
+  },
+  {
+    "text": "It's so simple to be wise. Just think of something stupid to say and then don't say it.",
+    "author": "Sam Levenson",
+    "theme": "simplicity",
+    "tags": ["wisdom", "words", "humor"]
+  },
+  {
+    "text": "Until you make peace with who you are, you will never be content with what you have.",
+    "author": "Doris Mortman",
+    "theme": "character",
+    "tags": ["acceptance"]
+  },
+  {
+    "text": "The purpose of learning is growth, and our minds, unlike our bodies, can continue growing as we continue to live.",
+    "author": "Mortimer Adler",
+    "theme": "learning",
+    "tags": ["growth"]
+  },
+  {
+    "text": "For every failure, there's an alternative course of action. You just have to find it. When you come to a roadblock, take a detour.",
+    "author": "Mary Kay Ash",
+    "theme": "perseverance",
+    "tags": ["setbacks"]
+  },
+  {
+    "text": "It is surprising what a man can do when he has to, and how little most men will do when they don't have to.",
+    "author": "Walter Linn",
+    "theme": "perseverance",
+    "tags": ["diligence"]
+  },
+  {
+    "text": "To be aware of a single shortcoming in oneself is more useful than to be aware of a thousand in someone else.",
+    "author": "Dalai Lama",
+    "theme": "character",
+    "tags": ["self-knowledge", "humility"]
+  },
+  {
+    "text": "Constant kindness can accomplish much. As the sun makes ice melt, kindness causes misunderstanding, mistrust, and hostility to evaporate.",
+    "author": "Albert Schweitzer",
+    "theme": "kindness",
+    "tags": ["compassion"]
+  },
+  {
+    "text": "The greatest minds are capable of the greatest vices as well as of the greatest virtues.",
+    "author": "Rene Descartes",
+    "theme": "mind",
+    "tags": ["virtue"]
+  },
+  {
+    "text": "Difficulties are meant to rouse, not discourage. The human spirit is to grow strong by conflict.",
+    "author": "William Ellery Channing",
+    "theme": "perseverance",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "Some people are always grumbling because roses have thorns; I am thankful that thorns have roses.",
+    "author": "Alphonse Karr",
+    "theme": "hope",
+    "tags": ["gratitude", "perception"]
+  },
+  {
+    "text": "To choose what is difficult all one's days, as if it were easy, that is faith.",
+    "author": "W. H. Auden",
+    "theme": "perseverance",
+    "tags": ["difficulty"]
+  },
+  {
+    "text": "Ability is what you're capable of doing. Motivation determines what you do. Attitude determines how well you do it.",
+    "author": "Lou Holtz",
+    "theme": "character",
+    "tags": ["confidence", "will"]
+  },
+  {
+    "text": "I care not so much what I am to others as what I am to myself. I will be rich by myself, and not by borrowing.",
+    "author": "Michel de Montaigne",
+    "theme": "character",
+    "tags": ["authenticity", "self-trust"]
+  },
+  {
+    "text": "Know that although in the eternal scheme of things you are small, you are also unique and irreplaceable, as are all your fellow humans everywhere in the world.",
+    "author": "Margaret Laurence",
+    "theme": "hope",
+    "tags": ["humility", "connection"]
+  },
+  {
+    "text": "If you let go a little, you will have a little peace. If you let go a lot, you will have a lot of peace.",
+    "author": "Ajahn Chah",
+    "theme": "simplicity",
+    "tags": ["letting-go", "peace"]
+  },
+  {
+    "text": "The spirit, the will to win, and the will to excel, are the things that endure. These qualities are so much more important than the events that occur.",
+    "author": "Vince Lombardi",
+    "theme": "perseverance",
+    "tags": ["will", "excellence"]
+  },
+  {
+    "text": "I believe that we are solely responsible for our choices, and we have to accept the consequences of every deed, word, and thought throughout our lifetime.",
+    "author": "Elisabeth Kubler-Ross",
+    "theme": "character",
+    "tags": ["responsibility"]
+  },
+  {
+    "text": "To understand the heart and mind of a person, look not at what he has already achieved, but at what he aspires to do.",
+    "author": "Kahlil Gibran",
+    "theme": "character",
+    "tags": ["ambition", "judgement"]
+  },
+  {
+    "text": "I am of the opinion that my life belongs to the community, and as long as I live it is my privilege to do for it whatever I can.",
+    "author": "George Bernard Shaw",
+    "theme": "kindness",
+    "tags": ["community", "purpose"]
+  },
+  {
+    "text": "If one is estranged from oneself, then one is estranged from others too. If one is out of touch with oneself, then one cannot touch others.",
+    "author": "Anne Morrow Lindbergh",
+    "theme": "mind",
+    "tags": ["self-knowledge", "connection"]
+  },
+  {
+    "text": "Most of the important things in the world have been accomplished by people who have kept on trying when there seemed to be no hope at all.",
+    "author": "Dale Carnegie",
+    "theme": "perseverance",
+    "tags": ["hope"]
+  },
+  {
+    "text": "The secret of joy in work is contained in one word — excellence. To know how to do something well is to enjoy it.",
+    "author": "Pearl S. Buck",
+    "theme": "character",
+    "tags": ["excellence", "joy", "work"]
+  },
+  {
+    "text": "We must overcome the notion that we must be regular. It robs you of the chance to be extraordinary and leads you to the mediocre.",
+    "author": "Uta Hagen",
+    "theme": "character",
+    "tags": ["authenticity"]
+  },
+  {
+    "text": "Most of our obstacles would melt away if, instead of cowering before them, we should make up our minds to walk boldly through them.",
+    "author": "Orison Swett Marden",
+    "theme": "courage",
+    "tags": ["boldness", "difficulty"]
+  },
+  {
+    "text": "Everything can be taken from a man but one thing: the last of the human freedoms — to choose one's attitude in any given set of circumstances, to choose one's own way.",
+    "author": "Viktor E. Frankl",
+    "theme": "mind",
+    "tags": ["freedom"]
+  },
+  {
+    "text": "It is better to have enough ideas for some of them to be wrong, than to be always right by having no ideas at all.",
+    "author": "Edward de Bono",
+    "theme": "mind",
+    "tags": ["mistakes", "imagination"]
+  },
+  {
+    "text": "The most dangerous way to lose time is not to spend it having fun, but to spend it doing fake work. When you spend time having fun, you know you're being self-indulgent.",
+    "author": "Paul Graham",
+    "theme": "time",
+    "tags": ["procrastination", "work"]
+  },
+  {
+    "text": "Without passion man is a mere latent force and possibility, like the flint which awaits the shock of the iron before it can give forth its spark.",
+    "author": "Henri-Frederic Amiel",
+    "theme": "character",
+    "tags": ["enthusiasm", "potential"]
+  },
+  {
+    "text": "Love at first sight is easy to understand; it's when two people have been looking at each other for a lifetime that it becomes a miracle.",
+    "author": "Amy Bloom",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "With courage you will dare to take risks, have the strength to be compassionate, and the wisdom to be humble. Courage is the foundation of integrity.",
+    "author": "Keshavan Nair",
+    "theme": "courage",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "The right way is not always the popular and easy way. Standing for right when it is unpopular is a true test of moral character.",
+    "author": "Margaret Chase Smith",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "I prefer to be true to myself, even at the hazard of incurring the ridicule of others, rather than to be false, and to incur my own abhorrence.",
+    "author": "Frederick Douglass",
+    "theme": "character",
+    "tags": ["integrity", "authenticity"]
+  },
+  {
+    "text": "No pessimist ever discovered the secrets of the stars, or sailed to an uncharted land, or opened a new heaven to the human spirit.",
+    "author": "Helen Keller",
+    "theme": "hope",
+    "tags": ["discovery"]
+  },
+  {
+    "text": "You must train your intuition — you must trust the small voice inside you which tells you exactly what to say, what to decide.",
+    "author": "Ingrid Bergman",
+    "theme": "mind",
+    "tags": ["self-trust"]
+  },
+  {
+    "text": "Parents can only give good advice or put them on the right paths, but the final forming of a person's character lies in their own hands.",
+    "author": "Anne Frank",
+    "theme": "character",
+    "tags": ["responsibility"]
+  },
+  {
+    "text": "If you break your neck, if you have nothing to eat, if your house is on fire, then you got a problem. Everything else is inconvenience.",
+    "author": "Robert Fulghum",
+    "theme": "simplicity",
+    "tags": ["perception", "worry"]
+  },
+  {
+    "text": "My advice to you is not to inquire why or whither, but just enjoy your ice cream while it's on your plate — that's my philosophy.",
+    "author": "Thornton Wilder",
+    "theme": "simplicity",
+    "tags": ["joy", "now"]
+  },
+  {
+    "text": "Arriving at one point is the starting point to another.",
+    "author": "John Dewey",
+    "theme": "learning",
+    "tags": ["journey"]
+  },
+  {
+    "text": "The foolish man seeks happiness in the distance, the wise grows it under his feet.",
+    "author": "James Oppenheim",
+    "theme": "simplicity",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "The greatest part of our happiness depends on our dispositions, not our circumstances.",
+    "author": "Martha Washington",
+    "theme": "mind",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "It is only possible to live happily ever after on a day to day basis.",
+    "author": "Margaret Bonnano",
+    "theme": "time",
+    "tags": ["today"]
+  },
+  {
+    "text": "A man sees in the world what he carries in his heart.",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "mind",
+    "tags": ["perception", "heart"]
+  },
+  {
+    "text": "The weak can never forgive. Forgiveness is the attribute of the strong.",
+    "author": "Mahatma Gandhi",
+    "theme": "kindness",
+    "tags": ["forgiveness", "strength"]
+  },
+  {
+    "text": "A man is great by deeds, not by birth.",
+    "author": "Chanakya",
+    "theme": "character",
+    "tags": ["deeds", "greatness"]
+  },
+  {
+    "text": "Success is getting what you want. Happiness is wanting what you get.",
+    "author": "Dale Carnegie",
+    "theme": "simplicity",
+    "tags": ["success", "happiness"]
+  },
+  {
+    "text": "Small opportunities are often the beginning of great enterprises.",
+    "author": "Demosthenes",
+    "theme": "action",
+    "tags": ["beginning", "small-steps"]
+  },
+  {
+    "text": "To be tested is good. The challenged life may be the best therapist.",
+    "author": "Gail Sheehy",
+    "theme": "perseverance",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "Be slow of tongue and quick of eye.",
+    "author": "Miguel de Cervantes",
+    "theme": "character",
+    "tags": ["words"]
+  },
+  {
+    "text": "Freedom is not worth having if it does not connote freedom to err.",
+    "author": "Mahatma Gandhi",
+    "theme": "mind",
+    "tags": ["freedom", "mistakes"]
+  },
+  {
+    "text": "I have always thought the actions of men the best interpreters of their thoughts.",
+    "author": "John Locke",
+    "theme": "character",
+    "tags": ["deeds"]
+  },
+  {
+    "text": "To dare is to lose one's footing momentarily. To not dare is to lose oneself.",
+    "author": "Soren Kierkegaard",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "No day in which you learn something is a complete loss.",
+    "author": "David Eddings",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "Real success is finding your lifework in the work that you love.",
+    "author": "David McCullough",
+    "theme": "action",
+    "tags": ["work"]
+  },
+  {
+    "text": "Your sacred space is where you can find yourself again and again.",
+    "author": "Joseph Campbell",
+    "theme": "simplicity",
+    "tags": ["solitude"]
+  },
+  {
+    "text": "In seed time learn, in harvest teach, in winter enjoy.",
+    "author": "William Blake",
+    "theme": "learning",
+    "tags": ["teaching"]
+  },
+  {
+    "text": "Happiness does not come from having much, but from being attached to little.",
+    "author": "Cheng Yen",
+    "theme": "simplicity",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "The wisest men follow their own direction.",
+    "author": "Euripides",
+    "theme": "character",
+    "tags": ["direction"]
+  },
+  {
+    "text": "Hope arouses, as nothing else can arouse, a passion for the possible.",
+    "author": "William Sloane Coffin",
+    "theme": "hope",
+    "tags": ["potential"]
+  },
+  {
+    "text": "Nothing ever goes away until it has taught us what we need to know.",
+    "author": "Pema Chodron",
+    "theme": "learning",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "When you learn, teach. When you get, give.",
+    "author": "Maya Angelou",
+    "theme": "kindness",
+    "tags": ["teaching", "sharing"]
+  },
+  {
+    "text": "Only when we are no longer afraid do we begin to live.",
+    "author": "Dorothy Thompson",
+    "theme": "courage",
+    "tags": ["fear"]
+  },
+  {
+    "text": "If you smile when no one else is around, you really mean it.",
+    "author": "Andy Rooney",
+    "theme": "character",
+    "tags": ["authenticity", "joy"]
+  },
+  {
+    "text": "Love is the only force capable of transforming an enemy into friend.",
+    "author": "Martin Luther King, Jr.",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "In all chaos there is a cosmos, in all disorder a secret order.",
+    "author": "Carl Jung",
+    "theme": "mind",
+    "tags": ["perception"]
+  },
+  {
+    "text": "The price of greatness is responsibility.",
+    "author": "Winston Churchill",
+    "theme": "character",
+    "tags": ["responsibility", "greatness"]
+  },
+  {
+    "text": "Decision is a risk rooted in the courage of being free.",
+    "author": "Paul Tillich",
+    "theme": "courage",
+    "tags": ["freedom"]
+  },
+  {
+    "text": "Your mind will answer most questions if you learn to relax and wait for the answer.",
+    "author": "William S. Burroughs",
+    "theme": "mind",
+    "tags": ["stillness", "patience"]
+  },
+  {
+    "text": "Saying thank you is more than good manners. It is good spirituality.",
+    "author": "Alfred Painter",
+    "theme": "kindness",
+    "tags": ["gratitude"]
+  },
+  { "text": "Joy is the best makeup.", "author": "Anne Lamott", "theme": "simplicity", "tags": ["joy", "beauty"] },
+  {
+    "text": "All men who have achieved great things have been great dreamers.",
+    "author": "Orison Swett Marden",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "Mediocrity knows nothing higher than itself, but talent instantly recognizes genius.",
+    "author": "Arthur Conan Doyle",
+    "theme": "mind",
+    "tags": ["genius"]
+  },
+  {
+    "text": "Where all think alike, no one thinks very much.",
+    "author": "Walter Lippmann",
+    "theme": "mind",
+    "tags": ["thought"]
+  },
+  {
+    "text": "Be less curious about people and more curious about ideas.",
+    "author": "Marie Curie",
+    "theme": "learning",
+    "tags": ["knowledge"]
+  },
+  {
+    "text": "The heart has eyes which the brain knows nothing of.",
+    "author": "Charles Parkhurst",
+    "theme": "mind",
+    "tags": ["heart"]
+  },
+  {
+    "text": "Only those who dare to fail greatly can ever achieve greatly.",
+    "author": "Robert F. Kennedy",
+    "theme": "courage",
+    "tags": ["failure"]
+  },
+  {
+    "text": "Lose an hour in the morning, and you will spend all day looking for it.",
+    "author": "Richard Whately",
+    "theme": "time",
+    "tags": ["haste"]
+  },
+  {
+    "text": "Stay away from what might have been and look at what will be.",
+    "author": "Marsha Petrie Sue",
+    "theme": "hope",
+    "tags": ["future"]
+  },
+  {
+    "text": "Act as if what you do makes a difference. It does.",
+    "author": "William James",
+    "theme": "action",
+    "tags": ["deeds"]
+  },
+  {
+    "text": "Do good by stealth, and blush to find it fame.",
+    "author": "Alexander Pope",
+    "theme": "kindness",
+    "tags": ["modesty"]
+  },
+  {
+    "text": "Always tell the truth. That way, you don't have to remember what you said.",
+    "author": "Mark Twain",
+    "theme": "character",
+    "tags": ["honesty", "humor"]
+  },
+  {
+    "text": "He who fears being conquered is sure of defeat.",
+    "author": "Napoleon Bonaparte",
+    "theme": "courage",
+    "tags": ["fear"]
+  },
+  {
+    "text": "One must still have chaos in oneself to be able to give birth to a dancing star.",
+    "author": "Friedrich Nietzsche",
+    "theme": "mind",
+    "tags": ["art"]
+  },
+  {
+    "text": "No yesterdays are ever wasted for those who give themselves to today.",
+    "author": "Brendan Francis",
+    "theme": "time",
+    "tags": ["today"]
+  },
+  {
+    "text": "What is necessary to change a person is to change his awareness of himself.",
+    "author": "Abraham Maslow",
+    "theme": "mind",
+    "tags": ["change"]
+  },
+  {
+    "text": "We shall never know all the good that a simple smile can do.",
+    "author": "Mother Teresa",
+    "theme": "kindness",
+    "tags": ["joy"]
+  },
+  {
+    "text": "Nothing is so strong as gentleness. Nothing is so gentle as real strength.",
+    "author": "Francis de Sales",
+    "theme": "kindness",
+    "tags": ["strength"]
+  },
+  {
+    "text": "We must embrace pain and burn it as fuel for our journey.",
+    "author": "Kenji Miyazawa",
+    "theme": "perseverance",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "A gem cannot be polished without friction, nor a man perfected without trials.",
+    "author": "Chinese proverb",
+    "theme": "perseverance",
+    "tags": ["adversity", "growth"]
+  },
+  {
+    "text": "Each day can be one of triumph if you keep up your interests.",
+    "author": "George Matthew Adams",
+    "theme": "time",
+    "tags": ["enthusiasm"]
+  },
+  {
+    "text": "The place to improve the world is first in one's own heart and head and hands.",
+    "author": "Robert M. Pirsig",
+    "theme": "character",
+    "tags": ["change"]
+  },
+  {
+    "text": "Winners have simply formed the habit of doing things losers don't like to do.",
+    "author": "Albert E. N. Gray",
+    "theme": "character",
+    "tags": ["habits"]
+  },
+  {
+    "text": "Life is what you make of it. Always has been, always will be.",
+    "author": "Grandma Moses",
+    "theme": "action",
+    "tags": ["life"]
+  },
+  {
+    "text": "Worry often gives a small thing a big shadow.",
+    "author": "Swedish proverb",
+    "theme": "mind",
+    "tags": ["worry"]
+  },
+  {
+    "text": "Freedom is what you do with what's been done to you.",
+    "author": "Jean-Paul Sartre",
+    "theme": "mind",
+    "tags": ["freedom"]
+  },
+  {
+    "text": "The truth which has made us free will in the end make us glad also.",
+    "author": "Felix Adler",
+    "theme": "hope",
+    "tags": ["truth"]
+  },
+  {
+    "text": "He who has imagination without learning has wings but no feet.",
+    "author": "Joseph Joubert",
+    "theme": "learning",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "Whoso loves, believes the impossible.",
+    "author": "Elizabeth Barrett Browning",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "It isn't where you come from, it's where you're going that counts.",
+    "author": "Ella Fitzgerald",
+    "theme": "hope",
+    "tags": ["future"]
+  },
+  {
+    "text": "The greatest obstacle to connecting with our joy is resentment.",
+    "author": "Pema Chodron",
+    "theme": "kindness",
+    "tags": ["joy", "forgiveness"]
+  },
+  {
+    "text": "We are all something, but none of us are everything.",
+    "author": "Blaise Pascal",
+    "theme": "character",
+    "tags": ["humility"]
+  },
+  {
+    "text": "If you can't feed a hundred people, then feed just one.",
+    "author": "Mother Teresa",
+    "theme": "kindness",
+    "tags": ["small-steps"]
+  },
+  {
+    "text": "In three words I can sum up everything I've learned about life: it goes on.",
+    "author": "Robert Frost",
+    "theme": "time",
+    "tags": ["acceptance"]
+  },
+  {
+    "text": "As we risk ourselves, we grow. Each new experience is a risk.",
+    "author": "Fran Watson",
+    "theme": "courage",
+    "tags": ["growth"]
+  },
+  {
+    "text": "The final proof of greatness lies in being able to endure criticism without resentment.",
+    "author": "Elbert Hubbard",
+    "theme": "character",
+    "tags": ["greatness"]
+  },
+  {
+    "text": "An invasion of armies can be resisted, but not an idea whose time has come.",
+    "author": "Victor Hugo",
+    "theme": "mind",
+    "tags": ["power"]
+  },
+  {
+    "text": "Excellence is not a skill. It is an attitude.",
+    "author": "Ralph Marston",
+    "theme": "character",
+    "tags": ["excellence"]
+  },
+  {
+    "text": "People may doubt what you say, but they will believe what you do.",
+    "author": "Lewis Cass",
+    "theme": "character",
+    "tags": ["deeds"]
+  },
+  {
+    "text": "The most formidable weapon against errors of every kind is reason.",
+    "author": "Thomas Paine",
+    "theme": "mind",
+    "tags": ["truth"]
+  },
+  {
+    "text": "It's important to know that words don't move mountains. Work, exacting work moves mountains.",
+    "author": "Danilo Dolci",
+    "theme": "action",
+    "tags": ["work"]
+  },
+  {
+    "text": "Beware of missing chances; otherwise it may be altogether too late some day.",
+    "author": "Franz Liszt",
+    "theme": "time",
+    "tags": ["chance"]
+  },
+  {
+    "text": "Life is a succession of moments. To live each one is to succeed.",
+    "author": "Corita Kent",
+    "theme": "time",
+    "tags": ["now"]
+  },
+  {
+    "text": "I know but one freedom and that is the freedom of the mind.",
+    "author": "Antoine de Saint-Exupery",
+    "theme": "mind",
+    "tags": ["freedom"]
+  },
+  { "text": "When in doubt, tell the truth.", "author": "Mark Twain", "theme": "character", "tags": ["honesty"] },
+  {
+    "text": "Every great advance in science has issued from a new audacity of the imagination.",
+    "author": "John Dewey",
+    "theme": "learning",
+    "tags": ["imagination", "discovery"]
+  },
+  {
+    "text": "No person is your friend who demands your silence, or denies your right to grow.",
+    "author": "Alice Walker",
+    "theme": "kindness",
+    "tags": ["friendship", "growth"]
+  },
+  {
+    "text": "Impossibilities are merely things which we have not yet learned.",
+    "author": "Charles Chesnutt",
+    "theme": "learning",
+    "tags": ["potential"]
+  },
+  { "text": "He who angers you conquers you.", "author": "Elizabeth Kenny", "theme": "mind", "tags": ["self-mastery"] },
+  {
+    "text": "No act of kindness, no matter how small, is ever wasted.",
+    "author": "Aesop",
+    "theme": "kindness",
+    "tags": ["small-steps"]
+  },
+  {
+    "text": "Every man is a volume if you know how to read him.",
+    "author": "William Ellery Channing",
+    "theme": "character",
+    "tags": ["reading", "perception"]
+  },
+  {
+    "text": "The odds of hitting your target go up dramatically when you aim at it.",
+    "author": "Mal Pancoast",
+    "theme": "action",
+    "tags": ["focus"]
+  },
+  {
+    "text": "On every thorn, delightful wisdom grows; in every rill a sweet instruction flows.",
+    "author": "Edward Young",
+    "theme": "nature",
+    "tags": ["wisdom"]
+  },
+  {
+    "text": "The future is completely open, and we are writing it moment to moment.",
+    "author": "Pema Chodron",
+    "theme": "hope",
+    "tags": ["future"]
+  },
+  {
+    "text": "Trust your hunches. They're usually based on facts filed away just below the conscious level.",
+    "author": "Joyce Brothers",
+    "theme": "mind",
+    "tags": ["self-trust"]
+  },
+  {
+    "text": "The personal life deeply lived always expands into truths beyond itself.",
+    "author": "Anais Nin",
+    "theme": "character",
+    "tags": ["reflection", "truth"]
+  },
+  {
+    "text": "Whenever something negative happens to you, there is a deep lesson concealed within it.",
+    "author": "Eckhart Tolle",
+    "theme": "learning",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "Know how to listen, and you will profit even from those who talk badly.",
+    "author": "Plutarch",
+    "theme": "learning",
+    "tags": ["wisdom"]
+  },
+  {
+    "text": "A man is not old as long as he is seeking something.",
+    "author": "Edmond Rostand",
+    "theme": "hope",
+    "tags": ["aging"]
+  },
+  {
+    "text": "Much wisdom often goes with fewer words.",
+    "author": "Sophocles",
+    "theme": "simplicity",
+    "tags": ["brevity", "wisdom"]
+  },
+  {
+    "text": "Imagination is the living power and prime agent of all human perception.",
+    "author": "Samuel Taylor Coleridge",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "It is impossible to feel grateful and depressed in the same moment.",
+    "author": "Naomi Williams",
+    "theme": "mind",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "Progress always involves risks. You can't steal second base and keep your foot on first.",
+    "author": "Frederick Wilcox",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Liberty, taking the word in its concrete sense, consists in the ability to choose.",
+    "author": "Simone Weil",
+    "theme": "mind",
+    "tags": ["freedom"]
+  },
+  {
+    "text": "A thing well said will be wit in all languages.",
+    "author": "John Dryden",
+    "theme": "simplicity",
+    "tags": ["words"]
+  },
+  {
+    "text": "Always do your best. What you plant now, you will harvest later.",
+    "author": "Og Mandino",
+    "theme": "action",
+    "tags": ["diligence"]
+  },
+  {
+    "text": "We are the leaves of one branch, the drops of one sea, the flowers of one garden.",
+    "author": "Jean-Baptiste Henri Lacordaire",
+    "theme": "kindness",
+    "tags": ["community"]
+  },
+  {
+    "text": "It is not only for what we do that we are held responsible, but also for what we do not do.",
+    "author": "Moliere",
+    "theme": "character",
+    "tags": ["responsibility"]
+  },
+  {
+    "text": "You cannot step twice into the same river, for other waters are continually flowing in.",
+    "author": "Heraclitus",
+    "theme": "nature",
+    "tags": ["change"]
+  },
+  {
+    "text": "Excellence is to do a common thing in an uncommon way.",
+    "author": "Booker T. Washington",
+    "theme": "character",
+    "tags": ["excellence"]
+  },
+  {
+    "text": "Whoever is happy will make others happy, too.",
+    "author": "Anne Frank",
+    "theme": "kindness",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "Take it easy — but take it.",
+    "author": "Woody Guthrie",
+    "theme": "simplicity",
+    "tags": ["balance", "humor"]
+  },
+  {
+    "text": "Take rest; a field that has rested gives a bountiful crop.",
+    "author": "Ovid",
+    "theme": "nature",
+    "tags": ["rest"]
+  },
+  {
+    "text": "Age does not protect you from love. But love, to some extent, protects you from age.",
+    "author": "Anais Nin",
+    "theme": "kindness",
+    "tags": ["love", "aging"]
+  },
+  {
+    "text": "Do what you can. Want what you have. Be who you are.",
+    "author": "Forrest Church",
+    "theme": "simplicity",
+    "tags": ["acceptance"]
+  },
+  {
+    "text": "There are people who have money and people who are rich.",
+    "author": "Coco Chanel",
+    "theme": "simplicity",
+    "tags": ["wealth"]
+  },
+  {
+    "text": "Speak when you are angry and you will make the best speech you will ever regret.",
+    "author": "Ambrose Bierce",
+    "theme": "character",
+    "tags": ["words", "humor"]
+  },
+  {
+    "text": "Things do not change, we change.",
+    "author": "Henry David Thoreau",
+    "theme": "mind",
+    "tags": ["change", "perception"]
+  },
+  {
+    "text": "The exercise of an extraordinary gift is the supremest pleasure in life.",
+    "author": "Mark Twain",
+    "theme": "character",
+    "tags": ["genius", "joy"]
+  },
+  {
+    "text": "Sometimes the most important thing in a whole day is the rest we take between two deep breaths.",
+    "author": "Etty Hillesum",
+    "theme": "simplicity",
+    "tags": ["rest", "stillness"]
+  },
+  {
+    "text": "To ensure good health: eat lightly, breathe deeply, live moderately, cultivate cheerfulness, and maintain an interest in life.",
+    "author": "William Londen",
+    "theme": "simplicity",
+    "tags": ["health", "balance"]
+  },
+  {
+    "text": "Experience keeps a dear school, but fools will learn in no other.",
+    "author": "Benjamin Franklin",
+    "theme": "learning",
+    "tags": ["experience", "mistakes"]
+  },
+  {
+    "text": "We can only be said to be alive in those moments when our hearts are conscious of our treasures.",
+    "author": "Thornton Wilder",
+    "theme": "simplicity",
+    "tags": ["gratitude", "joy"]
+  },
+  {
+    "text": "Keep your eyes on the stars and your feet on the ground.",
+    "author": "Theodore Roosevelt",
+    "theme": "hope",
+    "tags": ["dreams", "balance"]
+  },
+  {
+    "text": "I am not afraid of tomorrow, for I have seen yesterday and I love today.",
+    "author": "William Allen White",
+    "theme": "hope",
+    "tags": ["future", "now"]
+  },
+  {
+    "text": "Limitations live only in our minds. But if we use our imaginations, our possibilities become limitless.",
+    "author": "Jamie Paolinetti",
+    "theme": "mind",
+    "tags": ["imagination", "potential"]
+  },
+  {
+    "text": "Sunshine is delicious, rain is refreshing, wind braces us up, snow is exhilarating; there is really no such thing as bad weather, only different kinds of good weather.",
+    "author": "John Ruskin",
+    "theme": "nature",
+    "tags": ["joy", "perception"]
+  },
+  {
+    "text": "If you aren't going all the way, why go at all?",
+    "author": "Joe Namath",
+    "theme": "courage",
+    "tags": ["boldness", "ambition"]
+  },
+  {
+    "text": "The beginning of wisdom is found in doubting; by doubting we come to the question, and by seeking we may come upon the truth.",
+    "author": "Pierre Abelard",
+    "theme": "learning",
+    "tags": ["doubt", "truth"]
+  },
+  {
+    "text": "Just as a flower which seems beautiful has color but no perfume, so are the fruitless words of a man who speaks them but does them not.",
+    "author": "Dhammapada",
+    "theme": "character",
+    "tags": ["words", "deeds", "integrity"]
+  },
+  {
+    "text": "As we express our gratitude, we must never forget that the highest appreciation is not to utter words, but to live by them.",
+    "author": "John F. Kennedy",
+    "theme": "kindness",
+    "tags": ["gratitude", "deeds"]
+  },
+  {
+    "text": "The world cares very little about what a man or woman knows; it is what a man or woman is able to do that counts.",
+    "author": "Booker T. Washington",
+    "theme": "action",
+    "tags": ["deeds", "skill"]
+  },
+  {
+    "text": "Aim for success, not perfection. Never give up your right to be wrong, because then you will lose the ability to learn new things and move forward with your life.",
+    "author": "David Burns",
+    "theme": "learning",
+    "tags": ["perfectionism", "mistakes"]
+  },
+  {
+    "text": "When there is no enemy within, the enemies outside cannot hurt you.",
+    "author": "African proverb",
+    "theme": "mind",
+    "tags": ["peace", "self-mastery"]
+  },
+  {
+    "text": "The happy and efficient people in this world are those who accept trouble as a normal detail of human life and resolve to capitalize it when it comes along.",
+    "author": "H. Bertram Lewis",
+    "theme": "perseverance",
+    "tags": ["adversity", "acceptance"]
+  },
+  {
+    "text": "Enjoy the little things, for one day you may look back and realize they were the big things.",
+    "author": "Robert Brault",
+    "theme": "simplicity",
+    "tags": ["gratitude", "now"]
+  },
+  {
+    "text": "With every experience, you alone are painting your own canvas, thought by thought, choice by choice.",
+    "author": "Oprah Winfrey",
+    "theme": "mind",
+    "tags": ["thoughts", "responsibility"]
+  },
+  {
+    "text": "Let the beauty of what you love be what you do.",
+    "author": "Rumi",
+    "theme": "character",
+    "tags": ["love", "work", "purpose"]
+  },
+  {
+    "text": "Beauty is not in the face; beauty is a light in the heart.",
+    "author": "Kahlil Gibran",
+    "theme": "character",
+    "tags": ["beauty", "heart"]
+  },
+  {
+    "text": "A day of worry is more exhausting than a day of work.",
+    "author": "John Lubbock",
+    "theme": "mind",
+    "tags": ["worry", "work"]
+  },
+  {
+    "text": "Trust only movement. Life happens at the level of events, not of words. Trust movement.",
+    "author": "Alfred Adler",
+    "theme": "action",
+    "tags": ["trust", "deeds"]
+  },
+  {
+    "text": "The most decisive actions of our life... are most often unconsidered actions.",
+    "author": "André Gide",
+    "theme": "action",
+    "tags": ["deeds", "judgement"]
+  },
+  {
+    "text": "As we grow as unique persons, we learn to respect the uniqueness of others.",
+    "author": "Robert H. Schuller",
+    "theme": "kindness",
+    "tags": ["growth", "compassion"]
+  },
+  {
+    "text": "Failure doesn't mean you are a failure; it just means you haven't succeeded yet.",
+    "author": "Robert H. Schuller",
+    "theme": "perseverance",
+    "tags": ["failure", "setbacks"]
+  },
+  {
+    "text": "Try and fail, but don't fail to try.",
+    "author": "Stephen Kaggwa",
+    "theme": "courage",
+    "tags": ["failure", "striving"]
+  },
+  {
+    "text": "Fear not for the future, weep not for the past.",
+    "author": "Percy Bysshe Shelley",
+    "theme": "time",
+    "tags": ["future", "letting-go"]
+  },
+  {
+    "text": "If you kick a stone in anger, you'll hurt your own foot.",
+    "author": "Korean proverb",
+    "theme": "mind",
+    "tags": ["anger", "self-mastery"]
+  },
+  {
+    "text": "The happiness that is genuinely satisfying is accompanied by the fullest exercise of our faculties and the fullest realization of the world in which we live.",
+    "author": "Bertrand Russell",
+    "theme": "mind",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "Human beings, who are almost unique in having the ability to learn from the experience of others, are also remarkable for their apparent disinclination to do so.",
+    "author": "Douglas Adams",
+    "theme": "learning",
+    "tags": ["experience", "humor"]
+  },
+  {
+    "text": "The universe is made of stories, not atoms.",
+    "author": "Muriel Rukeyser",
+    "theme": "mind",
+    "tags": ["wonder"]
+  },
+  {
+    "text": "The trouble with most people is that they think with their hopes or fears or wishes rather than with their minds.",
+    "author": "Will Durant",
+    "theme": "mind",
+    "tags": ["thought"]
+  },
+  {
+    "text": "A lot of people give up just before they're about to make it. You know, you never know when that next obstacle is going to be the last one.",
+    "author": "Chuck Norris",
+    "theme": "perseverance",
+    "tags": ["resilience"]
+  },
+  {
+    "text": "Sometimes the biggest act of courage is a small one.",
+    "author": "Lauren Raffo",
+    "theme": "courage",
+    "tags": ["small-steps"]
+  },
+  {
+    "text": "You do not become good by trying to be good, but by finding the goodness that is already within you.",
+    "author": "Eckhart Tolle",
+    "theme": "character",
+    "tags": ["goodness"]
+  },
+  {
+    "text": "Happiness often sneaks in through a door you didn't know you left open.",
+    "author": "John Barrymore",
+    "theme": "hope",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "The things that one most wants to do are the things that are probably most worth doing.",
+    "author": "Winifred Holtby",
+    "theme": "action",
+    "tags": ["desire", "purpose"]
+  },
+  {
+    "text": "Perseverance is a great element of success. If you only knock long enough and loud enough at the gate, you are sure to wake up somebody.",
+    "author": "Henry Wadsworth Longfellow",
+    "theme": "perseverance",
+    "tags": ["diligence", "success"]
+  },
+  { "text": "Peace begins with a smile.", "author": "Mother Teresa", "theme": "kindness", "tags": ["peace"] },
+  {
+    "text": "Be your own hero, it's cheaper than a movie ticket.",
+    "author": "Doug Horton",
+    "theme": "character",
+    "tags": ["humor", "self-trust"]
+  },
+  {
+    "text": "Turn your face toward the sun and the shadows will fall behind you.",
+    "author": "Maori proverb",
+    "theme": "hope",
+    "tags": ["light"]
+  },
+  {
+    "text": "We're here for a reason. I believe a bit of the reason is to throw little torches out to lead people through the dark.",
+    "author": "Whoopi Goldberg",
+    "theme": "kindness",
+    "tags": ["purpose", "light"]
+  },
+  {
+    "text": "Courage is not the absence of fear, but simply moving on with dignity despite that fear.",
+    "author": "Pat Riley",
+    "theme": "courage",
+    "tags": ["fear"]
+  },
+  {
+    "text": "All truths are easy to understand once they are discovered; the point is to discover them.",
+    "author": "Galileo Galilei",
+    "theme": "learning",
+    "tags": ["discovery", "truth"]
+  },
+  {
+    "text": "When we feel love and kindness toward others, it not only makes others feel loved and cared for, but it helps us also to develop inner happiness and peace.",
+    "author": "Dalai Lama",
+    "theme": "kindness",
+    "tags": ["love", "peace"]
+  },
+  {
+    "text": "We may encounter many defeats but we must not be defeated.",
+    "author": "Maya Angelou",
+    "theme": "perseverance",
+    "tags": ["resilience", "setbacks"]
+  },
+  {
+    "text": "Our deepest wishes are whispers of our authentic selves. We must learn to respect them. We must learn to listen.",
+    "author": "Sarah Ban Breathnach",
+    "theme": "mind",
+    "tags": ["authenticity", "self-knowledge"]
+  },
+  {
+    "text": "The world is but a canvas to the imagination.",
+    "author": "Henry David Thoreau",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "That's the risk you take if you change: that people you've been involved with won't like the new you. But other people who do will come along.",
+    "author": "Lisa Alther",
+    "theme": "courage",
+    "tags": ["change", "friendship"]
+  },
+  {
+    "text": "To be happy is to be able to become aware of oneself without fright.",
+    "author": "Walter Benjamin",
+    "theme": "mind",
+    "tags": ["self-knowledge", "happiness"]
+  },
+  {
+    "text": "Be gentle first with yourself if you wish to be gentle with others.",
+    "author": "Lama Yeshe",
+    "theme": "kindness",
+    "tags": ["compassion"]
+  },
+  {
+    "text": "A man who doesn't trust himself can never really trust anyone else.",
+    "author": "Cardinal de Retz",
+    "theme": "character",
+    "tags": ["trust", "self-trust"]
+  },
+  {
+    "text": "Leaders aren't born, they are made. And they are made just like anything else, through hard work. And that's the price we'll have to pay to achieve that goal, or any goal.",
+    "author": "Vince Lombardi",
+    "theme": "perseverance",
+    "tags": ["work"]
+  },
+  {
+    "text": "Always seek out the seed of triumph in every adversity.",
+    "author": "Og Mandino",
+    "theme": "perseverance",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "Fame usually comes to those who are thinking about something else.",
+    "author": "Oliver Wendell Holmes",
+    "theme": "character",
+    "tags": ["humility"]
+  },
+  {
+    "text": "Work for something because it is good, not just because it stands a chance to succeed.",
+    "author": "Vaclav Havel",
+    "theme": "character",
+    "tags": ["integrity", "purpose"]
+  },
+  {
+    "text": "Make it a rule of life never to regret and never to look back. Regret is an appalling waste of energy; you can't build on it; it's only for wallowing in.",
+    "author": "Katherine Mansfield",
+    "theme": "time",
+    "tags": ["letting-go"]
+  },
+  {
+    "text": "Never regret. If it's good, it's wonderful. If it's bad, it's experience.",
+    "author": "Victoria Holt",
+    "theme": "hope",
+    "tags": ["experience"]
+  },
+  {
+    "text": "For everything that lives is holy, life delights in life.",
+    "author": "William Blake",
+    "theme": "nature",
+    "tags": ["wonder", "joy"]
+  },
+  {
+    "text": "The art of progress is to preserve order amid change, and to preserve change amid order.",
+    "author": "Alfred North Whitehead",
+    "theme": "mind",
+    "tags": ["change", "balance"]
+  },
+  {
+    "text": "If you want to study yourself — look into the hearts of other people. If you want to study other people — look into your own heart.",
+    "author": "Friedrich Schiller",
+    "theme": "mind",
+    "tags": ["self-knowledge", "heart"]
+  },
+  {
+    "text": "True happiness means forging a strong spirit that is undefeated, no matter how trying our circumstances.",
+    "author": "Daisaku Ikeda",
+    "theme": "perseverance",
+    "tags": ["resilience", "happiness"]
+  },
+  {
+    "text": "There is nothing so useless as doing efficiently that which should not be done at all.",
+    "author": "Peter Drucker",
+    "theme": "simplicity",
+    "tags": ["focus", "work"]
+  },
+  {
+    "text": "The most successful people are those who are good at plan B.",
+    "author": "James Yorke",
+    "theme": "perseverance",
+    "tags": ["plans"]
+  },
+  {
+    "text": "Neither genius, fame, nor love show the greatness of the soul. Only kindness can do that.",
+    "author": "Jean-Baptiste Henri Lacordaire",
+    "theme": "kindness",
+    "tags": ["greatness", "soul"]
+  },
+  {
+    "text": "The noblest worship is to make yourself as good and as just as you can.",
+    "author": "Isocrates",
+    "theme": "character",
+    "tags": ["virtue", "goodness"]
+  },
+  {
+    "text": "Don't think of it as failure. Think of it as time-released success.",
+    "author": "Robert Orben",
+    "theme": "perseverance",
+    "tags": ["failure", "humor"]
+  },
+  {
+    "text": "Divide each difficulty into as many parts as is feasible and necessary to resolve it.",
+    "author": "René Descartes",
+    "theme": "learning",
+    "tags": ["difficulty", "small-steps"]
+  },
+  {
+    "text": "We choose our joys and sorrows long before we experience them.",
+    "author": "Kahlil Gibran",
+    "theme": "mind",
+    "tags": ["joy", "reflection"]
+  },
+  {
+    "text": "Anybody can make history. Only a great man can write it.",
+    "author": "Oscar Wilde",
+    "theme": "mind",
+    "tags": ["writing", "humor"]
+  },
+  {
+    "text": "If I know what love is, it is because of you.",
+    "author": "Hermann Hesse",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "It is common sense to take a method and try it. If it fails, admit it frankly and try another. But above all, try something.",
+    "author": "Franklin D. Roosevelt",
+    "theme": "action",
+    "tags": ["mistakes", "boldness"]
+  },
+  {
+    "text": "Be here now. Be someplace else later. Is that so complicated?",
+    "author": "David Bader",
+    "theme": "time",
+    "tags": ["now", "humor"]
+  },
+  {
+    "text": "I don't believe in failure. It's not failure if you enjoyed the process.",
+    "author": "Oprah Winfrey",
+    "theme": "perseverance",
+    "tags": ["failure", "joy"]
+  },
+  {
+    "text": "The man who trusts men will make fewer mistakes than he who distrusts them.",
+    "author": "Camillo di Cavour",
+    "theme": "character",
+    "tags": ["trust"]
+  },
+  {
+    "text": "The dream was always running ahead of me. To catch up, to live for a moment in unison with it, that was the miracle.",
+    "author": "Anaïs Nin",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "The cure for boredom is curiosity. There is no cure for curiosity.",
+    "author": "Ellen Parr",
+    "theme": "learning",
+    "tags": ["curiosity", "humor"]
+  },
+  {
+    "text": "Gratitude is the fairest blossom which springs from the soul.",
+    "author": "Henry Ward Beecher",
+    "theme": "kindness",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "The best thing in every noble dream is the dreamer.",
+    "author": "Moncure Conway",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "If you want things to be different, perhaps the answer is to become different yourself.",
+    "author": "Norman Vincent Peale",
+    "theme": "action",
+    "tags": ["change"]
+  },
+  {
+    "text": "Kindness is more important than wisdom, and the recognition of this is the beginning of wisdom.",
+    "author": "Theodore Isaac Rubin",
+    "theme": "kindness",
+    "tags": ["wisdom"]
+  },
+  {
+    "text": "Those who cannot remember the past are condemned to repeat it.",
+    "author": "George Santayana",
+    "theme": "learning",
+    "tags": ["experience"]
+  },
+  {
+    "text": "The trick is in what one emphasizes. We either make ourselves miserable, or we make ourselves happy. The amount of work is the same.",
+    "author": "Carlos Castaneda",
+    "theme": "mind",
+    "tags": ["happiness", "perception"]
+  },
+  {
+    "text": "Three things in human life are important. The first is to be kind. The second is to be kind. The third is to be kind.",
+    "author": "Henry James",
+    "theme": "kindness",
+    "tags": ["goodness"]
+  },
+  { "text": "They can conquer who believe they can.", "author": "Virgil", "theme": "courage", "tags": ["belief"] },
+  {
+    "text": "Learn to listen. Opportunity could be knocking at your door very softly.",
+    "author": "Frank Tyger",
+    "theme": "mind",
+    "tags": ["chance"]
+  },
+  {
+    "text": "I love my past. I love my present. I'm not ashamed of what I've had, and I'm not sad because I have it no longer.",
+    "author": "Colette",
+    "theme": "time",
+    "tags": ["acceptance"]
+  },
+  {
+    "text": "Just as much as we see in others we have in ourselves.",
+    "author": "William Hazlitt",
+    "theme": "mind",
+    "tags": ["perception", "self-knowledge"]
+  },
+  {
+    "text": "Prosperity depends more on wanting what you have than having what you want.",
+    "author": "Geoffrey F. Abert",
+    "theme": "simplicity",
+    "tags": ["wealth", "gratitude"]
+  },
+  {
+    "text": "How many cares one loses when one decides not to be something but to be someone.",
+    "author": "Coco Chanel",
+    "theme": "character",
+    "tags": ["authenticity"]
+  },
+  {
+    "text": "The self is not something ready-made, but something in continuous formation through choice of action.",
+    "author": "John Dewey",
+    "theme": "character",
+    "tags": ["growth", "deeds"]
+  },
+  {
+    "text": "The only real mistake is the one from which we learn nothing.",
+    "author": "John Powell",
+    "theme": "learning",
+    "tags": ["mistakes"]
+  },
+  {
+    "text": "To dream of the person you would like to be is to waste the person you are.",
+    "author": "Tim Menchen",
+    "theme": "character",
+    "tags": ["acceptance", "authenticity"]
+  },
+  {
+    "text": "The important thing is this: to be able at any moment to sacrifice what we are for what we could become.",
+    "author": "Charles Du Bos",
+    "theme": "courage",
+    "tags": ["change", "growth"]
+  },
+  {
+    "text": "Gratitude is not only the greatest of virtues, but the parent of all the others.",
+    "author": "Cicero",
+    "theme": "character",
+    "tags": ["gratitude", "virtue"]
+  },
+  {
+    "text": "It is never too late. Even if you are going to die tomorrow, keep yourself straight and clear and be a happy human being today.",
+    "author": "Lama Yeshe",
+    "theme": "time",
+    "tags": ["now", "happiness"]
+  },
+  {
+    "text": "Learn wisdom from the ways of a seedling. A seedling which is never hardened off through stressful situations will never become a strong productive plant.",
+    "author": "Stephen Sigmund",
+    "theme": "perseverance",
+    "tags": ["adversity", "growth"]
+  },
+  {
+    "text": "All men have a sweetness in their life. That is what helps them go on. It is towards that they turn when they feel too worn out.",
+    "author": "Albert Camus",
+    "theme": "hope",
+    "tags": ["joy"]
+  },
+  {
+    "text": "Be a good listener. Your ears will never get you in trouble.",
+    "author": "Frank Tyger",
+    "theme": "mind",
+    "tags": ["words"]
+  },
+  {
+    "text": "To listen well is as powerful a means of communication and influence as to talk well.",
+    "author": "John Marshall",
+    "theme": "mind",
+    "tags": ["words"]
+  },
+  {
+    "text": "There is only one happiness in life, to love and be loved.",
+    "author": "George Sand",
+    "theme": "kindness",
+    "tags": ["love", "happiness"]
+  },
+  {
+    "text": "Reason and free inquiry are the only effectual agents against error.",
+    "author": "Thomas Jefferson",
+    "theme": "learning",
+    "tags": ["truth"]
+  },
+  {
+    "text": "By accepting yourself and being fully what you are, your presence can make others happy.",
+    "author": "Jane Roberts",
+    "theme": "character",
+    "tags": ["acceptance"]
+  },
+  {
+    "text": "Never deny a diagnosis, but do deny the negative verdict that may go with it.",
+    "author": "Norman Cousins",
+    "theme": "hope",
+    "tags": ["health"]
+  },
+  {
+    "text": "I do not believe in a fate that falls on men however they act; but I do believe in a fate that falls on them unless they act.",
+    "author": "G. K. Chesterton",
+    "theme": "action",
+    "tags": ["deeds"]
+  },
+  {
+    "text": "Risk more than others think is safe. Care more than others think is wise. Dream more than others think is practical. Expect more than others think is possible.",
+    "author": "Cadet Maxim",
+    "theme": "courage",
+    "tags": ["boldness", "dreams"]
+  },
+  {
+    "text": "Failure will never overtake me if my determination to succeed is strong enough.",
+    "author": "Og Mandino",
+    "theme": "perseverance",
+    "tags": ["will"]
+  },
+  {
+    "text": "Let yourself be silently drawn by the stronger pull of what you really love.",
+    "author": "Rumi",
+    "theme": "mind",
+    "tags": ["love", "desire"]
+  },
+  {
+    "text": "Give thanks for a little and you will find a lot.",
+    "author": "Hausa proverb",
+    "theme": "simplicity",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "Forgiveness does not change the past, but it does enlarge the future.",
+    "author": "Paul Boese",
+    "theme": "kindness",
+    "tags": ["forgiveness", "future"]
+  },
+  {
+    "text": "The deepest craving of human nature is the need to be appreciated.",
+    "author": "William James",
+    "theme": "kindness",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "Love does not consist of gazing at each other, but in looking together in the same direction.",
+    "author": "Antoine de Saint-Exupéry",
+    "theme": "kindness",
+    "tags": ["love"]
+  },
+  {
+    "text": "We have committed the Golden Rule to memory; let us now commit it to life.",
+    "author": "Edwin Markham",
+    "theme": "kindness",
+    "tags": ["golden-rule"]
+  },
+  {
+    "text": "It is with words as with sunbeams. The more they are condensed, the deeper they burn.",
+    "author": "Robert Southey",
+    "theme": "simplicity",
+    "tags": ["words", "brevity"]
+  },
+  {
+    "text": "As soon as you trust yourself, you will know how to live.",
+    "author": "Johann Wolfgang von Goethe",
+    "theme": "courage",
+    "tags": ["self-trust"]
+  },
+  {
+    "text": "If you don't design your own life plan, chances are you'll fall into someone else's plan. And guess what they have planned for you? Not much.",
+    "author": "Jim Rohn",
+    "theme": "action",
+    "tags": ["plans", "humor"]
+  },
+  {
+    "text": "It is not the possession of truth, but the success which attends the seeking after it, that enriches the seeker and brings happiness to him.",
+    "author": "Max Planck",
+    "theme": "learning",
+    "tags": ["truth"]
+  },
+  {
+    "text": "To follow, without halt, one aim: There is the secret of success.",
+    "author": "Anna Pavlova",
+    "theme": "perseverance",
+    "tags": ["focus"]
+  },
+  {
+    "text": "We read the world wrong and say that it deceives us.",
+    "author": "Rabindranath Tagore",
+    "theme": "mind",
+    "tags": ["perception"]
+  },
+  {
+    "text": "If only we'd stop trying to be happy we'd have a pretty good time.",
+    "author": "Edith Wharton",
+    "theme": "simplicity",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "I am glad that I paid so little attention to good advice; had I abided by it I might have been saved from some of my most valuable mistakes.",
+    "author": "Edna St. Vincent Millay",
+    "theme": "learning",
+    "tags": ["mistakes", "humor"]
+  },
+  {
+    "text": "The person who makes a success of living is the one who sees his goal steadily and aims for it unswervingly. That is dedication.",
+    "author": "Cecil B. DeMille",
+    "theme": "perseverance",
+    "tags": ["focus"]
+  },
+  {
+    "text": "My reputation grows with every failure.",
+    "author": "George Bernard Shaw",
+    "theme": "perseverance",
+    "tags": ["failure", "humor"]
+  },
+  {
+    "text": "If you are going to achieve excellence in big things, you develop the habit in little matters. Excellence is not an exception, it is a prevailing attitude.",
+    "author": "Colin Powell",
+    "theme": "character",
+    "tags": ["excellence", "habits"]
+  },
+  {
+    "text": "It is easier to live through someone else than to become complete yourself.",
+    "author": "Betty Friedan",
+    "theme": "character",
+    "tags": ["self-knowledge"]
+  },
+  {
+    "text": "If you're in a bad situation, don't worry, it'll change. If you're in a good situation, don't worry, it'll change.",
+    "author": "John Simone",
+    "theme": "time",
+    "tags": ["change", "transience"]
+  },
+  {
+    "text": "Remember that failure is an event, not a person.",
+    "author": "Zig Ziglar",
+    "theme": "perseverance",
+    "tags": ["failure"]
+  },
+  {
+    "text": "Instead of saying that man is the creature of circumstance, it would be nearer the mark to say that man is the architect of circumstance.",
+    "author": "Thomas Carlyle",
+    "theme": "action",
+    "tags": ["responsibility"]
+  },
+  {
+    "text": "Love vanquishes time. To lovers, a moment can be eternity, eternity can be the tick of a clock.",
+    "author": "Mary Parrish",
+    "theme": "time",
+    "tags": ["love"]
+  },
+  {
+    "text": "Think like a man of action; act like a man of thought.",
+    "author": "Henri Bergson",
+    "theme": "action",
+    "tags": ["thought"]
+  },
+  {
+    "text": "You will never be happy if you continue to search for what happiness consists of. You will never live if you are looking for the meaning of life.",
+    "author": "Albert Camus",
+    "theme": "simplicity",
+    "tags": ["happiness"]
+  },
+  {
+    "text": "Genuine sincerity opens people's hearts, while manipulation causes them to close.",
+    "author": "Daisaku Ikeda",
+    "theme": "character",
+    "tags": ["honesty"]
+  },
+  {
+    "text": "A man's dreams are an index to his greatness.",
+    "author": "Zadok Rabinowitz",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "This is the final test of a gentleman: his respect for those who can be of no possible value to him.",
+    "author": "William Lyon Phelps",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Never tell a young person that anything cannot be done. God may have been waiting centuries for someone ignorant enough of the impossible to do that very thing.",
+    "author": "John Andrew Holmes",
+    "theme": "hope",
+    "tags": ["potential"]
+  },
+  {
+    "text": "If we look at the world with a love of life, the world will reveal its beauty to us.",
+    "author": "Daisaku Ikeda",
+    "theme": "nature",
+    "tags": ["beauty"]
+  },
+  {
+    "text": "When you discover your mission, you will feel its demand. It will fill you with enthusiasm and a burning desire to get to work on it.",
+    "author": "W. Clement Stone",
+    "theme": "action",
+    "tags": ["purpose", "enthusiasm"]
+  },
+  {
+    "text": "Never promise more than you can perform.",
+    "author": "Publilius Syrus",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "If you don't go after what you want, you'll never have it. If you don't ask, the answer is always no. If you don't step forward, you're always in the same place.",
+    "author": "Nora Roberts",
+    "theme": "action",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "It is through science that we prove, but through intuition that we discover.",
+    "author": "Henri Poincaré",
+    "theme": "learning",
+    "tags": ["discovery"]
+  },
+  {
+    "text": "If someone in your life talked to you the way you talk to yourself, you would have left them long ago.",
+    "author": "Carla Gordon",
+    "theme": "kindness",
+    "tags": ["compassion", "words"]
+  },
+  {
+    "text": "If you lose today, win tomorrow. In this never-ending spirit of challenge is the heart of a victor.",
+    "author": "Daisaku Ikeda",
+    "theme": "perseverance",
+    "tags": ["resilience"]
+  },
+  {
+    "text": "There is a way that nature speaks, that land speaks. Most of the time we are simply not patient enough, quiet enough, to pay attention to the story.",
+    "author": "Linda Hogan",
+    "theme": "nature",
+    "tags": ["stillness", "patience"]
+  },
+  {
+    "text": "I cannot say whether things will get better if we change; what I can say is they must change if they are to get better.",
+    "author": "Georg Christoph Lichtenberg",
+    "theme": "action",
+    "tags": ["change"]
+  },
+  {
+    "text": "The greater part of human pain is unnecessary. It is self-created as long as the unobserved mind runs your life.",
+    "author": "Eckhart Tolle",
+    "theme": "mind",
+    "tags": ["thoughts"]
+  },
+  {
+    "text": "Blessed is the man who expects nothing, for he shall never be disappointed.",
+    "author": "Alexander Pope",
+    "theme": "simplicity",
+    "tags": ["acceptance"]
+  },
+  {
+    "text": "A garden is always a series of losses set against a few triumphs, like life itself.",
+    "author": "May Sarton",
+    "theme": "nature",
+    "tags": ["loss"]
+  },
+  {
+    "text": "If facts are the seeds that later produce knowledge and wisdom, then the emotions and the impressions of the senses are the fertile soil in which the seeds must grow.",
+    "author": "Rachel Carson",
+    "theme": "learning",
+    "tags": ["wonder"]
+  },
+  { "text": "Never mistake motion for action.", "author": "Ernest Hemingway", "theme": "action", "tags": ["deeds"] },
+  {
+    "text": "Good instincts usually tell you what to do long before your head has figured it out.",
+    "author": "Michael Burke",
+    "theme": "mind",
+    "tags": ["self-trust"]
+  },
+  {
+    "text": "Those who dream by day are cognizant of many things which escape those who dream only by night.",
+    "author": "Edgar Allan Poe",
+    "theme": "mind",
+    "tags": ["dreams", "imagination"]
+  },
+  {
+    "text": "We cannot hold a torch to light another's path without brightening our own.",
+    "author": "Ben Sweetland",
+    "theme": "kindness",
+    "tags": ["light", "sharing"]
+  },
+  {
+    "text": "Dreams come true. Without that possibility, nature would not incite us to have them.",
+    "author": "John Updike",
+    "theme": "hope",
+    "tags": ["dreams"]
+  },
+  {
+    "text": "Imagination will often carry us to worlds that never were. But without it we go nowhere.",
+    "author": "Carl Sagan",
+    "theme": "mind",
+    "tags": ["imagination"]
+  },
+  {
+    "text": "I endeavour to be wise when I cannot be merry, easy when I cannot be glad, content with what cannot be mended and patient when there is no redress.",
+    "author": "Elizabeth Montagu",
+    "theme": "character",
+    "tags": ["patience", "acceptance"]
+  },
+  {
+    "text": "The height of your accomplishments will equal the depth of your convictions.",
+    "author": "William Scolavino",
+    "theme": "character",
+    "tags": ["belief"]
+  },
+  {
+    "text": "If I am not for myself, who will be for me? If I am not for others, what am I? And if not now, when?",
+    "author": "Hillel the Elder",
+    "theme": "action",
+    "tags": ["now"]
+  },
+  {
+    "text": "When I dare to be powerful, to use my strength in the service of my vision, then it becomes less and less important whether I am afraid.",
+    "author": "Audre Lorde",
+    "theme": "courage",
+    "tags": ["fear", "vision"]
+  },
+  {
+    "text": "We lost because we told ourselves we lost.",
+    "author": "Leo Tolstoy",
+    "theme": "mind",
+    "tags": ["belief"]
+  },
+  {
+    "text": "Good advice is always certain to be ignored, but that's no reason not to give it.",
+    "author": "Agatha Christie",
+    "theme": "learning",
+    "tags": ["humor", "wisdom"]
+  },
+  {
+    "text": "The winner ain't the one with the fastest car; it's the one who refuses to lose.",
+    "author": "Dale Earnhardt",
+    "theme": "perseverance",
+    "tags": ["will"]
+  },
+  {
+    "text": "No one has a finer command of language than the person who keeps his mouth shut.",
+    "author": "Sam Rayburn",
+    "theme": "simplicity",
+    "tags": ["words", "humor"]
+  },
+  {
+    "text": "If you have knowledge, let others light their candles in it.",
+    "author": "Margaret Fuller",
+    "theme": "kindness",
+    "tags": ["sharing", "knowledge"]
+  },
+  {
+    "text": "To make no mistakes is not in the power of man; but from their errors and mistakes the wise and good learn wisdom for the future.",
+    "author": "Plutarch",
+    "theme": "learning",
+    "tags": ["mistakes"]
+  },
+  {
+    "text": "I think you can have moderate success by copying something else, but if you really want to knock it out of the park, you have to do something different and take chances.",
+    "author": "Lee Ann Womack",
+    "theme": "courage",
+    "tags": ["boldness"]
+  },
+  {
+    "text": "Nothing could be worse than the fear that one had given up too soon, and left one unexpended effort that might have saved the world.",
+    "author": "Jane Addams",
+    "theme": "perseverance",
+    "tags": ["striving"]
+  },
+  {
+    "text": "Begin, be bold, and venture to be wise.",
+    "author": "Horace",
+    "theme": "courage",
+    "tags": ["beginning", "boldness"]
+  },
+  {
+    "text": "A wise man will make more opportunities than he finds.",
+    "author": "Francis Bacon",
+    "theme": "action",
+    "tags": ["chance", "wisdom"]
+  },
+  {
+    "text": "Slow down and enjoy life. It's not only the scenery you miss by going too fast — you also miss the sense of where you are going and why.",
+    "author": "Eddie Cantor",
+    "theme": "time",
+    "tags": ["haste", "direction"]
+  },
+  {
+    "text": "The true way to render ourselves happy is to love our work and find in it our pleasure.",
+    "author": "Françoise de Motteville",
+    "theme": "action",
+    "tags": ["work", "joy"]
+  },
+  {
+    "text": "The greatest mistake you can make in life is to be continually fearing you will make one.",
+    "author": "Elbert Hubbard",
+    "theme": "courage",
+    "tags": ["fear", "mistakes"]
+  },
+  {
+    "text": "I have never been hurt by anything I didn't say.",
+    "author": "Calvin Coolidge",
+    "theme": "simplicity",
+    "tags": ["words"]
+  },
+  {
+    "text": "Be not angry that you cannot make others as you wish them to be, since you cannot make yourself as you wish to be.",
+    "author": "Thomas à Kempis",
+    "theme": "character",
+    "tags": ["acceptance", "humility"]
+  },
+  {
+    "text": "Adversity causes some men to break, others to break records.",
+    "author": "William Arthur Ward",
+    "theme": "perseverance",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "Example has more followers than reason.",
+    "author": "Christian Nestell Bovee",
+    "theme": "character",
+    "tags": ["example"]
+  },
+  {
+    "text": "If you have made mistakes, there is always another chance for you. You may have a fresh start any moment you choose.",
+    "author": "Mary Pickford",
+    "theme": "hope",
+    "tags": ["beginning", "mistakes"]
+  },
+  {
+    "text": "The only Zen you find on the tops of mountains is the Zen you bring up there.",
+    "author": "Robert M. Pirsig",
+    "theme": "mind",
+    "tags": ["mountains", "perception"]
+  },
+  {
+    "text": "Gratitude is riches. Complaint is poverty.",
+    "author": "Doris Day",
+    "theme": "simplicity",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "Strong people make as many mistakes as weak people. Difference is that strong people admit their mistakes, laugh at them, learn from them. That is how they become strong.",
+    "author": "Richard Needham",
+    "theme": "learning",
+    "tags": ["mistakes", "strength"]
+  },
+  {
+    "text": "You can stand tall without standing on someone. You can be a victor without having victims.",
+    "author": "Harriet Woods",
+    "theme": "character",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Either I will find a way, or I will make one.",
+    "author": "Philip Sidney",
+    "theme": "perseverance",
+    "tags": ["will"]
+  },
+  {
+    "text": "If we had no winter, the spring would not be so pleasant; if we did not sometimes taste of adversity, prosperity would not be so welcome.",
+    "author": "Anne Bradstreet",
+    "theme": "hope",
+    "tags": ["adversity"]
+  },
+  {
+    "text": "Joy is what happens to us when we allow ourselves to recognize how good things really are.",
+    "author": "Marianne Williamson",
+    "theme": "hope",
+    "tags": ["joy", "gratitude"]
+  },
+  {
+    "text": "There is never enough time to do everything, but there is always enough time to do the most important thing.",
+    "author": "Brian Tracy",
+    "theme": "time",
+    "tags": ["focus"]
+  },
+  {
+    "text": "You really can change the world if you care enough.",
+    "author": "Marian Wright Edelman",
+    "theme": "action",
+    "tags": ["change"]
+  },
+  {
+    "text": "There surely is in human nature an inherent propensity to extract all the good out of all the evil.",
+    "author": "Benjamin Haydon",
+    "theme": "hope",
+    "tags": ["goodness", "adversity"]
+  },
+  {
+    "text": "What we see depends mainly on what we look for.",
+    "author": "John Lubbock",
+    "theme": "mind",
+    "tags": ["perception"]
+  },
+  {
+    "text": "The truest greatness lies in being kind, the truest wisdom in a happy mind.",
+    "author": "Ella Wheeler Wilcox",
+    "theme": "kindness",
+    "tags": ["greatness", "wisdom"]
+  },
+  {
+    "text": "We need to find the courage to say no to the things and people that are not serving us if we want to rediscover ourselves and live our lives with authenticity.",
+    "author": "Barbara De Angelis",
+    "theme": "courage",
+    "tags": ["authenticity"]
+  },
+  {
+    "text": "Great is the art of beginning, but greater is the art of ending.",
+    "author": "Robert A. Heinlein",
+    "theme": "time",
+    "tags": ["beginning"]
+  },
+  {
+    "text": "To go against the dominant thinking of your friends, of most of the people you see every day, is perhaps the most difficult act of heroism you can perform.",
+    "author": "Theodore H. White",
+    "theme": "courage",
+    "tags": ["integrity"]
+  },
+  {
+    "text": "Gratitude makes sense of our past, brings peace for today, and creates a vision for tomorrow.",
+    "author": "Melody Beattie",
+    "theme": "hope",
+    "tags": ["gratitude"]
+  },
+  {
+    "text": "We are all inclined to judge ourselves by our ideals; others, by their acts.",
+    "author": "Harold Nicolson",
+    "theme": "mind",
+    "tags": ["judgement"]
+  },
+  {
+    "text": "Nothing is a waste of time if you use the experience wisely.",
+    "author": "Auguste Rodin",
+    "theme": "learning",
+    "tags": ["experience"]
+  }
+]
