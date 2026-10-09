@@ -1,24 +1,19 @@
-name: Release to the Chrome Web Store
+name: Release a new version
 
-# Bump with `npm version patch|minor|major` (package.json and src/manifest.json together), then
-# `git push --follow-tags`: the v<version> tag runs this workflow. It can also be started by hand from the Actions tab.
+# Run workflow in the Actions tab, on master: the checks, then `npm version <bump>` (package.json, src/manifest.json
+# and CHANGELOG.md, committed as "<version>" and tagged v<version>), pushed to master, and a GitHub release with the
+# zip and that version's notes. Nothing reaches the store: "Publish to the Chrome Web Store" sends a release there.
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
     inputs:
-      publish:
-        description: What to do after the upload
+      bump:
+        description: Which part of the version to raise
         type: choice
-        default: submit
+        default: patch
         options:
-          - submit # Submit for review; published as soon as it is approved.
-          - staged # Submit for review; once approved, wait for "Publish" in the developer dashboard.
-          - upload-only # Upload a draft; submit it from the dashboard.
-      dry_run:
-        description: Build, test and package only; nothing is sent to the store
-        type: boolean
-        default: false
+          - patch # 3.0.0 → 3.0.1: fixes
+          - minor # 3.0.0 → 3.1.0: new features
+          - major # 3.0.0 → 4.0.0: breaking changes
 
 concurrency:
   group: release
@@ -29,91 +24,59 @@ permissions:
 
 jobs:
   check:
+    if: ${{ github.ref == 'refs/heads/master' }}
     uses: ./.github/workflows/ci.yml
 
-  publish:
+  release:
     needs: check
-    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Holds the store credentials; add required reviewers to it to approve each release by hand.
-    environment:
-      name: chrome-web-store
-      url: https://chromewebstore.google.com/detail/${{ vars.CWS_ITEM_ID }}
     permissions:
-      contents: write # the GitHub release
-      id-token: write # Workload Identity Federation
+      contents: write # the version commit, its tag and the GitHub release
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0 # the release notes come from the history
+          fetch-depth: 0 # the changelog is built from the whole history
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - uses: actions/download-artifact@v7
-        with:
-          name: extension
-          path: release
-
-      # The store's API takes no release notes: a plain-text "What's new" of the last 10 releases (not the whole
-      # history) goes in the run summary, ready to paste into the listing's description in the developer dashboard.
-      - name: Release notes
-        run: |
-          version=$(node -p "require('./package.json').version")
-          node scripts/changelog.ts --notes "$version" > release/notes.md
-          {
-            echo "## Noteme $version"
-            echo
-            cat release/notes.md
-            echo
-            echo "### For the Chrome Web Store description (last 10 releases)"
-            echo
-            echo '```text'
-            node scripts/changelog.ts --store "$version"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      # A service account the store's Account page lists. Either keyless through Workload Identity Federation
-      # (vars.GCP_WORKLOAD_IDENTITY_PROVIDER) or with a JSON key (secrets.CWS_SERVICE_ACCOUNT_KEY).
-      - id: auth-keyless
-        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.CWS_SERVICE_ACCOUNT }}
-          token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
-          create_credentials_file: false
-          export_environment_variables: false
-      - id: auth-key
-        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER == '' }}
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
-          token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
-          create_credentials_file: false
-          export_environment_variables: false
-
-      - name: Upload and submit
+          cache: npm
+      - run: npm ci
         env:
-          CWS_ACCESS_TOKEN: ${{ steps.auth-keyless.outputs.access_token || steps.auth-key.outputs.access_token }}
-          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
-          CWS_ITEM_ID: ${{ vars.CWS_ITEM_ID }}
-          PUBLISH: ${{ inputs.publish || 'submit' }}
+          HUSKY: '0' # no pre-commit hook on the version commit
+
+      # The version script syncs src/manifest.json and files the commits since the last release in CHANGELOG.md.
+      - name: Bump the version
+        id: bump
+        env:
+          BUMP: ${{ inputs.bump }}
         run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          npm version "$BUMP" --message '%s'
           version=$(node -p "require('./package.json').version")
-          node scripts/chrome-web-store.ts upload "release/noteme-$version.zip" --expect-version "$version"
-          case "$PUBLISH" in
-            submit) node scripts/chrome-web-store.ts publish ;;
-            staged) node scripts/chrome-web-store.ts publish --staged ;;
-            upload-only) echo "Uploaded as a draft: submit it from the developer dashboard." ;;
-          esac
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Package
+        run: npm run build && npm run package
+
+      - name: Release notes
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          node scripts/changelog.ts --notes "$VERSION" > dist/notes.md
+          { echo "## Noteme $VERSION"; echo; cat dist/notes.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      # Atomic: the commit and the tag land together, or neither does when master moved since the run started.
+      - name: Push
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: git push --atomic origin HEAD:master "v$VERSION"
 
       - name: GitHub release
-        if: ${{ github.ref_type == 'tag' }}
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          gh release create "$GITHUB_REF_NAME" release/*.zip --title "Noteme ${GITHUB_REF_NAME#v}" \
-            --notes-file release/notes.md --verify-tag
+          gh release create "v$VERSION" "dist/noteme-$VERSION.zip" --title "Noteme $VERSION" \
+            --notes-file dist/notes.md --verify-tag --latest

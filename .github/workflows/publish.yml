@@ -1,0 +1,110 @@
+name: Publish to the Chrome Web Store
+
+# Run workflow in the Actions tab: sends a GitHub release's zip, as "Release a new version" built and tested it, to
+# the store. The latest release unless a tag is given.
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release tag, e.g. v3.0.1 (empty for the latest release)
+        type: string
+        default: ''
+      publish:
+        description: What to do after the upload
+        type: choice
+        default: submit
+        options:
+          - submit # Submit for review; published as soon as it is approved.
+          - staged # Submit for review; once approved, wait for "Publish" in the developer dashboard.
+          - upload-only # Upload a draft; submit it from the dashboard.
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Holds the store credentials; add required reviewers to it to approve each release by hand.
+    environment:
+      name: chrome-web-store
+      url: https://chromewebstore.google.com/detail/${{ vars.CWS_ITEM_ID }}
+    permissions:
+      contents: read # the release's zip
+      id-token: write # Workload Identity Federation
+    steps:
+      - name: Find the release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          tag=${RELEASE:-$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)}
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern 'noteme-*.zip' --dir release
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          fetch-depth: 0 # the store's "What's new" comes from the history
+          path: source
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      # The store's API takes no release notes: a plain-text "What's new" of the last 10 releases (not the whole
+      # history) goes in the run summary, ready to paste into the listing's description in the developer dashboard.
+      - name: Release notes
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          {
+            echo "## Noteme $VERSION"
+            echo
+            echo "### For the Chrome Web Store description (last 10 releases)"
+            echo
+            echo '```text'
+            node source/scripts/changelog.ts --store "$VERSION"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # A service account the store's Account page lists. Either keyless through Workload Identity Federation
+      # (vars.GCP_WORKLOAD_IDENTITY_PROVIDER) or with a JSON key (secrets.CWS_SERVICE_ACCOUNT_KEY).
+      - id: auth-keyless
+        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.CWS_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false
+          export_environment_variables: false
+      - id: auth-key
+        if: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER == '' }}
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false
+          export_environment_variables: false
+
+      - name: Upload and submit
+        env:
+          CWS_ACCESS_TOKEN: ${{ steps.auth-keyless.outputs.access_token || steps.auth-key.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_ITEM_ID: ${{ vars.CWS_ITEM_ID }}
+          PUBLISH: ${{ inputs.publish }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          node source/scripts/chrome-web-store.ts upload "release/noteme-$VERSION.zip" --expect-version "$VERSION"
+          case "$PUBLISH" in
+            submit) node source/scripts/chrome-web-store.ts publish ;;
+            staged) node source/scripts/chrome-web-store.ts publish --staged ;;
+            upload-only) echo "Uploaded as a draft: submit it from the developer dashboard." ;;
+          esac

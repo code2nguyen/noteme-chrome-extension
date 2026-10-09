@@ -60,31 +60,22 @@ npm run c2n:unlink   # back to the published packages
 CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the changelog check, the production
 build and both Playwright suites (Chromium only) on every pull request and push to `master`, and keeps the packaged zip as the `extension` artifact.
 
-To release, bump the version and push the tag:
+Releasing takes two runs from the Actions tab (**Run workflow**), so a version can wait on GitHub before it goes to
+the store:
 
-```sh
-npm version patch        # or minor / major: updates package.json and src/manifest.json, commits, tags v<version>
-git push --follow-tags
-```
+1. **Release a new version** (`.github/workflows/release.yml`), on `master`, with a choice of patch, minor or major.
+   It runs the same checks, then `npm version <bump>`: package.json and `src/manifest.json` get the new version and
+   `CHANGELOG.md` the commits since the last release, committed as `<version>` and tagged `v<version>`. It pushes both
+   to `master`, then creates a GitHub release with `noteme-<version>.zip` and that version's notes. Nothing to edit by
+   hand, the changelog included; `git pull` afterwards.
+2. **Publish to the Chrome Web Store** (`.github/workflows/publish.yml`) sends a release's zip, the one built and
+   tested in step 1, to the store: the latest release, or the tag you type (`v3.0.1`). Then submit for review, staged
+   (approved, then published from the dashboard) or upload only. Its summary has the store's "What's new" text.
 
-The tag runs `.github/workflows/release.yml`: the same checks, then `npm run package` (`dist/noteme-<version>.zip`,
-refused if package.json, the manifest and the tag disagree), an upload through the Chrome Web Store API v2, a
-submission for review, and a GitHub release with the zip attached. **Run workflow** in the Actions tab starts it by
-hand, with a choice of submit, staged (approved, then published from the dashboard) or upload only, and a dry run. A
-run started by hand sends package.json's version to the store but creates no GitHub release (that step needs a tag
-ref). Release through the tag to get both; pushing the tag after a run by hand would upload the same version again, so
-create that GitHub release by hand instead, with the zip attached as the tag run does:
-
-```sh
-npm run build && npm run package                   # dist/noteme-<version>.zip
-node scripts/changelog.ts --notes <version> > notes.md   # needs the full git history (not a shallow clone)
-gh release create v<version> dist/noteme-<version>.zip --title "Noteme <version>" --notes-file notes.md
-```
+The store refuses a version it already has, so each upload needs a new version from step 1.
 
 `npm run package` zips with the system's `zip` command, which Linux, macOS and the workflow's Ubuntu runners have; on
 Windows, run it from WSL or install a `zip` on the PATH.
-
-The first 3.x release keeps the version package.json already has: `npm version 3.0.0 --allow-same-version`.
 
 ### Changelog
 
@@ -96,7 +87,7 @@ the commit body words the entry differently, and `Changelog: skip` leaves the co
 
 - `npm version` files the commits since the last release under the new version and commits `CHANGELOG.md` with it;
   CI fails when the file is stale.
-- The release workflow puts that version's notes in the GitHub release. For the store listing it writes, in the run's
+- **Release a new version** puts that version's notes in the GitHub release. **Publish to the Chrome Web Store** writes, in its
   summary, a plain-text "What's new" of that release and the ones before it, the last 10 releases at most rather than
   the whole history, ready to paste (the store's API takes no release notes).
 - Preview a release's notes, by version: `npm run changelog -- --notes 3.1.0` (markdown, as in the GitHub release)
@@ -105,7 +96,7 @@ the commit body words the entry differently, and `Changelog: skip` leaves the co
 
 ### One-time setup
 
-The workflow signs in as a Google Cloud service account that the store lets publish.
+The publish workflow signs in as a Google Cloud service account that the store lets publish.
 
 1. In a Google Cloud project, enable the **Chrome Web Store API** and create a service account (no roles needed).
 2. In the [developer dashboard](https://chrome.google.com/webstore/devconsole), **Account** → service accounts:
