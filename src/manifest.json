@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Noteme",
   "description": "Replace new tab page with a personal note application",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "permissions": ["storage", "unlimitedStorage"],
   "optional_permissions": ["topSites", "favicon"],
   "icons": {
