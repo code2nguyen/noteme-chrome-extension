@@ -92,7 +92,7 @@
   @if (checkedNotes().length > 0) {
     <div class="archive__bulk" role="toolbar" aria-label="Selected notes">
       <span class="archive__bulk-count">{{ checkedNotes().length }} selected</span>
-      <c2-button class="archive__restore" (click)="restoreNotes(checkedNotes())">
+      <c2-button class="archive__restore ntm-action" (click)="restoreNotes(checkedNotes())">
         <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
         Restore
       </c2-button>
@@ -155,7 +155,7 @@
       </div>
     }
     <div class="archive__actions">
-      <c2-button class="archive__restore" (click)="restoreNotes([note])">
+      <c2-button class="archive__restore ntm-action" (click)="restoreNotes([note])">
         <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
         Restore to the board
       </c2-button>

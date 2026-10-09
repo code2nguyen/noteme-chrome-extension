@@ -62,7 +62,7 @@
   }
 
   <c2-menu class="navbar__new" placement="bottom-end" aria-label="New" (menu-select)="onNewMenu($event)">
-    <c2-button slot="trigger" class="navbar__new-button">
+    <c2-button slot="trigger" class="navbar__new-button ntm-action">
       <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
       New
     </c2-button>
@@ -104,7 +104,7 @@
         <c2-symbol-create-new slot="media"></c2-symbol-create-new>
         <span slot="title">Nothing here yet</span>
         <span slot="description">Press N for a note, P for a page, F for a flow or T for a to-do list.</span>
-        <c2-button slot="actions" class="board__empty-action" (click)="create(ExtensionId.TextNote)">
+        <c2-button slot="actions" class="board__empty-action ntm-action" (click)="create(ExtensionId.TextNote)">
           <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
           Write a note
         </c2-button>
