@@ -31,9 +31,10 @@ describe('splitBoard', () => {
     expect(older.map((item) => item.id)).toEqual(['b', 'a']);
   });
 
-  it('shows pinned notes first, whatever their age, and they do not count against the recent ones', () => {
-    const withPin = items.map((item) => (item.id === 'a' ? { ...item, starred: true } : item));
-    const { shown, older } = splitBoard(withPin, data, new Set(), 3);
+  it('shows pinned notes in their place, whatever their age, and they do not count against the recent ones', () => {
+    const withPin = items.map((item) => (item.id === 'd' || item.id === 'a' ? { ...item, starred: true } : item));
+    const { shown, older } = splitBoard(withPin, data, new Set(), 2);
+    // a and d keep their places among the two most recent of the others (c, e); b goes to the sheet.
     expect(shown.map((item) => item.id)).toEqual(['a', 'c', 'd', 'e']);
     expect(older.map((item) => item.id)).toEqual(['b']);
   });
@@ -79,12 +80,12 @@ describe('summarize and groupByMonth', () => {
 });
 
 describe('rearrange', () => {
-  it('reuses the order values the shown cards held, keeping pinned ones first', () => {
+  it('reuses the order values the shown cards held, a pinned card where it was put', () => {
     // Shown cards held orders 2, 5 and 9 (the hidden notes keep the others); the user put c first.
     const arranged = [note('c', 9), note('p', 5, true), note('b', 2)];
     expect(rearrange(arranged).map(({ item, order }) => [item.id, order])).toEqual([
-      ['p', 2],
-      ['c', 5],
+      ['c', 2],
+      ['p', 5],
       ['b', 9],
     ]);
   });

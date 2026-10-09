@@ -7,7 +7,11 @@
   border-radius: var(--c2-theme--radius-lg, 8px);
 }
 
+// Grids, so the list stretches to the tile's height: the list has no height variable, but its paper (its shadow
+// section, the only child) is a grid item of the host and fills it, as the host fills the body. A longer list still
+// grows past the tile and scrolls in the body.
 .todo__body {
+  display: grid;
   flex: 1;
   min-height: 0;
   overflow: hidden auto;
@@ -15,6 +19,8 @@
 }
 
 .todo__list {
+  display: grid;
+
   // A card among cards: the tile clips a shadow, and the board's cards are drawn tighter than a page-sized list.
   --c2-todo-list__container--box-shadow: none;
   --c2-todo-list__container--border: 1px solid var(--ntm-line);
@@ -91,9 +97,4 @@
 
 .todo__move::part(button) {
   cursor: grab;
-}
-
-.todo__unpin {
-  --c2-icon-button__icon--color: var(--ntm-accent);
-  --c2-icon-button__icon__hover--color: var(--ntm-accent);
 }

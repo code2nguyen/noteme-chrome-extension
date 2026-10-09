@@ -147,13 +147,17 @@
           [colsSm]="item.gridPosition.screenColumns.Small"
           [colsXs]="item.gridPosition.screenColumns.XSmall"
           [attr.move-handle]="'move-' + item.id"
-          [pinned]="!!item.starred"
         >
           @if (item.starred) {
-            <!-- A push-pin on the card's corner: it stays on the board, first. -->
-            <span class="board__pin" role="img" aria-label="Pinned">
-              <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
-            </span>
+            <!-- A push-pin on the card's corner: it stays on the board, in its place. Pulling the pin out unpins the card. -->
+            <c2-icon-button
+              class="board__pin"
+              aria-label="Unpin from the board"
+              tooltip="Unpin from the board"
+              (click)="unpin(item)"
+            >
+              <span class="board__pin-head"></span>
+            </c2-icon-button>
           }
           @if (item.extensionId === ExtensionId.Page || item.extensionId === ExtensionId.Flow) {
             @if (item.extensionId === ExtensionId.Page) {
@@ -162,17 +166,6 @@
               <ntm-flow-card [item]="item" />
             }
             <!-- The card is one link, so its buttons sit beside it, in the tile's top-right corner. -->
-            @if (item.starred) {
-              <c2-icon-button
-                slot="actions"
-                class="board__tile-action board__tile-unpin"
-                aria-label="Unpin from the board"
-                tooltip="Unpin from the board"
-                (click)="unpin(item)"
-              >
-                <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
-              </c2-icon-button>
-            }
             <c2-icon-button
               slot="actions"
               class="board__tile-action board__tile-move"

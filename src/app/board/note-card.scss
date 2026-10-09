@@ -168,9 +168,3 @@
 .note__move::part(button) {
   cursor: grab;
 }
-
-// The unpin button of a pinned note: the pin in the accent colour, pressed in.
-.note__unpin {
-  --c2-icon-button__icon--color: var(--ntm-accent);
-  --c2-icon-button__icon__hover--color: var(--ntm-accent);
-}

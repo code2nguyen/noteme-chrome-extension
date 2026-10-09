@@ -48,6 +48,8 @@
   --ntm-shadow: 0 2px 10px rgb(35 33 30 / 12%);
   --ntm-scrollbar: rgb(35 33 30 / 20%);
   --ntm-scrollbar-hover: rgb(35 33 30 / 40%);
+  // A pinned card's pin head: the card's own colour behind it, deeper (board.scss).
+  --ntm-pin-filter: saturate(3) brightness(0.72);
 
   // Home: text and frosted glass over the photo.
   --ntm-home-ink: #3a3631;
@@ -93,6 +95,8 @@
   --ntm-shadow: 0 2px 10px rgb(0 0 0 / 60%);
   --ntm-scrollbar: rgb(245 245 245 / 20%);
   --ntm-scrollbar-hover: rgb(245 245 245 / 40%);
+  // On dark paper a deeper shade would vanish: the pin is a lighter, brighter one.
+  --ntm-pin-filter: saturate(2) brightness(1.9);
 
   --ntm-home-ink: #e4e0d8;
   --ntm-home-glass: rgb(20 19 18 / 45%);

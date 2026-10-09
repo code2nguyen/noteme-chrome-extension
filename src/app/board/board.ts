@@ -493,20 +493,20 @@ export class Board {
   }
 
   /**
-   * Pin a note: it stays on the board, first, until unpinned. From the Older notes sheet it comes back to the board,
-   * lit up, with a message that can undo it.
+   * Pin a note: it stays on the board until unpinned. On the board it stays where it is, so no other card moves. From
+   * the Older notes sheet it comes back to the board first, lit up, with a message that can undo it.
    */
   pin(item: ArtBoardItem, fromOlder = false): void {
+    if (!fromOlder) {
+      this.dataService.updateArtBoardItem({ ...item, starred: true });
+      return;
+    }
     const previous = item.gridPosition;
-    // First of the pinned notes.
     this.dataService.updateArtBoardItem({
       ...item,
       starred: true,
       gridPosition: { ...item.gridPosition, order: this.minOrder() - 1 },
     });
-    if (!fromOlder) {
-      return;
-    }
     this.olderOpen.set(false);
     this.olderOpenId.set(null);
     this.olderRendered.set(new Set());
