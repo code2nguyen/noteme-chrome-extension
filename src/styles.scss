@@ -53,8 +53,17 @@
   --ntm-home-ink: #3a3631;
   --ntm-home-glass: rgb(255 255 255 / 55%);
   --ntm-home-glass-strong: rgb(255 255 255 / 75%);
+  --ntm-home-favicon-plate: rgb(255 255 255 / 92%);
   --ntm-home-line: rgb(31 29 26 / 25%);
-  --ntm-home-scrim: linear-gradient(rgb(255 255 255 / 35%), rgb(255 255 255 / 10%) 40%, rgb(255 255 255 / 45%));
+  // The scrim only tints the edges, where the bar and the quote sit; the middle shows the photo as taken, and the
+  // text there reads through a soft halo instead.
+  --ntm-home-scrim: linear-gradient(
+    rgb(255 255 255 / 20%),
+    rgb(255 255 255 / 0%) 25%,
+    rgb(255 255 255 / 0%) 70%,
+    rgb(255 255 255 / 30%)
+  );
+  --ntm-home-halo: 0 0 12px rgb(255 255 255 / 60%), 0 1px 2px rgb(255 255 255 / 50%);
 
   color-scheme: light;
 }
@@ -88,8 +97,11 @@
   --ntm-home-ink: #e4e0d8;
   --ntm-home-glass: rgb(20 19 18 / 45%);
   --ntm-home-glass-strong: rgb(20 19 18 / 65%);
+  // Light, but softer than white against the dark theme.
+  --ntm-home-favicon-plate: rgb(236 233 226 / 92%);
   --ntm-home-line: rgb(247 245 240 / 30%);
-  --ntm-home-scrim: linear-gradient(rgb(0 0 0 / 40%), rgb(0 0 0 / 15%) 40%, rgb(0 0 0 / 55%));
+  --ntm-home-scrim: linear-gradient(rgb(0 0 0 / 25%), rgb(0 0 0 / 0%) 25%, rgb(0 0 0 / 0%) 70%, rgb(0 0 0 / 35%));
+  --ntm-home-halo: 0 0 12px rgb(0 0 0 / 45%), 0 1px 2px rgb(0 0 0 / 40%);
 
   color-scheme: dark;
 }
