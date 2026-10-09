@@ -13,7 +13,8 @@ import { ArtBoardItem } from '../store/models';
 
 /**
  * A flow on the board: its title over the flow itself, drawn small and still (fitted to the card, its boxes in their
- * shapes and colours). The flow is inert, so the whole card is one link that opens it.
+ * shapes and colours). It is never drawn smaller than 50%, where its labels can still be read: a flow too big for the
+ * card at that size shows its first steps. The flow is inert, so the whole card is one link that opens it.
  */
 @Component({
   selector: 'ntm-flow-card',
@@ -36,6 +37,7 @@ import { ArtBoardItem } from '../store/models';
           locked
           no-card
           no-context-menu
+          fit-min-zoom="0.5"
           [nodes]="nodes()"
           [edges]="edges()"
         ></c2-flow>

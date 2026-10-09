@@ -147,6 +147,8 @@
           [colsSm]="item.gridPosition.screenColumns.Small"
           [colsXs]="item.gridPosition.screenColumns.XSmall"
           [attr.move-handle]="'move-' + item.id"
+          [minRows]="minRowsOf(item)"
+          [minCols]="minCols"
         >
           @if (item.starred) {
             <!-- A push-pin on the card's corner: it stays on the board, in its place. Pulling the pin out unpins the card. -->

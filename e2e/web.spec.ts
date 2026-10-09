@@ -1124,20 +1124,25 @@ test.describe('flow', () => {
     await expect(page.locator('.flow__hint')).toHaveCount(0);
     await addBoxAt(page, 0.6, 'Book the night bus');
 
-    // Connect the two by dragging from the first box's handle onto the second.
+    // Connect the two by dragging from the first box's right handle onto the second's left side: a box has a handle on
+    // each side, and the arrow is kept between the sides it was drawn from and to.
     const first = box(page, 'Weather ok?');
     await first.hover();
-    const handle = first.locator('.connector');
+    const handle = first.locator('.connector--right');
     await expect(handle).toHaveCSS('opacity', '1');
     const from = (await handle.boundingBox())!;
     const to = (await box(page, 'Book the night bus').boundingBox())!;
     await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
     await page.mouse.down();
-    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+    await page.mouse.move(to.x + 4, to.y + to.height / 2, { steps: 8 });
     await page.mouse.up();
     await expect
       .poll(async () => (await storedFlow(page))?.data && JSON.parse((await storedFlow(page)).data).edges.length)
       .toBe(1);
+    expect(JSON.parse((await storedFlow(page)).data).edges[0]).toMatchObject({
+      sourceSide: 'right',
+      targetSide: 'left',
+    });
     // The arrow ends in an arrowhead; a box is its label only, without the pipeline status marker.
     await expect(page.locator('c2-flow .arrow')).toHaveCount(1);
     await expect(page.locator('c2-flow .arrow')).toBeVisible();

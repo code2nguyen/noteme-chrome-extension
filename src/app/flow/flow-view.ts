@@ -54,6 +54,7 @@ import { DataType } from '../store/models/data-type';
 import { boxMenu, readBoxMenuValue } from './box-menu';
 import {
   addBox,
+  ArrowSides,
   connect,
   deleteBox,
   disconnect,
@@ -194,9 +195,10 @@ export class FlowView {
   }
 
   onNodeAdd(event: Event): void {
-    const { position, source } = (event as CustomEvent<FlowNodeAddDetail>).detail;
+    // An arrow dropped on empty canvas makes a box, joined by the sides it was drawn between.
+    const { position, source, ...sides } = (event as CustomEvent<FlowNodeAddDetail & ArrowSides>).detail;
     const id = uuid();
-    this.change(addBox(this.doc(), id, position, source));
+    this.change(addBox(this.doc(), id, position, source, sides));
     // Name it straight away, as in any diagram tool: once Angular has handed the new box to c2-flow and it has drawn
     // it.
     afterNextRender(
@@ -221,8 +223,9 @@ export class FlowView {
   }
 
   onEdgeAdd(event: Event): void {
-    const { source, target } = (event as CustomEvent<FlowEdgeEventDetail>).detail;
-    this.change(connect(this.doc(), source, target));
+    // The sides an arrow was drawn between come with it (c2-flow's sourceSide and targetSide).
+    const { source, target, ...sides } = (event as CustomEvent<FlowEdgeEventDetail & ArrowSides>).detail;
+    this.change(connect(this.doc(), source, target, sides));
   }
 
   onEdgeDelete(event: Event): void {

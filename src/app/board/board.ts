@@ -40,7 +40,7 @@ import { SettingsService } from '../settings/settings.service';
 import { ArchiveView } from './archive-view';
 import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
-import { cardRows, storedRows } from './card-rows';
+import { cardRows, MIN_CARD_COLUMNS, minCardRows, storedRows } from './card-rows';
 import { PageCard } from './page-card';
 import { TodoCard } from './todo-card';
 import {
@@ -280,6 +280,10 @@ export class Board {
       },
     })),
   }));
+
+  /** The smallest a resize can leave a card (card-rows.ts). */
+  readonly minRowsOf = minCardRows;
+  readonly minCols = MIN_CARD_COLUMNS;
 
   /** The rows a card spans (card-rows.ts): a page card left at its default height follows its excerpt. */
   rowsOf(item: ArtBoardItem): number {

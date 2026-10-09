@@ -21,11 +21,36 @@ export interface FlowBox extends BoxStyle {
   position?: { x: number; y: number };
 }
 
+/** A side of a box, where an arrow leaves or arrives (c2-flow's FlowSide). */
+export type ArrowSide = 'top' | 'right' | 'bottom' | 'left';
+
+const ARROW_SIDES: readonly string[] = ['top', 'right', 'bottom', 'left'];
+
+function isArrowSide(value: unknown): value is ArrowSide {
+  return typeof value === 'string' && ARROW_SIDES.includes(value);
+}
+
 export interface FlowArrow {
   source: string;
   target: string;
   /** Text halfway along the arrow, such as the "yes" and "no" of a decision. */
   label?: string;
+  /** The sides of the boxes it was drawn from and to; absent, the flow's direction decides (out right, in left). */
+  sourceSide?: ArrowSide;
+  targetSide?: ArrowSide;
+}
+
+/** The sides an arrow was drawn between, without any it does not have. */
+export interface ArrowSides {
+  sourceSide?: ArrowSide;
+  targetSide?: ArrowSide;
+}
+
+function readSides(edge: Partial<ArrowSides>): ArrowSides {
+  return {
+    ...(isArrowSide(edge.sourceSide) ? { sourceSide: edge.sourceSide } : {}),
+    ...(isArrowSide(edge.targetSide) ? { targetSide: edge.targetSide } : {}),
+  };
 }
 
 export interface FlowDoc {
@@ -61,7 +86,7 @@ export function parseFlow(data: string | null | undefined): FlowDoc {
       return [];
     }
     const label = typeof edge.label === 'string' ? edge.label.trim() : '';
-    return [{ source: edge.source, target: edge.target, ...(label ? { label } : {}) }];
+    return [{ source: edge.source, target: edge.target, ...(label ? { label } : {}), ...readSides(edge) }];
   });
   return { nodes, edges };
 }
@@ -80,9 +105,17 @@ export function serializeFlow(doc: FlowDoc): string {
   return JSON.stringify(doc);
 }
 
-export function addBox(doc: FlowDoc, id: string, position: { x: number; y: number }, source?: string): FlowDoc {
+export function addBox(
+  doc: FlowDoc,
+  id: string,
+  position: { x: number; y: number },
+  source?: string,
+  sides: ArrowSides = {},
+): FlowDoc {
   const edges =
-    source && doc.nodes.some((node) => node.id === source) ? [...doc.edges, { source, target: id }] : doc.edges;
+    source && doc.nodes.some((node) => node.id === source)
+      ? [...doc.edges, { source, target: id, ...readSides(sides) }]
+      : doc.edges;
   return { nodes: [...doc.nodes, { id, label: NEW_BOX_LABEL, position }], edges };
 }
 
@@ -102,9 +135,10 @@ export function deleteBox(doc: FlowDoc, id: string): FlowDoc {
   };
 }
 
-export function connect(doc: FlowDoc, source: string, target: string): FlowDoc {
+/** An arrow from `source` to `target`, between the sides it was drawn from and to; once per pair of boxes. */
+export function connect(doc: FlowDoc, source: string, target: string, sides: ArrowSides = {}): FlowDoc {
   const exists = doc.edges.some((edge) => edge.source === source && edge.target === target);
-  return exists || source === target ? doc : { ...doc, edges: [...doc.edges, { source, target }] };
+  return exists || source === target ? doc : { ...doc, edges: [...doc.edges, { source, target, ...readSides(sides) }] };
 }
 
 export function disconnect(doc: FlowDoc, source: string, target: string): FlowDoc {
@@ -167,8 +201,10 @@ export function labelArrow(doc: FlowDoc, source: string, target: string, label: 
   if (!edge || (edge.label ?? '') === text) {
     return doc;
   }
+  const { label: _label, ...rest } = edge;
   const edges = [...doc.edges];
-  edges[index] = { source, target, ...(text ? { label: text } : {}) };
+  // The arrow keeps its sides.
+  edges[index] = { ...rest, ...(text ? { label: text } : {}) };
   return { ...doc, edges };
 }
 
