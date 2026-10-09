@@ -26,11 +26,20 @@
 // its own look. The page itself sits on --ntm-canvas, a step darker than the surface of notes, cards and fields, so
 // they stand out from it in both themes.
 :root {
-  // Dark enough for link text to reach 4.5:1 on the canvas (and white text on it, 5.6:1).
-  --c2-theme--color-primary: #b83b32;
-  --c2-theme--color-primary-hover: #a8362e;
-  --c2-theme--color-primary-active: #96302a;
+  // Two colours. The theme's accent is a deep teal: selected states, focus rings, links, the pins, the flow and the
+  // plan (4.6:1 on the canvas, white text 5.8:1 on it). The brick red is kept for the main actions (New, Restore,
+  // Save), which take it through .ntm-action (4.5:1 on the canvas, white text 5.6:1 on it).
+  --c2-theme--color-primary: #2f6f73;
+  --c2-theme--color-primary-hover: #285f62;
+  --c2-theme--color-primary-active: #224f52;
   --c2-theme--color-on-primary: #ffffff;
+  --c2-theme--color-primary-container: #dcebea;
+  --c2-theme--color-primary-glow: rgb(47 111 115 / 22%);
+  --c2-theme--focus-ring: 2px solid rgb(47 111 115 / 45%);
+  --ntm-action: #b83b32;
+  --ntm-action-hover: #a8362e;
+  --ntm-action-active: #96302a;
+  --ntm-on-action: #ffffff;
   --c2-theme--color-surface: #f6f4ef;
   --c2-theme--color-surface-container-low: #fbfaf7;
   --c2-theme--color-surface-container: #dedad2;
@@ -53,8 +62,17 @@
   --ntm-home-ink: #3a3631;
   --ntm-home-glass: rgb(255 255 255 / 55%);
   --ntm-home-glass-strong: rgb(255 255 255 / 75%);
+  --ntm-home-favicon-plate: rgb(255 255 255 / 92%);
   --ntm-home-line: rgb(31 29 26 / 25%);
-  --ntm-home-scrim: linear-gradient(rgb(255 255 255 / 35%), rgb(255 255 255 / 10%) 40%, rgb(255 255 255 / 45%));
+  // The scrim only tints the edges, where the bar and the quote sit; the middle shows the photo as taken, and the
+  // text there reads through a soft halo instead.
+  --ntm-home-scrim: linear-gradient(
+    rgb(255 255 255 / 20%),
+    rgb(255 255 255 / 0%) 25%,
+    rgb(255 255 255 / 0%) 70%,
+    rgb(255 255 255 / 30%)
+  );
+  --ntm-home-halo: 0 0 12px rgb(255 255 255 / 60%), 0 1px 2px rgb(255 255 255 / 50%);
 
   color-scheme: light;
 }
@@ -62,10 +80,17 @@
 // As specific as the theme's own `@media (prefers-color-scheme: dark) :root:not([data-theme='light']):not(.c2-light)`
 // and after it, so this palette, not the theme's default dark one, applies when the system is dark too.
 :root[data-theme='dark']:not(.c2-light) {
-  --c2-theme--color-primary: #ff8a7a;
-  --c2-theme--color-primary-hover: #ff9e90;
-  --c2-theme--color-primary-active: #f2725f;
-  --c2-theme--color-on-primary: #2a1512;
+  --c2-theme--color-primary: #7cc4c2;
+  --c2-theme--color-primary-hover: #94d0ce;
+  --c2-theme--color-primary-active: #66b3b1;
+  --c2-theme--color-on-primary: #10292a;
+  --c2-theme--color-primary-container: #24403f;
+  --c2-theme--color-primary-glow: rgb(124 196 194 / 28%);
+  --c2-theme--focus-ring: 2px solid rgb(124 196 194 / 55%);
+  --ntm-action: #ff8a7a;
+  --ntm-action-hover: #ff9e90;
+  --ntm-action-active: #f2725f;
+  --ntm-on-action: #2a1512;
   --c2-theme--color-surface: #2f2c29;
   --c2-theme--color-surface-container-low: #363330;
   --c2-theme--color-surface-container: #3e3b37;
@@ -88,14 +113,26 @@
   --ntm-home-ink: #e4e0d8;
   --ntm-home-glass: rgb(20 19 18 / 45%);
   --ntm-home-glass-strong: rgb(20 19 18 / 65%);
+  // Light, but softer than white against the dark theme.
+  --ntm-home-favicon-plate: rgb(236 233 226 / 92%);
   --ntm-home-line: rgb(247 245 240 / 30%);
-  --ntm-home-scrim: linear-gradient(rgb(0 0 0 / 40%), rgb(0 0 0 / 15%) 40%, rgb(0 0 0 / 55%));
+  --ntm-home-scrim: linear-gradient(rgb(0 0 0 / 25%), rgb(0 0 0 / 0%) 25%, rgb(0 0 0 / 0%) 70%, rgb(0 0 0 / 35%));
+  --ntm-home-halo: 0 0 12px rgb(0 0 0 / 45%), 0 1px 2px rgb(0 0 0 / 40%);
 
   color-scheme: dark;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+// A main action (New, Restore, Save): a c2-button filled with the action red rather than the teal accent.
+.ntm-action {
+  --c2-button__container--background-color: var(--ntm-action);
+  --c2-button__container--color: var(--ntm-on-action);
+  --c2-button__container__hover--background-color: var(--ntm-action-hover);
+  --c2-button__container__hover--color: var(--ntm-on-action);
+  --c2-button__container__active--background-color: var(--ntm-action-active);
 }
 
 body {

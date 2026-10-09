@@ -6,6 +6,9 @@ import { ArtBoardItem } from '../store/models';
 export const PAGE_EXCERPT_LENGTH = 220;
 
 const MIN_PAGE_ROWS = 3;
+/** The smallest a card can be resized to: below it a note, a list or a flow can no longer be read. */
+const MIN_CARD_ROWS = 5;
+export const MIN_CARD_COLUMNS = 2;
 const MAX_PAGE_ROWS = 6;
 const CHARS_PER_ROW = 70;
 
@@ -32,4 +35,9 @@ export function storedRows(item: ArtBoardItem, tileRows: number, pageTextLength:
   return item.extensionId === ExtensionId.Page && tileRows === cardRows(item, pageTextLength)
     ? item.gridPosition.rows
     : tileRows;
+}
+
+/** The fewest rows a resize can leave a card: a page keeps the height of its shortest excerpt card. */
+export function minCardRows(item: ArtBoardItem): number {
+  return item.extensionId === ExtensionId.Page ? MIN_PAGE_ROWS : MIN_CARD_ROWS;
 }

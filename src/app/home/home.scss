@@ -167,6 +167,14 @@
   text-align: center;
 }
 
+// Text straight on the photo, with no glass behind it.
+.home__clock,
+.home__site-name,
+.home__quote,
+.home__credit {
+  text-shadow: var(--ntm-home-halo);
+}
+
 .home__time {
   margin: 0;
   font:
@@ -224,6 +232,12 @@
     sans-serif;
 }
 
+// A favicon is drawn for a light browser tab: it sits on a light plate in both themes, or a dark logo (ChatGPT, a
+// black square) disappears into the dark glass, and a white one into the light glass.
+.home__site-icon--image {
+  background: var(--ntm-home-favicon-plate);
+}
+
 .home__site-name {
   max-width: 84px;
   overflow: hidden;
@@ -252,15 +266,15 @@
 
 .home__footer {
   display: flex;
-  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px 32px;
 }
 
+// The quote takes the width it needs: one line when it fits beside the credit, wrapped only when it doesn't.
 .home__quote {
-  flex: 1 1 320px;
-  max-width: 560px;
+  flex: 0 1 auto;
+  min-width: 0;
   margin: 0;
   animation: home-quote-in 0.4s ease;
 
@@ -292,6 +306,8 @@
 }
 
 .home__credit {
+  flex: 0 1 auto;
+  max-width: 40%;
   margin: 0 0 0 auto;
   font-size: 12px;
   opacity: 0.75;
@@ -308,6 +324,15 @@
 
   .home__time {
     font-size: 64px;
+  }
+
+  // The quote over the credit, each a full row.
+  .home__footer {
+    flex-wrap: wrap;
+  }
+
+  .home__credit {
+    max-width: none;
   }
 
   // One row of actions, the search on its own row below.

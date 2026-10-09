@@ -47,7 +47,7 @@ export class NoteCard {
   private readonly injector = inject(Injector);
 
   readonly item = input.required<ArtBoardItem>();
-  /** Pinned: it stays on the board, first, until unpinned. */
+  /** Pinned: it stays on the board, in its place, until unpinned. */
   readonly pinned = input(false);
   /** Focus the editor once it is rendered (a note that was just created). */
   readonly autofocus = input(false);

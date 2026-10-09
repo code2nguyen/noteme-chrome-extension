@@ -248,25 +248,26 @@
   --c2-badge__neutral--color: var(--c2-theme--color-on-surface);
 }
 
-// A pinned card's push-pin, in its top-left corner, over the card. The tile is positioned; the pin is its own child.
+// A pinned card's pin, in its top-left corner: a flat dot in the accent colour, set off from the paper by a thin light
+// ring and a soft shadow. It is a button that unpins the card; the tile is positioned, the pin is its own child.
 .board__pin {
   position: absolute;
-  top: 8px;
-  left: 10px;
+  top: 2px;
+  left: 2px;
   z-index: 4;
-  display: grid;
-  color: var(--ntm-accent);
-  // Pressed in at an angle, as a pin is, with a little shadow to lift it off the paper.
-  rotate: -20deg;
-  filter: drop-shadow(1px 2px 1px rgb(0 0 0 / 40%));
-  pointer-events: none;
-  --c2-phosphor-icon--size: 17px;
+  --c2-icon-button__state-layer--size: 28px;
+  --c2-icon-button__hover--background-color: color-mix(in srgb, var(--ntm-accent) 14%, transparent);
 }
 
-// A pinned card's unpin button, among its actions: the pin in the accent colour, pressed in.
-.board__tile-unpin {
-  --c2-icon-button__icon--color: var(--ntm-accent);
-  --c2-icon-button__icon__hover--color: var(--ntm-accent);
+.board__pin-head {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ntm-accent);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--c2-theme--color-surface) 70%, transparent),
+    0 1px 2px rgb(0 0 0 / 25%);
 }
 
 // The Older notes sheet.

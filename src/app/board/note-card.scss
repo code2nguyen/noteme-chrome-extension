@@ -95,20 +95,21 @@
 }
 
 // Dark papers: the theme's coloured papers are bright enough there that the ink, and the caret, which is drawn in it,
-// fell to 2.5–3.5:1. A deeper paper (22% of its hue) and the plain text colour as ink keep every one above 5:1, and
-// deep highlighters keep highlighted text readable.
+// fell to 2.5–3.5:1. A deeper paper (38% of its hue: at 22% it read as mud) and an ink near white
+// keep every one above 4.7:1, and deep highlighters keep highlighted text readable.
 :host-context([data-theme='dark']) .note__text {
-  --c2-notepad__writing--color: var(--c2-theme--color-on-surface);
-  --c2-notepad__paper-yellow--background: color-mix(in srgb, #f5d547 22%, var(--c2-theme--color-surface));
-  --c2-notepad__paper-green--background: color-mix(in srgb, #bddcb2 22%, var(--c2-theme--color-surface));
-  --c2-notepad__paper-blue--background: color-mix(in srgb, #b8ceee 22%, var(--c2-theme--color-surface));
-  --c2-notepad__paper-pink--background: color-mix(in srgb, #f4b8c3 22%, var(--c2-theme--color-surface));
-  --c2-notepad__pad-legal--background: color-mix(in srgb, #f5d547 22%, var(--c2-theme--color-surface));
-  --c2-notepad__pad-sticky--background: color-mix(in srgb, #ffd23f 22%, var(--c2-theme--color-surface));
-  --c2-notepad__paper-yellow--color: var(--c2-theme--color-on-surface);
-  --c2-notepad__paper-green--color: var(--c2-theme--color-on-surface);
-  --c2-notepad__paper-blue--color: var(--c2-theme--color-on-surface);
-  --c2-notepad__paper-pink--color: var(--c2-theme--color-on-surface);
+  --note-dark-ink: color-mix(in srgb, var(--c2-theme--color-on-surface) 25%, white);
+  --c2-notepad__writing--color: var(--note-dark-ink);
+  --c2-notepad__paper-yellow--background: color-mix(in srgb, #f5d547 38%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-green--background: color-mix(in srgb, #bddcb2 38%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-blue--background: color-mix(in srgb, #b8ceee 38%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-pink--background: color-mix(in srgb, #f4b8c3 38%, var(--c2-theme--color-surface));
+  --c2-notepad__pad-legal--background: color-mix(in srgb, #f5d547 38%, var(--c2-theme--color-surface));
+  --c2-notepad__pad-sticky--background: color-mix(in srgb, #ffd23f 38%, var(--c2-theme--color-surface));
+  --c2-notepad__paper-yellow--color: var(--note-dark-ink);
+  --c2-notepad__paper-green--color: var(--note-dark-ink);
+  --c2-notepad__paper-blue--color: var(--note-dark-ink);
+  --c2-notepad__paper-pink--color: var(--note-dark-ink);
   // Highlighters as deep markers: the light text keeps 4.5:1 on them over every dark paper, where the bright light-mode
   // ones fell under 3:1.
   --c2-notepad__highlight-yellow--background: rgb(122 94 0 / 60%);
@@ -167,10 +168,4 @@
 
 .note__move::part(button) {
   cursor: grab;
-}
-
-// The unpin button of a pinned note: the pin in the accent colour, pressed in.
-.note__unpin {
-  --c2-icon-button__icon--color: var(--ntm-accent);
-  --c2-icon-button__icon__hover--color: var(--ntm-accent);
 }

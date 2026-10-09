@@ -16,17 +16,6 @@
     (paper-change)="onPaperChange($event)"
     (page-tear)="onPageTear($event)"
   >
-    @if (pinned()) {
-      <c2-icon-button
-        slot="actions"
-        class="note__actions note__unpin"
-        aria-label="Unpin from the board"
-        tooltip="Unpin from the board"
-        (click)="unpin.emit()"
-      >
-        <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
-      </c2-icon-button>
-    }
     <!-- Moves the note's tile: its c2-masonry-item names this button in move-handle. -->
     <c2-icon-button
       slot="actions"

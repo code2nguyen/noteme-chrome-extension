@@ -41,7 +41,7 @@ function loadElements(): Promise<unknown> {
 
 /**
  * A to-do list, worked through right on the board: a c2-todo-list whose tasks and title are stored as they change,
- * with the tile's actions (unpin, move, its menu) in the list's header, after its palette button as on a note. The
+ * with the tile's actions (move, its menu) in the list's header, after its palette button as on a note. The
  * title is renamed in place, and a new list opens with its title ready for writing.
  * Rendered inside the c2-masonry-item that places it.
  */
@@ -65,7 +65,7 @@ export class TodoCard {
   private readonly list = viewChild<ElementRef<TodoList>>('list');
 
   readonly item = input.required<ArtBoardItem>();
-  /** Pinned: it stays on the board, first, until unpinned. */
+  /** Pinned: it stays on the board, in its place, until unpinned. */
   readonly pinned = input(false);
   /** A list that was just created: it asks for its title. */
   readonly autofocus = input(false);

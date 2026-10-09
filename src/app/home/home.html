@@ -68,7 +68,7 @@
         <nav class="home__sites" aria-label="Your most visited sites">
           @for (site of sites(); track site.url) {
             <a class="home__site" [href]="site.url" [title]="site.host">
-              <span class="home__site-icon">
+              <span class="home__site-icon" [class.home__site-icon--image]="!!site.icon">
                 @if (site.icon) {
                   <img [src]="site.icon" alt="" width="28" height="28" />
                 } @else {

@@ -88,6 +88,22 @@ describe('flow document', () => {
     ]);
   });
 
+  it('keeps the sides an arrow was drawn between, through a label and a reload, and drops unknown ones', () => {
+    const boxes = addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(0, 1));
+    const doc = connect(boxes, 'a', 'b', { sourceSide: 'bottom', targetSide: 'top' });
+    expect(doc.edges).toEqual([{ source: 'a', target: 'b', sourceSide: 'bottom', targetSide: 'top' }]);
+    const labelled = labelArrow(doc, 'a', 'b', 'next');
+    expect(labelled.edges).toEqual([
+      { source: 'a', target: 'b', label: 'next', sourceSide: 'bottom', targetSide: 'top' },
+    ]);
+    expect(parseFlow(serializeFlow(labelled)).edges).toEqual(labelled.edges);
+    const odd = JSON.stringify({
+      ...boxes,
+      edges: [{ source: 'a', target: 'b', sourceSide: 'middle', targetSide: 'left' }],
+    });
+    expect(parseFlow(odd).edges).toEqual([{ source: 'a', target: 'b', targetSide: 'left' }]);
+  });
+
   it('labels an arrow, and an empty label removes it', () => {
     const doc = connect(addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0)), 'a', 'b');
     const labelled = labelArrow(doc, 'a', 'b', '  yes ');

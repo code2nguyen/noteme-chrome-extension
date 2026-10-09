@@ -125,7 +125,9 @@
       }
       <span class="plan__dialog-spacer"></span>
       <c2-button (click)="draft.set(null)">Cancel</c2-button>
-      <c2-button class="plan__dialog-save" [disabled]="!current.title.trim()" (click)="save()">Save</c2-button>
+      <c2-button class="plan__dialog-save ntm-action" [disabled]="!current.title.trim()" (click)="save()"
+        >Save</c2-button
+      >
     </div>
   }
 </c2-modal>

@@ -172,13 +172,6 @@
   flex: 1;
 }
 
-.plan__dialog-save {
-  --c2-button__container--background-color: var(--c2-theme--color-primary);
-  --c2-button__container--color: var(--c2-theme--color-on-primary);
-  --c2-button__container__hover--background-color: var(--c2-theme--color-primary-hover);
-  --c2-button__container__hover--color: var(--c2-theme--color-on-primary);
-}
-
 .plan__dialog-delete {
   --c2-button__container--color: var(--c2-theme--color-error, #c0392b);
 }

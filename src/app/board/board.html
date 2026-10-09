@@ -62,7 +62,7 @@
   }
 
   <c2-menu class="navbar__new" placement="bottom-end" aria-label="New" (menu-select)="onNewMenu($event)">
-    <c2-button slot="trigger" class="navbar__new-button">
+    <c2-button slot="trigger" class="navbar__new-button ntm-action">
       <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
       New
     </c2-button>
@@ -104,7 +104,7 @@
         <c2-symbol-create-new slot="media"></c2-symbol-create-new>
         <span slot="title">Nothing here yet</span>
         <span slot="description">Press N for a note, P for a page, F for a flow or T for a to-do list.</span>
-        <c2-button slot="actions" class="board__empty-action" (click)="create(ExtensionId.TextNote)">
+        <c2-button slot="actions" class="board__empty-action ntm-action" (click)="create(ExtensionId.TextNote)">
           <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
           Write a note
         </c2-button>
@@ -147,13 +147,19 @@
           [colsSm]="item.gridPosition.screenColumns.Small"
           [colsXs]="item.gridPosition.screenColumns.XSmall"
           [attr.move-handle]="'move-' + item.id"
-          [pinned]="!!item.starred"
+          [minRows]="minRowsOf(item)"
+          [minCols]="minCols"
         >
           @if (item.starred) {
-            <!-- A push-pin on the card's corner: it stays on the board, first. -->
-            <span class="board__pin" role="img" aria-label="Pinned">
-              <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
-            </span>
+            <!-- A push-pin on the card's corner: it stays on the board, in its place. Pulling the pin out unpins the card. -->
+            <c2-icon-button
+              class="board__pin"
+              aria-label="Unpin from the board"
+              tooltip="Unpin from the board"
+              (click)="unpin(item)"
+            >
+              <span class="board__pin-head"></span>
+            </c2-icon-button>
           }
           @if (item.extensionId === ExtensionId.Page || item.extensionId === ExtensionId.Flow) {
             @if (item.extensionId === ExtensionId.Page) {
@@ -162,17 +168,6 @@
               <ntm-flow-card [item]="item" />
             }
             <!-- The card is one link, so its buttons sit beside it, in the tile's top-right corner. -->
-            @if (item.starred) {
-              <c2-icon-button
-                slot="actions"
-                class="board__tile-action board__tile-unpin"
-                aria-label="Unpin from the board"
-                tooltip="Unpin from the board"
-                (click)="unpin(item)"
-              >
-                <c2-phosphor-push-pin weight="fill"></c2-phosphor-push-pin>
-              </c2-icon-button>
-            }
             <c2-icon-button
               slot="actions"
               class="board__tile-action board__tile-move"

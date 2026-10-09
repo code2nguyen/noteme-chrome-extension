@@ -75,9 +75,9 @@ export function archivedOn(item: ArtBoardItem, data: Dictionary<ItemData>): stri
 }
 
 /**
- * Which notes the board shows: every pinned note, first, then the `count` most recently edited of the others, and
- * any note shown on purpose this session (`revealed`: picked in the search, just unpinned). `items` is in the board's
- * order, which both groups keep.
+ * Which notes the board shows: every pinned note, the `count` most recently edited of the others, and any note shown
+ * on purpose this session (`revealed`: picked in the search, just unpinned). They keep the board's order (`items`):
+ * a pinned card stays where it was, so pinning or unpinning one moves no other card.
  */
 export function splitBoard(
   items: ArtBoardItem[],
@@ -95,7 +95,7 @@ export function splitBoard(
   );
   const onBoard = (item: ArtBoardItem) => recent.has(item.id) || revealed.has(item.id);
   return {
-    shown: [...items.filter((item) => item.starred), ...unpinned.filter(onBoard)],
+    shown: items.filter((item) => item.starred || onBoard(item)),
     older: unpinned.filter((item) => !onBoard(item)).sort(newestFirst),
   };
 }
@@ -148,12 +148,10 @@ export function groupByMonth<T extends { edited: string }>(
 }
 
 /**
- * The board's order once its shown cards were rearranged (`arranged`, as the masonry reports them): pinned ones
- * stay first, and the cards take the order values they already held between them, so the notes that are not shown
- * keep their place in the order.
+ * The board's order once its shown cards were rearranged (`arranged`, as the masonry reports them): the cards take
+ * the order values they already held between them, so the notes that are not shown keep their place in the order.
  */
 export function rearrange(arranged: ArtBoardItem[]): { item: ArtBoardItem; order: number }[] {
   const slots = arranged.map((item) => item.gridPosition.order ?? 0).sort((a, b) => a - b);
-  const pinnedFirst = [...arranged.filter((item) => item.starred), ...arranged.filter((item) => !item.starred)];
-  return pinnedFirst.map((item, index) => ({ item, order: slots[index] }));
+  return arranged.map((item, index) => ({ item, order: slots[index] }));
 }
