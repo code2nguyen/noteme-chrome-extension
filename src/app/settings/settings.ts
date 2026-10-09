@@ -43,8 +43,8 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  // Dark until the user picks another theme, whatever the system's.
-  theme: 'dark',
+  // Follows the system until the user picks a theme.
+  theme: 'auto',
   clock: '24h',
   dateFormat: 'long',
   photos: true,

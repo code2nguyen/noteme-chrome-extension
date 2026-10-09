@@ -849,7 +849,8 @@ test.describe('home', () => {
   });
 
   test('settings change the clock, the theme and the quote, and survive a reload', async ({ page }) => {
-    // A fresh start is dark, whatever the system's theme.
+    // A fresh start follows the system: dark here, so picking Light is a change.
+    await page.emulateMedia({ colorScheme: 'dark' });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.locator('ntm-home c2-icon-button[aria-label="Settings"]').click();
     await expect(page).toHaveURL(/settings=1/);
@@ -877,10 +878,9 @@ test.describe('home', () => {
     await expect(page.locator('.home__quote')).toHaveCount(0);
   });
 
-  test('the Auto theme follows the system', async ({ page }) => {
+  test('the Auto theme, the default, follows the system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/#/?settings=1');
-    await page.locator('ntm-settings-panel c2-button', { hasText: 'Auto' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await page.emulateMedia({ colorScheme: 'dark' });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
