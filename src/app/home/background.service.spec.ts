@@ -16,7 +16,7 @@ const options = (...themes: PhotoTheme[]): BackgroundOptions => ({ themes, chang
 
 function commonsPhoto(theme: PhotoTheme, n: number): BackgroundPhoto {
   const title = `File:${theme} ${n}.jpg`;
-  return { id: title, url: `https://upload.test/${theme}-${n}.jpg`, credit: 'Photo by A · CC0', link: 'x', theme };
+  return { id: title, url: `https://upload.test/${theme}-${n}.jpg`, artist: 'A', licence: 'CC0', link: 'x', theme };
 }
 
 /** A Commons search answer of four fresh photos of the theme searched for. */

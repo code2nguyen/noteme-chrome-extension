@@ -20,6 +20,7 @@ import '@c2n/components/menu';
 import '@c2n/components/menu/menu-item';
 import '@c2n/components/page-editor';
 import '@c2n/components/inline-edit';
+import '@c2n/components/relative-time';
 import '@c2n/feather-icons/icons/archive.js';
 import '@c2n/feather-icons/icons/arrow-left.js';
 import '@c2n/feather-icons/icons/more-horizontal.js';
@@ -27,12 +28,13 @@ import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 import type { PageEditor } from '@c2n/components/page-editor';
 import type { InlineEdit } from '@c2n/components/inline-edit';
-import { combineLatest, EMPTY, interval } from 'rxjs';
-import { filter, map, startWith, switchMap, take, tap, timeout } from 'rxjs/operators';
+import { combineLatest, EMPTY } from 'rxjs';
+import { filter, map, switchMap, take, tap, timeout } from 'rxjs/operators';
 
+import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
-import { editedLabel, pageMarkdownToText } from '../services/utils';
+import { pageMarkdownToText } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
 
@@ -59,6 +61,8 @@ export class PageView {
   private readonly injector = inject(Injector);
   private readonly titleField = viewChild<ElementRef<InlineEdit>>('titleField');
   private readonly editor = viewChild<ElementRef<PageEditor>>('editor');
+  readonly i18n = inject(I18n);
+  readonly t = this.i18n.t;
 
   readonly id = toSignal(this.route.paramMap.pipe(map((params) => params.get('id') ?? '')), { initialValue: '' });
   readonly title = signal('');
@@ -74,9 +78,8 @@ export class PageView {
   );
   /** Whether the way back leads to the Archive and the menu offers Restore. */
   readonly inArchive = computed(() => (this.found() === null ? this.openedFromArchive() : this.archived()));
-  private readonly modified = signal<string | undefined>(undefined);
+  readonly modified = signal<string | undefined>(undefined);
   private readonly createdDate = signal<string | undefined>(undefined);
-  private readonly tick = toSignal(interval(30_000).pipe(startWith(0)));
   private item: ArtBoardItem | undefined;
   /** The page shown: Angular reuses this view from one page to the next. */
   private shownId: string | undefined;
@@ -90,20 +93,17 @@ export class PageView {
   private deleted = false;
   private savingTimer?: ReturnType<typeof setTimeout>;
 
+  /** Loading, saving or saved; once saved, the template adds when it was last edited, which keeps itself current. */
   readonly status = computed(() => {
-    this.tick();
     if (this.found() === null) {
-      return 'Loading…';
+      return this.t('common.loading');
     }
-    if (this.saving()) {
-      return 'Saving…';
-    }
-    const modified = this.modified();
-    return modified ? `Saved · edited ${editedLabel(modified)}` : 'Saved';
+    return this.t(this.saving() ? 'page.saving' : 'page.saved');
   });
+  readonly saved = computed(() => this.found() !== null && !this.saving());
   readonly created = computed(() => {
     const created = this.createdDate();
-    return created ? new Date(created).toLocaleDateString(undefined, { day: 'numeric', month: 'long' }) : '';
+    return created ? new Date(created).toLocaleDateString(this.i18n.locale(), { day: 'numeric', month: 'long' }) : '';
   });
 
   constructor() {

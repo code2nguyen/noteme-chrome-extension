@@ -1,4 +1,5 @@
 import { PHOTO_THEME_IDS, PhotoChange, PhotoTheme } from '../home/background';
+import { LANGUAGES, LanguageSetting } from '../i18n/language';
 
 /**
  * What a person can set up. Stored as one small record, so it fits chrome.storage.sync and follows the profile once
@@ -17,9 +18,8 @@ export type HomeNotesSetting = 'off' | 'auto' | 'pinned' | 'edited';
 /** Optional parts of Noteme, switched on or off in Settings. Plan is the first; more will join it. */
 export type Feature = 'plan';
 
-export const FEATURES: readonly { id: Feature; label: string; description: string }[] = [
-  { id: 'plan', label: 'Plan', description: 'A week and month calendar for what you plan to do' },
-];
+/** The optional features, in the order Settings lists them; their names are messages (`settings.feature.<id>`). */
+export const FEATURES: readonly { id: Feature }[] = [{ id: 'plan' }];
 
 export function hasFeature(settings: Settings, feature: Feature): boolean {
   return settings.features.includes(feature);
@@ -27,6 +27,8 @@ export function hasFeature(settings: Settings, feature: Feature): boolean {
 
 export interface Settings {
   theme: ThemeSetting;
+  /** Noteme's language; Auto follows the browser. */
+  language: LanguageSetting;
   clock: ClockSetting;
   dateFormat: DateFormat;
   /** A photo behind Home. */
@@ -52,6 +54,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   // Follows the system until the user picks a theme.
   theme: 'auto',
+  language: 'auto',
   clock: '24h',
   dateFormat: 'long',
   photos: true,
@@ -69,6 +72,7 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   theme: ['auto', 'light', 'dark'],
+  language: ['auto', ...LANGUAGES],
   clock: ['24h', '12h'],
   dateFormat: ['long', 'short', 'numeric'],
   photoChange: ['day', 'hour'],

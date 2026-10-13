@@ -1,4 +1,6 @@
-// The notes sit on Home's frosted glass, each on its own paper, and follow the theme through --ntm-home-*.
+// The notes sit on a faint frame, each on its own paper blended into the photo, and follow the theme through
+// --ntm-home-*.
+// They grow with the screen: the paper keeps a 3:2 shape, never taller than 30% of the window, the type follows the width.
 :host {
   display: block;
   color: var(--ntm-home-ink);
@@ -34,16 +36,20 @@
 }
 
 .note {
-  background: var(--ntm-home-glass);
-  backdrop-filter: blur(16px);
+  // A faint frame and no blur, so the photo stays sharp around and through the note.
+  background: color-mix(in srgb, var(--ntm-home-nav) 50%, transparent);
   display: flex;
   flex-direction: column;
   border-radius: 16px;
   color: inherit;
   text-decoration: none;
+  box-shadow: inset 0 0 0 1.5px transparent;
+  transition: box-shadow 0.25s ease;
 
+  // A ring on the frame's edge under the pointer. Not the background: the paper is see-through, so the whole note
+  // would change with it.
   &:hover {
-    background: var(--ntm-home-glass-strong);
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ntm-home-ink) 45%, transparent);
   }
 
   &:focus-visible {
@@ -52,92 +58,102 @@
   }
 }
 
-// The note on its own paper, as on the board; a list, a page and a flow sit on the plain one.
+// The note on its own paper, as on the board.
 .note__paper {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  height: 168px;
+  aspect-ratio: 3 / 2;
+  min-height: 168px;
+  max-height: 30vh;
+  // The same 3:2 as a length when Home gives the width (inside the 6px margins), so a resize can animate it.
+  height: max(168px, min((var(--ntm-notes-width) - 12px) * 2 / 3, 30vh));
+  transition: height 0.35s ease;
   box-sizing: border-box;
-  margin: 6px 6px 0;
+  margin: 6px;
   padding: 12px 14px;
   border-radius: 11px;
   overflow: hidden;
+  position: relative;
   color: var(--c2-theme--color-on-surface);
-  background: color-mix(in srgb, var(--c2-theme--color-surface) 80%, #f3ead0);
+  --ntm-note-paper: color-mix(in srgb, var(--c2-theme--color-surface) 80%, #f3ead0);
+
+  // The paper is blended into the photo (hard light): the photo shows through as a light wash, the text above it
+  // stays unblended and readable.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ntm-note-paper);
+    mix-blend-mode: hard-light;
+    opacity: var(--ntm-home-note-paper);
+  }
+
+  > * {
+    position: relative;
+  }
 
   &[data-paper='yellow'] {
-    background: color-mix(in srgb, #f5d547 30%, var(--c2-theme--color-surface));
+    --ntm-note-paper: color-mix(in srgb, #f5d547 30%, var(--c2-theme--color-surface));
   }
 
   &[data-paper='green'] {
-    background: color-mix(in srgb, #bddcb2 30%, var(--c2-theme--color-surface));
+    --ntm-note-paper: color-mix(in srgb, #bddcb2 30%, var(--c2-theme--color-surface));
   }
 
   &[data-paper='blue'] {
-    background: color-mix(in srgb, #b8ceee 30%, var(--c2-theme--color-surface));
+    --ntm-note-paper: color-mix(in srgb, #b8ceee 30%, var(--c2-theme--color-surface));
   }
 
   &[data-paper='pink'] {
-    background: color-mix(in srgb, #f4b8c3 30%, var(--c2-theme--color-surface));
+    --ntm-note-paper: color-mix(in srgb, #f4b8c3 30%, var(--c2-theme--color-surface));
   }
 
   &[data-paper='night'] {
-    background: #232a33;
+    --ntm-note-paper: #232a33;
     color: #e9e4d4;
   }
 }
 
+// Pinned, or when it was last edited: a side note, quieter than the note itself.
 .note__head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.7;
-  --c2-feather-icon--size: 12px;
-  --c2-phosphor-icon--size: 13px;
+  opacity: 0.55;
+  --c2-feather-icon--size: 11px;
+  --c2-phosphor-icon--size: 12px;
 }
 
 .note__title {
   font:
-    600 15px/1.3 'RedHatDisplay',
+    600 clamp(15px, 1vw, 19px) / 1.3 'RedHatDisplay',
     system-ui,
     sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: font-size 0.35s ease;
 }
 
 .note__text {
-  font-size: 13px;
+  // As many lines as the paper holds, the last one fading out.
+  flex: 1;
+  min-height: 0;
+  font-size: clamp(13px, 0.75vw, 15px);
   line-height: 1.5;
   white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
+  transition: font-size 0.35s ease;
 }
 
-.note__foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 14px 10px;
-  font-size: 12px;
-}
-
-.note__count {
-  opacity: 0.8;
-  font-variant-numeric: tabular-nums;
-}
-
-.note__open {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 600;
-  --c2-feather-icon--size: 13px;
+@media (prefers-reduced-motion: reduce) {
+  .note,
+  .note__paper,
+  .note__title,
+  .note__text {
+    transition: none;
+  }
 }

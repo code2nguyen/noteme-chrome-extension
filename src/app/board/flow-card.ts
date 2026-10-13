@@ -7,8 +7,8 @@ import { switchMap } from 'rxjs/operators';
 
 import { parseFlow } from '../flow/flow-doc';
 import { flowNodes } from '../flow/flow-nodes';
+import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
-import { editedLabel } from '../services/utils';
 import { ArtBoardItem } from '../store/models';
 
 /**
@@ -25,10 +25,10 @@ import { ArtBoardItem } from '../store/models';
     <a class="flow-card" [routerLink]="['/flow', item().id]" [queryParams]="item().boardId ? {} : { from: 'archive' }">
       <span class="flow-card__kind">
         <c2-feather-share-2 aria-hidden="true"></c2-feather-share-2>
-        Flow · {{ edited() }}
+        <span>{{ t('common.flow') }} · <c2-relative-time [date]="edited()"></c2-relative-time></span>
       </span>
       <span class="flow-card__title" [class.flow-card__title--untitled]="!title()">{{
-        title() || 'Untitled flow'
+        title() || t('common.untitled.flow')
       }}</span>
       @if (nodes().length > 0) {
         <c2-flow
@@ -47,6 +47,7 @@ import { ArtBoardItem } from '../store/models';
   styleUrl: './flow-card.scss',
 })
 export class FlowCard {
+  readonly t = inject(I18n).t;
   private readonly dataService = inject(DataService);
 
   readonly item = input.required<ArtBoardItem>();
@@ -63,6 +64,6 @@ export class FlowCard {
     const item = this.item();
     const data = this.data();
     // An empty placeholder (no data stored yet) carries the time it was made, not when the note was edited.
-    return editedLabel((data?.empty ? undefined : data?.modifiedDate) ?? item.dataModifiedDate ?? item.modifiedDate);
+    return (data?.empty ? undefined : data?.modifiedDate) ?? item.dataModifiedDate ?? item.modifiedDate;
   });
 }

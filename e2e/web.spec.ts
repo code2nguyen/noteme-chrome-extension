@@ -92,14 +92,15 @@ test('home shows the clock, a photo and the quote, and opens the board', async (
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(page.locator('.board__empty [slot="title"]')).toHaveText('Nothing here yet');
   await expect(page.locator('.board__empty [slot="description"]')).toHaveText(
-    'Press N for a note, P for a page, F for a flow or T for a to-do list.',
+    'Press N for a note, P for a paper, F for a flow or T for a to do.',
   );
   await shot(page, '02-board-empty');
 });
 
-test('a note is focused on creation, saved and restored after a reload', async ({ page }) => {
+test('a note is focused and lit up on creation, saved and restored after a reload', async ({ page }) => {
   await openBoard(page);
   const note = await newNote(page);
+  await expect(note.locator('.note__beam')).toBeVisible();
   // Typing right away must land in the new note (spaces included), not on the button that created it.
   await page.keyboard.type('Buy milk and bread');
   await expect(notepadSurface(note)).toHaveText('Buy milk and bread');
@@ -209,7 +210,7 @@ test('a page left empty is not kept, and a page can be deleted', async ({ page }
 
   await newPage(page);
   await page.keyboard.type('Short-lived');
-  await page.locator('ntm-page-view c2-icon-button[aria-label="Page actions"]').click();
+  await page.locator('ntm-page-view c2-icon-button[aria-label="Paper actions"]').click();
   await page.locator('ntm-page-view c2-menu-item[value="delete"]').click();
   await expect(page).toHaveURL(/#\/main-board$/);
   await expect(tiles(page)).toHaveCount(0);
@@ -326,6 +327,53 @@ test('N and P start a note or a page from the keyboard', async ({ page }) => {
   await expect(page).toHaveURL(/#\/page\//);
 });
 
+test('the New menu opens with the mouse resting on New, and leaves the focus in the note being written', async ({
+  page,
+}) => {
+  await openBoard(page);
+  const menu = page.locator('c2-menu.navbar__new');
+  const isOpen = () => menu.evaluate((element) => (element as HTMLElement & { open: boolean }).open);
+  await page.keyboard.press('n');
+  await expect.poll(() => focusedTag(page)).toBe('c2-notepad');
+  await page.keyboard.type('hello');
+
+  // Resting on New opens the menu; the keys still go to the note.
+  await page.locator('.navbar__new-button').hover();
+  await expect.poll(isOpen).toBe(true);
+  await page.keyboard.type(' world');
+  await expect(notepadSurface(card(page))).toHaveText('hello world');
+  // A click on New keeps it open, as does crossing over to the menu; leaving both closes it.
+  await page.locator('.navbar__new-button').click();
+  await page.locator('.navbar__new c2-menu-item[value="flow"]').hover();
+  await expect.poll(isOpen).toBe(true);
+  await page.mouse.move(400, 600);
+  await expect.poll(isOpen).toBe(false);
+
+  // A type picked from the hover menu is created.
+  await page.locator('.navbar__new-button').hover();
+  await expect.poll(isOpen).toBe(true);
+  await page.locator('.navbar__new c2-menu-item[value="note"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(2);
+});
+
+test('the customize panel of a to-do list floats whole in the window, however short its card', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 600 });
+  await openBoard(page);
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await expect(list).toHaveCount(1);
+  await page.keyboard.press('Escape');
+  await list.getByRole('button', { name: 'Customize look' }).click();
+  const panel = list.getByRole('region', { name: 'Customize the list' });
+  await expect(panel).toBeVisible();
+  // All of it is in view without scrolling the card, its last choices included.
+  await expect(panel.getByRole('radio', { name: 'None' })).toBeInViewport({ ratio: 1 });
+  await panel.evaluate((element) => Promise.all(element.getAnimations().map((animation) => animation.finished)));
+  await shot(page, '04-todo-customize');
+  await panel.getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(panel).toHaveCount(0);
+});
+
 test('a to-do list is named, filled and checked off on its card, and kept after a reload', async ({ page }) => {
   await openBoard(page);
   await page.keyboard.press('t');
@@ -382,7 +430,7 @@ test('a to-do list is named, filled and checked off on its card, and kept after 
   await expect(list.getByRole('heading', { name: 'Groceries' })).toBeVisible();
 
   // Renamed in place from its menu.
-  await list.getByRole('button', { name: 'To-do list actions' }).click();
+  await list.getByRole('button', { name: 'To do actions' }).click();
   await list.locator('c2-menu-item[value="rename"]').click();
   await expect(title).toBeFocused();
   await page.keyboard.type('Weekend shopping');
@@ -397,12 +445,12 @@ test('a to-do list is named, filled and checked off on its card, and kept after 
   await search.click();
   await search.pressSequentially('oat milk');
   const result = page.locator('c2-autocomplete c2-list-item', { hasText: 'Weekend shopping' });
-  await expect(result).toContainText('List ·');
+  await expect(result).toContainText('To do ·');
   await result.click();
   await expect(list).toHaveClass(/todo--blink/);
 
   // Deleted from its menu.
-  await list.getByRole('button', { name: 'To-do list actions' }).click();
+  await list.getByRole('button', { name: 'To do actions' }).click();
   await list.locator('c2-menu-item[value="delete"]').click();
   await expect(list).toHaveCount(0);
 });
@@ -451,7 +499,7 @@ test('search finds a note and highlights it, and opens a page', async ({ page })
   await search.click();
   await search.pressSequentially('bus leaves');
   const pageResult = page.locator('c2-autocomplete c2-list-item', { hasText: 'Trip to Da Lat' });
-  await expect(pageResult).toContainText('Page ·');
+  await expect(pageResult).toContainText('Paper ·');
   await pageResult.click();
   await expect(page).toHaveURL(/#\/page\/[\w-]+$/);
   await expect(pageSurface(page)).toHaveText('The bus leaves Friday at 22:00');
@@ -1460,7 +1508,6 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
   // Auto, the default: pinned notes first, newest pin first, then the others by last edit; an empty note is left out.
   await expect(titles).toHaveText(['Launch checklist', 'Wi-Fi password', 'Groceries', 'Book ideas']);
   await expect(page.locator('ntm-notes-carousel .note__head').first()).toContainText('Pinned');
-  await expect(page.locator('ntm-notes-carousel .note__count').first()).toHaveText('1 / 4');
 
   // Edited: every note by last edit, pins ignored.
   await page.goto('/#/?settings=1');
@@ -1496,4 +1543,41 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
   await page.locator('ntm-notes-carousel .note', { hasText: 'Wi-Fi password' }).click();
   await expect(page.locator('ntm-board')).toBeVisible();
   await expect(page).toHaveURL(/#\/main-board$/);
+  // The board brings the note into view and lights it up.
+  const picked = page.locator('ntm-board c2-masonry-item[item-id="old-pin"]');
+  await expect(picked.locator('.note__beam')).toBeVisible();
+  await expect(picked).toBeInViewport({ ratio: 0.8 });
+
+  // Back on Home, the note just opened comes first.
+  await page.goto('/');
+  await expect(titles).toHaveText(['Wi-Fi password', 'Launch checklist', 'Groceries', 'Book ideas']);
+});
+
+test('the language picked in Settings changes the whole app at once, with no reload, and is kept', async ({ page }) => {
+  await page.goto('/#/?settings=1');
+  const language = page.locator('ntm-settings-panel c2-select[aria-labelledby="settings-language"]');
+  await language.click();
+  await page.locator('c2-list-item[value="fr"]').click();
+  // Home, Settings and the page's lang (which the c2 components and the relative times follow), all at once.
+  await expect(page.locator('html')).toHaveAttribute('lang', /^fr/);
+  await expect(page.locator('ntm-settings-panel [slot="title"]')).toHaveText('Réglages');
+  await expect(page.locator('ntm-home c2-autocomplete')).toHaveJSProperty('placeholder', 'Rechercher dans mes notes');
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('noteme-settings') ?? '{}').language))
+    .toBe('fr');
+
+  // Kept after a reload, and the board speaks it too.
+  await page.goto('/#/main-board');
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('Rien pour l’instant');
+  await expect(page.locator('.navbar__new-button')).toContainText('Nouveau');
+
+  // Vietnamese, then back to Auto, which follows the browser (English here).
+  await page.goto('/#/?settings=1');
+  await language.click();
+  await page.locator('c2-list-item[value="vi"]').click();
+  await expect(page.locator('ntm-settings-panel [slot="title"]')).toHaveText('Cài đặt');
+  await language.click();
+  await page.locator('c2-list-item[value="auto"]').click();
+  await expect(page.locator('ntm-settings-panel [slot="title"]')).toHaveText('Settings');
+  await expect(page.locator('html')).toHaveAttribute('lang', /^en/);
 });

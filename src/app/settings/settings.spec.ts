@@ -38,6 +38,9 @@ describe('parseSettings', () => {
   it('keeps valid values and drops bad or unknown ones', () => {
     const parsed = parseSettings({ theme: 'dark', clock: '13h', quote: false, shortcuts: 'yes', extra: 1 });
     expect(parsed).toEqual({ ...DEFAULT_SETTINGS, theme: 'dark', quote: false });
+    // A language Noteme speaks, or Auto; anything else falls back to Auto.
+    expect(parseSettings({ language: 'vi' }).language).toBe('vi');
+    expect(parseSettings({ language: 'de' }).language).toBe('auto');
     expect(parsed).not.toHaveProperty('extra');
   });
 });

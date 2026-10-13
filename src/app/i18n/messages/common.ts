@@ -1,0 +1,56 @@
+import type { Translation } from './types';
+
+/** Words used across the app: the kinds of note, and actions every view has. */
+export const commonEn = {
+  'common.note': 'Note',
+  'common.page': 'Paper',
+  'common.flow': 'Flow',
+  'common.list': 'To do',
+  'common.notes': 'Notes',
+  'common.archive': 'Archive',
+  'common.settings': 'Settings',
+  'common.cancel': 'Cancel',
+  'common.undo': 'Undo',
+  'common.delete': 'Delete',
+  'common.loading': 'Loading…',
+  'common.untitled.note': 'Empty note',
+  'common.untitled.page': 'Untitled paper',
+  'common.untitled.flow': 'Untitled flow',
+  'common.untitled.list': 'Untitled to do',
+};
+
+export const commonFr: Translation<typeof commonEn> = {
+  'common.note': 'Note',
+  'common.page': 'Feuille',
+  'common.flow': 'Flux',
+  'common.list': 'À faire',
+  'common.notes': 'Notes',
+  'common.archive': 'Archives',
+  'common.settings': 'Réglages',
+  'common.cancel': 'Annuler',
+  'common.undo': 'Annuler',
+  'common.delete': 'Supprimer',
+  'common.loading': 'Chargement…',
+  'common.untitled.note': 'Note vide',
+  'common.untitled.page': 'Feuille sans titre',
+  'common.untitled.flow': 'Flux sans titre',
+  'common.untitled.list': 'À faire sans titre',
+};
+
+export const commonVi: Translation<typeof commonEn> = {
+  'common.note': 'Ghi chú',
+  'common.page': 'Giấy',
+  'common.flow': 'Sơ đồ',
+  'common.list': 'Việc cần làm',
+  'common.notes': 'Ghi chú',
+  'common.archive': 'Lưu trữ',
+  'common.settings': 'Cài đặt',
+  'common.cancel': 'Hủy',
+  'common.undo': 'Hoàn tác',
+  'common.delete': 'Xóa',
+  'common.loading': 'Đang tải…',
+  'common.untitled.note': 'Ghi chú trống',
+  'common.untitled.page': 'Giấy chưa đặt tên',
+  'common.untitled.flow': 'Sơ đồ chưa đặt tên',
+  'common.untitled.list': 'Việc cần làm chưa đặt tên',
+};

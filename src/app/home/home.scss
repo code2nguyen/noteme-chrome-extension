@@ -164,12 +164,17 @@
 
 @media (min-width: 1180px) {
   // Under the Notes link, clear of the clock and the shortcuts, which stay centred on the page.
+  // A fifth of the screen's width or less, clear of the shortcuts (760px, centred): 260px to 440px.
+  // The notes size their paper from --ntm-notes-width, and both ease to a new size as the window is resized.
   .home__notes {
+    --ntm-notes-width: clamp(260px, min(18vw, 50vw - 380px - 56px), 440px);
     position: absolute;
     top: 76px;
     left: 32px;
-    width: 260px;
+    width: var(--ntm-notes-width);
+    max-width: none;
     margin: 0;
+    transition: width 0.35s ease;
   }
 }
 
@@ -289,6 +294,21 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px 32px;
+  color: var(--ntm-home-ink);
+  transition: color 0.4s ease;
+
+  // The photo is dark behind the quote: light ink on a dark halo, in either theme. The halos are stronger than the
+  // theme's, for a busy or mid-tone photo.
+  &[data-tone='dark'] {
+    --ntm-home-ink: #f2eee6;
+    --ntm-home-halo: 0 0 14px rgb(0 0 0 / 70%), 0 0 4px rgb(0 0 0 / 55%), 0 1px 2px rgb(0 0 0 / 60%);
+  }
+
+  // The photo is light behind it: dark ink on a light halo.
+  &[data-tone='light'] {
+    --ntm-home-ink: #2c2925;
+    --ntm-home-halo: 0 0 14px rgb(255 255 255 / 85%), 0 0 4px rgb(255 255 255 / 70%), 0 1px 2px rgb(255 255 255 / 70%);
+  }
 }
 
 // The quote takes the width it needs: one line when it fits beside the credit, wrapped only when it doesn't.
@@ -322,6 +342,10 @@
 @media (prefers-reduced-motion: reduce) {
   .home__quote {
     animation: none;
+  }
+
+  .home__notes {
+    transition: none;
   }
 }
 

@@ -41,6 +41,11 @@
                 "output": "."
               },
               {
+                "glob": "**/*",
+                "input": "src/_locales",
+                "output": "_locales"
+              },
+              {
                 "glob": "favicon.ico",
                 "input": "src",
                 "output": "."

@@ -1,37 +1,37 @@
 import { Dictionary } from '@ngrx/entity';
 
-import { kindOf, lastEdited, NoteKind, untitled } from '../board/older-notes';
+import { kindOf, lastEdited } from '../board/older-notes';
 import { PaperColor, paperColorFor } from '../note-config';
 import { getText, plainLine } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 import type { HomeNotesSetting } from '../settings/settings';
 
 /** How many lines of a note a slide shows under its first one; the card clamps them to its height anyway. */
-const PREVIEW_LINES = 8;
+const PREVIEW_LINES = 16;
 
-/** A note as a slide of the carousel on Home: its first line, a few more, and its paper. */
+/** A quick note as a slide of the carousel on Home: its first line, a few more, and its paper. */
 export interface HomeNote {
   id: string;
-  kind: NoteKind;
   title: string;
   lines: string[];
   pinned: boolean;
   /** When it was last edited (ISO date). */
   edited: string;
-  /** The paper of a quick note; every other kind sits on the plain one. */
   paper: PaperColor;
 }
 
 /**
- * The notes Home shows, in order, for a setting: the board's notes (`items`, archived ones are not among them) with
- * something written in them. Auto puts the pinned ones first, most recently pinned first, then the others by last edit;
+ * The notes Home shows, in order, for a setting: the board's quick notes (`items`, archived ones are not among them)
+ * with something written in them; to-do lists, pages and flows stay on the board. Auto puts the pinned ones first, most recently pinned first, then the others by last edit;
  * Pinned keeps the pinned ones only; Edited orders them all by last edit. A note pinned before its pin date was recorded
- * counts as pinned when it was last edited.
+ * counts as pinned when it was last edited. The note last opened from Home (`opened`) comes first, when it is among
+ * them, so coming back to Home shows it again.
  */
 export function homeNotes(
   items: readonly ArtBoardItem[],
   data: Dictionary<ItemData>,
   setting: HomeNotesSetting,
+  opened: string | null = null,
 ): HomeNote[] {
   if (setting === 'off') {
     return [];
@@ -46,14 +46,16 @@ export function homeNotes(
       : setting === 'edited'
         ? [...notes].sort(byEdit)
         : [...pinned, ...notes.filter((note) => !note.pinned).sort(byEdit)];
-  return ordered.map(({ pinnedOn: _pinnedOn, ...note }) => note);
+  const last = ordered.find((note) => note.id === opened);
+  const shown = last ? [last, ...ordered.filter((note) => note !== last)] : ordered;
+  return shown.map(({ pinnedOn: _pinnedOn, ...note }) => note);
 }
 
 type Shown = HomeNote & { pinnedOn: string };
 
 function toHomeNote(item: ArtBoardItem, data: Dictionary<ItemData>): Shown | null {
   const itemData = data[item.id];
-  if (!itemData || itemData.empty) {
+  if (kindOf(item) !== 'Note' || !itemData || itemData.empty) {
     return null;
   }
   const lines = getText(itemData.data, itemData.dataType, itemData.properties)
@@ -63,16 +65,14 @@ function toHomeNote(item: ArtBoardItem, data: Dictionary<ItemData>): Shown | nul
   if (lines.length === 0) {
     return null;
   }
-  const kind = kindOf(item);
   const edited = lastEdited(item, data);
   return {
     id: item.id,
-    kind,
-    title: lines[0] || untitled(kind),
+    title: lines[0],
     lines: lines.slice(1, PREVIEW_LINES + 1),
     pinned: !!item.starred,
     edited,
-    paper: kind === 'Note' ? paperColorFor(item.colorIndex) : 'default',
+    paper: paperColorFor(item.colorIndex),
     pinnedOn: item.starredDate ?? edited,
   };
 }

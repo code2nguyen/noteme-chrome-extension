@@ -3,7 +3,21 @@ import { ExtensionId } from '../extension-id';
 import { noteDefaultProperties } from '../note-config';
 import { DataType } from '../store/models/data-type';
 import { ArtBoardItem, ItemData } from '../store/models';
-import { countKinds, groupByMonth, kindOf, plainLine, rearrange, splitBoard, summarize } from './older-notes';
+import { CATALOGS, MessageKey } from '../i18n/messages';
+import {
+  countKinds,
+  groupByMonth,
+  kindOf,
+  plainLine,
+  rearrange,
+  splitBoard,
+  summarize,
+  Translate,
+} from './older-notes';
+
+/** `I18n.t` in a language, for the messages without values these functions use. */
+const translate = (language: 'en' | 'fr') => ((key: MessageKey) => CATALOGS[language][key]) as Translate;
+const t = translate('en');
 
 const day = (n: number) => `2026-09-${String(n).padStart(2, '0')}T10:00:00.000Z`;
 
@@ -62,20 +76,30 @@ describe('summarize and groupByMonth', () => {
   });
 
   it('takes the first line as the label and the rest as the excerpt', () => {
-    const summary = summarize(note('a', 0), { a: written('a', 4, 'Groceries\n- [ ] oat milk\n- [ ] rice') });
+    const summary = summarize(note('a', 0), { a: written('a', 4, 'Groceries\n- [ ] oat milk\n- [ ] rice') }, t);
     expect(summary).toMatchObject({ kind: 'Note', label: 'Groceries', edited: day(4) });
     expect(summary.excerpt).toBe('oat milk · rice');
-    expect(summarize(note('p', 0, false, ExtensionId.Page), {}).label).toBe('Untitled page');
+    expect(summarize(note('p', 0, false, ExtensionId.Page), {}, t).label).toBe('Untitled paper');
+    expect(summarize(note('p', 0, false, ExtensionId.Page), {}, translate('fr')).label).toBe('Feuille sans titre');
   });
 
   it('groups notes by the month they were last edited, naming the year only when it is not this one', () => {
     const groups = groupByMonth(
       [{ edited: day(20) }, { edited: day(2) }, { edited: '2025-12-24T10:00:00.000Z' }],
+      'en',
       new Date('2026-10-07T00:00:00.000Z'),
     );
     expect(groups.map((group) => group.items.length)).toEqual([2, 1]);
-    expect(groups[1].label).toMatch(/2025/);
-    expect(groups[0].label).not.toMatch(/2026/);
+    expect(groups.map((group) => group.label)).toEqual(['September', 'December 2025']);
+  });
+
+  it('names the months in the app language', () => {
+    const groups = groupByMonth(
+      [{ edited: day(20) }, { edited: '2025-12-24T10:00:00.000Z' }],
+      'fr-FR',
+      new Date('2026-10-07T00:00:00.000Z'),
+    );
+    expect(groups.map((group) => group.label)).toEqual(['septembre', 'décembre 2025']);
   });
 });
 
@@ -119,12 +143,12 @@ describe('to-do lists', () => {
   });
 
   it('are named by their title, then their tasks; archived tasks are left out', () => {
-    expect(summarize(list, { t: data('Groceries') })).toMatchObject({
+    expect(summarize(list, { t: data('Groceries') }, t)).toMatchObject({
       kind: 'List',
       label: 'Groceries',
       excerpt: 'Oat milk — the barista one · Bread',
     });
-    expect(summarize(list, { t: data() }).label).toBe('Oat milk — the barista one');
-    expect(summarize(list, {}).label).toBe('Untitled list');
+    expect(summarize(list, { t: data() }, t).label).toBe('Oat milk — the barista one');
+    expect(summarize(list, {}, t).label).toBe('Untitled to do');
   });
 });

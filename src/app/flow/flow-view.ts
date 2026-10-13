@@ -9,7 +9,7 @@ import '@c2n/feather-icons/icons/more-horizontal.js';
 import '@c2n/feather-icons/icons/rotate-ccw.js';
 import '@c2n/feather-icons/icons/trash-2.js';
 // The canvas tools: a box to drop onto it, the flow laid out again, the whole flow in view.
-import '@c2n/phosphor-icons/icons/rectangle-dashed.js';
+import '@c2n/phosphor-icons/icons/plus-square.js';
 import '@c2n/phosphor-icons/icons/scan.js';
 import '@c2n/phosphor-icons/icons/tree-structure.js';
 
@@ -46,6 +46,7 @@ import type { InlineEdit } from '@c2n/components/inline-edit';
 import { combineLatest, EMPTY } from 'rxjs';
 import { filter, map, switchMap, take, tap, timeout } from 'rxjs/operators';
 
+import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { uuid } from '../services/utils';
@@ -91,6 +92,7 @@ export class FlowView {
   private readonly injector = inject(Injector);
   private readonly titleField = viewChild<ElementRef<InlineEdit>>('titleField');
   private readonly flow = viewChild<ElementRef<Flow>>('flow');
+  readonly t = inject(I18n).t;
 
   readonly id = toSignal(this.route.paramMap.pipe(map((params) => params.get('id') ?? '')), { initialValue: '' });
   readonly title = signal('');
@@ -120,10 +122,13 @@ export class FlowView {
   /** What c2-flow draws: the boxes as its nodes, placed where they were left, in their shape, colours and icon. */
   readonly nodes = computed<FlowNode[]>(() => flowNodes(this.doc()));
 
-  /** A box's right-click menu: its look and Duplicate, before the flow's Rename and Delete. The canvas keeps its own. */
+  /**
+   * A box's right-click menu: its look and Duplicate, before the flow's Rename and Delete. The canvas keeps its own.
+   * Built each time it opens, in the language of the moment.
+   */
   readonly renderContextMenu = ({ node, defaultItems }: FlowContextMenuContext): unknown => {
     const box = node && this.doc().nodes.find((entry) => entry.id === node.id);
-    return box ? [...boxMenu(box), defaultItems] : undefined;
+    return box ? [...boxMenu(box, this.t), defaultItems] : undefined;
   };
   readonly edges = computed(() => this.doc().edges);
   readonly empty = computed(() => this.doc().nodes.length === 0);
@@ -198,7 +203,7 @@ export class FlowView {
     // An arrow dropped on empty canvas makes a box, joined by the sides it was drawn between.
     const { position, source, ...sides } = (event as CustomEvent<FlowNodeAddDetail & ArrowSides>).detail;
     const id = uuid();
-    this.change(addBox(this.doc(), id, position, source, sides));
+    this.change(addBox(this.doc(), id, position, source, sides, this.t('flow.newBox')));
     // Name it straight away, as in any diagram tool: once Angular has handed the new box to c2-flow and it has drawn
     // it.
     afterNextRender(

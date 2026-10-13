@@ -1,37 +1,38 @@
 /**
  * How a flow box can look: its shape, its paper, its ink and an icon. A box stores the names; the colours are looked up
- * here, so a box keeps its look when the palette is tuned.
+ * here, so a box keeps its look when the palette is tuned. Their names in the menu are messages:
+ * `flow.shape.<name>`, `flow.paper.<name>`, `flow.ink.<name>`, `flow.icon.<icon>`.
  */
 
 export const BOX_SHAPES = [
-  { name: 'rect', label: 'Box' },
-  { name: 'pill', label: 'Pill' },
-  { name: 'diamond', label: 'Diamond' },
-  { name: 'circle', label: 'Circle' },
-  { name: 'note', label: 'Note' },
-  { name: 'slanted', label: 'Slanted' },
+  { name: 'rect' },
+  { name: 'pill' },
+  { name: 'diamond' },
+  { name: 'circle' },
+  { name: 'note' },
+  { name: 'slanted' },
 ] as const;
 export type BoxShape = (typeof BOX_SHAPES)[number]['name'];
 
 /** The board's papers, a shade deeper so a box stands out on the canvas; `night` is dark. */
 export const BOX_PAPERS = [
-  { name: 'cream', label: 'Cream', color: '#f3ead0' },
-  { name: 'yellow', label: 'Yellow', color: '#f5e08a' },
-  { name: 'green', label: 'Green', color: '#cfe3c4' },
-  { name: 'blue', label: 'Blue', color: '#b8ceee' },
-  { name: 'pink', label: 'Pink', color: '#f4b8c3' },
-  { name: 'lilac', label: 'Lilac', color: '#e3c9f0' },
-  { name: 'night', label: 'Night', color: '#232a33' },
+  { name: 'cream', color: '#f3ead0' },
+  { name: 'yellow', color: '#f5e08a' },
+  { name: 'green', color: '#cfe3c4' },
+  { name: 'blue', color: '#b8ceee' },
+  { name: 'pink', color: '#f4b8c3' },
+  { name: 'lilac', color: '#e3c9f0' },
+  { name: 'night', color: '#232a33' },
 ] as const;
 export type BoxPaper = (typeof BOX_PAPERS)[number]['name'];
 
 export const BOX_INKS = [
-  { name: 'dark', label: 'Dark', color: '#2b2a28' },
-  { name: 'blue', label: 'Blue', color: '#1f3f73' },
-  { name: 'green', label: 'Green', color: '#2f6b3c' },
-  { name: 'red', label: 'Red', color: '#a3392b' },
-  { name: 'purple', label: 'Purple', color: '#7a3f9a' },
-  { name: 'light', label: 'Light', color: '#f0ebe0' },
+  { name: 'dark', color: '#2b2a28' },
+  { name: 'blue', color: '#1f3f73' },
+  { name: 'green', color: '#2f6b3c' },
+  { name: 'red', color: '#a3392b' },
+  { name: 'purple', color: '#7a3f9a' },
+  { name: 'light', color: '#f0ebe0' },
 ] as const;
 export type BoxInk = (typeof BOX_INKS)[number]['name'];
 
@@ -85,10 +86,4 @@ export function inkColor(ink: BoxInk | undefined, paper: BoxPaper | undefined): 
     return undefined;
   }
   return paper === 'night' ? '#f0ebe0' : '#2b2a28';
-}
-
-/** "check-circle" → "Check circle", for the icon's name in the menu. */
-export function iconLabel(icon: BoxIcon): string {
-  const words = icon.replaceAll('-', ' ');
-  return words[0].toUpperCase() + words.slice(1);
 }

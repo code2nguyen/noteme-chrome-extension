@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Noteme",
+    "description": "The extension's name, the same in every language."
+  },
+  "appDescription": {
+    "message": "Remplace la page Nouvel onglet par une application de notes personnelle",
+    "description": "The extension's description in Chrome and the Chrome Web Store."
+  }
+}

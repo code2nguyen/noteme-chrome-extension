@@ -2,7 +2,7 @@
   "mcpServers": {
     "c2n": {
       "command": "npx",
-      "args": ["-y", "@c2n/mcp@1.0.4"]
+      "args": ["-y", "@c2n/mcp@1.0.6"]
     }
   }
 }

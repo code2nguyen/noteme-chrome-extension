@@ -1,5 +1,6 @@
 @if (photo(); as current) {
   <img
+    #photoImage
     class="home__photo"
     [src]="current.src"
     alt=""
@@ -11,7 +12,7 @@
 
 <div class="home__layout">
   <header class="home__bar">
-    <a class="home__logo" routerLink="/" aria-label="Noteme home">
+    <a class="home__logo" routerLink="/" [attr.aria-label]="t('home.logo')">
       <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#3498db" d="M22 22H12A10 10 0 0 1 2 12A10 10 0 0 1 12 2A10 10 0 0 1 22 12Z" />
         <path fill="#efc94c" d="M26 22H36A10 10 0 0 0 46 12A10 10 0 0 0 36 2A10 10 0 0 0 26 12Z" />
@@ -19,9 +20,13 @@
         <path fill="#ff726b" d="M26 26H36A10 10 0 0 1 46 36A10 10 0 0 1 36 46A10 10 0 0 1 26 36Z" />
       </svg>
     </a>
-    <a class="home__link" routerLink="/main-board"><c2-feather-layout aria-hidden="true"></c2-feather-layout>Notes</a>
+    <a class="home__link" routerLink="/main-board"
+      ><c2-feather-layout aria-hidden="true"></c2-feather-layout>{{ t('common.notes') }}</a
+    >
     @if (planOn()) {
-      <a class="home__link" routerLink="/plan"><c2-feather-calendar aria-hidden="true"></c2-feather-calendar>Plan</a>
+      <a class="home__link" routerLink="/plan"
+        ><c2-feather-calendar aria-hidden="true"></c2-feather-calendar>{{ t('home.plan') }}</a
+      >
     }
 
     <!-- Searches right here: a note picked opens the board on it, a page or a flow opens full screen. -->
@@ -29,8 +34,8 @@
       <c2-autocomplete
         #searchField
         class="home__search-field"
-        aria-label="Search my notes"
-        placeholder="Search my notes"
+        [attr.aria-label]="t('home.search')"
+        [placeholder]="t('home.search')"
         item-key="id"
         label-field="label"
         description-field="description"
@@ -50,9 +55,9 @@
     </div>
 
     <a class="home__glass-button" routerLink="/main-board" [queryParams]="{ new: 'note' }">
-      <c2-feather-edit-3 aria-hidden="true"></c2-feather-edit-3>Note
+      <c2-phosphor-notepad aria-hidden="true"></c2-phosphor-notepad>{{ t('common.note') }}
     </a>
-    <c2-icon-button class="home__icon-button" aria-label="Settings" (click)="openSettings()">
+    <c2-icon-button class="home__icon-button" [attr.aria-label]="t('common.settings')" (click)="openSettings()">
       <c2-feather-settings></c2-feather-settings>
     </c2-icon-button>
   </header>
@@ -60,7 +65,7 @@
   <!-- Notes on Home, under the Notes link. The carousel and its notes load once the page is up. -->
   @if (notesSetting() !== 'off') {
     @defer (on idle) {
-      <ntm-notes-carousel class="home__notes" [setting]="notesSetting()" [now]="now()" />
+      <ntm-notes-carousel class="home__notes" [setting]="notesSetting()" />
     }
   }
 
@@ -72,7 +77,7 @@
 
     @switch (shortcuts()) {
       @case ('shown') {
-        <nav class="home__sites" aria-label="Your most visited sites">
+        <nav class="home__sites" [attr.aria-label]="t('home.sites')">
           @for (site of sites(); track site.url) {
             <a class="home__site" [href]="site.url" [title]="site.host">
               <span class="home__site-icon" [class.home__site-icon--image]="!!site.icon">
@@ -89,21 +94,22 @@
       }
       @case ('ask') {
         <div class="home__ask">
-          <c2-button class="home__ask-button" (click)="allowShortcuts()">Show my most visited sites</c2-button>
-          <c2-button class="home__ask-later" (click)="declineShortcuts()">Not now</c2-button>
+          <c2-button class="home__ask-button" (click)="allowShortcuts()">{{ t('home.sites.allow') }}</c2-button>
+          <c2-button class="home__ask-later" (click)="declineShortcuts()">{{ t('home.sites.later') }}</c2-button>
         </div>
       }
     }
   </main>
 
-  <footer class="home__footer">
+  <!-- The quote and the credit take light or dark ink from the photo behind them, whatever the theme. -->
+  <footer #footer class="home__footer" [attr.data-tone]="footerTone()">
     @if (quote(); as q) {
       <figure class="home__quote" [attr.lang]="q.lang">
         <blockquote>{{ quoteMarks()[0] }}{{ q.text }}{{ quoteMarks()[1] }}</blockquote>
         <figcaption>{{ q.author }}</figcaption>
       </figure>
     }
-    @if (photo(); as current) {
+    @if (creditedPhoto(); as current) {
       <p class="home__credit">
         @if (current.link) {
           <a [href]="current.link" target="_blank" rel="noopener">{{ current.credit }}</a>
@@ -119,7 +125,7 @@
 @defer (when settingsOpen()) {
   <ntm-settings-panel
     [open]="settingsOpen()"
-    [photo]="photo()"
+    [photo]="creditedPhoto()"
     (closed)="closeSettings()"
     (changePhoto)="changePhoto()"
   />

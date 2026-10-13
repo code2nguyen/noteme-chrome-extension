@@ -3,8 +3,9 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 
+import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
-import { editedLabel, pageMarkdownToText } from '../services/utils';
+import { pageMarkdownToText } from '../services/utils';
 import { ArtBoardItem } from '../store/models';
 import { PAGE_EXCERPT_LENGTH } from './card-rows';
 
@@ -18,15 +19,18 @@ import { PAGE_EXCERPT_LENGTH } from './card-rows';
     <a class="page-card" [routerLink]="['/page', item().id]" [queryParams]="item().boardId ? {} : { from: 'archive' }">
       <span class="page-card__kind">
         <c2-feather-file-text aria-hidden="true"></c2-feather-file-text>
-        Page · {{ edited() }}
+        <span>{{ t('common.page') }} · <c2-relative-time [date]="edited()"></c2-relative-time></span>
       </span>
-      <span class="page-card__title" [class.page-card__title--untitled]="!title()">{{ title() || 'Untitled' }}</span>
+      <span class="page-card__title" [class.page-card__title--untitled]="!title()">{{
+        title() || t('board.page.untitled')
+      }}</span>
       <span class="page-card__excerpt">{{ excerpt() }}</span>
     </a>
   `,
   styleUrl: './page-card.scss',
 })
 export class PageCard {
+  readonly t = inject(I18n).t;
   private readonly dataService = inject(DataService);
 
   readonly item = input.required<ArtBoardItem>();
@@ -48,6 +52,6 @@ export class PageCard {
     const item = this.item();
     const data = this.data();
     // An empty placeholder (no data stored yet) carries the time it was made, not when the note was edited.
-    return editedLabel((data?.empty ? undefined : data?.modifiedDate) ?? item.dataModifiedDate ?? item.modifiedDate);
+    return (data?.empty ? undefined : data?.modifiedDate) ?? item.dataModifiedDate ?? item.modifiedDate;
   });
 }

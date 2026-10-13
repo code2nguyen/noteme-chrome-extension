@@ -2,24 +2,26 @@
   @if (notes.length > 0) {
     <c2-carousel
       class="notes"
-      label="Your notes"
-      previous-label="Previous note"
-      next-label="Next note"
-      slide-label-template="{index} of {count}"
+      [label]="t('home.notes')"
+      [previousLabel]="t('home.notes.previous')"
+      [nextLabel]="t('home.notes.next')"
+      [slideLabelTemplate]="t('home.notes.slide')"
     >
-      @for (note of notes; track note.id; let index = $index) {
+      @for (note of notes; track note.id) {
         <a
           class="note"
           routerLink="/main-board"
           [queryParams]="{ show: note.id }"
-          [attr.aria-label]="note.title + ', open in Notes'"
+          (click)="open(note.id)"
+          [attr.aria-label]="t('home.notes.open', note.title)"
         >
           <span class="note__paper" [attr.data-paper]="note.paper">
             <span class="note__head">
               @if (note.pinned && setting() !== 'edited') {
-                <c2-phosphor-push-pin aria-hidden="true"></c2-phosphor-push-pin>Pinned
+                <c2-phosphor-push-pin aria-hidden="true"></c2-phosphor-push-pin>{{ t('home.notes.pinned') }}
               } @else {
-                <c2-feather-clock aria-hidden="true"></c2-feather-clock>Edited {{ note.editedLabel }}
+                <c2-feather-clock aria-hidden="true"></c2-feather-clock>
+                <c2-relative-time [date]="note.edited" [locale]="locale()"></c2-relative-time>
               }
             </span>
             <span class="note__title">{{ note.title }}</span>
@@ -27,16 +29,10 @@
               <span class="note__text">{{ note.text }}</span>
             }
           </span>
-          <span class="note__foot">
-            <span class="note__count">{{ index + 1 }} / {{ notes.length }}</span>
-            <span class="note__open"
-              >Open in Notes<c2-feather-arrow-right aria-hidden="true"></c2-feather-arrow-right
-            ></span>
-          </span>
         </a>
       }
     </c2-carousel>
   } @else if (setting() === 'pinned') {
-    <p class="notes__empty">No pinned notes yet. Pin one in Notes to see it here.</p>
+    <p class="notes__empty">{{ t('home.notes.none') }}</p>
   }
 }

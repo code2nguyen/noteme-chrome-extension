@@ -4,10 +4,10 @@
     class="todo__list"
     customizable
     heading-editable
-    heading-placeholder="Untitled list"
+    [attr.heading-placeholder]="t('common.untitled.list')"
     actions-placement="end"
     progress="ring"
-    placeholder="Add a task — a note after a dash"
+    [attr.placeholder]="t('board.list.placeholder')"
     [heading]="title()"
     [tasks]="tasks()"
     [look]="look()"
@@ -20,8 +20,8 @@
       slot="actions"
       class="todo__actions todo__move"
       [id]="'move-' + item().id"
-      aria-label="Move to-do list"
-      tooltip="Move"
+      [attr.aria-label]="t('board.list.move')"
+      [tooltip]="t('board.move')"
     >
       <c2-feather-move></c2-feather-move>
     </c2-icon-button>
@@ -29,34 +29,34 @@
       slot="actions"
       class="todo__actions"
       placement="bottom-end"
-      aria-label="To-do list actions"
+      [attr.aria-label]="t('board.list.actions')"
       (menu-select)="onMenu($event)"
     >
-      <c2-icon-button slot="trigger" aria-label="To-do list actions" tooltip="More">
+      <c2-icon-button slot="trigger" [attr.aria-label]="t('board.list.actions')" [tooltip]="t('board.more')">
         <c2-feather-more-vertical></c2-feather-more-vertical>
       </c2-icon-button>
       <c2-menu-item value="rename">
         <c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>
-        Rename
+        {{ t('board.rename') }}
       </c2-menu-item>
       @if (pinned()) {
         <c2-menu-item value="unpin">
           <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
-          Unpin from the board
+          {{ t('board.unpin') }}
         </c2-menu-item>
       } @else {
         <c2-menu-item value="pin">
           <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
-          Pin to the board
+          {{ t('board.pin') }}
         </c2-menu-item>
       }
       <c2-menu-item value="archive">
         <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
-        Archive
+        {{ t('board.toArchive') }}
       </c2-menu-item>
       <c2-menu-item value="delete" destructive>
         <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-        Delete this list
+        {{ t('board.list.delete') }}
       </c2-menu-item>
     </c2-menu>
   </c2-todo-list>

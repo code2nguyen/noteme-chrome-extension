@@ -2,6 +2,7 @@ import '@c2n/components/menu';
 import '@c2n/components/menu/menu-item';
 import './flow-icons';
 
+import type { I18n } from '../i18n/i18n.service';
 import type { FlowBox } from './flow-doc';
 import {
   BOX_ICONS,
@@ -12,7 +13,6 @@ import {
   BoxInk,
   BoxPaper,
   BoxShape,
-  iconLabel,
   isBoxIcon,
   isBoxInk,
   isBoxPaper,
@@ -22,7 +22,8 @@ import {
 /**
  * The right-click menu of a flow box: its shape, paper and ink as rows of choices that apply at once (the menu stays
  * open to try them), an icon picker, and Duplicate. c2-flow renders the rows in its own shadow root, out of reach of
- * the app's stylesheets, so they are built here as elements and the swatches carry their colour inline.
+ * the app's stylesheets, so they are built here as elements and the swatches carry their colour inline. Built each
+ * time the menu opens, with the text in the language of the moment (`t`).
  */
 
 /** What a row of the box menu asks for, read from its value (`box:<what>[:<name>]`). */
@@ -109,14 +110,14 @@ function iconElement(icon: BoxIcon | 'smiley' | 'prohibit' | 'copy', slot?: stri
 }
 
 /** The rows of a box's menu; the flow's own Rename and Delete follow them. */
-export function boxMenu(box: FlowBox): Node[] {
+export function boxMenu(box: FlowBox, t: I18n['t']): Node[] {
   const shape = box.shape ?? 'rect';
   const iconRows: HTMLElement[] = [];
   for (let start = 0; start < BOX_ICONS.length; start += 6) {
     iconRows.push(
       element(
         'c2-menu-row',
-        { 'aria-label': 'Icons' },
+        { 'aria-label': t('flow.menu.icons') },
         ...BOX_ICONS.slice(start, start + 6).map((icon) =>
           element(
             'c2-menu-item',
@@ -124,7 +125,7 @@ export function boxMenu(box: FlowBox): Node[] {
               type: 'radio',
               name: 'box-icon',
               value: `box:icon:${icon}`,
-              label: iconLabel(icon),
+              label: t(`flow.icon.${icon}`),
               checked: box.icon === icon,
             },
             iconElement(icon, 'prefix-icon'),
@@ -135,51 +136,63 @@ export function boxMenu(box: FlowBox): Node[] {
   }
 
   return [
-    element('h6', {}, 'Shape'),
+    element('h6', {}, t('flow.menu.shape')),
     element(
       'c2-menu-row',
-      { 'aria-label': 'Shape' },
-      ...BOX_SHAPES.map(({ name, label }) => choice('shape', name, label, shape === name, shapeGlyph(name))),
+      { 'aria-label': t('flow.menu.shape') },
+      ...BOX_SHAPES.map(({ name }) => choice('shape', name, t(`flow.shape.${name}`), shape === name, shapeGlyph(name))),
     ),
-    element('h6', {}, 'Paper'),
+    element('h6', {}, t('flow.menu.paper')),
     element(
       'c2-menu-row',
-      { 'aria-label': 'Paper' },
-      ...BOX_PAPERS.map(({ name, label, color }) =>
-        choice('paper', name, label, box.paper === name, swatch(`background:${color}`)),
+      { 'aria-label': t('flow.menu.paper') },
+      ...BOX_PAPERS.map(({ name, color }) =>
+        choice('paper', name, t(`flow.paper.${name}`), box.paper === name, swatch(`background:${color}`)),
       ),
-      choice('paper', 'none', 'No paper', !box.paper, swatch('border:1.5px dashed currentColor;box-shadow:none')),
+      choice(
+        'paper',
+        'none',
+        t('flow.menu.noPaper'),
+        !box.paper,
+        swatch('border:1.5px dashed currentColor;box-shadow:none'),
+      ),
     ),
-    element('h6', {}, 'Text'),
+    element('h6', {}, t('flow.menu.text')),
     element(
       'c2-menu-row',
-      { 'aria-label': 'Text colour' },
-      choice('ink', 'auto', 'Auto', !box.ink, swatch('background:conic-gradient(#f0ebe0 0 50%, #2b2a28 0)')),
-      ...BOX_INKS.map(({ name, label, color }) =>
-        choice('ink', name, label, box.ink === name, swatch(`background:${color}`)),
+      { 'aria-label': t('flow.menu.textColour') },
+      choice(
+        'ink',
+        'auto',
+        t('flow.menu.auto'),
+        !box.ink,
+        swatch('background:conic-gradient(#f0ebe0 0 50%, #2b2a28 0)'),
+      ),
+      ...BOX_INKS.map(({ name, color }) =>
+        choice('ink', name, t(`flow.ink.${name}`), box.ink === name, swatch(`background:${color}`)),
       ),
     ),
     element('hr'),
     element(
       'c2-menu-item',
-      { label: 'Icon' },
+      { label: t('flow.menu.icon') },
       iconElement('smiley', 'prefix-icon'),
-      'Icon',
-      element('span', { slot: 'shortcut' }, box.icon ? iconLabel(box.icon) : 'None'),
+      t('flow.menu.icon'),
+      element('span', { slot: 'shortcut' }, box.icon ? t(`flow.icon.${box.icon}`) : t('flow.menu.none')),
       element(
         'c2-menu',
-        { slot: 'submenu', 'aria-label': 'Icon' },
+        { slot: 'submenu', 'aria-label': t('flow.menu.icon') },
         ...iconRows,
         element('hr'),
         element(
           'c2-menu-item',
           { value: 'box:icon:none', disabled: !box.icon },
           iconElement('prohibit', 'prefix-icon'),
-          'No icon',
+          t('flow.menu.noIcon'),
         ),
       ),
     ),
-    element('c2-menu-item', { value: 'box:duplicate' }, iconElement('copy', 'prefix-icon'), 'Duplicate'),
+    element('c2-menu-item', { value: 'box:duplicate' }, iconElement('copy', 'prefix-icon'), t('flow.menu.duplicate')),
     element('hr'),
   ];
 }

@@ -26,8 +26,8 @@ const items = [
   note('e'),
 ];
 const data = Object.fromEntries(items.map((item, index) => [item.id, written(item.id, index + 1)]));
-const ids = (setting: Parameters<typeof homeNotes>[2], list = items, notes = data) =>
-  homeNotes(list, notes, setting).map((shown) => shown.id);
+const ids = (setting: Parameters<typeof homeNotes>[2], list = items, notes = data, opened: string | null = null) =>
+  homeNotes(list, notes, setting, opened).map((shown) => shown.id);
 
 describe('homeNotes', () => {
   it('shows the pinned notes first, newest pin first, then the others by last edit (Auto)', () => {
@@ -71,9 +71,25 @@ describe('homeNotes', () => {
       lines: ['first', 'second'],
       paper: 'blue',
       pinned: false,
-      kind: 'Note',
     });
-    const [list] = homeNotes([note('a', { colorIndex: 3 }, ExtensionId.TodoList)], data, 'auto');
-    expect(list.paper).toBe('default');
+  });
+
+  it('puts the note last opened from Home first, in every order, while it is among the notes shown', () => {
+    expect(ids('auto', items, data, 'c')).toEqual(['c', 'b', 'd', 'e', 'a']);
+    expect(ids('edited', items, data, 'a')).toEqual(['a', 'e', 'd', 'c', 'b']);
+    expect(ids('pinned', items, data, 'd')).toEqual(['d', 'b']);
+    // Not pinned, so not on Pinned; gone from the board, so nowhere.
+    expect(ids('pinned', items, data, 'c')).toEqual(['b', 'd']);
+    expect(ids('auto', items, data, 'gone')).toEqual(['b', 'd', 'e', 'c', 'a']);
+  });
+
+  it('shows quick notes only: to-do lists, pages and flows stay on the board, pinned or not', () => {
+    const others = [
+      note('list', { starred: true, starredDate: day(30) }, ExtensionId.TodoList),
+      note('page', {}, ExtensionId.Page),
+      note('flow', {}, ExtensionId.Flow),
+    ];
+    const notes = { ...data, ...Object.fromEntries(others.map((item) => [item.id, written(item.id, 9)])) };
+    expect(ids('auto', [...items, ...others], notes)).toEqual(['b', 'd', 'e', 'c', 'a']);
   });
 });

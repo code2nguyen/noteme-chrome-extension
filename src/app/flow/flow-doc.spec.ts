@@ -58,6 +58,11 @@ describe('flow document', () => {
     expect(addBox(doc, 'c', at(0, 0), 'missing').edges).toHaveLength(1);
   });
 
+  it('names a new box in the language it is given, leaving the boxes already there as they are', () => {
+    const doc = addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0), 'a', {}, 'Nouvelle boîte');
+    expect(doc.nodes.map((node) => node.label)).toEqual([NEW_BOX_LABEL, 'Nouvelle boîte']);
+  });
+
   it('renames, connects once, disconnects and deletes with the arrows that touch it', () => {
     let doc = addBox(addBox(addBox(EMPTY_FLOW, 'a', at(0, 0)), 'b', at(1, 0)), 'c', at(2, 0));
     doc = renameBox(doc, 'a', 'Weather ok?');

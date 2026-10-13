@@ -32,12 +32,6 @@
   font-size: 15px;
 }
 
-.settings__hint {
-  display: block;
-  font-size: 13px;
-  color: var(--c2-theme--color-on-surface-variant);
-}
-
 .settings__select {
   // Next to its label when there is room, on a line of its own in a narrow sheet.
   flex: 0 1 240px;
@@ -77,11 +71,5 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
-  color: var(--c2-theme--color-on-surface-variant);
-}
-
-.settings__footer {
-  margin: 0;
-  font-size: 13px;
   color: var(--c2-theme--color-on-surface-variant);
 }

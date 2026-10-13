@@ -38,7 +38,11 @@
   z-index: 2;
   border-radius: inherit;
   pointer-events: none;
-  animation: todo-beam 6.6s ease-out forwards;
+  // Under the running light, a ring and a soft glow in the accent colour, so the note stands out at a glance.
+  box-shadow:
+    inset 0 0 0 2px var(--ntm-accent),
+    inset 0 0 28px color-mix(in srgb, var(--ntm-accent) 30%, transparent);
+  animation: todo-beam 3.6s ease-out forwards;
 }
 
 .todo__beam-light {
