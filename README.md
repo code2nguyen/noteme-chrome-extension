@@ -57,16 +57,19 @@ npm run c2n:unlink   # back to the published packages
 
 ## Release
 
+Two branches: `develop`, the default, takes the pull requests; `main` holds the released versions only, and only the
+release workflow moves it.
+
 CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the changelog check, the production
-build and both Playwright suites (Chromium only) on every pull request and push to `master`, and keeps the packaged zip as the `extension` artifact.
+build and both Playwright suites (Chromium only) on every pull request and push to `develop` or `main`, and keeps the packaged zip as the `extension` artifact.
 
 Releasing takes two runs from the Actions tab (**Run workflow**), so a version can wait on GitHub before it goes to
 the store:
 
-1. **Release a new version** (`.github/workflows/release.yml`), on `master`, with a choice of patch, minor or major.
+1. **Release a new version** (`.github/workflows/release.yml`), on `develop`, with a choice of patch, minor or major.
    It runs the same checks, then `npm version <bump>`: package.json and `src/manifest.json` get the new version and
    `CHANGELOG.md` the commits since the last release, committed as `<version>` and tagged `v<version>`. It pushes both
-   to `master`, then creates a GitHub release with `noteme-<version>.zip` and that version's notes. Nothing to edit by
+   to `develop`, fast-forwards `main` to it, then creates a GitHub release with `noteme-<version>.zip` and that version's notes. Nothing to edit by
    hand, the changelog included; `git pull` afterwards.
 2. **Publish to the Chrome Web Store** (`.github/workflows/publish.yml`) sends a release's zip, the one built and
    tested in step 1, to the store: the latest release, or the tag you type (`v3.0.1`). Then submit for review, staged

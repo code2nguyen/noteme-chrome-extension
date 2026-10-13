@@ -1,8 +1,8 @@
 name: Release a new version
 
-# Run workflow in the Actions tab, on master: the checks, then `npm version <bump>` (package.json, src/manifest.json
-# and CHANGELOG.md, committed as "<version>" and tagged v<version>), pushed to master, and a GitHub release with the
-# zip and that version's notes. Nothing reaches the store: "Publish to the Chrome Web Store" sends a release there.
+# Run workflow in the Actions tab, on develop: the checks, then `npm version <bump>` (package.json, src/manifest.json
+# and CHANGELOG.md, committed as "<version>" and tagged v<version>), pushed to develop with main fast-forwarded to it,
+# and a GitHub release with the zip and that version's notes. Nothing reaches the store: "Publish to the Chrome Web Store" sends a release there.
 on:
   workflow_dispatch:
     inputs:
@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   check:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/develop' }}
     uses: ./.github/workflows/ci.yml
 
   release:
@@ -67,11 +67,12 @@ jobs:
           node scripts/changelog.ts --notes "$VERSION" > dist/notes.md
           { echo "## Noteme $VERSION"; echo; cat dist/notes.md; } >> "$GITHUB_STEP_SUMMARY"
 
-      # Atomic: the commit and the tag land together, or neither does when master moved since the run started.
+      # Atomic: the commit, the tag and main land together, or none does when develop moved since the run started or
+      # main has a commit develop lacks (main only ever fast-forwards to a release).
       - name: Push
         env:
           VERSION: ${{ steps.bump.outputs.version }}
-        run: git push --atomic origin HEAD:master "v$VERSION"
+        run: git push --atomic origin HEAD:develop HEAD:main "v$VERSION"
 
       - name: GitHub release
         env:
