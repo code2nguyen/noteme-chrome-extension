@@ -26,6 +26,7 @@ import { formatDate, formatTime, hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
 import { BackgroundOptions, BackgroundService, ShownPhoto } from './background.service';
+import { NotesCarousel } from './notes-carousel';
 import { Quote, QUOTE_MARKS } from './quotes';
 import { QuoteService } from './quotes.service';
 import { Site, TopSitesService } from './top-sites.service';
@@ -40,7 +41,7 @@ type ShortcutsState = 'hidden' | 'ask' | 'shown';
   selector: 'ntm-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [RouterLink, SettingsPanel],
+  imports: [RouterLink, SettingsPanel, NotesCarousel],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   host: {
@@ -55,7 +56,7 @@ export class Home {
   private readonly router = inject(Router);
   private readonly dataService = inject(DataService);
   private readonly store = inject(Store);
-  private readonly now = signal(new Date());
+  readonly now = signal(new Date());
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
 
   readonly settings = this.settingsService.settings;
@@ -100,6 +101,8 @@ export class Home {
   /** The search shortcut as this keyboard writes it; onKey takes both. */
   readonly searchKey = searchShortcut();
 
+  /** Which notes the carousel under Notes shows, if any. */
+  readonly notesSetting = computed(() => this.settings().homeNotes);
   readonly settingsOpen = toSignal(inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,
   });

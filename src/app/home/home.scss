@@ -153,6 +153,26 @@
   --c2-icon-button__icon__hover--color: var(--ntm-home-ink);
 }
 
+// Notes on Home: the carousel under the Notes link, beside the clock on a wide window and above it on a narrower one.
+.home__notes {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 16px;
+}
+
+@media (min-width: 1180px) {
+  // Under the Notes link, clear of the clock and the shortcuts, which stay centred on the page.
+  .home__notes {
+    position: absolute;
+    top: 76px;
+    left: 32px;
+    width: 260px;
+    margin: 0;
+  }
+}
+
 .home__main {
   flex: 1;
   display: flex;

@@ -22,6 +22,13 @@ describe('parseSettings', () => {
     expect(parseSettings({ features: 'plan' }).features).toEqual([]);
   });
 
+  it('shows notes on Home by default, in a known order only', () => {
+    expect(parseSettings(null).homeNotes).toBe('auto');
+    expect(parseSettings({ homeNotes: 'pinned' }).homeNotes).toBe('pinned');
+    expect(parseSettings({ homeNotes: 'off' }).homeNotes).toBe('off');
+    expect(parseSettings({ homeNotes: 'random' }).homeNotes).toBe('auto');
+  });
+
   it('does not sync until switched on', () => {
     expect(parseSettings(null).sync).toBe(false);
     expect(parseSettings({ sync: true }).sync).toBe(true);

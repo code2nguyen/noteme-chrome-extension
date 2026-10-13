@@ -502,13 +502,14 @@ export class Board {
    */
   pin(item: ArtBoardItem, fromOlder = false): void {
     if (!fromOlder) {
-      this.dataService.updateArtBoardItem({ ...item, starred: true });
+      this.dataService.updateArtBoardItem({ ...item, starred: true, starredDate: new Date().toISOString() });
       return;
     }
     const previous = item.gridPosition;
     this.dataService.updateArtBoardItem({
       ...item,
       starred: true,
+      starredDate: new Date().toISOString(),
       gridPosition: { ...item.gridPosition, order: this.minOrder() - 1 },
     });
     this.olderOpen.set(false);
@@ -529,6 +530,7 @@ export class Board {
         this.dataService.updateArtBoardItem({
           ...current,
           starred: false,
+          starredDate: undefined,
           gridPosition: { ...current.gridPosition, order: previous.order },
         });
       });
@@ -538,7 +540,7 @@ export class Board {
   /** Unpin a note. It stays on the board until the next visit, if it is not among the recent ones: not gone from under the pointer. */
   unpin(item: ArtBoardItem): void {
     this.reveal(item.id);
-    this.dataService.updateArtBoardItem({ ...item, starred: false });
+    this.dataService.updateArtBoardItem({ ...item, starred: false, starredDate: undefined });
   }
 
   /** What each message's Undo does, by the message's id. */

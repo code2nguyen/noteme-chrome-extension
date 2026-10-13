@@ -8,6 +8,11 @@ export type ThemeSetting = 'auto' | 'light' | 'dark';
 export type ClockSetting = '24h' | '12h';
 export type DateFormat = 'long' | 'short' | 'numeric';
 export type WeekStart = 'monday' | 'sunday';
+/**
+ * Which notes the carousel on Home shows, in which order. Auto: pinned ones first (newest pin first), then the rest by
+ * last edit. Pinned: pinned ones only. Edited: all of them by last edit. Off: no carousel.
+ */
+export type HomeNotesSetting = 'off' | 'auto' | 'pinned' | 'edited';
 
 /** Optional parts of Noteme, switched on or off in Settings. Plan is the first; more will join it. */
 export type Feature = 'plan';
@@ -32,6 +37,8 @@ export interface Settings {
   photoChange: PhotoChange;
   quote: boolean;
   shortcuts: boolean;
+  /** Notes in a carousel on Home, under the Notes link. */
+  homeNotes: HomeNotesSetting;
   weekStart: WeekStart;
   /** The optional features switched on; may be none. */
   features: Feature[];
@@ -52,6 +59,7 @@ export const DEFAULT_SETTINGS: Settings = {
   photoChange: 'day',
   quote: true,
   shortcuts: true,
+  homeNotes: 'auto',
   weekStart: 'monday',
   // Every feature is opt-in: switched on in Settings.
   features: [],
@@ -64,6 +72,7 @@ const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   clock: ['24h', '12h'],
   dateFormat: ['long', 'short', 'numeric'],
   photoChange: ['day', 'hour'],
+  homeNotes: ['off', 'auto', 'pinned', 'edited'],
   weekStart: ['monday', 'sunday'],
 };
 

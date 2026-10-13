@@ -57,6 +57,13 @@
     </c2-icon-button>
   </header>
 
+  <!-- Notes on Home, under the Notes link. The carousel and its notes load once the page is up. -->
+  @if (notesSetting() !== 'off') {
+    @defer (on idle) {
+      <ntm-notes-carousel class="home__notes" [setting]="notesSetting()" [now]="now()" />
+    }
+  }
+
   <main class="home__main">
     <div class="home__clock">
       <p class="home__time">{{ time() }}</p>

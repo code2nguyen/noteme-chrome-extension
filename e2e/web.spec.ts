@@ -1415,3 +1415,85 @@ test('Plan is off until switched on in Settings, and switched off it leaves the 
   await page.keyboard.press('Escape');
   await expect(page.locator('ntm-board .navbar__link', { hasText: 'Plan' })).toHaveCount(0);
 });
+
+test('Home shows the notes in a carousel under Notes, in the order chosen in Settings, and opens one on the board', async ({
+  page,
+}) => {
+  const minutes = (n: number) => new Date(Date.now() - n * 60_000).toISOString();
+  const notes = [
+    { id: 'old-pin', text: 'Wi-Fi password\nhoa-sua-2026', edited: 600, pinned: minutes(300) },
+    { id: 'new-pin', text: 'Launch checklist\n- [ ] screenshots', edited: 120, pinned: minutes(5) },
+    { id: 'recent', text: 'Groceries\n- oat milk', edited: 2 },
+    { id: 'older', text: 'Book ideas', edited: 60 },
+    { id: 'blank', text: '', edited: 1 },
+  ];
+  await page.evaluate((notes) => {
+    const set = (key: string, value: unknown) => localStorage.setItem(`noteme-dev:${key}`, JSON.stringify(value));
+    const ids = notes.map((note) => note.id);
+    set('_ART_BOARD_ITEM__IDS', ids);
+    set('_ART_BOARD__ART_BOARD_ITEM_IDS__defaultArtBoard', ids);
+    notes.forEach((note, order) => {
+      const date = new Date(Date.now() - note.edited * 60_000).toISOString();
+      set(`ART_BOARD_ITEM__${note.id}`, {
+        id: note.id,
+        boardId: 'defaultArtBoard',
+        extensionId: 'ntm-text-note-element',
+        colorIndex: 0,
+        gridPosition: { order, rows: 10, screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 } },
+        properties: {},
+        modifiedDate: date,
+        ...(note.pinned ? { starred: true, starredDate: note.pinned } : {}),
+      });
+      set(`ITEM_DATA__${note.id}`, {
+        id: note.id,
+        dataType: 'markdown',
+        empty: !note.text,
+        data: note.text,
+        createdDate: date,
+        modifiedDate: date,
+      });
+    });
+  }, notes);
+  await page.reload();
+
+  const titles = page.locator('ntm-notes-carousel .note__title');
+  // Auto, the default: pinned notes first, newest pin first, then the others by last edit; an empty note is left out.
+  await expect(titles).toHaveText(['Launch checklist', 'Wi-Fi password', 'Groceries', 'Book ideas']);
+  await expect(page.locator('ntm-notes-carousel .note__head').first()).toContainText('Pinned');
+  await expect(page.locator('ntm-notes-carousel .note__count').first()).toHaveText('1 / 4');
+
+  // Edited: every note by last edit, pins ignored.
+  await page.goto('/#/?settings=1');
+  await page
+    .locator('ntm-settings-panel c2-button-group[aria-labelledby="settings-home-notes"] c2-button', {
+      hasText: 'Edited',
+    })
+    .click();
+  await expect(titles).toHaveText(['Groceries', 'Book ideas', 'Launch checklist', 'Wi-Fi password']);
+  // Pinned: the pinned notes only.
+  await page
+    .locator('ntm-settings-panel c2-button-group[aria-labelledby="settings-home-notes"] c2-button', {
+      hasText: 'Pinned',
+    })
+    .click();
+  await expect(titles).toHaveText(['Launch checklist', 'Wi-Fi password']);
+  // Off: no carousel.
+  await page
+    .locator('ntm-settings-panel c2-button-group[aria-labelledby="settings-home-notes"] c2-button', { hasText: 'Off' })
+    .click();
+  await expect(page.locator('ntm-notes-carousel')).toHaveCount(0);
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('noteme-settings') ?? '{}').homeNotes))
+    .toBe('off');
+
+  // Back to Auto, the second note opens the board on it.
+  await page
+    .locator('ntm-settings-panel c2-button-group[aria-labelledby="settings-home-notes"] c2-button', { hasText: 'Auto' })
+    .click();
+  await page.keyboard.press('Escape');
+  await page.locator('ntm-notes-carousel c2-carousel').hover();
+  await page.locator('ntm-notes-carousel c2-carousel').getByRole('button', { name: 'Next note' }).click();
+  await page.locator('ntm-notes-carousel .note', { hasText: 'Wi-Fi password' }).click();
+  await expect(page.locator('ntm-board')).toBeVisible();
+  await expect(page).toHaveURL(/#\/main-board$/);
+});

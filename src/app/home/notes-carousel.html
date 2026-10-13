@@ -1,0 +1,42 @@
+@if (slides(); as notes) {
+  @if (notes.length > 0) {
+    <c2-carousel
+      class="notes"
+      label="Your notes"
+      previous-label="Previous note"
+      next-label="Next note"
+      slide-label-template="{index} of {count}"
+    >
+      @for (note of notes; track note.id; let index = $index) {
+        <a
+          class="note"
+          routerLink="/main-board"
+          [queryParams]="{ show: note.id }"
+          [attr.aria-label]="note.title + ', open in Notes'"
+        >
+          <span class="note__paper" [attr.data-paper]="note.paper">
+            <span class="note__head">
+              @if (note.pinned && setting() !== 'edited') {
+                <c2-phosphor-push-pin aria-hidden="true"></c2-phosphor-push-pin>Pinned
+              } @else {
+                <c2-feather-clock aria-hidden="true"></c2-feather-clock>Edited {{ note.editedLabel }}
+              }
+            </span>
+            <span class="note__title">{{ note.title }}</span>
+            @if (note.text) {
+              <span class="note__text">{{ note.text }}</span>
+            }
+          </span>
+          <span class="note__foot">
+            <span class="note__count">{{ index + 1 }} / {{ notes.length }}</span>
+            <span class="note__open"
+              >Open in Notes<c2-feather-arrow-right aria-hidden="true"></c2-feather-arrow-right
+            ></span>
+          </span>
+        </a>
+      }
+    </c2-carousel>
+  } @else if (setting() === 'pinned') {
+    <p class="notes__empty">No pinned notes yet. Pin one in Notes to see it here.</p>
+  }
+}

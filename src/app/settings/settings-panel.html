@@ -53,6 +53,24 @@
       Quote of the day
       <span slot="description">A short quote under the clock, a new one each day</span>
     </c2-switch>
+    <div class="settings__row">
+      <span id="settings-home-notes"
+        >Notes on Home<span class="settings__hint">Your notes under Notes, one at a time</span></span
+      >
+      <c2-button-group
+        selection="single"
+        appearance="segmented"
+        size="s"
+        aria-labelledby="settings-home-notes"
+        [value]="settings().homeNotes"
+        (change)="choose('homeNotes', $event)"
+      >
+        <c2-button value="off">Off</c2-button>
+        <c2-button value="auto">Auto</c2-button>
+        <c2-button value="pinned">Pinned</c2-button>
+        <c2-button value="edited">Edited</c2-button>
+      </c2-button-group>
+    </div>
     @if (shortcutsSupported) {
       <c2-switch class="settings__switch" [checked]="settings().shortcuts" (change)="toggleShortcuts($event)">
         Site shortcuts
