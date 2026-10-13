@@ -97,6 +97,19 @@ test('home shows the clock, a photo and the quote, and opens the board', async (
   await shot(page, '02-board-empty');
 });
 
+test('the clock opens the notes, and only the clock: a click beside it stays home', async ({ page }) => {
+  const clock = page.locator('.home__clock');
+  const box = (await clock.boundingBox())!;
+  const main = (await page.locator('.home__main').boundingBox())!;
+  // As wide as its text, not the whole column, so the shortcuts and the space around it are not part of it.
+  expect(box.width).toBeLessThan(main.width / 2);
+  await page.mouse.click(box.x - 40, box.y + box.height / 2);
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height + 20);
+  await expect(page).toHaveURL(/#\/$/);
+  await clock.click();
+  await expect(page).toHaveURL(/#\/main-board$/);
+});
+
 test('a note is focused on creation, saved and restored after a reload', async ({ page }) => {
   await openBoard(page);
   const note = await newNote(page);
