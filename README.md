@@ -58,7 +58,9 @@ npm run c2n:unlink   # back to the published packages
 ## Release
 
 Two branches: `develop`, the default, takes the pull requests; `main` holds the released versions only, and only the
-release workflow moves it.
+release workflow moves it: the "main: releases only" ruleset rejects every other push to `main`, and the workflow
+pushes with a deploy key (write access, its private key in the `RELEASE_DEPLOY_KEY` secret) that the ruleset lets
+through.
 
 CI (`.github/workflows/ci.yml`) runs lint, format, type-check, the unit tests, the changelog check, the production
 build and both Playwright suites (Chromium only) on every pull request and push to `develop` or `main`, and keeps the packaged zip as the `extension` artifact.

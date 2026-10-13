@@ -32,11 +32,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write # the version commit, its tag and the GitHub release
+      contents: write # the GitHub release
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # the changelog is built from the whole history
+          # A deploy key with write access pushes the version commit and tag: the "main: releases only" ruleset lets
+          # only that key move main.
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
       - uses: actions/setup-node@v5
         with:
           node-version: 24
