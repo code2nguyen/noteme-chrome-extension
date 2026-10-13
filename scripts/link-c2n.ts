@@ -1,7 +1,7 @@
 // Points the installed c2n packages at a local checkout of the web-components repo, to try component changes in the
 // app before they are published. package.json and the lockfile stay on the published versions.
 //
-//   node scripts/link-c2n.ts             -> node_modules/@c2n/{components,feather-icons,theme} link to ../web-components
+//   node scripts/link-c2n.ts             -> node_modules/@c2n/{components,core,feather-icons,theme} link to ../web-components
 //   node scripts/link-c2n.ts --unlink    -> back to the published packages (npm install)
 //
 // C2N_REPO overrides where the checkout is. Build it first, and again after each change (wireit skips what is fresh):
@@ -15,6 +15,8 @@ const root = resolve(import.meta.dirname, '..');
 const repo = resolve(root, process.env['C2N_REPO'] ?? '../web-components');
 const links = {
   components: 'packages/umbrella',
+  // The translations registry: the app and the components must share one copy.
+  core: 'packages/core',
   'feather-icons': 'packages/icons/feather-icons',
   // The theme stylesheet @c2n/components/theme.css imports, with every component's token mapping.
   theme: 'packages/tools/theme',
