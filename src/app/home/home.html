@@ -70,10 +70,12 @@
   }
 
   <main class="home__main">
-    <div class="home__clock">
+    <!-- Opens the notes. Only the time and the date are the link, sized to their text, so a click beside them or on
+         the shortcuts below never lands on it. -->
+    <a class="home__clock" routerLink="/main-board" [title]="t('home.clock.open')">
       <p class="home__time">{{ time() }}</p>
       <p class="home__date">{{ date() }}</p>
-    </div>
+    </a>
 
     @switch (shortcuts()) {
       @case ('shown') {
