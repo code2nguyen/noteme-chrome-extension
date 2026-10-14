@@ -346,6 +346,13 @@ test('the New menu opens with the mouse resting on New, and leaves the focus in 
   await openBoard(page);
   const menu = page.locator('c2-menu.navbar__new');
   const isOpen = () => menu.evaluate((element) => (element as HTMLElement & { open: boolean }).open);
+  // With nothing focused, the menu does not keep the focus either: a note about to take it (one "+ Note" on Home
+  // creates, with the pointer left where New appears) still can.
+  await page.locator('.navbar__new-button').hover();
+  await expect.poll(isOpen).toBe(true);
+  await expect.poll(() => focusedTag(page)).toBe('body');
+  await page.mouse.move(400, 600);
+  await expect.poll(isOpen).toBe(false);
   await page.keyboard.press('n');
   await expect.poll(() => focusedTag(page)).toBe('c2-notepad');
   await page.keyboard.type('hello');

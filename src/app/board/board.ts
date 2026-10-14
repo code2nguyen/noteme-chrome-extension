@@ -417,19 +417,33 @@ export class Board {
       this.newMenuTimer = setTimeout(() => {
         if (!menu.open) {
           this.newMenuHovered = true;
-          // The menu takes the focus as it opens, for the keyboard; opened by the mouse, the focus stays where it was,
-          // so typing in a note goes on into the note.
+          // The menu takes the focus as it opens, for the keyboard; opened by the mouse, it never keeps it: the focus
+          // goes back where it was, so typing in a note goes on into the note, or nowhere, so a note about to take it
+          // (a new one, the pointer resting where New appears after "+ Note" on Home) still can.
           const focused = deepActiveElement();
           menu.open = true;
-          if (focused && focused !== document.body) {
-            requestAnimationFrame(() => focused.focus({ preventScroll: true }));
-          }
+          requestAnimationFrame(() => {
+            if (focused && focused !== document.body) {
+              focused.focus({ preventScroll: true });
+            } else if (menu.contains(document.activeElement)) {
+              (document.activeElement as HTMLElement).blur();
+            }
+          });
         }
       }, 120);
     } else if (this.newMenuHovered) {
       this.newMenuTimer = setTimeout(() => {
+        // Closing hands the focus to New, for the keyboard; a menu the mouse opened leaves it where it was instead.
+        const focused = deepActiveElement();
         menu.open = false;
         this.newMenuHovered = false;
+        requestAnimationFrame(() => {
+          if (focused && focused !== document.body && !menu.contains(focused)) {
+            focused.focus({ preventScroll: true });
+          } else if (menu.contains(document.activeElement)) {
+            (document.activeElement as HTMLElement).blur();
+          }
+        });
       }, 250);
     }
   }
