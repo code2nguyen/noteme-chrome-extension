@@ -441,15 +441,43 @@ export class Board {
   private keepNewMenuOpen(event: MouseEvent): void {
     const menu = this.newMenu()?.nativeElement;
     const onTrigger = (event.target as Element).closest('[slot="trigger"]');
+    if (onTrigger && !this.newMenuHovered) {
+      // A click opens the menu before the pointer has rested on New: no hover is to open it again later.
+      clearTimeout(this.newMenuTimer);
+    }
     if (menu && this.newMenuHovered && onTrigger) {
       setTimeout(() => (menu.open = true));
     }
   }
 
   onNewMenu(event: Event): void {
+    // A hover still waiting would open the menu again once it closes, and take the focus back from the new note.
+    clearTimeout(this.newMenuTimer);
     this.newMenuHovered = false;
     const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
-    this.create(NEW_KINDS[value] ?? ExtensionId.TextNote);
+    const kind = NEW_KINDS[value] ?? ExtensionId.TextNote;
+    const menu = this.newMenu()?.nativeElement;
+    if (!menu?.open) {
+      this.create(kind);
+      return;
+    }
+    // The menu hands the focus back to New as it closes, which would take it from the new note: create the note once
+    // the menu has closed (or soon, should it not say so).
+    let created = false;
+    const createOnce = () => {
+      if (!created) {
+        created = true;
+        menu.removeEventListener('toggle', onToggle);
+        this.create(kind);
+      }
+    };
+    const onToggle = (toggle: Event) => {
+      if ((toggle as ToggleEvent).newState === 'closed') {
+        setTimeout(createOnce);
+      }
+    };
+    menu.addEventListener('toggle', onToggle);
+    setTimeout(createOnce, 300);
   }
 
   /** N for a note, P for a page, F for a flow, T for a to-do list (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
