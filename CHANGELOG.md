@@ -2,6 +2,19 @@
 
 Generated from the commit history by `npm run changelog`; do not edit by hand.
 
+## 3.0.2
+
+### New
+
+- Home: show your notes in a carousel under Notes
+- Languages, Home notes polish, floating to-do customize, Notion-style papers
+- I18n: give the c2 components Noteme's French and Vietnamese
+- Home: the clock opens the notes
+
+### Fixes
+
+- Board: the New menu opened or closed by the mouse never takes the focus
+
 ## 3.0.1
 
 ### New
