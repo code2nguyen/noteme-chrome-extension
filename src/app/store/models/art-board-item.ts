@@ -7,6 +7,8 @@ export interface ArtBoardItem {
   boardId?: string;
   gridPosition: GridPosition;
   starred?: boolean;
+  /** When it was last pinned (ISO date), for the order of Home's notes; unset on notes pinned before it was recorded. */
+  starredDate?: string;
   colorIndex: number;
   properties: {
     [key: string]: unknown;

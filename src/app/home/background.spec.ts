@@ -9,6 +9,7 @@ import {
   localDay,
   parseCommonsSearch,
   PHOTO_THEMES,
+  photoCredit,
   plainText,
 } from './background';
 
@@ -61,12 +62,13 @@ describe('Commons', () => {
     expect(photos[0]).toEqual({
       id: 'File:Lake Bled at dawn.jpg',
       url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lake_Bled_at_dawn.jpg/1920px-Lake_Bled_at_dawn.jpg',
-      credit: 'Photo by Jane Doe · CC BY-SA 4.0',
+      artist: 'Jane Doe',
+      licence: 'CC BY-SA 4.0',
       link: 'https://commons.wikimedia.org/wiki/File:Lake_Bled_at_dawn.jpg',
       theme: 'nature',
     });
-    expect(photos[1].credit).toBe('Photo by Peter & Anna Smith · CC BY 3.0');
-    expect(photos[2].credit).toBe('Wikimedia Commons · Public domain');
+    expect(photos[1]).toMatchObject({ artist: 'Peter & Anna Smith', licence: 'CC BY 3.0' });
+    expect(photos[2]).toMatchObject({ artist: '', licence: 'Public domain' });
   });
 
   it('survives an empty or broken answer, and the legacy keyed pages shape', () => {
@@ -88,5 +90,28 @@ describe('bundledPhoto', () => {
     expect(bundledPhoto(BUNDLED_PHOTO_COUNT + 2).id).toBe('noteme-2');
     expect(bundledPhoto(-1).id).toBe(`noteme-${BUNDLED_PHOTO_COUNT - 1}`);
     expect(bundledPhoto(3)).toMatchObject({ bundled: true, theme: 'noteme' });
+  });
+});
+
+describe('photoCredit', () => {
+  const english = { noteme: 'Photo from Noteme', by: (artist: string) => `Photo by ${artist}` };
+  const french = { noteme: 'Photo de Noteme', by: (artist: string) => `Photo\u202f: ${artist}` };
+
+  it('credits the author and the licence of a Commons photo, in the language given', () => {
+    const photos = parseCommonsSearch(commonsSearch, 'nature');
+    expect(photoCredit(photos[0], english)).toBe('Photo by Jane Doe · CC BY-SA 4.0');
+    expect(photoCredit(photos[1], english)).toBe('Photo by Peter & Anna Smith · CC BY 3.0');
+    expect(photoCredit(photos[2], english)).toBe('Wikimedia Commons · Public domain');
+    expect(photoCredit(photos[0], french)).toBe('Photo\u202f: Jane Doe · CC BY-SA 4.0');
+  });
+
+  it('credits Noteme for a bundled photo', () => {
+    expect(photoCredit(bundledPhoto(2), english)).toBe('Photo from Noteme');
+    expect(photoCredit(bundledPhoto(2), french)).toBe('Photo de Noteme');
+  });
+
+  it('shows the credit a photo queued by an older version stored', () => {
+    const legacy = { id: 'File:x.jpg', url: 'https://x', credit: 'Photo by A · CC0', theme: 'nature' as const };
+    expect(photoCredit(legacy, french)).toBe('Photo by A · CC0');
   });
 });

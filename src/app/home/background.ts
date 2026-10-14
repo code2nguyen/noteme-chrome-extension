@@ -40,7 +40,11 @@ export interface BackgroundPhoto {
   id: string;
   /** Where the image is downloaded from (Commons) or read from (bundled, an extension path). */
   url: string;
-  credit: string;
+  /** Who took it ('' when Commons does not say) and its licence; absent for a bundled photo. */
+  artist?: string;
+  licence?: string;
+  /** The credit as English text, as photos queued by older versions stored it; shown as is for those. */
+  credit?: string;
   link?: string;
   theme: PhotoTheme;
   /** A photo shipped with Noteme: always there, never downloaded or cached. */
@@ -67,7 +71,6 @@ export function bundledPhoto(index: number): BackgroundPhoto {
   return {
     id: `noteme-${n}`,
     url: `assets/bg/bg-${n}-small.jpg`,
-    credit: 'Photo from Noteme',
     theme: 'noteme',
     bundled: true,
   };
@@ -148,10 +151,30 @@ export function parseCommonsSearch(json: unknown, theme: PhotoTheme): Background
       {
         id: page.title,
         url: info.thumburl,
-        credit: [artist ? `Photo by ${artist}` : 'Wikimedia Commons', licence].filter(Boolean).join(' · '),
+        artist,
+        licence,
         link: info.descriptionurl,
         theme,
       },
     ];
   });
+}
+
+/** The words of a photo credit, in Noteme's language. */
+export interface CreditText {
+  /** A photo shipped with Noteme. */
+  noteme: string;
+  /** A photo from Commons whose author is known. */
+  by: (artist: string) => string;
+}
+
+/** The credit line under a photo: "Photo by Jane Doe · CC BY-SA 4.0", "Wikimedia Commons · Public domain"… */
+export function photoCredit(photo: BackgroundPhoto, text: CreditText): string {
+  if (photo.bundled) {
+    return text.noteme;
+  }
+  if (photo.artist === undefined && photo.licence === undefined) {
+    return photo.credit ?? '';
+  }
+  return [photo.artist ? text.by(photo.artist) : 'Wikimedia Commons', photo.licence].filter(Boolean).join(' · ');
 }

@@ -23,11 +23,13 @@ import type {
 } from '@c2n/components/todo-list';
 import { filter } from 'rxjs/operators';
 
+import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { ArtBoardItem } from '../store/models';
 import { DataType } from '../store/models/data-type';
 import { parseTasks, serializeTasks, TodoTask } from '../todo/todo-doc';
+import { bringIntoView } from './bring-into-view';
 
 /**
  * The list loads with the first list on the board: c2-todo-list brings every task icon with it, which a board without
@@ -58,6 +60,7 @@ function loadElements(): Promise<unknown> {
   },
 })
 export class TodoCard {
+  readonly t = inject(I18n).t;
   private readonly dataService = inject(DataService);
   private readonly instanceId = inject(INSTANCE_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -108,9 +111,9 @@ export class TodoCard {
     });
   }
 
-  /** Scroll the list into view and run a light around its border, after picking it from the search results. */
+  /** Scroll the list to the middle and light it up: a new one, or one picked from the search results or on Home. */
   highlight(): void {
-    this.host.nativeElement.closest('c2-masonry-item')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    bringIntoView(this.host.nativeElement.closest('c2-masonry-item'));
     this.blinking.set(true);
   }
 

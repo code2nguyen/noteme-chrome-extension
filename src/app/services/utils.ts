@@ -56,38 +56,6 @@ export function pageMarkdownToText(markdown: string): string {
   );
 }
 
-/** "2 min ago", "yesterday", "Tue", "24 Sep": how recent an edit is, in a few words. */
-export function editedLabel(value: string | undefined, now = new Date()): string {
-  if (!value) {
-    return '';
-  }
-  const date = new Date(value);
-  // Whole minutes elapsed: 30 seconds is still "just now", 59 minutes still "59 min ago".
-  const minutes = Math.floor((now.getTime() - date.getTime()) / 60_000);
-  if (minutes < 1) {
-    return 'just now';
-  }
-  if (minutes < 60) {
-    return `${minutes} min ago`;
-  }
-  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  const days = Math.round((startOfDay(now) - startOfDay(date)) / 86_400_000);
-  if (days === 0) {
-    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-  }
-  if (days === 1) {
-    return 'yesterday';
-  }
-  if (days < 7) {
-    return date.toLocaleDateString(undefined, { weekday: 'short' });
-  }
-  return date.toLocaleDateString(undefined, {
-    day: 'numeric',
-    month: 'short',
-    year: date.getFullYear() === now.getFullYear() ? undefined : 'numeric',
-  });
-}
-
 export function getText(data: unknown, type: string, properties?: ItemData['properties']): string {
   if (type === DataType.FLOW) {
     const labels = typeof data === 'string' ? flowText(parseFlow(data)) : '';

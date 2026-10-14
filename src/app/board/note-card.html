@@ -1,8 +1,8 @@
 <div class="note__body" [class.note__body--tearing]="tearing()">
   <c2-notepad
     class="note__text"
-    aria-label="Note"
-    placeholder="New note..."
+    [attr.aria-label]="t('common.note')"
+    [attr.placeholder]="t('board.note.placeholder')"
     paper-picker
     actions-placement="end"
     tearable
@@ -21,8 +21,8 @@
       slot="actions"
       class="note__actions note__move"
       [id]="'move-' + item().id"
-      aria-label="Move note"
-      tooltip="Move"
+      [attr.aria-label]="t('board.note.move')"
+      [tooltip]="t('board.move')"
     >
       <c2-feather-move></c2-feather-move>
     </c2-icon-button>
@@ -30,30 +30,30 @@
       slot="actions"
       class="note__actions"
       placement="bottom-end"
-      aria-label="Note actions"
+      [attr.aria-label]="t('board.note.actions')"
       (menu-select)="onMenu($event)"
     >
-      <c2-icon-button slot="trigger" aria-label="Note actions" tooltip="More">
+      <c2-icon-button slot="trigger" [attr.aria-label]="t('board.note.actions')" [tooltip]="t('board.more')">
         <c2-feather-more-vertical></c2-feather-more-vertical>
       </c2-icon-button>
       @if (pinned()) {
         <c2-menu-item value="unpin">
           <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
-          Unpin from the board
+          {{ t('board.unpin') }}
         </c2-menu-item>
       } @else {
         <c2-menu-item value="pin">
           <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
-          Pin to the board
+          {{ t('board.pin') }}
         </c2-menu-item>
       }
       <c2-menu-item value="archive">
         <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
-        Archive
+        {{ t('board.toArchive') }}
       </c2-menu-item>
       <c2-menu-item value="delete" destructive>
         <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-        Delete this note
+        {{ t('board.note.delete') }}
       </c2-menu-item>
     </c2-menu>
   </c2-notepad>

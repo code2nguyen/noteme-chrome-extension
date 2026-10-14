@@ -64,6 +64,11 @@
   --ntm-home-glass-strong: rgb(255 255 255 / 75%);
   --ntm-home-favicon-plate: rgb(255 255 255 / 92%);
   --ntm-home-line: rgb(31 29 26 / 25%);
+  // The previous/next buttons of Home's notes: a faint tint, so they never pull the eye from the note.
+  --ntm-home-nav: rgb(255 255 255 / 30%);
+  --ntm-home-nav-strong: rgb(255 255 255 / 55%);
+  // How strongly a Home note's paper is blended into the photo: lower shows more of the photo through it.
+  --ntm-home-note-paper: 0.8;
   // The scrim only tints the edges, where the bar and the quote sit; the middle shows the photo as taken, and the
   // text there reads through a soft halo instead.
   --ntm-home-scrim: linear-gradient(
@@ -73,6 +78,8 @@
     rgb(255 255 255 / 30%)
   );
   --ntm-home-halo: 0 0 12px rgb(255 255 255 / 60%), 0 1px 2px rgb(255 255 255 / 50%);
+  // About what the scrim lays over the photo behind the quote, counted in when Home picks the quote's ink.
+  --ntm-home-footer-veil: rgb(255 255 255 / 22%);
 
   color-scheme: light;
 }
@@ -116,8 +123,11 @@
   // Light, but softer than white against the dark theme.
   --ntm-home-favicon-plate: rgb(236 233 226 / 92%);
   --ntm-home-line: rgb(247 245 240 / 30%);
+  --ntm-home-nav: rgb(20 19 18 / 25%);
+  --ntm-home-nav-strong: rgb(20 19 18 / 45%);
   --ntm-home-scrim: linear-gradient(rgb(0 0 0 / 25%), rgb(0 0 0 / 0%) 25%, rgb(0 0 0 / 0%) 70%, rgb(0 0 0 / 35%));
   --ntm-home-halo: 0 0 12px rgb(0 0 0 / 45%), 0 1px 2px rgb(0 0 0 / 40%);
+  --ntm-home-footer-veil: rgb(0 0 0 / 26%);
 
   color-scheme: dark;
 }

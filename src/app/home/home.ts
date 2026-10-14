@@ -22,10 +22,14 @@ import { DataService } from '../services/data.service';
 import { FULL_SCREEN, SearchSuggestion, searchShortcut, searchSuggestions } from '../services/search-results';
 import { selectItemDataEntities } from '../store/reducers';
 
+import { I18n } from '../i18n/i18n.service';
 import { formatDate, formatTime, hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
+import { photoCredit } from './background';
 import { BackgroundOptions, BackgroundService, ShownPhoto } from './background.service';
+import { NotesCarousel } from './notes-carousel';
+import { measureTone, PhotoTone } from './photo-tone';
 import { Quote, QUOTE_MARKS } from './quotes';
 import { QuoteService } from './quotes.service';
 import { Site, TopSitesService } from './top-sites.service';
@@ -40,11 +44,12 @@ type ShortcutsState = 'hidden' | 'ask' | 'shown';
   selector: 'ntm-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [RouterLink, SettingsPanel],
+  imports: [RouterLink, SettingsPanel, NotesCarousel],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   host: {
     '(document:keydown)': 'onKey($event)',
+    '(window:resize)': 'measureFooterTone()',
   },
 })
 export class Home {
@@ -55,12 +60,14 @@ export class Home {
   private readonly router = inject(Router);
   private readonly dataService = inject(DataService);
   private readonly store = inject(Store);
-  private readonly now = signal(new Date());
+  readonly now = signal(new Date());
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
 
   readonly settings = this.settingsService.settings;
-  readonly time = computed(() => formatTime(this.now(), this.settings().clock));
-  readonly date = computed(() => formatDate(this.now(), this.settings().dateFormat));
+  private readonly i18n = inject(I18n);
+  readonly t = this.i18n.t;
+  readonly time = computed(() => formatTime(this.now(), this.settings().clock, this.i18n.locale()));
+  readonly date = computed(() => formatDate(this.now(), this.settings().dateFormat, this.i18n.locale()));
   readonly quote = signal<Quote | null>(null);
   /** The quotation marks of the quote's language. */
   readonly quoteMarks = computed(() => QUOTE_MARKS[this.quote()?.lang ?? 'en']);
@@ -70,8 +77,27 @@ export class Home {
   readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
 
   readonly photo = signal<ShownPhoto | null>(null);
+  /** The photo with its credit in Noteme's language, as Home and Settings show it. */
+  readonly creditedPhoto = computed<ShownPhoto | null>(() => {
+    const photo = this.photo();
+    const t = this.t;
+    return (
+      photo && {
+        ...photo,
+        credit: photoCredit(photo, { noteme: t('home.photo.noteme'), by: (artist) => t('home.photo.by', artist) }),
+      }
+    );
+  });
   /** The photo fades in once decoded, rather than painting top to bottom. */
   readonly photoLoaded = signal<string | null>(null);
+  /**
+   * Whether the photo is light or dark behind the quote and the credit, so they take the ink that reads on it; null
+   * (the theme's ink) until it is measured.
+   */
+  readonly footerTone = signal<PhotoTone | null>(null);
+  private readonly photoImage = viewChild<ElementRef<HTMLImageElement>>('photoImage');
+  private readonly footer = viewChild<ElementRef<HTMLElement>>('footer');
+  private toneFrame = 0;
   private readonly photoOptions = computed<BackgroundOptions>(
     () => {
       const settings = this.settings();
@@ -92,7 +118,9 @@ export class Home {
       this.dataService.getSearchResults(),
       this.store.select(selectItemDataEntities),
       this.dataService.selectArtBoardItemSearchLoading(),
-    ]).pipe(map(([items, data, loading]) => (loading ? [] : searchSuggestions(items, data)))),
+    ]).pipe(
+      map(([items, data, loading]) => (loading ? [] : searchSuggestions(items, data, this.t, this.i18n.locale()))),
+    ),
     { initialValue: [] as SearchSuggestion[] },
   );
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
@@ -100,6 +128,8 @@ export class Home {
   /** The search shortcut as this keyboard writes it; onKey takes both. */
   readonly searchKey = searchShortcut();
 
+  /** Which notes the carousel under Notes shows, if any. */
+  readonly notesSetting = computed(() => this.settings().homeNotes);
   readonly settingsOpen = toSignal(inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,
   });
@@ -116,6 +146,14 @@ export class Home {
       const options = this.photoOptions();
       untracked(() => void this.showPhoto(options));
     });
+
+    // Measured again once the photo is in and whenever the quote, and so the footer's size, changes.
+    effect(() => {
+      this.photoLoaded();
+      this.quote();
+      untracked(() => this.measureFooterTone());
+    });
+    inject(DestroyRef).onDestroy(() => cancelAnimationFrame(this.toneFrame));
 
     const quoteOn = computed(() => this.settings().quote);
     effect(() => {
@@ -178,7 +216,8 @@ export class Home {
       return;
     }
     afterIdle(async () => {
-      const quote = await this.quotes.next().catch(() => null);
+      // Mostly in Noteme's language, now and then in the others.
+      const quote = await this.quotes.next(Date.now(), Math.random, this.i18n.language()).catch(() => null);
       if (run === this.quoteRun) {
         this.quote.set(quote);
       }
@@ -254,6 +293,35 @@ export class Home {
       this.dataService.restoreArtBoardItem(found);
     }
     this.router.navigate(['/main-board'], { queryParams: { show: id } });
+  }
+
+  /** On the next frame, once the footer is laid out; a resize crops the photo differently. */
+  measureFooterTone(): void {
+    cancelAnimationFrame(this.toneFrame);
+    this.toneFrame = requestAnimationFrame(() => {
+      const image = this.photoImage()?.nativeElement;
+      const footer = this.footer()?.nativeElement;
+      if (!image || !footer || this.photoLoaded() !== this.photo()?.src) {
+        return;
+      }
+      const box = image.getBoundingClientRect();
+      // Right behind the quote, which is what has to read; the whole footer when the quote is off.
+      const rect = (footer.querySelector('.home__quote') ?? footer).getBoundingClientRect();
+      this.footerTone.set(
+        measureTone(
+          image,
+          box.width,
+          box.height,
+          {
+            x: rect.left - box.left,
+            y: rect.top - box.top,
+            width: rect.width,
+            height: rect.height,
+          },
+          getComputedStyle(footer).getPropertyValue('--ntm-home-footer-veil').trim(),
+        ),
+      );
+    });
   }
 
   onKey(event: KeyboardEvent): void {

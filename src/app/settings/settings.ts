@@ -1,4 +1,5 @@
 import { PHOTO_THEME_IDS, PhotoChange, PhotoTheme } from '../home/background';
+import { LANGUAGES, LanguageSetting } from '../i18n/language';
 
 /**
  * What a person can set up. Stored as one small record, so it fits chrome.storage.sync and follows the profile once
@@ -8,13 +9,17 @@ export type ThemeSetting = 'auto' | 'light' | 'dark';
 export type ClockSetting = '24h' | '12h';
 export type DateFormat = 'long' | 'short' | 'numeric';
 export type WeekStart = 'monday' | 'sunday';
+/**
+ * Which notes the carousel on Home shows, in which order. Auto: pinned ones first (newest pin first), then the rest by
+ * last edit. Pinned: pinned ones only. Edited: all of them by last edit. Off: no carousel.
+ */
+export type HomeNotesSetting = 'off' | 'auto' | 'pinned' | 'edited';
 
 /** Optional parts of Noteme, switched on or off in Settings. Plan is the first; more will join it. */
 export type Feature = 'plan';
 
-export const FEATURES: readonly { id: Feature; label: string; description: string }[] = [
-  { id: 'plan', label: 'Plan', description: 'A week and month calendar for what you plan to do' },
-];
+/** The optional features, in the order Settings lists them; their names are messages (`settings.feature.<id>`). */
+export const FEATURES: readonly { id: Feature }[] = [{ id: 'plan' }];
 
 export function hasFeature(settings: Settings, feature: Feature): boolean {
   return settings.features.includes(feature);
@@ -22,6 +27,8 @@ export function hasFeature(settings: Settings, feature: Feature): boolean {
 
 export interface Settings {
   theme: ThemeSetting;
+  /** Noteme's language; Auto follows the browser. */
+  language: LanguageSetting;
   clock: ClockSetting;
   dateFormat: DateFormat;
   /** A photo behind Home. */
@@ -32,6 +39,8 @@ export interface Settings {
   photoChange: PhotoChange;
   quote: boolean;
   shortcuts: boolean;
+  /** Notes in a carousel on Home, under the Notes link. */
+  homeNotes: HomeNotesSetting;
   weekStart: WeekStart;
   /** The optional features switched on; may be none. */
   features: Feature[];
@@ -45,6 +54,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   // Follows the system until the user picks a theme.
   theme: 'auto',
+  language: 'auto',
   clock: '24h',
   dateFormat: 'long',
   photos: true,
@@ -52,6 +62,7 @@ export const DEFAULT_SETTINGS: Settings = {
   photoChange: 'day',
   quote: true,
   shortcuts: true,
+  homeNotes: 'auto',
   weekStart: 'monday',
   // Every feature is opt-in: switched on in Settings.
   features: [],
@@ -61,9 +72,11 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   theme: ['auto', 'light', 'dark'],
+  language: ['auto', ...LANGUAGES],
   clock: ['24h', '12h'],
   dateFormat: ['long', 'short', 'numeric'],
   photoChange: ['day', 'hour'],
+  homeNotes: ['off', 'auto', 'pinned', 'edited'],
   weekStart: ['monday', 'sunday'],
 };
 

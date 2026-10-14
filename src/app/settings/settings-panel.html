@@ -1,10 +1,10 @@
 <c2-sheet class="settings" side="right" [open]="open()" (close)="closed.emit()">
-  <span slot="title">Settings</span>
+  <span slot="title">{{ t('settings.title') }}</span>
 
   <section class="settings__group" aria-labelledby="settings-look">
-    <h2 id="settings-look" class="settings__heading">Look</h2>
+    <h2 id="settings-look" class="settings__heading">{{ t('settings.look') }}</h2>
     <div class="settings__row">
-      <span id="settings-theme">Theme</span>
+      <span id="settings-theme">{{ t('settings.theme') }}</span>
       <c2-button-group
         selection="single"
         appearance="segmented"
@@ -13,17 +13,31 @@
         [value]="settings().theme"
         (change)="choose('theme', $event)"
       >
-        <c2-button value="light">Light</c2-button>
-        <c2-button value="dark">Dark</c2-button>
-        <c2-button value="auto">Auto</c2-button>
+        <c2-button value="light">{{ t('settings.theme.light') }}</c2-button>
+        <c2-button value="dark">{{ t('settings.theme.dark') }}</c2-button>
+        <c2-button value="auto">{{ t('settings.auto') }}</c2-button>
       </c2-button-group>
+    </div>
+    <div class="settings__row">
+      <span id="settings-language">{{ t('settings.language') }}</span>
+      <c2-select
+        class="settings__select"
+        aria-labelledby="settings-language"
+        [value]="[settings().language]"
+        (change)="select('language', $event)"
+      >
+        <c2-list-item value="auto">{{ t('settings.auto') }}</c2-list-item>
+        @for (language of languages; track language.id) {
+          <c2-list-item [value]="language.id" [attr.lang]="language.id">{{ language.name }}</c2-list-item>
+        }
+      </c2-select>
     </div>
   </section>
 
   <section class="settings__group" aria-labelledby="settings-home">
-    <h2 id="settings-home" class="settings__heading">Home</h2>
+    <h2 id="settings-home" class="settings__heading">{{ t('settings.home') }}</h2>
     <div class="settings__row">
-      <span id="settings-clock">Clock</span>
+      <span id="settings-clock">{{ t('settings.clock') }}</span>
       <c2-button-group
         selection="single"
         appearance="segmented"
@@ -32,46 +46,60 @@
         [value]="settings().clock"
         (change)="choose('clock', $event)"
       >
-        <c2-button value="24h">24 h</c2-button>
-        <c2-button value="12h">12 h</c2-button>
+        <c2-button value="24h">{{ t('settings.clock.24h') }}</c2-button>
+        <c2-button value="12h">{{ t('settings.clock.12h') }}</c2-button>
       </c2-button-group>
     </div>
     <div class="settings__row">
-      <span id="settings-date">Date</span>
+      <span id="settings-date">{{ t('settings.date') }}</span>
       <c2-select
         class="settings__select"
         aria-labelledby="settings-date"
         [value]="[settings().dateFormat]"
         (change)="select('dateFormat', $event)"
       >
-        @for (option of dateFormats; track option.format) {
+        @for (option of dateFormats(); track option.format) {
           <c2-list-item [value]="option.format">{{ option.label }}</c2-list-item>
         }
       </c2-select>
     </div>
     <c2-switch class="settings__switch" [checked]="settings().quote" (change)="toggle('quote', $event)">
-      Quote of the day
-      <span slot="description">A short quote under the clock, a new one each day</span>
+      {{ t('settings.quote') }}
+      <span slot="description">{{ t('settings.quote.description') }}</span>
     </c2-switch>
+    <div class="settings__row">
+      <span id="settings-home-notes">{{ t('settings.homeNotes') }}</span>
+      <c2-button-group
+        selection="single"
+        appearance="segmented"
+        size="s"
+        aria-labelledby="settings-home-notes"
+        [value]="settings().homeNotes"
+        (change)="choose('homeNotes', $event)"
+      >
+        <c2-button value="off">{{ t('settings.homeNotes.off') }}</c2-button>
+        <c2-button value="auto">{{ t('settings.auto') }}</c2-button>
+        <c2-button value="pinned">{{ t('settings.homeNotes.pinned') }}</c2-button>
+        <c2-button value="edited">{{ t('settings.homeNotes.edited') }}</c2-button>
+      </c2-button-group>
+    </div>
     @if (shortcutsSupported) {
       <c2-switch class="settings__switch" [checked]="settings().shortcuts" (change)="toggleShortcuts($event)">
-        Site shortcuts
-        <span slot="description">Your most visited sites, one click away</span>
+        {{ t('settings.shortcuts') }}
+        <span slot="description">{{ t('settings.shortcuts.description') }}</span>
       </c2-switch>
     }
   </section>
 
   <section class="settings__group" aria-labelledby="settings-background">
-    <h2 id="settings-background" class="settings__heading">Background</h2>
+    <h2 id="settings-background" class="settings__heading">{{ t('settings.background') }}</h2>
     <c2-switch class="settings__switch" [checked]="settings().photos" (change)="toggle('photos', $event)">
-      Photo behind Home
-      <span slot="description"
-        >Featured pictures from Wikimedia Commons, downloaded ahead so a new tab opens at once</span
-      >
+      {{ t('settings.photos') }}
+      <span slot="description">{{ t('settings.photos.description') }}</span>
     </c2-switch>
     @if (settings().photos) {
       <div class="settings__row">
-        <span id="settings-themes">Themes</span>
+        <span id="settings-themes">{{ t('settings.photoThemes') }}</span>
         <c2-select
           class="settings__select"
           multiple
@@ -80,12 +108,12 @@
           (change)="chooseThemes($event)"
         >
           @for (theme of themes; track theme.id) {
-            <c2-list-item [value]="theme.id">{{ theme.label }}</c2-list-item>
+            <c2-list-item [value]="theme.id">{{ t(theme.label) }}</c2-list-item>
           }
         </c2-select>
       </div>
       <div class="settings__row">
-        <span id="settings-change">New photo</span>
+        <span id="settings-change">{{ t('settings.photoChange') }}</span>
         <c2-button-group
           selection="single"
           appearance="segmented"
@@ -94,49 +122,49 @@
           [value]="settings().photoChange"
           (change)="choose('photoChange', $event)"
         >
-          <c2-button value="day">Daily</c2-button>
-          <c2-button value="hour">Hourly</c2-button>
+          <c2-button value="day">{{ t('settings.photoChange.day') }}</c2-button>
+          <c2-button value="hour">{{ t('settings.photoChange.hour') }}</c2-button>
         </c2-button-group>
       </div>
       @if (photo(); as current) {
         <div class="settings__photo">
-          <img [src]="current.src" alt="The photo on Home" />
+          <img [src]="current.src" [alt]="t('settings.photo.alt')" />
           <span>{{ current.credit }}</span>
-          <c2-button (click)="changePhoto.emit()">Change now</c2-button>
+          <c2-button (click)="changePhoto.emit()">{{ t('settings.photo.change') }}</c2-button>
         </div>
       }
     }
   </section>
 
   <section class="settings__group" aria-labelledby="settings-features">
-    <h2 id="settings-features" class="settings__heading">Features</h2>
+    <h2 id="settings-features" class="settings__heading">{{ t('settings.features') }}</h2>
     <div class="settings__row">
-      <span id="settings-feature-list">Switched on</span>
+      <span id="settings-feature-list">{{ t('settings.features.on') }}</span>
       <c2-select
         class="settings__select settings__features"
         multiple
-        placeholder="None"
+        [placeholder]="t('settings.features.none')"
         aria-labelledby="settings-feature-list"
         [value]="settings().features"
         (change)="chooseFeatures($event)"
       >
         @for (feature of features; track feature.id) {
-          <c2-list-item [value]="feature.id" [label]="feature.label"
-            >{{ feature.label }}<span slot="description">{{ feature.description }}</span></c2-list-item
+          <c2-list-item [value]="feature.id" [label]="t(feature.label)"
+            >{{ t(feature.label) }}<span slot="description">{{ t(feature.description) }}</span></c2-list-item
           >
         }
       </c2-select>
     </div>
     <p class="settings__text">
-      Optional parts of Noteme. Switched off, a feature leaves the menus; what you made with it is kept.
+      {{ t('settings.features.text') }}
     </p>
   </section>
 
   @if (planOn()) {
     <section class="settings__group" aria-labelledby="settings-plan">
-      <h2 id="settings-plan" class="settings__heading">Plan</h2>
+      <h2 id="settings-plan" class="settings__heading">{{ t('settings.plan') }}</h2>
       <div class="settings__row">
-        <span id="settings-week">Week starts on</span>
+        <span id="settings-week">{{ t('settings.weekStart') }}</span>
         <c2-button-group
           selection="single"
           appearance="segmented"
@@ -145,27 +173,21 @@
           [value]="settings().weekStart"
           (change)="choose('weekStart', $event)"
         >
-          <c2-button value="monday">Monday</c2-button>
-          <c2-button value="sunday">Sunday</c2-button>
+          <c2-button value="monday">{{ t('settings.weekStart.monday') }}</c2-button>
+          <c2-button value="sunday">{{ t('settings.weekStart.sunday') }}</c2-button>
         </c2-button-group>
       </div>
     </section>
   }
 
   <section class="settings__group" aria-labelledby="settings-sync">
-    <h2 id="settings-sync" class="settings__heading">Sync</h2>
+    <h2 id="settings-sync" class="settings__heading">{{ t('settings.sync') }}</h2>
     <c2-switch class="settings__switch" [checked]="settings().sync" (change)="toggle('sync', $event)">
-      Sync with your Chrome profile
-      <span slot="description"
-        >Notes, to-do lists and settings follow you to every computer where you sign in to Chrome and switch this
-        on</span
-      >
+      {{ t('settings.sync.switch') }}
+      <span slot="description">{{ t('settings.sync.description') }}</span>
     </c2-switch>
     <p class="settings__text">
-      Off, everything stays on this computer. Pages, flows and plans stay on this computer either way for now: syncing
-      them through your Google Drive is coming.
+      {{ t('settings.sync.text') }}
     </p>
   </section>
-
-  <p slot="footer" class="settings__footer">Changes save by themselves.</p>
 </c2-sheet>

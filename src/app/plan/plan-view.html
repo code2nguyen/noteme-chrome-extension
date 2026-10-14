@@ -1,28 +1,28 @@
 <header class="plan-bar">
   <a class="plan-bar__back" routerLink="/main-board">
     <c2-feather-arrow-left aria-hidden="true"></c2-feather-arrow-left>
-    Notes
+    {{ t('common.notes') }}
   </a>
-  <h1 class="plan-bar__title">Plan</h1>
+  <h1 class="plan-bar__title">{{ t('plan.title') }}</h1>
   <c2-button-group
     class="plan-bar__views"
     selection="single"
     appearance="segmented"
     size="s"
-    aria-label="View"
+    [attr.aria-label]="t('plan.view')"
     [value]="view()"
     (change)="onViewChange($event)"
   >
-    <c2-button value="week">Week</c2-button>
-    <c2-button value="month">Month</c2-button>
+    <c2-button value="week">{{ t('plan.week') }}</c2-button>
+    <c2-button value="month">{{ t('plan.month') }}</c2-button>
   </c2-button-group>
 </header>
 
 <main class="plan">
   @if (view() === 'week') {
     @if (allDay().length > 0) {
-      <div class="plan__all-day" aria-label="All day this week">
-        <span class="plan__all-day-label">All day</span>
+      <div class="plan__all-day" [attr.aria-label]="t('plan.allDayThisWeek')">
+        <span class="plan__all-day-label">{{ t('plan.allDay') }}</span>
         @for (item of allDay(); track item.id) {
           <c2-button class="plan__chip" (click)="open(item)">
             {{ formatDay(item.date, false) }} · {{ item.title }}
@@ -36,6 +36,7 @@
       start-hour="7"
       end-hour="21"
       [date]="date()"
+      [locale]="i18n.locale()"
       [attr.week-start]="weekStart()"
       [events]="weekEvents()"
       (week-change)="onWeekChange($event)"
@@ -43,14 +44,13 @@
       (event-change)="onWeekEventChange($event)"
       (event-click)="onWeekEventClick($event)"
     ></c2-week-planner>
-    <p class="plan__hint">
-      Click an empty hour and type. Drag a plan to move it, drag its bottom edge to change how long it lasts.
-    </p>
+    <p class="plan__hint">{{ t('plan.hint.week') }}</p>
   } @else {
     <c2-month-planner
       class="plan__month"
       editable
       [month]="month()"
+      [locale]="i18n.locale()"
       [attr.week-start]="weekStart()"
       [events]="monthEvents()"
       (month-change)="onMonthChange($event)"
@@ -59,7 +59,7 @@
       (event-change)="onMonthEventChange($event)"
       (event-click)="onMonthEventClick($event)"
     ></c2-month-planner>
-    <p class="plan__hint">Click a day to see it and add to it. Drag across days for something that lasts several.</p>
+    <p class="plan__hint">{{ t('plan.hint.month') }}</p>
   }
 </main>
 
@@ -68,13 +68,15 @@
   @if (day(); as current) {
     <span slot="title">{{ formatDay(current) }}</span>
     @if (dayItems().length === 0) {
-      <p class="plan__day-empty">Nothing planned yet.</p>
+      <p class="plan__day-empty">{{ t('plan.empty') }}</p>
     } @else {
       <ul class="plan__day-list">
         @for (item of dayItems(); track item.id) {
           <li>
             <c2-button class="plan__day-item" (click)="open(item)">
-              <span class="plan__day-time">{{ timed(item) ? item.start + ' – ' + item.end : 'all day' }}</span>
+              <span class="plan__day-time">{{
+                timed(item) ? item.start + ' – ' + item.end : t('plan.allDay.time')
+              }}</span>
               {{ item.title }}
             </c2-button>
           </li>
@@ -84,23 +86,23 @@
     <c2-text-field
       #dayField
       class="plan__day-add"
-      aria-label="Add to this day"
-      placeholder="Add to this day"
+      [attr.aria-label]="t('plan.addToDay')"
+      [attr.placeholder]="t('plan.addToDay')"
       (keydown)="addToDay($event)"
     ></c2-text-field>
-    <p class="plan__day-hint">Enter to save · add a time like “19:00” if you want one</p>
+    <p class="plan__day-hint">{{ t('plan.addToDay.hint') }}</p>
   }
 </c2-sheet>
 
 <!-- A plan being written or changed. -->
 <c2-modal class="plan__dialog" [open]="!!draft()" (close)="draft.set(null)">
   @if (draft(); as current) {
-    <span slot="title">{{ current.id ? 'Plan' : 'New plan' }}</span>
+    <span slot="title">{{ current.id ? t('plan.item') : t('plan.new') }}</span>
     <c2-text-field
       #titleField
       class="plan__dialog-title"
-      aria-label="What"
-      placeholder="What"
+      [attr.aria-label]="t('plan.what')"
+      [attr.placeholder]="t('plan.what')"
       [value]="current.title"
       (input)="onTitleInput($event)"
       (keydown)="onTitleKeydown($event)"
@@ -109,25 +111,29 @@
     <!-- Always shown: empty times make the plan all day, so either kind can become the other. -->
     <div class="plan__dialog-times">
       <c2-time-input
-        aria-label="From"
+        [attr.aria-label]="t('plan.from')"
         [value]="current.start ?? ''"
         (change)="onTimeChange('start', $event)"
       ></c2-time-input>
       <span aria-hidden="true">–</span>
-      <c2-time-input aria-label="To" [value]="current.end ?? ''" (change)="onTimeChange('end', $event)"></c2-time-input>
+      <c2-time-input
+        [attr.aria-label]="t('plan.to')"
+        [value]="current.end ?? ''"
+        (change)="onTimeChange('end', $event)"
+      ></c2-time-input>
     </div>
     <div slot="footer" class="plan__dialog-actions">
       @if (current.id) {
         <c2-button class="plan__dialog-delete" (click)="remove()">
           <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-          Delete
+          {{ t('common.delete') }}
         </c2-button>
       }
       <span class="plan__dialog-spacer"></span>
-      <c2-button (click)="draft.set(null)">Cancel</c2-button>
-      <c2-button class="plan__dialog-save ntm-action" [disabled]="!current.title.trim()" (click)="save()"
-        >Save</c2-button
-      >
+      <c2-button (click)="draft.set(null)">{{ t('common.cancel') }}</c2-button>
+      <c2-button class="plan__dialog-save ntm-action" [disabled]="!current.title.trim()" (click)="save()">{{
+        t('plan.save')
+      }}</c2-button>
     </div>
   }
 </c2-modal>

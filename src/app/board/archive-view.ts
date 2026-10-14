@@ -14,9 +14,12 @@ import { Dictionary } from '@ngrx/entity';
 import type { SelectionChangeEventDetail } from '@c2n/components/list';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 
+import { I18n } from '../i18n/i18n.service';
+import { kindKey } from '../i18n/kinds';
+import type { MessageKey } from '../i18n/messages';
 import { paperColorFor } from '../note-config';
 import { FULL_SCREEN } from '../services/search-results';
-import { editedLabel, getText } from '../services/utils';
+import { getText } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 import {
   archivedOn,
@@ -37,10 +40,19 @@ export interface ArchivedNote extends NoteSummary {
 
 export type ArchiveSort = 'archived' | 'edited' | 'name';
 
-const SORT_LABELS: Record<ArchiveSort, string> = {
-  archived: 'Recently archived',
-  edited: 'Recently edited',
-  name: 'Name',
+const SORT_LABELS: Record<ArchiveSort, MessageKey> = {
+  archived: 'archive.sort.archived',
+  edited: 'archive.sort.edited',
+  name: 'archive.sort.name',
+};
+
+/** What the list says when nothing of the chosen kind is archived; "all" reads as notes. */
+const NONE_KEYS: Record<'all' | NoteKind, MessageKey> = {
+  all: 'archive.none.note',
+  Note: 'archive.none.note',
+  Page: 'archive.none.page',
+  Flow: 'archive.none.flow',
+  List: 'archive.none.list',
 };
 
 /** Below this width the list takes the screen and the preview slides up in a sheet. */
@@ -59,6 +71,10 @@ const NARROW = '(max-width: 760px)';
   styleUrl: './archive-view.scss',
 })
 export class ArchiveView {
+  private readonly i18n = inject(I18n);
+  readonly t = this.i18n.t;
+  readonly kindKey = kindKey;
+
   /** What is archived, or what of it matches the search. */
   readonly items = input.required<ArtBoardItem[]>();
   readonly data = input.required<Dictionary<ItemData>>();
@@ -76,6 +92,7 @@ export class ArchiveView {
   readonly kind = signal<'all' | NoteKind>('all');
   readonly sort = signal<ArchiveSort>('archived');
   readonly sortLabels = SORT_LABELS;
+  readonly noneKeys = NONE_KEYS;
   readonly sorts = Object.keys(SORT_LABELS) as ArchiveSort[];
   /** The note picked for the preview; unset, the first one shows on a wide screen. */
   private readonly chosenId = signal<string | null>(null);
@@ -90,7 +107,7 @@ export class ArchiveView {
 
   readonly notes = computed<ArchivedNote[]>(() => {
     const data = this.data();
-    return this.items().map((item) => ({ ...summarize(item, data), item, archived: archivedOn(item, data) }));
+    return this.items().map((item) => ({ ...summarize(item, data, this.t), item, archived: archivedOn(item, data) }));
   });
 
   readonly counts = computed(() => countKinds(this.notes()));
@@ -101,7 +118,8 @@ export class ArchiveView {
     const sort = this.sort();
     const notes = this.notes().filter((note) => kind === 'all' || note.kind === kind);
     if (sort === 'name') {
-      return notes.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+      const locale = this.i18n.locale();
+      return notes.sort((a, b) => a.label.localeCompare(b.label, locale, { sensitivity: 'base' }));
     }
     const date = sort === 'archived' ? (note: ArchivedNote) => note.archived : (note: ArchivedNote) => note.edited;
     return notes.sort((a, b) => date(b).localeCompare(date(a)));
@@ -113,7 +131,9 @@ export class ArchiveView {
     if (sort === 'name') {
       return [{ label: '', items: this.shown() }];
     }
-    return groupByMonth(this.shown(), new Date(), (note) => (sort === 'archived' ? note.archived : note.edited));
+    return groupByMonth(this.shown(), this.i18n.locale(), new Date(), (note) =>
+      sort === 'archived' ? note.archived : note.edited,
+    );
   });
 
   readonly preview = computed(() => {
@@ -221,22 +241,18 @@ export class ArchiveView {
 
   confirmText(items: ArtBoardItem[]): string {
     if (items.length === 1) {
-      return `Delete “${summarize(items[0], this.data()).label}” forever?`;
+      return this.t('archive.confirm.one', summarize(items[0], this.data(), this.t).label);
     }
-    return `Delete ${items.length} archived notes forever?`;
+    return this.t('archive.confirm.many', items.length);
   }
 
   shortDate(iso: string): string {
     const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(this.i18n.locale(), {
       month: 'short',
       day: 'numeric',
       ...(date.getFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' }),
     });
-  }
-
-  edited(iso: string): string {
-    return editedLabel(iso);
   }
 
   paperColor(item: ArtBoardItem): string {

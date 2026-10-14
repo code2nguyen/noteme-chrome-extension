@@ -18,10 +18,12 @@ import { filter } from 'rxjs/operators';
 
 import { colorIndexFor, paperColorFor } from '../note-config';
 import { getCurrentDate } from '../services/utils';
+import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { ArtBoardItem } from '../store/models';
 import { DataType } from '../store/models/data-type';
+import { bringIntoView } from './bring-into-view';
 
 /**
  * A quick note: a c2-notepad written right on the board, with its actions menu (pin, archive, delete) in the
@@ -41,6 +43,7 @@ import { DataType } from '../store/models/data-type';
   },
 })
 export class NoteCard {
+  readonly t = inject(I18n).t;
   private readonly dataService = inject(DataService);
   private readonly instanceId = inject(INSTANCE_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -122,9 +125,9 @@ export class NoteCard {
     }
   }
 
-  /** Scroll the note into view and run a light around its border, after picking it from the search results. */
+  /** Scroll the note to the middle and light it up: a new one, or one picked from the search results or on Home. */
   highlight(): void {
-    this.host.nativeElement.closest('c2-masonry-item')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    bringIntoView(this.host.nativeElement.closest('c2-masonry-item'));
     this.blinking.set(true);
   }
 

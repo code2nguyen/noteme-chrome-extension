@@ -68,7 +68,8 @@ export class DataService {
   }
 
   toggleArtBoardItemStarState(artBoardItem: ArtBoardItem): void {
-    this.updateArtBoardItem({ ...artBoardItem, starred: !artBoardItem.starred });
+    const starred = !artBoardItem.starred;
+    this.updateArtBoardItem({ ...artBoardItem, starred, starredDate: starred ? new Date().toISOString() : undefined });
   }
 
   changeArtBoardItemPosition(artBoardItemId: string, position: GridPosition): void {

@@ -22,6 +22,13 @@ describe('parseSettings', () => {
     expect(parseSettings({ features: 'plan' }).features).toEqual([]);
   });
 
+  it('shows notes on Home by default, in a known order only', () => {
+    expect(parseSettings(null).homeNotes).toBe('auto');
+    expect(parseSettings({ homeNotes: 'pinned' }).homeNotes).toBe('pinned');
+    expect(parseSettings({ homeNotes: 'off' }).homeNotes).toBe('off');
+    expect(parseSettings({ homeNotes: 'random' }).homeNotes).toBe('auto');
+  });
+
   it('does not sync until switched on', () => {
     expect(parseSettings(null).sync).toBe(false);
     expect(parseSettings({ sync: true }).sync).toBe(true);
@@ -31,6 +38,9 @@ describe('parseSettings', () => {
   it('keeps valid values and drops bad or unknown ones', () => {
     const parsed = parseSettings({ theme: 'dark', clock: '13h', quote: false, shortcuts: 'yes', extra: 1 });
     expect(parsed).toEqual({ ...DEFAULT_SETTINGS, theme: 'dark', quote: false });
+    // A language Noteme speaks, or Auto; anything else falls back to Auto.
+    expect(parseSettings({ language: 'vi' }).language).toBe('vi');
+    expect(parseSettings({ language: 'de' }).language).toBe('auto');
     expect(parsed).not.toHaveProperty('extra');
   });
 });

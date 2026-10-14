@@ -59,6 +59,7 @@ export interface FlowDoc {
 }
 
 export const EMPTY_FLOW: FlowDoc = { nodes: [], edges: [] };
+/** The label of a new box when none is given; the view gives it in the language of the moment. */
 export const NEW_BOX_LABEL = 'New box';
 
 /** Read stored flow data defensively: anything malformed is dropped rather than breaking the view. */
@@ -105,18 +106,20 @@ export function serializeFlow(doc: FlowDoc): string {
   return JSON.stringify(doc);
 }
 
+/** A box named `label` (written into the document: it stays in the language it was made in). */
 export function addBox(
   doc: FlowDoc,
   id: string,
   position: { x: number; y: number },
   source?: string,
   sides: ArrowSides = {},
+  label = NEW_BOX_LABEL,
 ): FlowDoc {
   const edges =
     source && doc.nodes.some((node) => node.id === source)
       ? [...doc.edges, { source, target: id, ...readSides(sides) }]
       : doc.edges;
-  return { nodes: [...doc.nodes, { id, label: NEW_BOX_LABEL, position }], edges };
+  return { nodes: [...doc.nodes, { id, label, position }], edges };
 }
 
 /** Renames a box; the same document when nothing changes, so committing an unchanged label saves nothing. */

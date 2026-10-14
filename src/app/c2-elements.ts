@@ -9,8 +9,8 @@ import '@c2n/components/kbd';
 import '@c2n/components/tooltip';
 
 import '@c2n/feather-icons/icons/calendar.js';
-import '@c2n/feather-icons/icons/edit-3.js';
 import '@c2n/feather-icons/icons/layout.js';
 import '@c2n/feather-icons/icons/plus.js';
 import '@c2n/feather-icons/icons/search.js';
 import '@c2n/feather-icons/icons/settings.js';
+import '@c2n/phosphor-icons/icons/notepad.js';

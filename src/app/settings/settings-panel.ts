@@ -11,6 +11,9 @@ import './settings-elements';
 import type { Select } from '@c2n/components/select';
 import type { Switch } from '@c2n/components/switch';
 import { PHOTO_THEMES, PhotoTheme } from '../home/background';
+import { I18n } from '../i18n/i18n.service';
+import { LANGUAGE_NAMES, LANGUAGES } from '../i18n/language';
+import type { MessageKey } from '../i18n/messages';
 import type { ShownPhoto } from '../home/background.service';
 import { TopSitesService } from '../home/top-sites.service';
 import { Feature, FEATURES, formatDate, hasFeature, Settings } from './settings';
@@ -30,6 +33,8 @@ import { SettingsService } from './settings.service';
 export class SettingsPanel {
   private readonly service = inject(SettingsService);
   private readonly topSites = inject(TopSitesService);
+  private readonly i18n = inject(I18n);
+  readonly t = this.i18n.t;
 
   readonly open = input(false);
   readonly photo = input<ShownPhoto | null>(null);
@@ -38,14 +43,25 @@ export class SettingsPanel {
 
   readonly settings = this.service.settings;
   readonly shortcutsSupported = this.topSites.supported;
-  readonly themes = PHOTO_THEMES;
-  readonly features = FEATURES;
-  readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
-  /** Each date format, shown with today's date. */
-  readonly dateFormats = (['long', 'short', 'numeric'] as const).map((format) => ({
-    format,
-    label: formatDate(new Date(), format),
+  readonly themes = PHOTO_THEMES.map((theme) => ({
+    id: theme.id,
+    label: `settings.photoTheme.${theme.id}` as MessageKey,
   }));
+  readonly features = FEATURES.map((feature) => ({
+    id: feature.id,
+    label: `settings.feature.${feature.id}` as MessageKey,
+    description: `settings.feature.${feature.id}.description` as MessageKey,
+  }));
+  /** Each language in its own name: whoever looks for theirs can read it. */
+  readonly languages = LANGUAGES.map((id) => ({ id, name: LANGUAGE_NAMES[id] }));
+  readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
+  /** Each date format, shown with today's date in the current language. */
+  readonly dateFormats = computed(() =>
+    (['long', 'short', 'numeric'] as const).map((format) => ({
+      format,
+      label: formatDate(new Date(), format, this.i18n.locale()),
+    })),
+  );
 
   choose<K extends keyof Settings>(key: K, event: Event): void {
     const value = (event as CustomEvent<{ value: string }>).detail.value;

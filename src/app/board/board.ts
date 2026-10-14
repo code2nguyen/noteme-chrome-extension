@@ -17,7 +17,7 @@ import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
 import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/components/masonry';
-import type { MenuSelectEventDetail } from '@c2n/components/menu';
+import type { Menu, MenuSelectEventDetail } from '@c2n/components/menu';
 import type { SearchFieldSearchDetail } from '@c2n/components/search-field';
 import type { ToastRegion } from '@c2n/components/toast';
 import { Dictionary } from '@ngrx/entity';
@@ -30,10 +30,12 @@ import { latestNotePaper, noteDefaultProperties, paperColorFor } from '../note-c
 import { DataService } from '../services/data.service';
 import { DeviceSyncService } from '../services/device-sync.service';
 import { FULL_SCREEN, SearchSuggestion, searchShortcut, searchSuggestions } from '../services/search-results';
-import { editedLabel, getCurrentDate, pageMarkdownToText, uuid } from '../services/utils';
+import { getCurrentDate, pageMarkdownToText, uuid } from '../services/utils';
 import { ArtBoardItemApiActions, ItemDataActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { selectIsAllLoadedItemDatas, selectItemDataEntities, selectItemDatasLoadFailed } from '../store/reducers';
+import { I18n } from '../i18n/i18n.service';
+import type { MessageKey } from '../i18n/messages';
 import { hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
 import { SettingsService } from '../settings/settings.service';
@@ -43,6 +45,7 @@ import { FlowCard } from './flow-card';
 import { cardRows, MIN_CARD_COLUMNS, minCardRows, storedRows } from './card-rows';
 import { PageCard } from './page-card';
 import { TodoCard } from './todo-card';
+import { bringIntoView } from './bring-into-view';
 import {
   countKinds,
   groupByMonth,
@@ -50,6 +53,7 @@ import {
   NoteKind,
   NoteSummary,
   rearrange,
+  shortKindKey,
   splitBoard,
   summarize,
 } from './older-notes';
@@ -64,11 +68,11 @@ const NEW_KEYS: Record<string, ExtensionId> = {
   t: ExtensionId.TodoList,
 };
 
-const TILE_LABELS: Record<ExtensionId, string> = {
-  [ExtensionId.TextNote]: 'Note',
-  [ExtensionId.Page]: 'Page',
-  [ExtensionId.Flow]: 'Flow',
-  [ExtensionId.TodoList]: 'To-do list',
+const TILE_LABELS: Record<ExtensionId, MessageKey> = {
+  [ExtensionId.TextNote]: 'common.note',
+  [ExtensionId.Page]: 'common.page',
+  [ExtensionId.Flow]: 'common.flow',
+  [ExtensionId.TodoList]: 'common.list',
 };
 
 /** The New menu's values. */
@@ -99,6 +103,11 @@ const NEW_KINDS: Record<string, ExtensionId> = {
 })
 export class Board {
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18n);
+  /** The app's locale as a stream, made once here: toObservable needs the injection context. */
+  private readonly locale$ = toObservable(this.i18n.locale);
+  readonly t = this.i18n.t;
+  readonly shortKindKey = shortKindKey;
   private readonly settings = inject(SettingsService).settings;
   /** Plan is optional: its link shows only while it is switched on in Settings. */
   readonly planOn = computed(() => hasFeature(this.settings(), 'plan'));
@@ -109,6 +118,11 @@ export class Board {
   private readonly todoCards = viewChildren(TodoCard);
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
   private readonly toasts = viewChild<ElementRef<ToastRegion>>('toasts');
+  private readonly newMenu = viewChild<ElementRef<Menu>>('newMenu');
+  /** Opens or closes the New menu a moment after the mouse arrives or leaves; either cancels the other. */
+  private newMenuTimer?: ReturnType<typeof setTimeout>;
+  /** The New menu was opened by the mouse resting on it, not by a click. */
+  private newMenuHovered = false;
   private readonly route = inject(ActivatedRoute);
 
   readonly ExtensionId = ExtensionId;
@@ -226,7 +240,7 @@ export class Board {
   readonly older = computed(() => (this.dataLoaded() ? this.split().older : []));
   private readonly olderSummaries = computed(() => {
     const data = this.itemData();
-    return this.older().map((item) => ({ item, ...summarize(item, data) }));
+    return this.older().map((item) => ({ item, ...summarize(item, data, this.t) }));
   });
   /** How many older notes there are of each kind, for the filter. */
   readonly olderCounts = computed(() => countKinds(this.olderSummaries()));
@@ -239,6 +253,7 @@ export class Board {
           (kind === 'all' || note.kind === kind) &&
           (!words || `${note.label} ${note.excerpt}`.toLowerCase().includes(words)),
       ),
+      this.i18n.locale(),
     );
   });
 
@@ -254,11 +269,13 @@ export class Board {
               this.dataService.getSearchResults(),
               this.store.select(selectItemDataEntities),
               this.dataService.selectArtBoardItemSearchLoading(),
+              // In the language picked, again when it changes.
+              this.locale$,
             ])
-          : of<[ArtBoardItem[], Dictionary<ItemData>, boolean]>([[], {}, false]),
+          : of<[ArtBoardItem[], Dictionary<ItemData>, boolean, string]>([[], {}, false, '']),
       ),
       // None while a search is pending: a quick pick must never open a match of the previous query.
-      map(([items, data, loading]) => (loading ? [] : searchSuggestions(items, data))),
+      map(([items, data, loading, locale]) => (loading ? [] : searchSuggestions(items, data, this.t, locale))),
     ),
     { initialValue: [] as SearchSuggestion[] },
   );
@@ -311,7 +328,14 @@ export class Board {
     this.store.dispatch(ItemDataActions.getAllItemData());
     this.deviceSync.sync();
     this.handleHomeActions();
-    inject(DestroyRef).onDestroy(() => this.boardLoadedSubscription.unsubscribe());
+    inject(DestroyRef).onDestroy(() => {
+      this.boardLoadedSubscription.unsubscribe();
+      clearTimeout(this.newMenuTimer);
+    });
+    // A click on New once the mouse has opened the menu must not leave it shut.
+    afterNextRender(() =>
+      this.newMenu()?.nativeElement.addEventListener('click', (event) => this.keepNewMenuOpen(event), true),
+    );
   }
 
   /**
@@ -379,9 +403,95 @@ export class Board {
     this.highlight(id);
   }
 
+  /**
+   * The New menu opens with the mouse resting on New (120ms, so passing over it does not) and closes 250ms after the
+   * mouse has left both New and the menu, time enough to cross the gap between them. Touch and pen keep the tap.
+   */
+  hoverNewMenu(event: PointerEvent, inside: boolean): void {
+    const menu = this.newMenu()?.nativeElement;
+    if (!menu || event.pointerType !== 'mouse') {
+      return;
+    }
+    clearTimeout(this.newMenuTimer);
+    if (inside) {
+      this.newMenuTimer = setTimeout(() => {
+        if (!menu.open) {
+          this.newMenuHovered = true;
+          // The menu takes the focus as it opens, for the keyboard; opened by the mouse, it never keeps it: the focus
+          // goes back where it was, so typing in a note goes on into the note, or nowhere, so a note about to take it
+          // (a new one, the pointer resting where New appears after "+ Note" on Home) still can.
+          const focused = deepActiveElement();
+          menu.open = true;
+          requestAnimationFrame(() => {
+            if (focused && focused !== document.body) {
+              focused.focus({ preventScroll: true });
+            } else if (menu.contains(document.activeElement)) {
+              (document.activeElement as HTMLElement).blur();
+            }
+          });
+        }
+      }, 120);
+    } else if (this.newMenuHovered) {
+      this.newMenuTimer = setTimeout(() => {
+        // Closing hands the focus to New, for the keyboard; a menu the mouse opened leaves it where it was instead.
+        const focused = deepActiveElement();
+        menu.open = false;
+        this.newMenuHovered = false;
+        requestAnimationFrame(() => {
+          if (focused && focused !== document.body && !menu.contains(focused)) {
+            focused.focus({ preventScroll: true });
+          } else if (menu.contains(document.activeElement)) {
+            (document.activeElement as HTMLElement).blur();
+          }
+        });
+      }, 250);
+    }
+  }
+
+  /**
+   * A click on New while the mouse holds the menu open keeps it open: the press already closed it (a click outside a
+   * popover) and the menu's own handling may toggle it, so it is opened again once both are done.
+   */
+  private keepNewMenuOpen(event: MouseEvent): void {
+    const menu = this.newMenu()?.nativeElement;
+    const onTrigger = (event.target as Element).closest('[slot="trigger"]');
+    if (onTrigger && !this.newMenuHovered) {
+      // A click opens the menu before the pointer has rested on New: no hover is to open it again later.
+      clearTimeout(this.newMenuTimer);
+    }
+    if (menu && this.newMenuHovered && onTrigger) {
+      setTimeout(() => (menu.open = true));
+    }
+  }
+
   onNewMenu(event: Event): void {
+    // A hover still waiting would open the menu again once it closes, and take the focus back from the new note.
+    clearTimeout(this.newMenuTimer);
+    this.newMenuHovered = false;
     const value = (event as CustomEvent<MenuSelectEventDetail>).detail.value;
-    this.create(NEW_KINDS[value] ?? ExtensionId.TextNote);
+    const kind = NEW_KINDS[value] ?? ExtensionId.TextNote;
+    const menu = this.newMenu()?.nativeElement;
+    if (!menu?.open) {
+      this.create(kind);
+      return;
+    }
+    // The menu hands the focus back to New as it closes, which would take it from the new note: create the note once
+    // the menu has closed (or soon, should it not say so).
+    let created = false;
+    const createOnce = () => {
+      if (!created) {
+        created = true;
+        menu.removeEventListener('toggle', onToggle);
+        this.create(kind);
+      }
+    };
+    const onToggle = (toggle: Event) => {
+      if ((toggle as ToggleEvent).newState === 'closed') {
+        setTimeout(createOnce);
+      }
+    };
+    menu.addEventListener('toggle', onToggle);
+    setTimeout(createOnce, 300);
   }
 
   /** N for a note, P for a page, F for a flow, T for a to-do list (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
@@ -436,8 +546,9 @@ export class Board {
         .subscribe(() => this.router.navigate([route, item.id], { queryParams: { new: 1 } }));
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // It lands first on the board: lit up and brought into view, as a note picked from the search results is.
     this.focusItemId.set(item.id);
+    this.highlight(item.id);
   }
 
   removeNote(item: ArtBoardItem): void {
@@ -462,9 +573,12 @@ export class Board {
     for (const item of items) {
       this.restore(item);
     }
-    const label =
-      items.length === 1 ? `“${summarize(items[0], this.itemData()).label}” is` : `${items.length} notes are`;
-    this.toasts()?.nativeElement.show({ message: `${label} back on the board`, duration: 4000, noIcon: true });
+    const title = items.length === 1 ? summarize(items[0], this.itemData(), this.t).label : '';
+    this.toasts()?.nativeElement.show({
+      message: this.t('board.toast.back', items.length, title),
+      duration: 4000,
+      noIcon: true,
+    });
   }
 
   /** Notes deleted forever from the Archive view, once confirmed there. */
@@ -502,13 +616,14 @@ export class Board {
    */
   pin(item: ArtBoardItem, fromOlder = false): void {
     if (!fromOlder) {
-      this.dataService.updateArtBoardItem({ ...item, starred: true });
+      this.dataService.updateArtBoardItem({ ...item, starred: true, starredDate: new Date().toISOString() });
       return;
     }
     const previous = item.gridPosition;
     this.dataService.updateArtBoardItem({
       ...item,
       starred: true,
+      starredDate: new Date().toISOString(),
       gridPosition: { ...item.gridPosition, order: this.minOrder() - 1 },
     });
     this.olderOpen.set(false);
@@ -518,8 +633,8 @@ export class Board {
     const toasts = this.toasts()?.nativeElement;
     if (toasts) {
       const id = toasts.show({
-        message: `“${summarize(item, this.itemData()).label}” is pinned to the board`,
-        actionLabel: 'Undo',
+        message: this.t('board.toast.pinned', summarize(item, this.itemData(), this.t).label),
+        actionLabel: this.t('common.undo'),
         actionPlacement: 'end',
         duration: 6000,
         noIcon: true,
@@ -529,6 +644,7 @@ export class Board {
         this.dataService.updateArtBoardItem({
           ...current,
           starred: false,
+          starredDate: undefined,
           gridPosition: { ...current.gridPosition, order: previous.order },
         });
       });
@@ -538,7 +654,7 @@ export class Board {
   /** Unpin a note. It stays on the board until the next visit, if it is not among the recent ones: not gone from under the pointer. */
   unpin(item: ArtBoardItem): void {
     this.reveal(item.id);
-    this.dataService.updateArtBoardItem({ ...item, starred: false });
+    this.dataService.updateArtBoardItem({ ...item, starred: false, starredDate: undefined });
   }
 
   /** What each message's Undo does, by the message's id. */
@@ -584,7 +700,7 @@ export class Board {
 
   /** What a tile is called, for screen readers. */
   tileLabel(item: ArtBoardItem): string {
-    return TILE_LABELS[item.extensionId] ?? 'Note';
+    return this.t(TILE_LABELS[item.extensionId] ?? 'common.note');
   }
 
   /** Whether a note opens full screen (a page or a flow), rather than being worked on on its card. */
@@ -603,15 +719,11 @@ export class Board {
   /** "Sep 24" this year, "Sep 24, 2025" before. */
   shortDate(iso: string): string {
     const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(this.i18n.locale(), {
       month: 'short',
       day: 'numeric',
       ...(date.getFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' }),
     });
-  }
-
-  edited(iso: string): string {
-    return editedLabel(iso);
   }
 
   paperColor(item: ArtBoardItem): string {
@@ -710,10 +822,10 @@ export class Board {
   }
 
   /**
-   * Light the note up once it is on the board (a restored or pinned note renders a moment later); a page or a flow is
-   * brought into view.
+   * Light the note up once it is on the board (a restored, older or pinned note renders a moment later, later still
+   * from chrome.storage): tried for up to 3s. A page or a flow is brought into view.
    */
-  private highlight(id: string, attempts = 20): void {
+  private highlight(id: string, attempts = 60): void {
     const card =
       this.cards().find((candidate) => candidate.item().id === id) ??
       this.todoCards().find((candidate) => candidate.item().id === id);
@@ -721,9 +833,18 @@ export class Board {
     if (card) {
       card.highlight();
     } else if (tile) {
-      tile.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      bringIntoView(tile);
     } else if (attempts > 0) {
       setTimeout(() => this.highlight(id, attempts - 1), 50);
     }
   }
+}
+
+/** The focused element, inside the shadow roots it is in (a note's editor is in its c2-notepad's). */
+function deepActiveElement(): HTMLElement | null {
+  let active = document.activeElement;
+  while (active?.shadowRoot?.activeElement) {
+    active = active.shadowRoot.activeElement;
+  }
+  return active instanceof HTMLElement ? active : null;
 }

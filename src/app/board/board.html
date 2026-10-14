@@ -1,5 +1,10 @@
 <header class="navbar" [class.navbar--raised]="raised()">
-  <c2-icon-button class="navbar__logo" aria-label="Home" tooltip="Home" (click)="goHome()">
+  <c2-icon-button
+    class="navbar__logo"
+    [attr.aria-label]="t('board.home')"
+    [tooltip]="t('board.home')"
+    (click)="goHome()"
+  >
     <svg viewBox="0 0 48 48" aria-hidden="true">
       <path fill="#3498db" d="M22 22H12A10 10 0 0 1 2 12A10 10 0 0 1 12 2A10 10 0 0 1 22 12Z" />
       <path fill="#efc94c" d="M26 22H36A10 10 0 0 0 46 12A10 10 0 0 0 36 2A10 10 0 0 0 26 12Z" />
@@ -7,29 +12,35 @@
       <path fill="#ff726b" d="M26 26H36A10 10 0 0 1 46 36A10 10 0 0 1 36 46A10 10 0 0 1 26 36Z" />
     </svg>
   </c2-icon-button>
-  <h1 class="navbar__title">{{ inNotesView() ? 'Notes' : 'Archive' }}</h1>
+  <h1 class="navbar__title">{{ inNotesView() ? t('common.notes') : t('common.archive') }}</h1>
   <c2-button-group
     class="navbar__views"
     selection="single"
     appearance="segmented"
     size="s"
-    aria-label="Notes or archive"
+    [attr.aria-label]="t('board.views')"
     [value]="view()"
     (change)="changeView($event)"
   >
-    <c2-button value="notes"><c2-feather-layout slot="prefix-icon"></c2-feather-layout>Notes</c2-button>
-    <c2-button value="archive"><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-button>
+    <c2-button value="notes"
+      ><c2-feather-layout slot="prefix-icon"></c2-feather-layout>{{ t('common.notes') }}</c2-button
+    >
+    <c2-button value="archive"
+      ><c2-feather-archive slot="prefix-icon"></c2-feather-archive>{{ t('common.archive') }}</c2-button
+    >
   </c2-button-group>
   @if (planOn()) {
-    <a class="navbar__link" routerLink="/plan"><c2-feather-calendar aria-hidden="true"></c2-feather-calendar>Plan</a>
+    <a class="navbar__link" routerLink="/plan"
+      ><c2-feather-calendar aria-hidden="true"></c2-feather-calendar>{{ t('board.plan') }}</a
+    >
   }
 
   <div class="navbar__search">
     <c2-autocomplete
       #searchField
       class="navbar__search-field"
-      [attr.aria-label]="inNotesView() ? 'Search everything' : 'Search the archive'"
-      [attr.placeholder]="inNotesView() ? 'Search everything' : 'Search the archive'"
+      [attr.aria-label]="inNotesView() ? t('board.search') : t('board.search.archive')"
+      [attr.placeholder]="inNotesView() ? t('board.search') : t('board.search.archive')"
       item-key="id"
       label-field="label"
       description-field="description"
@@ -42,7 +53,7 @@
     >
       <c2-feather-search slot="prefix-icon"></c2-feather-search>
       @if (searching()) {
-        <c2-spinner slot="suffix-icon" class="navbar__searching" label="Searching"></c2-spinner>
+        <c2-spinner slot="suffix-icon" class="navbar__searching" [attr.label]="t('board.searching')"></c2-spinner>
       }
     </c2-autocomplete>
     <!-- Over the field's right end, not in its suffix-icon slot, which sizes what it holds as a 16px icon. -->
@@ -56,43 +67,52 @@
   @if (inNotesView() && older().length > 0) {
     <c2-button class="navbar__older" (click)="olderOpen.set(true)">
       <c2-feather-clock slot="prefix-icon"></c2-feather-clock>
-      Older notes
-      <c2-badge class="navbar__older-count" [count]="older().length"></c2-badge>
+      {{ t('board.older') }}
+      <c2-badge slot="suffix-icon" class="navbar__older-count" [count]="older().length"></c2-badge>
     </c2-button>
   }
 
-  <c2-menu class="navbar__new" placement="bottom-end" aria-label="New" (menu-select)="onNewMenu($event)">
+  <!-- Opens as the mouse rests on New (and stays open while it is over the menu), on a tap, or from the keyboard. -->
+  <c2-menu
+    #newMenu
+    class="navbar__new"
+    placement="bottom-end"
+    [attr.aria-label]="t('board.new')"
+    (menu-select)="onNewMenu($event)"
+    (pointerenter)="hoverNewMenu($event, true)"
+    (pointerleave)="hoverNewMenu($event, false)"
+  >
     <c2-button slot="trigger" class="navbar__new-button ntm-action">
-      <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
-      New
+      <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+      {{ t('board.new') }}
     </c2-button>
     <c2-menu-item value="note">
-      <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
-      Note
-      <span slot="description">A quick thought, on a card</span>
+      <c2-phosphor-notepad slot="prefix-icon"></c2-phosphor-notepad>
+      {{ t('common.note') }}
+      <span slot="description">{{ t('board.new.note') }}</span>
       <span slot="shortcut">N</span>
     </c2-menu-item>
     <c2-menu-item value="page">
       <c2-feather-file-text slot="prefix-icon"></c2-feather-file-text>
-      Page
-      <span slot="description">A full page: headings, lists, code</span>
+      {{ t('common.page') }}
+      <span slot="description">{{ t('board.new.page') }}</span>
       <span slot="shortcut">P</span>
     </c2-menu-item>
     <c2-menu-item value="flow">
       <c2-feather-share-2 slot="prefix-icon"></c2-feather-share-2>
-      Flow
-      <span slot="description">Boxes and arrows</span>
+      {{ t('common.flow') }}
+      <span slot="description">{{ t('board.new.flow') }}</span>
       <span slot="shortcut">F</span>
     </c2-menu-item>
     <c2-menu-item value="todo">
       <c2-feather-check-square slot="prefix-icon"></c2-feather-check-square>
-      To-do list
-      <span slot="description">Tasks to check off</span>
+      {{ t('common.list') }}
+      <span slot="description">{{ t('board.new.list') }}</span>
       <span slot="shortcut">T</span>
     </c2-menu-item>
   </c2-menu>
 
-  <c2-icon-button aria-label="Settings" tooltip="Settings" (click)="openSettings()">
+  <c2-icon-button [attr.aria-label]="t('common.settings')" [tooltip]="t('common.settings')" (click)="openSettings()">
     <c2-feather-settings></c2-feather-settings>
   </c2-icon-button>
 </header>
@@ -102,20 +122,20 @@
     <c2-status-panel class="board__empty" media="illustration">
       @if (inNotesView()) {
         <c2-symbol-create-new slot="media"></c2-symbol-create-new>
-        <span slot="title">Nothing here yet</span>
-        <span slot="description">Press N for a note, P for a page, F for a flow or T for a to-do list.</span>
+        <span slot="title">{{ t('board.empty.title') }}</span>
+        <span slot="description">{{ t('board.empty.text') }}</span>
         <c2-button slot="actions" class="board__empty-action ntm-action" (click)="create(ExtensionId.TextNote)">
-          <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
-          Write a note
+          <c2-phosphor-notepad slot="prefix-icon"></c2-phosphor-notepad>
+          {{ t('board.empty.action') }}
         </c2-button>
       } @else if (searchQuery()) {
         <c2-symbol-no-results slot="media"></c2-symbol-no-results>
-        <span slot="title">Nothing archived matches</span>
-        <span slot="description">No archived note contains “{{ searchQuery() }}”.</span>
+        <span slot="title">{{ t('board.archive.noMatch.title') }}</span>
+        <span slot="description">{{ t('board.archive.noMatch.text', searchQuery()) }}</span>
       } @else {
         <c2-symbol-archive slot="media"></c2-symbol-archive>
-        <span slot="title">The archive is empty</span>
-        <span slot="description">Archived notes wait here, out of the way, until you bring them back.</span>
+        <span slot="title">{{ t('board.archive.empty.title') }}</span>
+        <span slot="description">{{ t('board.archive.empty.text') }}</span>
       }
     </c2-status-panel>
   }
@@ -154,8 +174,8 @@
             <!-- A push-pin on the card's corner: it stays on the board, in its place. Pulling the pin out unpins the card. -->
             <c2-icon-button
               class="board__pin"
-              aria-label="Unpin from the board"
-              tooltip="Unpin from the board"
+              [attr.aria-label]="t('board.unpin')"
+              [tooltip]="t('board.unpin')"
               (click)="unpin(item)"
             >
               <span class="board__pin-head"></span>
@@ -172,8 +192,8 @@
               slot="actions"
               class="board__tile-action board__tile-move"
               [id]="'move-' + item.id"
-              [attr.aria-label]="item.extensionId === ExtensionId.Page ? 'Move page' : 'Move flow'"
-              tooltip="Move"
+              [attr.aria-label]="item.extensionId === ExtensionId.Page ? t('board.page.move') : t('board.flow.move')"
+              [tooltip]="t('board.move')"
             >
               <c2-feather-move></c2-feather-move>
             </c2-icon-button>
@@ -181,34 +201,38 @@
               slot="actions"
               class="board__tile-action"
               placement="bottom-end"
-              [attr.aria-label]="item.extensionId === ExtensionId.Page ? 'Page actions' : 'Flow actions'"
+              [attr.aria-label]="
+                item.extensionId === ExtensionId.Page ? t('board.page.actions') : t('board.flow.actions')
+              "
               (menu-select)="onTileMenu(item, $event)"
             >
               <c2-icon-button
                 slot="trigger"
-                [attr.aria-label]="item.extensionId === ExtensionId.Page ? 'Page actions' : 'Flow actions'"
-                tooltip="More"
+                [attr.aria-label]="
+                  item.extensionId === ExtensionId.Page ? t('board.page.actions') : t('board.flow.actions')
+                "
+                [tooltip]="t('board.more')"
               >
                 <c2-feather-more-vertical></c2-feather-more-vertical>
               </c2-icon-button>
               @if (item.starred) {
                 <c2-menu-item value="unpin">
                   <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
-                  Unpin from the board
+                  {{ t('board.unpin') }}
                 </c2-menu-item>
               } @else {
                 <c2-menu-item value="pin">
                   <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
-                  Pin to the board
+                  {{ t('board.pin') }}
                 </c2-menu-item>
               }
               <c2-menu-item value="archive">
                 <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
-                Archive
+                {{ t('board.toArchive') }}
               </c2-menu-item>
               <c2-menu-item value="delete" destructive>
                 <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-                {{ item.extensionId === ExtensionId.Page ? 'Delete this page' : 'Delete this flow' }}
+                {{ item.extensionId === ExtensionId.Page ? t('board.page.delete') : t('board.flow.delete') }}
               </c2-menu-item>
             </c2-menu>
           } @else if (item.extensionId === ExtensionId.TodoList) {
@@ -246,27 +270,27 @@
 <!-- The notes the board leaves out: not pinned, and not among the recent ones. -->
 <c2-sheet class="older" side="right" [open]="olderOpen()" (close)="olderOpen.set(false)">
   <span slot="title"
-    >Older notes <span class="older__count">· {{ older().length }}</span></span
+    >{{ t('board.older') }} <span class="older__count">· {{ older().length }}</span></span
   >
-  <p class="older__intro">Notes you haven’t edited lately. Pin one to keep it on the board.</p>
+  <p class="older__intro">{{ t('board.older.intro') }}</p>
   <c2-button-group
     class="older__kinds"
     selection="single"
     appearance="segmented"
     size="s"
-    aria-label="Kind of note"
+    [attr.aria-label]="t('board.older.kinds')"
     [value]="olderKind()"
     (change)="onOlderKind($event)"
   >
-    <c2-button value="all">All</c2-button>
-    <c2-button value="Note">Notes · {{ olderCounts().Note }}</c2-button>
-    <c2-button value="Page">Pages · {{ olderCounts().Page }}</c2-button>
-    <c2-button value="Flow">Flows · {{ olderCounts().Flow }}</c2-button>
-    <c2-button value="List">Lists · {{ olderCounts().List }}</c2-button>
+    <c2-button value="all">{{ t('board.older.all') }}</c2-button>
+    <c2-button value="Note">{{ t('common.notes') }} · {{ olderCounts().Note }}</c2-button>
+    <c2-button value="Page">{{ t('board.older.pages') }} · {{ olderCounts().Page }}</c2-button>
+    <c2-button value="Flow">{{ t('board.older.flows') }} · {{ olderCounts().Flow }}</c2-button>
+    <c2-button value="List">{{ t('board.older.lists') }} · {{ olderCounts().List }}</c2-button>
   </c2-button-group>
   <c2-search-field
     class="older__filter"
-    placeholder="Filter older notes"
+    [attr.placeholder]="t('board.older.filter')"
     debounce="150"
     (search)="onOlderSearch($event)"
   >
@@ -295,7 +319,7 @@
                   <c2-feather-check-square></c2-feather-check-square>
                 }
                 @default {
-                  <c2-feather-edit-3></c2-feather-edit-3>
+                  <c2-phosphor-notepad></c2-phosphor-notepad>
                 }
               }
             </span>
@@ -315,33 +339,35 @@
                   [value]="olderText(note.id)"
                 ></c2-notepad>
               } @else {
-                <p class="older__excerpt">{{ note.excerpt || 'Nothing written yet.' }}</p>
+                <p class="older__excerpt">{{ note.excerpt || t('board.older.nothingWritten') }}</p>
               }
-              <p class="older__meta">{{ note.kind }} · edited {{ edited(note.edited) }}</p>
+              <p class="older__meta">
+                {{ t(shortKindKey(note.kind)) }} · <c2-relative-time [date]="note.edited"></c2-relative-time>
+              </p>
               <div class="older__actions">
                 <c2-button class="older__pin" (click)="pin(note.item, true)">
                   <c2-phosphor-push-pin slot="prefix-icon" weight="fill"></c2-phosphor-push-pin>
-                  Pin to the board
+                  {{ t('board.pin') }}
                 </c2-button>
                 @if (opensFullScreen(note.item)) {
-                  <c2-button class="older__secondary" (click)="openOlder(note.item)">Open</c2-button>
+                  <c2-button class="older__secondary" (click)="openOlder(note.item)">{{ t('board.open') }}</c2-button>
                 }
                 <c2-button class="older__secondary" (click)="archive(note.item)">
                   <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
-                  Archive
+                  {{ t('board.toArchive') }}
                 </c2-button>
                 <c2-menu
                   class="older__more"
                   placement="bottom-end"
-                  aria-label="More actions"
+                  [attr.aria-label]="t('board.moreActions')"
                   (menu-select)="onTileMenu(note.item, $event)"
                 >
-                  <c2-icon-button slot="trigger" aria-label="More actions" tooltip="More">
+                  <c2-icon-button slot="trigger" [attr.aria-label]="t('board.moreActions')" [tooltip]="t('board.more')">
                     <c2-feather-more-vertical></c2-feather-more-vertical>
                   </c2-icon-button>
                   <c2-menu-item value="delete" destructive>
                     <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-                    Delete
+                    {{ t('common.delete') }}
                   </c2-menu-item>
                 </c2-menu>
               </div>
@@ -351,7 +377,7 @@
       }
     </c2-accordion>
   } @empty {
-    <p class="older__none">No older note matches.</p>
+    <p class="older__none">{{ t('board.older.none') }}</p>
   }
 </c2-sheet>
 

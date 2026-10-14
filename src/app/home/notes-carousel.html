@@ -1,0 +1,38 @@
+@if (slides(); as notes) {
+  @if (notes.length > 0) {
+    <c2-carousel
+      class="notes"
+      [label]="t('home.notes')"
+      [previousLabel]="t('home.notes.previous')"
+      [nextLabel]="t('home.notes.next')"
+      [slideLabelTemplate]="t('home.notes.slide')"
+    >
+      @for (note of notes; track note.id) {
+        <a
+          class="note"
+          routerLink="/main-board"
+          [queryParams]="{ show: note.id }"
+          (click)="open(note.id)"
+          [attr.aria-label]="t('home.notes.open', note.title)"
+        >
+          <span class="note__paper" [attr.data-paper]="note.paper">
+            <span class="note__head">
+              @if (note.pinned && setting() !== 'edited') {
+                <c2-phosphor-push-pin aria-hidden="true"></c2-phosphor-push-pin>{{ t('home.notes.pinned') }}
+              } @else {
+                <c2-feather-clock aria-hidden="true"></c2-feather-clock>
+                <c2-relative-time [date]="note.edited" [locale]="locale()"></c2-relative-time>
+              }
+            </span>
+            <span class="note__title">{{ note.title }}</span>
+            @if (note.text) {
+              <span class="note__text">{{ note.text }}</span>
+            }
+          </span>
+        </a>
+      }
+    </c2-carousel>
+  } @else if (setting() === 'pinned') {
+    <p class="notes__empty">{{ t('home.notes.none') }}</p>
+  }
+}

@@ -39,6 +39,7 @@ import type {
   WeekPlannerWeekChangeDetail,
 } from '@c2n/components/week-planner';
 
+import { I18n } from '../i18n/i18n.service';
 import { SettingsService } from '../settings/settings.service';
 import {
   allDayInWeek,
@@ -87,6 +88,8 @@ export class PlanViewComponent {
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly settings = inject(SettingsService).settings;
+  readonly i18n = inject(I18n);
+  readonly t = this.i18n.t;
   private readonly titleField = viewChild<ElementRef<TextField>>('titleField');
   private readonly dayField = viewChild<ElementRef<TextField>>('dayField');
 
@@ -115,7 +118,7 @@ export class PlanViewComponent {
 
   readonly formatDay = (day: string, long = true) =>
     fromIsoDay(day).toLocaleDateString(
-      undefined,
+      this.i18n.locale(),
       long ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'short', day: 'numeric' },
     );
 

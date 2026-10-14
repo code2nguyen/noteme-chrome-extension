@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Noteme",
+    "description": "The extension's name, the same in every language."
+  },
+  "appDescription": {
+    "message": "Thay trang thẻ mới bằng một ứng dụng ghi chú cá nhân",
+    "description": "The extension's description in Chrome and the Chrome Web Store."
+  }
+}

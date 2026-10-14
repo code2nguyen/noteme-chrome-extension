@@ -1,7 +1,7 @@
 <header class="flow-bar">
   <a class="flow-bar__back" routerLink="/main-board" [queryParams]="inArchive() ? { view: 'archive' } : {}">
     <c2-feather-arrow-left aria-hidden="true"></c2-feather-arrow-left>
-    {{ inArchive() ? 'Archive' : 'Notes' }}
+    {{ inArchive() ? t('common.archive') : t('common.notes') }}
   </a>
   @if (found()) {
     <!-- The flow's name, in the bar: read as its heading; a click (or Enter on it) turns it into a field, saved on
@@ -9,39 +9,39 @@
     <c2-inline-edit
       #titleField
       class="flow-bar__title"
-      label="Title"
-      placeholder="Untitled flow"
+      [attr.label]="t('flow.title')"
+      [attr.placeholder]="t('common.untitled.flow')"
       [value]="title()"
       (change)="onTitleChange($event)"
     ></c2-inline-edit>
   }
   <span class="flow-bar__spacer"></span>
-  <c2-menu placement="bottom-end" aria-label="Flow actions" (menu-select)="onMenu($event)">
-    <c2-icon-button slot="trigger" aria-label="Flow actions" tooltip="More">
+  <c2-menu placement="bottom-end" [attr.aria-label]="t('flow.actions')" (menu-select)="onMenu($event)">
+    <c2-icon-button slot="trigger" [attr.aria-label]="t('flow.actions')" [attr.tooltip]="t('flow.more')">
       <c2-feather-more-horizontal></c2-feather-more-horizontal>
     </c2-icon-button>
     @if (inArchive()) {
       <c2-menu-item value="restore">
         <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
-        Restore to the board
+        {{ t('flow.restore') }}
       </c2-menu-item>
     } @else {
       <c2-menu-item value="archive">
         <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
-        Archive
+        {{ t('flow.archive') }}
       </c2-menu-item>
     }
     <c2-menu-item value="delete" destructive>
       <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-      Delete this flow
+      {{ t('flow.delete') }}
     </c2-menu-item>
   </c2-menu>
 </header>
 
 @if (found() === false) {
   <main class="flow flow--missing">
-    <p>This flow no longer exists.</p>
-    <a routerLink="/main-board">Back to your notes</a>
+    <p>{{ t('flow.missing') }}</p>
+    <a routerLink="/main-board">{{ t('flow.back') }}</a>
   </main>
 } @else if (found()) {
   <main class="flow">
@@ -52,7 +52,7 @@
         editable
         no-card
         no-double-click-add
-        aria-label="Flow"
+        [attr.aria-label]="t('common.flow')"
         [nodes]="nodes()"
         [edges]="edges()"
         [renderContextMenu]="renderContextMenu"
@@ -68,25 +68,35 @@
         <c2-icon-button
           slot="actions"
           class="flow__add"
-          aria-label="Add a box"
-          tooltip="Click or drag onto the canvas to add a box (N)"
+          [attr.aria-label]="t('flow.add')"
+          [attr.tooltip]="t('flow.add.tooltip')"
           (pointerdown)="dragBox($event)"
           (click)="addBox()"
         >
-          <c2-phosphor-rectangle-dashed></c2-phosphor-rectangle-dashed>
+          <c2-phosphor-plus-square></c2-phosphor-plus-square>
         </c2-icon-button>
-        <c2-icon-button slot="actions" aria-label="Tidy up" tooltip="Tidy up: lay the boxes out again" (click)="tidy()">
+        <c2-icon-button
+          slot="actions"
+          [attr.aria-label]="t('flow.tidy')"
+          [attr.tooltip]="t('flow.tidy.tooltip')"
+          (click)="tidy()"
+        >
           <c2-phosphor-tree-structure></c2-phosphor-tree-structure>
         </c2-icon-button>
-        <c2-icon-button slot="actions" aria-label="Show the whole flow" tooltip="Fit to screen" (click)="fit()">
+        <c2-icon-button
+          slot="actions"
+          [attr.aria-label]="t('flow.fit')"
+          [attr.tooltip]="t('flow.fit.tooltip')"
+          (click)="fit()"
+        >
           <c2-phosphor-scan></c2-phosphor-scan>
         </c2-icon-button>
       </c2-flow>
       <!-- Only on an empty flow, to show where to start: once there are boxes, the canvas speaks for itself. -->
       @if (empty()) {
         <p class="flow__hint">
-          <span class="flow__hint-pointer">Click or drag + to add a box, or press N</span>
-          <span class="flow__hint-touch">Tap or drag + to add a box</span>
+          <span class="flow__hint-pointer">{{ t('flow.hint.pointer') }}</span>
+          <span class="flow__hint-touch">{{ t('flow.hint.touch') }}</span>
         </p>
       }
     </div>

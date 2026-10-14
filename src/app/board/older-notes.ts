@@ -1,6 +1,9 @@
 import { Dictionary } from '@ngrx/entity';
 
 import { ExtensionId } from '../extension-id';
+import type { I18n } from '../i18n/i18n.service';
+import { kindKey, untitledKey } from '../i18n/kinds';
+import type { MessageKey } from '../i18n/messages';
 import { getText, plainLine } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 
@@ -53,9 +56,12 @@ export function kindOf(item: ArtBoardItem): NoteKind {
   return KINDS[item.extensionId] ?? 'Note';
 }
 
-/** What a note with nothing written in it is called. */
-export function untitled(kind: NoteKind): string {
-  return kind === 'Note' ? 'Empty note' : `Untitled ${kind.toLowerCase()}`;
+/** The text of the app's language: `I18n.t`. */
+export type Translate = I18n['t'];
+
+/** A kind as shown before a date ("List · 3 days ago"): as `kindKey`, with a to-do list in short. */
+export function shortKindKey(kind: NoteKind): MessageKey {
+  return kind === 'List' ? 'board.kind.list' : kindKey(kind);
 }
 
 /**
@@ -100,7 +106,8 @@ export function splitBoard(
   };
 }
 
-export function summarize(item: ArtBoardItem, data: Dictionary<ItemData>): NoteSummary {
+/** A note's summary; one with nothing written in it is named in the app's language (`t`). */
+export function summarize(item: ArtBoardItem, data: Dictionary<ItemData>, t: Translate): NoteSummary {
   const itemData = data[item.id];
   const kind = kindOf(item);
   const lines = (itemData ? getText(itemData.data, itemData.dataType, itemData.properties) : '')
@@ -110,7 +117,7 @@ export function summarize(item: ArtBoardItem, data: Dictionary<ItemData>): NoteS
   return {
     id: item.id,
     kind,
-    label: lines[0] || untitled(kind),
+    label: lines[0] || t(untitledKey(kind)),
     excerpt: lines.slice(1).join(' · '),
     edited: lastEdited(item, data),
   };
@@ -124,16 +131,20 @@ export interface MonthGroup<T> {
   items: T[];
 }
 
-/** Notes newest first, grouped by the month of a date of theirs: by default, when they were last edited. */
+/**
+ * Notes newest first, grouped by the month of a date of theirs (by default, when they were last edited), the months
+ * named in `locale` (`I18n.locale()`).
+ */
 export function groupByMonth<T extends { edited: string }>(
   notes: T[],
+  locale: string,
   now = new Date(),
   dateOf: (note: T) => string = (note) => note.edited,
 ): MonthGroup<T>[] {
   const groups: MonthGroup<T>[] = [];
   for (const note of notes) {
     const date = new Date(dateOf(note));
-    const label = date.toLocaleDateString(undefined, {
+    const label = date.toLocaleDateString(locale, {
       month: 'long',
       ...(date.getFullYear() === now.getFullYear() ? {} : { year: 'numeric' }),
     });
