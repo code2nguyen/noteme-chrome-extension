@@ -65,12 +65,14 @@ c2-icon-button.sheet__action[id^='move-']::part(button) {
   cursor: grab;
 }
 
-// A grid with one row the height left in the card: the sheet stretches to it, so its own max-height of 100% lets it
-// scroll there rather than push the card taller.
+// A grid of one cell the size left in the card: the sheet stretches to it, so its own max-height of 100% lets it
+// scroll there rather than push the card taller, and its columns scroll across rather than push the card wider.
 .sheet__grid {
   display: grid;
   flex: 1;
   grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   min-height: 0;
 }
 

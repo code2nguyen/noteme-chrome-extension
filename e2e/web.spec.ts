@@ -826,6 +826,38 @@ test('arrange: cards move and resize without a mode, and the order is kept after
   expect(resized.height).toBeGreaterThan(heightBefore + 20);
 });
 
+test('a sheet grown past its card scrolls inside it, and the card keeps its size', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  const size = () =>
+    card.evaluate((element) => {
+      const paper = element.querySelector('.sheet__paper')!;
+      return { width: element.getBoundingClientRect().width, overflow: paper.scrollWidth - paper.clientWidth };
+    });
+  const height = async () => (await card.boundingBox())!.height;
+  const shortHeight = await height();
+  const before = await size();
+  for (let i = 0; i < 8; i++) {
+    await card.getByRole('button', { name: 'Add a column' }).click();
+    await page.keyboard.press('Escape');
+  }
+  for (let i = 0; i < 15; i++) {
+    await card.getByRole('button', { name: 'Add a row' }).click();
+  }
+  await expect(card.locator('c2-spreadsheet #cell-K18')).toHaveCount(1);
+  expect(await size()).toEqual({ width: before.width, overflow: 0 });
+  // The sheet scrolls, across and down, inside the card.
+  const scroller = card.locator('c2-spreadsheet .scroller');
+  expect(await scroller.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  // Taller, once saved, as tall as twelve rows: past them the sheet scrolls down too.
+  await expect.poll(height).toBeGreaterThan(shortHeight + 200);
+  expect(await scroller.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
+  await shot(page, 'sheet-card-grown');
+});
+
 test('a sheet is named, filled and styled on its card, kept after a reload, and found by a cell', async ({ page }) => {
   await openBoard(page);
   await page.keyboard.press('s');
