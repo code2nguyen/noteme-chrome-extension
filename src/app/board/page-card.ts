@@ -19,7 +19,7 @@ import { PAGE_EXCERPT_LENGTH } from './card-rows';
     <a class="page-card" [routerLink]="['/page', item().id]" [queryParams]="item().boardId ? {} : { from: 'archive' }">
       <span class="page-card__kind">
         <c2-feather-file-text aria-hidden="true"></c2-feather-file-text>
-        <span>{{ t('common.page') }} · <c2-relative-time [date]="edited()"></c2-relative-time></span>
+        <span>{{ t('common.page') }} · <c2-relative-time min-unit="minute" [date]="edited()"></c2-relative-time></span>
       </span>
       <span class="page-card__title" [class.page-card__title--untitled]="!title()">{{
         title() || t('board.page.untitled')

@@ -363,7 +363,8 @@
                 <p class="older__excerpt">{{ note.excerpt || t('board.older.nothingWritten') }}</p>
               }
               <p class="older__meta">
-                {{ t(shortKindKey(note.kind)) }} · <c2-relative-time [date]="note.edited"></c2-relative-time>
+                {{ t(shortKindKey(note.kind)) }} ·
+                <c2-relative-time min-unit="minute" [date]="note.edited"></c2-relative-time>
               </p>
               <div class="older__actions">
                 <c2-button class="older__pin" (click)="pin(note.item, true)">

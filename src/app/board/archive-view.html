@@ -150,7 +150,7 @@
     </header>
     <p class="archive__meta">
       {{ t('archive.meta.edited', t(kindKey(note.kind)), note.kind) }}
-      <c2-relative-time [date]="note.edited"></c2-relative-time>
+      <c2-relative-time min-unit="minute" [date]="note.edited"></c2-relative-time>
       {{ t('archive.meta.archived', shortDate(note.archived), note.kind) }}
     </p>
     @if (note.kind === 'Note') {

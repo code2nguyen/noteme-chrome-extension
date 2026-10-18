@@ -6,7 +6,8 @@
   <span class="page-bar__status" role="status"
     >{{ status() }}
     @if (saved() && modified(); as modified) {
-      · {{ t('page.edited') }} <c2-relative-time [date]="modified" [locale]="i18n.locale()"></c2-relative-time>
+      · {{ t('page.edited') }}
+      <c2-relative-time min-unit="minute" [date]="modified" [locale]="i18n.locale()"></c2-relative-time>
     }
   </span>
   <span class="page-bar__spacer"></span>

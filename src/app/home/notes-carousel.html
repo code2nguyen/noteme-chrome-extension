@@ -21,7 +21,7 @@
                 <c2-phosphor-push-pin aria-hidden="true"></c2-phosphor-push-pin>{{ t('home.notes.pinned') }}
               } @else {
                 <c2-feather-clock aria-hidden="true"></c2-feather-clock>
-                <c2-relative-time [date]="note.edited" [locale]="locale()"></c2-relative-time>
+                <c2-relative-time min-unit="minute" [date]="note.edited" [locale]="locale()"></c2-relative-time>
               }
             </span>
             <span class="note__title">{{ note.title }}</span>
