@@ -34,7 +34,6 @@ export const archiveEn = {
   'archive.meta.edited': (name: string, _kind: NoteKind) => `${name} · edited`,
   /** "· archived Oct 3", after how long ago it was edited. */
   'archive.meta.archived': (date: string, _kind: NoteKind) => `· archived ${date}`,
-  'archive.nothingWritten': 'Nothing written yet.',
   'archive.restoreToBoard': 'Restore to the board',
   'archive.open': 'Open',
   'archive.deleteForever': 'Delete forever',
@@ -71,7 +70,6 @@ export const archiveFr: Translation<typeof archiveEn> = {
   'archive.clear': 'Effacer',
   'archive.meta.edited': (name, kind) => `${name} · modifié${kind === 'Flow' || kind === 'Sheet' ? '' : 'e'}`,
   'archive.meta.archived': (date, kind) => `· archivé${kind === 'Flow' || kind === 'Sheet' ? '' : 'e'} le ${date}`,
-  'archive.nothingWritten': 'Rien d’écrit pour l’instant.',
   'archive.restoreToBoard': 'Remettre sur le tableau',
   'archive.open': 'Ouvrir',
   'archive.deleteForever': 'Supprimer définitivement',
@@ -113,7 +111,6 @@ export const archiveVi: Translation<typeof archiveEn> = {
   'archive.clear': 'Bỏ chọn',
   'archive.meta.edited': (name) => `${name} · sửa`,
   'archive.meta.archived': (date) => `· lưu trữ ngày ${date}`,
-  'archive.nothingWritten': 'Chưa có nội dung.',
   'archive.restoreToBoard': 'Khôi phục về bảng',
   'archive.open': 'Mở',
   'archive.deleteForever': 'Xóa vĩnh viễn',

@@ -45,6 +45,7 @@ import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
 import { cardRows, MIN_CARD_COLUMNS, minCardRows, storedRows } from './card-rows';
 import { PageCard } from './page-card';
+import { NotePreview } from './note-preview';
 import { SheetCard } from './sheet-card';
 import { TodoCard } from './todo-card';
 import { bringIntoView } from './bring-into-view';
@@ -97,7 +98,7 @@ const NEW_KINDS: Record<string, ExtensionId> = {
   selector: 'ntm-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [ArchiveView, NoteCard, PageCard, FlowCard, TodoCard, SheetCard, RouterLink, SettingsPanel],
+  imports: [ArchiveView, NoteCard, NotePreview, PageCard, FlowCard, TodoCard, SheetCard, RouterLink, SettingsPanel],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {

@@ -1687,6 +1687,69 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
   await expect(titles).toHaveText(['Wi-Fi password', 'Launch checklist', 'Groceries', 'Book ideas']);
 });
 
+test('the Archive shows a page, a list and a sheet as they look, not as their text', async ({ page }) => {
+  // Stored, so archived rather than removed as empty: an edit reaches the store after a pause.
+  const stored = (text: string) =>
+    expect
+      .poll(() => page.evaluate((wanted) => Object.values(localStorage).some((value) => value.includes(wanted)), text))
+      .toBe(true);
+  await openBoard(page);
+  // A list and a sheet, archived from their cards.
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await expect(list.getByRole('textbox', { name: 'List title' })).toBeFocused();
+  await page.keyboard.type('Groceries');
+  await page.keyboard.press('Enter');
+  const add = list.getByRole('textbox', { name: 'New task' });
+  await add.fill('Bread');
+  await add.press('Enter');
+  await stored('Bread');
+  await list.locator('c2-menu.todo__actions c2-icon-button[slot="trigger"]').click();
+  await list.locator('c2-menu-item[value="archive"]').click();
+  await expect(list).toHaveCount(0);
+
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('s');
+  const sheet = page.locator('ntm-sheet-card');
+  await expect(sheet.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.type('Budget');
+  await page.keyboard.press('Enter');
+  await expect(sheet.getByRole('textbox', { name: 'Name of column A' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await sheet.locator('c2-spreadsheet #cell-A1').click();
+  await page.keyboard.type('Hotel');
+  await page.keyboard.press('Enter');
+  await stored('Hotel');
+  await sheet.locator('c2-menu c2-icon-button[slot="trigger"]').click();
+  await sheet.locator('c2-menu-item[value="archive"]').click();
+  await expect(tiles(page)).toHaveCount(0);
+
+  // A page, archived from its own view.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('p');
+  await expect(page).toHaveURL(/#\/page\//);
+  await page.locator('ntm-page-view c2-page-editor .ProseMirror').click();
+  await page.keyboard.type('## Packing');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('Passports');
+  await page.locator('ntm-page-view c2-menu c2-icon-button[slot="trigger"]').click();
+  await page.locator('ntm-page-view c2-menu-item[value="archive"]').click();
+  await expect(page).toHaveURL(/#\/main-board/);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(archiveRows(page)).toHaveCount(3);
+  await archiveRows(page).filter({ hasText: 'Packing' }).click();
+  await expect(archivePreview(page).locator('c2-page-editor h2')).toHaveText('Packing');
+  await shot(page, 'archive-page-preview');
+  await archiveRows(page).filter({ hasText: 'Groceries' }).click();
+  await expect(archivePreview(page).locator('c2-todo-list').getByRole('checkbox')).toHaveCount(1);
+  await shot(page, 'archive-list-preview');
+  await archiveRows(page).filter({ hasText: 'Budget' }).click();
+  await expect(archivePreview(page).locator('c2-spreadsheet #cell-A1')).toHaveText('Hotel');
+  await expect(archivePreview(page).locator('c2-spreadsheet #cell-A1')).toHaveCSS('outline-style', 'none');
+  await shot(page, 'archive-sheet-preview');
+});
+
 test('the text size picked in Settings scales the text of Noteme and of its notes, and is kept', async ({ page }) => {
   const fontSize = (locator: Locator) => locator.evaluate((element) => getComputedStyle(element).fontSize);
   await openBoard(page);

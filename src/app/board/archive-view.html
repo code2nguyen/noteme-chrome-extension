@@ -164,13 +164,12 @@
         [value]="markdown(note.id)"
       ></c2-notepad>
     } @else {
-      <div class="archive__doc">
-        @for (line of lines(note.id); track $index) {
-          <p>{{ line }}</p>
-        } @empty {
-          <p class="archive__empty-doc">{{ t('archive.nothingWritten') }}</p>
-        }
-      </div>
+      <ntm-note-preview
+        [kind]="note.kind"
+        [item]="note.item"
+        [data]="data()[note.id]"
+        [label]="note.label"
+      ></ntm-note-preview>
     }
     <div class="archive__actions">
       <c2-button class="archive__restore ntm-action" (click)="restoreNotes([note])">

@@ -263,22 +263,6 @@
   --c2-notepad__focus--outline: none;
 }
 
-.archive__doc {
-  padding: 16px 20px;
-  border: 1px solid var(--ntm-line);
-  border-radius: 12px;
-  background: var(--c2-theme--color-surface-container-low);
-  line-height: 1.55;
-
-  p {
-    margin: 0 0 6px;
-  }
-}
-
-.archive__empty-doc {
-  color: var(--ntm-muted);
-}
-
 .archive__actions {
   display: flex;
   flex-wrap: wrap;

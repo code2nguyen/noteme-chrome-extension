@@ -68,7 +68,6 @@ export const boardEn = {
   'board.older.lists': 'To do',
   'board.older.sheets': 'Sheets',
   'board.older.filter': 'Filter older notes',
-  'board.older.nothingWritten': 'Nothing written yet.',
   'board.older.none': 'No older note matches.',
   'board.toast.back': (count: number, title: string) =>
     count === 1 ? `“${title}” is back on the board` : `${count} notes are back on the board`,
@@ -142,7 +141,6 @@ export const boardFr: Translation<typeof boardEn> = {
   'board.older.lists': 'À faire',
   'board.older.sheets': 'Tableaux',
   'board.older.filter': 'Filtrer les notes plus anciennes',
-  'board.older.nothingWritten': 'Rien d’écrit pour l’instant.',
   'board.older.none': 'Aucune note plus ancienne ne correspond.',
   'board.toast.back': (count, title) =>
     count <= 1 ? `De retour sur le tableau : « ${title} »` : `${count} notes sont de retour sur le tableau`,
@@ -215,7 +213,6 @@ export const boardVi: Translation<typeof boardEn> = {
   'board.older.lists': 'Việc cần làm',
   'board.older.sheets': 'Bảng tính',
   'board.older.filter': 'Lọc ghi chú cũ hơn',
-  'board.older.nothingWritten': 'Chưa viết gì.',
   'board.older.none': 'Không có ghi chú cũ nào khớp.',
   'board.toast.back': (count, title) =>
     count === 1 ? `“${title}” đã trở lại bảng` : `${count} ghi chú đã trở lại bảng`,

@@ -19,18 +19,9 @@ import { kindKey } from '../i18n/kinds';
 import type { MessageKey } from '../i18n/messages';
 import { paperColorFor } from '../note-config';
 import { FULL_SCREEN } from '../services/search-results';
-import { getText } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
-import {
-  archivedOn,
-  countKinds,
-  groupByMonth,
-  isNoteKind,
-  NoteKind,
-  NoteSummary,
-  plainLine,
-  summarize,
-} from './older-notes';
+import { NotePreview } from './note-preview';
+import { archivedOn, countKinds, groupByMonth, isNoteKind, NoteKind, NoteSummary, summarize } from './older-notes';
 
 /** An archived note as the list shows it: its summary, and when it was archived. */
 export interface ArchivedNote extends NoteSummary {
@@ -67,7 +58,7 @@ const NARROW = '(max-width: 760px)';
   selector: 'ntm-archive-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, NotePreview],
   templateUrl: './archive-view.html',
   styleUrl: './archive-view.scss',
 })
@@ -263,19 +254,6 @@ export class ArchiveView {
   /** A note's markdown, for its paper in the preview. */
   markdown(id: string): string {
     return this.data()[id]?.data ?? '';
-  }
-
-  /** The first lines of a page or a flow, for the preview. */
-  lines(id: string): string[] {
-    const itemData = this.data()[id];
-    if (!itemData) {
-      return [];
-    }
-    return getText(itemData.data, itemData.dataType, itemData.properties)
-      .split('\n')
-      .map(plainLine)
-      .filter(Boolean)
-      .slice(1, 16);
   }
 
   /**

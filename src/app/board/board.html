@@ -360,7 +360,12 @@
                   [value]="olderText(note.id)"
                 ></c2-notepad>
               } @else {
-                <p class="older__excerpt">{{ note.excerpt || t('board.older.nothingWritten') }}</p>
+                <ntm-note-preview
+                  [kind]="note.kind"
+                  [item]="note.item"
+                  [data]="itemData()[note.id]"
+                  [label]="note.label"
+                ></ntm-note-preview>
               }
               <p class="older__meta">
                 {{ t(shortKindKey(note.kind)) }} ·
