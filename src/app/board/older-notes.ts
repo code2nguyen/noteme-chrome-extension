@@ -10,9 +10,9 @@ import { ArtBoardItem, ItemData } from '../store/models';
 /** The board keeps this many unpinned notes on it, the most recently edited; the rest wait in the Older notes sheet. */
 export const RECENT_COUNT = 10;
 
-export type NoteKind = 'Note' | 'Page' | 'Flow' | 'List';
+export type NoteKind = 'Note' | 'Page' | 'Flow' | 'List' | 'Sheet';
 
-export const NOTE_KINDS: readonly NoteKind[] = ['Note', 'Page', 'Flow', 'List'];
+export const NOTE_KINDS: readonly NoteKind[] = ['Note', 'Page', 'Flow', 'List', 'Sheet'];
 
 export function isNoteKind(value: unknown): value is NoteKind {
   return NOTE_KINDS.includes(value as NoteKind);
@@ -20,7 +20,7 @@ export function isNoteKind(value: unknown): value is NoteKind {
 
 /** How many notes there are of each kind, for the filters. */
 export function countKinds(notes: readonly { kind: NoteKind }[]): Record<NoteKind, number> {
-  const counts: Record<NoteKind, number> = { Note: 0, Page: 0, Flow: 0, List: 0 };
+  const counts: Record<NoteKind, number> = { Note: 0, Page: 0, Flow: 0, List: 0, Sheet: 0 };
   for (const note of notes) {
     counts[note.kind]++;
   }
@@ -50,6 +50,7 @@ const KINDS: Record<ExtensionId, NoteKind> = {
   [ExtensionId.Page]: 'Page',
   [ExtensionId.Flow]: 'Flow',
   [ExtensionId.TodoList]: 'List',
+  [ExtensionId.Sheet]: 'Sheet',
 };
 
 export function kindOf(item: ArtBoardItem): NoteKind {

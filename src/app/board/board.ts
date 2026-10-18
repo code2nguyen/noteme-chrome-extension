@@ -31,6 +31,7 @@ import { DataService } from '../services/data.service';
 import { DeviceSyncService } from '../services/device-sync.service';
 import { FULL_SCREEN, SearchSuggestion, searchShortcut, searchSuggestions } from '../services/search-results';
 import { getCurrentDate, pageMarkdownToText, uuid } from '../services/utils';
+import { parseSheet, sheetLines } from '../sheet/sheet-doc';
 import { ArtBoardItemApiActions, ItemDataActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { selectIsAllLoadedItemDatas, selectItemDataEntities, selectItemDatasLoadFailed } from '../store/reducers';
@@ -44,6 +45,7 @@ import { NoteCard } from './note-card';
 import { FlowCard } from './flow-card';
 import { cardRows, MIN_CARD_COLUMNS, minCardRows, storedRows } from './card-rows';
 import { PageCard } from './page-card';
+import { SheetCard } from './sheet-card';
 import { TodoCard } from './todo-card';
 import { bringIntoView } from './bring-into-view';
 import {
@@ -66,6 +68,7 @@ const NEW_KEYS: Record<string, ExtensionId> = {
   p: ExtensionId.Page,
   f: ExtensionId.Flow,
   t: ExtensionId.TodoList,
+  s: ExtensionId.Sheet,
 };
 
 const TILE_LABELS: Record<ExtensionId, MessageKey> = {
@@ -73,6 +76,7 @@ const TILE_LABELS: Record<ExtensionId, MessageKey> = {
   [ExtensionId.Page]: 'common.page',
   [ExtensionId.Flow]: 'common.flow',
   [ExtensionId.TodoList]: 'common.list',
+  [ExtensionId.Sheet]: 'common.sheet',
 };
 
 /** The New menu's values. */
@@ -81,6 +85,7 @@ const NEW_KINDS: Record<string, ExtensionId> = {
   page: ExtensionId.Page,
   flow: ExtensionId.Flow,
   todo: ExtensionId.TodoList,
+  sheet: ExtensionId.Sheet,
 };
 
 /**
@@ -92,7 +97,7 @@ const NEW_KINDS: Record<string, ExtensionId> = {
   selector: 'ntm-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [ArchiveView, NoteCard, PageCard, FlowCard, TodoCard, RouterLink, SettingsPanel],
+  imports: [ArchiveView, NoteCard, PageCard, FlowCard, TodoCard, SheetCard, RouterLink, SettingsPanel],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {
@@ -116,6 +121,7 @@ export class Board {
   private readonly deviceSync = inject(DeviceSyncService);
   private readonly cards = viewChildren(NoteCard);
   private readonly todoCards = viewChildren(TodoCard);
+  private readonly sheetCards = viewChildren(SheetCard);
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
   private readonly toasts = viewChild<ElementRef<ToastRegion>>('toasts');
   private readonly newMenu = viewChild<ElementRef<Menu>>('newMenu');
@@ -123,6 +129,11 @@ export class Board {
   private newMenuTimer?: ReturnType<typeof setTimeout>;
   /** The New menu was opened by the mouse resting on it, not by a click. */
   private newMenuHovered = false;
+  /**
+   * Opened from "+ Note" on Home: the pointer rests where New appears, and resting there must not open the menu over the
+   * note being written. Hovering New counts again once the pointer has moved off it.
+   */
+  private newHoverMuted = false;
   private readonly route = inject(ActivatedRoute);
 
   readonly ExtensionId = ExtensionId;
@@ -302,14 +313,18 @@ export class Board {
   readonly minRowsOf = minCardRows;
   readonly minCols = MIN_CARD_COLUMNS;
 
-  /** The rows a card spans (card-rows.ts): a page card left at its default height follows its excerpt. */
+  /** The rows a card spans (card-rows.ts): a page or sheet card left at its default height follows its content. */
   rowsOf(item: ArtBoardItem): number {
-    return cardRows(item, () => this.pageTextLength(item));
+    return cardRows(item, () => this.contentSize(item));
   }
 
-  private pageTextLength(item: ArtBoardItem): number {
-    const data = this.itemData()[item.id];
-    return data ? pageMarkdownToText(data.data ?? '').length : 0;
+  /** What a card that follows its content measures (card-rows.ts): a page's text length, a sheet's lines. */
+  private contentSize(item: ArtBoardItem): number {
+    const data = this.itemData()[item.id]?.data ?? '';
+    if (item.extensionId === ExtensionId.Sheet) {
+      return sheetLines(parseSheet(data));
+    }
+    return pageMarkdownToText(data).length;
   }
 
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
@@ -345,6 +360,7 @@ export class Board {
   private handleHomeActions(): void {
     const params = this.route.snapshot.queryParamMap;
     if (params.has('new')) {
+      this.muteNewHover();
       const kind = params.get('new') === 'page' ? ExtensionId.Page : ExtensionId.TextNote;
       // The new note goes before the first one, so wait until the board has read its notes.
       this.boardLoaded.pipe(take(1)).subscribe(() => setTimeout(() => this.create(kind)));
@@ -409,7 +425,7 @@ export class Board {
    */
   hoverNewMenu(event: PointerEvent, inside: boolean): void {
     const menu = this.newMenu()?.nativeElement;
-    if (!menu || event.pointerType !== 'mouse') {
+    if (!menu || event.pointerType !== 'mouse' || this.newHoverMuted) {
       return;
     }
     clearTimeout(this.newMenuTimer);
@@ -446,6 +462,18 @@ export class Board {
         });
       }, 250);
     }
+  }
+
+  /** Ignore the pointer resting on New until it moves off it (see newHoverMuted). */
+  private muteNewHover(): void {
+    this.newHoverMuted = true;
+    const onMove = (event: PointerEvent) => {
+      if (!(event.target as Element | null)?.closest?.('.navbar__new')) {
+        this.newHoverMuted = false;
+        document.removeEventListener('pointermove', onMove, true);
+      }
+    };
+    document.addEventListener('pointermove', onMove, true);
   }
 
   /**
@@ -494,7 +522,7 @@ export class Board {
     setTimeout(createOnce, 300);
   }
 
-  /** N for a note, P for a page, F for a flow, T for a to-do list (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
+  /** N for a note, P for a page, F for a flow, T for a to-do list, S for a sheet (on the Notes view, where they land), when the keyboard is not busy in a field or an editor. */
   onKey(event: KeyboardEvent): void {
     // The settings sheet has the keyboard: N in it must not start a note behind it.
     if (this.settingsOpen()) {
@@ -579,6 +607,11 @@ export class Board {
       duration: 4000,
       noIcon: true,
     });
+  }
+
+  /** A sheet copied as a table: where it goes. */
+  onSheetCopied(): void {
+    this.toasts()?.nativeElement.show({ message: this.t('board.sheet.copied'), duration: 3000, noIcon: true });
   }
 
   /** Notes deleted forever from the Archive view, once confirmed there. */
@@ -761,7 +794,7 @@ export class Board {
           artBoardItemId: tile.id,
           gridPosition: {
             order: orders.get(tile.id) ?? index,
-            rows: item ? storedRows(item, tile.rows, () => this.pageTextLength(item)) : tile.rows,
+            rows: item ? storedRows(item, tile.rows, () => this.contentSize(item)) : tile.rows,
             screenColumns: {
               Large: tile.columns.lg,
               Medium: tile.columns.md,
@@ -828,7 +861,8 @@ export class Board {
   private highlight(id: string, attempts = 60): void {
     const card =
       this.cards().find((candidate) => candidate.item().id === id) ??
-      this.todoCards().find((candidate) => candidate.item().id === id);
+      this.todoCards().find((candidate) => candidate.item().id === id) ??
+      this.sheetCards().find((candidate) => candidate.item().id === id);
     const tile = document.querySelector<HTMLElement>(`ntm-board c2-masonry-item[item-id="${CSS.escape(id)}"]`);
     if (card) {
       card.highlight();

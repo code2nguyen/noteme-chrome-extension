@@ -53,6 +53,7 @@ const NONE_KEYS: Record<'all' | NoteKind, MessageKey> = {
   Page: 'archive.none.page',
   Flow: 'archive.none.flow',
   List: 'archive.none.list',
+  Sheet: 'archive.none.sheet',
 };
 
 /** Below this width the list takes the screen and the preview slides up in a sheet. */

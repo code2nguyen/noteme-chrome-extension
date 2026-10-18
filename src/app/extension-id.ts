@@ -8,4 +8,6 @@ export enum ExtensionId {
   Flow = 'ntm-flow',
   /** Tasks to check off (c2-todo-list), worked through right on its card. */
   TodoList = 'ntm-todo-list',
+  /** Rows, columns and formulas (c2-spreadsheet), worked on right on its card. */
+  Sheet = 'ntm-sheet',
 }

@@ -6,6 +6,7 @@ export const commonEn = {
   'common.page': 'Paper',
   'common.flow': 'Flow',
   'common.list': 'To do',
+  'common.sheet': 'Sheet',
   'common.notes': 'Notes',
   'common.archive': 'Archive',
   'common.settings': 'Settings',
@@ -17,6 +18,7 @@ export const commonEn = {
   'common.untitled.page': 'Untitled paper',
   'common.untitled.flow': 'Untitled flow',
   'common.untitled.list': 'Untitled to do',
+  'common.untitled.sheet': 'Untitled sheet',
 };
 
 export const commonFr: Translation<typeof commonEn> = {
@@ -24,6 +26,7 @@ export const commonFr: Translation<typeof commonEn> = {
   'common.page': 'Feuille',
   'common.flow': 'Flux',
   'common.list': 'À faire',
+  'common.sheet': 'Tableau',
   'common.notes': 'Notes',
   'common.archive': 'Archives',
   'common.settings': 'Réglages',
@@ -35,6 +38,7 @@ export const commonFr: Translation<typeof commonEn> = {
   'common.untitled.page': 'Feuille sans titre',
   'common.untitled.flow': 'Flux sans titre',
   'common.untitled.list': 'À faire sans titre',
+  'common.untitled.sheet': 'Tableau sans titre',
 };
 
 export const commonVi: Translation<typeof commonEn> = {
@@ -42,6 +46,7 @@ export const commonVi: Translation<typeof commonEn> = {
   'common.page': 'Giấy',
   'common.flow': 'Sơ đồ',
   'common.list': 'Việc cần làm',
+  'common.sheet': 'Bảng tính',
   'common.notes': 'Ghi chú',
   'common.archive': 'Lưu trữ',
   'common.settings': 'Cài đặt',
@@ -53,4 +58,5 @@ export const commonVi: Translation<typeof commonEn> = {
   'common.untitled.page': 'Giấy chưa đặt tên',
   'common.untitled.flow': 'Sơ đồ chưa đặt tên',
   'common.untitled.list': 'Việc cần làm chưa đặt tên',
+  'common.untitled.sheet': 'Bảng tính chưa đặt tên',
 };

@@ -25,6 +25,7 @@ import '@c2n/components/toast';
 import '@c2n/phosphor-icons/icons/notepad.js';
 import '@c2n/phosphor-icons/icons/push-pin.js';
 import '@c2n/phosphor-icons/icons/push-pin-slash.js';
+import '@c2n/phosphor-icons/icons/table.js';
 import '@c2n/symbols/symbols/archive.js';
 import '@c2n/symbols/symbols/create-new.js';
 import '@c2n/symbols/symbols/no-results.js';

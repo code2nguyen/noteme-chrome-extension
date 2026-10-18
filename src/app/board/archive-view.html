@@ -21,6 +21,7 @@
       <c2-button value="Page">{{ t('archive.filter.page', counts().Page) }}</c2-button>
       <c2-button value="Flow">{{ t('archive.filter.flow', counts().Flow) }}</c2-button>
       <c2-button value="List">{{ t('archive.filter.list', counts().List) }}</c2-button>
+      <c2-button value="Sheet">{{ t('archive.filter.sheet', counts().Sheet) }}</c2-button>
     </c2-button-group>
     <c2-menu
       class="archive__sort"
@@ -78,6 +79,9 @@
                 @case ('List') {
                   <c2-feather-check-square></c2-feather-check-square>
                 }
+                @case ('Sheet') {
+                  <c2-phosphor-table></c2-phosphor-table>
+                }
                 @default {
                   <c2-phosphor-notepad></c2-phosphor-notepad>
                 }
@@ -133,6 +137,9 @@
           }
           @case ('List') {
             <c2-feather-check-square></c2-feather-check-square>
+          }
+          @case ('Sheet') {
+            <c2-phosphor-table></c2-phosphor-table>
           }
           @default {
             <c2-phosphor-notepad></c2-phosphor-notepad>

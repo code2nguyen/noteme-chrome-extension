@@ -171,3 +171,38 @@ body {
     background-color: var(--ntm-scrollbar-hover);
   }
 }
+
+// c2-spreadsheet (a sheet note, a table in a page) on Noteme's palette, in both themes: its own colours are fixed
+// light ones. Set on :root, they reach the sheets inside a page editor too.
+:root {
+  --c2-spreadsheet--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-spreadsheet--color: var(--c2-theme--color-on-surface);
+  --c2-spreadsheet--border: 1px solid var(--ntm-line);
+  --c2-spreadsheet__cell--border-color: color-mix(in srgb, var(--ntm-line) 75%, transparent);
+  --c2-spreadsheet__cell__selected--background-color: var(--c2-theme--color-primary-glow);
+  --c2-spreadsheet__cell__active--outline: 2px solid var(--c2-theme--color-primary);
+  --c2-spreadsheet__grid__focus--outline: var(--c2-theme--focus-ring);
+  --c2-spreadsheet__header--background-color: var(--c2-theme--color-surface);
+  --c2-spreadsheet__header--color: var(--c2-theme--color-on-surface-variant);
+  --c2-spreadsheet__header__selected--background-color: var(--c2-theme--color-primary-container);
+  --c2-spreadsheet__header__selected--color: var(--c2-theme--color-primary);
+  --c2-spreadsheet__column-label--color: var(--c2-theme--color-on-surface);
+  --c2-spreadsheet__resizer__hover--color: var(--c2-theme--color-primary);
+  --c2-spreadsheet__editor--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-spreadsheet__formula-bar--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-spreadsheet__fx--color: var(--c2-theme--color-on-surface-variant);
+  --c2-spreadsheet__fx__hover--background-color: var(--c2-theme--color-primary-container);
+  --c2-spreadsheet__fx__hover--color: var(--c2-theme--color-primary);
+  --c2-spreadsheet__summary--background-color: var(--c2-theme--color-surface);
+  --c2-spreadsheet__summary--color: var(--c2-theme--color-on-surface-variant);
+  --c2-spreadsheet__summary-value--color: var(--c2-theme--color-on-surface);
+  --c2-spreadsheet__total__hover--background-color: var(--c2-theme--color-primary-glow);
+  --c2-spreadsheet__help--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-spreadsheet__help--color: var(--c2-theme--color-on-surface);
+  --c2-spreadsheet__help--border: 1px solid var(--ntm-line);
+  --c2-spreadsheet__help--box-shadow: var(--ntm-shadow);
+  --c2-spreadsheet__help-muted--color: var(--c2-theme--color-on-surface-variant);
+  --c2-spreadsheet__help-option__active--background-color: var(--c2-theme--color-primary-container);
+  --c2-spreadsheet__help-accent--color: var(--c2-theme--color-primary);
+  --c2-spreadsheet__reference-1--color: var(--c2-theme--color-primary);
+}

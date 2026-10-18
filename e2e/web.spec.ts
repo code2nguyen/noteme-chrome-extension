@@ -816,6 +816,100 @@ test('arrange: cards move and resize without a mode, and the order is kept after
   expect(resized.height).toBeGreaterThan(heightBefore + 20);
 });
 
+test('a sheet is named, filled and styled on its card, kept after a reload, and found by a cell', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card).toHaveCount(1);
+  const cell = (ref: string) => card.locator(`c2-spreadsheet #cell-${ref}`);
+
+  // A new sheet asks for its title, then its first column's name; Tab goes on to the next column.
+  const title = card.getByRole('textbox', { name: 'Sheet title' });
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Trip budget');
+  await page.keyboard.press('Enter');
+  await expect(card.getByRole('textbox', { name: 'Name of column A' })).toBeFocused();
+  await page.keyboard.type('Item');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type('Cost');
+  await page.keyboard.press('Enter');
+
+  await cell('A1').click();
+  await page.keyboard.type('Hotel');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type('420');
+  await page.keyboard.press('Enter');
+  await cell('A2').click();
+  await page.keyboard.type('Taxi');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type('30');
+  await page.keyboard.press('Enter');
+
+  // Its own right-click menu: bold for the selection.
+  await cell('A1').click();
+  await page.keyboard.press('Shift+ArrowDown');
+  await cell('A1').click({ button: 'right' });
+  await card.locator('c2-menu-item[value="bold"]').click();
+  await expect(cell('A2')).toHaveClass(/bold/);
+  await shot(page, 'sheet-card');
+
+  // Elsewhere on the board, the sheet shows no selection left behind.
+  await expect(cell('A1')).not.toHaveCSS('outline-style', 'none');
+  await card.getByRole('button', { name: 'Sheet actions' }).first().focus();
+  await expect(cell('A1')).toHaveCSS('outline-style', 'none');
+  await expect(cell('A2')).toHaveCSS('background-image', 'none');
+
+  const stored = () =>
+    page.evaluate(() =>
+      Object.entries(localStorage)
+        .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+        .map(([, value]) => JSON.parse(value))
+        .filter((data) => data.dataType === 'sheet')
+        .map((data) => {
+          const sheet = JSON.parse(data.data);
+          return [
+            data.properties?.title,
+            sheet.columns.map((column: { label?: string }) => column.label ?? ''),
+            sheet.data,
+            sheet.styles,
+          ];
+        }),
+    );
+  await expect.poll(stored).toEqual([
+    [
+      'Trip budget',
+      ['Item', 'Cost', ''],
+      [
+        ['Hotel', '420'],
+        ['Taxi', '30'],
+      ],
+      { A1: { bold: true }, A2: { bold: true } },
+    ],
+  ]);
+
+  await page.reload();
+  await expect(cell('A2')).toHaveText('Taxi');
+  await expect(cell('A2')).toHaveClass(/bold/);
+
+  // The formula bar, from the card's menu.
+  await card.getByRole('button', { name: 'Sheet actions' }).click();
+  await card.locator('c2-menu-item[value="formula-bar"]').click();
+  await expect(card.locator('c2-spreadsheet .formula-input')).toBeVisible();
+
+  // The search finds it by a cell, and lights it up on the board.
+  const search = page.locator('c2-autocomplete input');
+  await search.click();
+  await search.pressSequentially('taxi');
+  const result = page.locator('c2-autocomplete c2-list-item', { hasText: 'Trip budget' });
+  await expect(result).toContainText('Sheet ·');
+  await result.click();
+  await expect(card.locator('.sheet__beam')).toHaveCount(1);
+
+  await card.getByRole('button', { name: 'Sheet actions' }).click();
+  await card.locator('c2-menu-item[value="delete"]').click();
+  await expect(card).toHaveCount(0);
+});
+
 test('phone width: one column, no horizontal scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openBoard(page);
@@ -963,6 +1057,26 @@ test.describe('home', () => {
     await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-notepad');
     await page.keyboard.type('From home');
     await expect(page.locator('ntm-note-card c2-notepad .ProseMirror')).toHaveText('From home');
+  });
+
+  test('"+ Note" does not open the New menu under the pointer it leaves on New', async ({ page }) => {
+    const plus = page.locator('.home__glass-button', { hasText: 'Note' });
+    await plus.click();
+    await expect(page.locator('ntm-note-card')).toHaveCount(1);
+    const menu = page.locator('c2-menu.navbar__new');
+    const isOpen = () => menu.evaluate((element) => (element as HTMLElement & { open: boolean }).open);
+    // The pointer comes to rest on New, wherever Home's button left it, and nudges: no menu, the note keeps the keys.
+    const button = await page.locator('.navbar__new-button').boundingBox();
+    await page.mouse.move(button!.x + button!.width / 2, button!.y + button!.height / 2);
+    await page.mouse.move(button!.x + button!.width / 2 + 2, button!.y + button!.height / 2 + 1);
+    await page.waitForTimeout(400);
+    expect(await isOpen()).toBe(false);
+    await page.keyboard.type('Still here');
+    await expect(page.locator('ntm-note-card c2-notepad .ProseMirror')).toHaveText('Still here');
+    // Once the pointer has been away, resting on New opens it again.
+    await page.mouse.move(400, 600);
+    await page.locator('.navbar__new-button').hover();
+    await expect.poll(isOpen).toBe(true);
   });
 
   test('Home searches in place: a note picked opens the board on it, lit up, and a page opens full screen', async ({

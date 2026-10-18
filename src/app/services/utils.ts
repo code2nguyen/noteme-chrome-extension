@@ -1,6 +1,7 @@
 import { flowText, parseFlow } from '../flow/flow-doc';
 import { ItemData } from '../store/models';
 import { parseTasks, tasksText } from '../todo/todo-doc';
+import { parseSheet, sheetText } from '../sheet/sheet-doc';
 import { DataType } from '../store/models/data-type';
 
 export function uuid(): string {
@@ -75,6 +76,10 @@ export function getText(data: unknown, type: string, properties?: ItemData['prop
     const tasks = typeof data === 'string' ? tasksText(parseTasks(data)) : '';
     return [properties?.title?.trim(), tasks].filter(Boolean).join('\n');
   }
+  if (type === DataType.SHEET) {
+    const cells = typeof data === 'string' ? sheetText(parseSheet(data)) : '';
+    return [properties?.title?.trim(), cells].filter(Boolean).join('\n');
+  }
   if (type === DataType.PAGE) {
     const body = typeof data === 'string' ? pageMarkdownToText(data) : '';
     return [properties?.title?.trim(), body].filter(Boolean).join('\n');
@@ -100,6 +105,7 @@ export const IndexableItemTypes: string[] = [
   DataType.PAGE,
   DataType.FLOW,
   DataType.TODO,
+  DataType.SHEET,
 ];
 
 export function without<T>(values: T[], value: T): T[] {
