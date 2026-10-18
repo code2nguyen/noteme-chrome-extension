@@ -567,6 +567,16 @@ test('changing the paper colour is saved on the note', async ({ page }) => {
   await expect(card(page).locator('c2-notepad')).toHaveAttribute('pad', 'legal');
 });
 
+test('a note archived with nothing written is removed, not kept in the Archive', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
+  await card(page).locator('c2-menu-item[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('The archive is empty');
+});
+
 test('archive a note, find it in the Archive and restore it to the board', async ({ page }) => {
   await openBoard(page);
   await newNote(page);
@@ -1688,13 +1698,9 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
 });
 
 test('the Archive shows a page, a list and a sheet as they look, not as their text', async ({ page }) => {
-  // Stored, so archived rather than removed as empty: an edit reaches the store after a pause.
-  const stored = (text: string) =>
-    expect
-      .poll(() => page.evaluate((wanted) => Object.values(localStorage).some((value) => value.includes(wanted)), text))
-      .toBe(true);
   await openBoard(page);
-  // A list and a sheet, archived from their cards.
+  // A list and a sheet, archived from their cards right after an edit, before it is saved: archived, not removed as
+  // empty.
   await page.keyboard.press('t');
   const list = page.locator('ntm-todo-card');
   await expect(list.getByRole('textbox', { name: 'List title' })).toBeFocused();
@@ -1703,7 +1709,6 @@ test('the Archive shows a page, a list and a sheet as they look, not as their te
   const add = list.getByRole('textbox', { name: 'New task' });
   await add.fill('Bread');
   await add.press('Enter');
-  await stored('Bread');
   await list.locator('c2-menu.todo__actions c2-icon-button[slot="trigger"]').click();
   await list.locator('c2-menu-item[value="archive"]').click();
   await expect(list).toHaveCount(0);
@@ -1719,7 +1724,6 @@ test('the Archive shows a page, a list and a sheet as they look, not as their te
   await sheet.locator('c2-spreadsheet #cell-A1').click();
   await page.keyboard.type('Hotel');
   await page.keyboard.press('Enter');
-  await stored('Hotel');
   await sheet.locator('c2-menu c2-icon-button[slot="trigger"]').click();
   await sheet.locator('c2-menu-item[value="archive"]').click();
   await expect(tiles(page)).toHaveCount(0);

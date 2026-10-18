@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
-import { ArtBoardItemActions, ItemDataActions } from '../store/actions';
+import { ArtBoardItemActions, ItemDataActions, ItemDataApiActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { ArtBoardItemPosition } from '../store/models/art-board-item-position';
 import { GridPosition } from '../store/models/grid-position';
@@ -20,6 +21,17 @@ import { isNotNullOrUndefined } from './utils';
 @Injectable({ providedIn: 'root' })
 export class DataService {
   private readonly store = inject(Store);
+  /**
+   * Notes with an edit not saved yet: edits reach the store after a pause (item-data.effects.ts), and until then a new
+   * note still reads as empty there. Once one is saved, the store has the note as written.
+   */
+  private readonly unsaved = new Set<string>();
+
+  constructor() {
+    inject(Actions)
+      .pipe(ofType(ItemDataApiActions.updateItemDataSuccess))
+      .subscribe(({ itemData }) => this.unsaved.delete(itemData.id));
+  }
 
   getItemData(itemDataId: string): Observable<ItemData> {
     this.store.dispatch(ItemDataActions.getItemData({ itemDataId }));
@@ -27,6 +39,9 @@ export class DataService {
   }
 
   updateDataItem(itemData: Partial<ItemData>): void {
+    if (itemData.id) {
+      this.unsaved.add(itemData.id);
+    }
     this.store.dispatch(ItemDataActions.updateItemData({ itemData }));
   }
 
@@ -115,8 +130,8 @@ export class DataService {
       .select(selectItemDataById(artBoardItem.id))
       .pipe(take(1))
       .subscribe((data) => {
-        // An empty note is not worth archiving.
-        if (!data || data.empty) {
+        // An empty note is not worth archiving; one with an edit on its way is not empty, whatever the store says yet.
+        if ((!data || data.empty) && !this.unsaved.has(artBoardItem.id)) {
           this.removeArtBoardItem(artBoardItem);
         } else {
           this.store.dispatch(ArtBoardItemActions.hideArtBoardItem({ boardId, artBoardItemId: artBoardItem.id }));
