@@ -43,6 +43,16 @@ export function markdownToText(markdown: string): string {
 export function pageMarkdownToText(markdown: string): string {
   return (
     markdown
+      // A table: its options comment and delimiter row go, each row reads as its cells.
+      .replace(/^[ \t]*<!--[ \t]*table:.*-->[ \t]*$/gm, '')
+      .replace(/^[ \t]*\|?[ \t]*:?-+:?[ \t]*(\|[ \t]*:?-+:?[ \t]*)+\|?[ \t]*$/gm, '')
+      .replace(/^[ \t]*\|(.*?)(?<!\\)\|?[ \t]*$/gm, (_, cells: string) =>
+        cells
+          .split(/(?<!\\)\|/)
+          .map((cell) => cell.trim())
+          .filter(Boolean)
+          .join(' · '),
+      )
       .replace(/^(`{3,}|~{3,}).*$/gm, '')
       .replace(/^\s{0,3}(#{1,6}\s+|>\s?|[-*+]\s+\[[ xX]\]\s+|[-*+]\s+|\d+[.)]\s+)/gm, '')
       .replace(/^\s*([-*_])(\s*\1){2,}\s*$/gm, '')
