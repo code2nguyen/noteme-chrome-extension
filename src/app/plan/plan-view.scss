@@ -24,7 +24,7 @@
   color: inherit;
   text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+  font-size: calc(14px * var(--ntm-text-scale));
   --c2-feather-icon--size: 16px;
 
   &:hover {
@@ -34,7 +34,7 @@
 
 .plan-bar__title {
   margin: 0;
-  font-size: 18px;
+  font-size: calc(18px * var(--ntm-text-scale));
   font-weight: 600;
 }
 
@@ -65,7 +65,7 @@
 
 .plan__all-day-label {
   margin-right: 4px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ntm-text-scale));
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -74,14 +74,14 @@
 
 .plan__chip {
   --c2-button__container--height: 28px;
-  --c2-button__container--font-size: 13px;
+  --c2-button__container--font-size: calc(13px * var(--ntm-text-scale));
   --c2-button__container--border-radius: 999px;
 }
 
 .plan__hint {
   margin: 0;
   text-align: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
 }
 
@@ -123,14 +123,14 @@
   --c2-button__label--justify-content: flex-start;
   --c2-button__label--flex-grow: 1;
   --c2-button__container--gap: 12px;
-  --c2-button__container--font-size: 14px;
+  --c2-button__container--font-size: calc(14px * var(--ntm-text-scale));
   --c2-button__container--font-weight: 500;
 }
 
 .plan__day-time {
   min-width: 96px;
   text-align: left;
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
 }
 
@@ -140,13 +140,13 @@
 
 .plan__day-hint {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
 }
 
 .plan__dialog-title {
   display: block;
-  --c2-text-field--font-size: 17px;
+  --c2-text-field--font-size: calc(17px * var(--ntm-text-scale));
 }
 
 .plan__dialog-when {

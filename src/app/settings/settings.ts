@@ -6,6 +6,8 @@ import { LANGUAGES, LanguageSetting } from '../i18n/language';
  * sync is switched on.
  */
 export type ThemeSetting = 'auto' | 'light' | 'dark';
+/** The size of the text everywhere in Noteme: the notes, and the menus and buttons around them. */
+export type TextSize = 'small' | 'default' | 'large' | 'larger';
 export type ClockSetting = '24h' | '12h';
 export type DateFormat = 'long' | 'short' | 'numeric';
 export type WeekStart = 'monday' | 'sunday';
@@ -21,6 +23,9 @@ export type Feature = 'plan';
 /** The optional features, in the order Settings lists them; their names are messages (`settings.feature.<id>`). */
 export const FEATURES: readonly { id: Feature }[] = [{ id: 'plan' }];
 
+/** How much each text size scales Noteme's text (--ntm-text-scale in styles.scss). */
+export const TEXT_SCALES: Record<TextSize, number> = { small: 0.875, default: 1, large: 1.125, larger: 1.25 };
+
 export function hasFeature(settings: Settings, feature: Feature): boolean {
   return settings.features.includes(feature);
 }
@@ -29,6 +34,7 @@ export interface Settings {
   theme: ThemeSetting;
   /** Noteme's language; Auto follows the browser. */
   language: LanguageSetting;
+  textSize: TextSize;
   clock: ClockSetting;
   dateFormat: DateFormat;
   /** A photo behind Home. */
@@ -55,6 +61,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // Follows the system until the user picks a theme.
   theme: 'auto',
   language: 'auto',
+  textSize: 'default',
   clock: '24h',
   dateFormat: 'long',
   photos: true,
@@ -73,6 +80,7 @@ export const DEFAULT_SETTINGS: Settings = {
 const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   theme: ['auto', 'light', 'dark'],
   language: ['auto', ...LANGUAGES],
+  textSize: ['small', 'default', 'large', 'larger'],
   clock: ['24h', '12h'],
   dateFormat: ['long', 'short', 'numeric'],
   photoChange: ['day', 'hour'],

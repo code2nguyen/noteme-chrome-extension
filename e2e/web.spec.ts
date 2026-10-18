@@ -1,4 +1,4 @@
-import { expect, type Page, test as base } from '@playwright/test';
+import { expect, type Locator, type Page, test as base } from '@playwright/test';
 import {
   archivePreview,
   archiveRows,
@@ -1685,6 +1685,36 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
   // Back on Home, the note just opened comes first.
   await page.goto('/');
   await expect(titles).toHaveText(['Wi-Fi password', 'Launch checklist', 'Groceries', 'Book ideas']);
+});
+
+test('the text size picked in Settings scales the text of Noteme and of its notes, and is kept', async ({ page }) => {
+  const fontSize = (locator: Locator) => locator.evaluate((element) => getComputedStyle(element).fontSize);
+  await openBoard(page);
+  await page.locator('c2-masonry').click({ position: { x: 5, y: 5 }, force: true });
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('n');
+  const writing = page.locator('ntm-note-card c2-notepad .ProseMirror').first();
+  await expect(writing).toBeVisible();
+  expect(await fontSize(writing)).toBe('20px');
+
+  await page.goto('/#/?settings=1');
+  const sizes = page.locator('ntm-settings-panel c2-button-group[aria-labelledby="settings-text-size"]');
+  await sizes.locator('c2-button', { hasText: 'Larger' }).click();
+  await expect.poll(() => fontSize(page.locator('body'))).toBe('20px');
+  // Noteme's own sizes (15px for a settings row).
+  await expect.poll(() => fontSize(page.locator('ntm-settings-panel .settings__row').first())).toBe('18.75px');
+  await shot(page, 'text-size-settings');
+
+  // Kept after a reload; a note's writing follows (a sticky note's 20px).
+  await page.goto('/#/main-board');
+  await expect.poll(() => fontSize(writing)).toBe('25px');
+  await writing.click();
+  await page.keyboard.type('Bigger text, still on its lines');
+  await shot(page, 'text-size-board');
+
+  await page.goto('/#/?settings=1');
+  await sizes.locator('c2-button', { hasText: 'Default' }).click();
+  await expect.poll(() => fontSize(page.locator('body'))).toBe('16px');
 });
 
 test('the language picked in Settings changes the whole app at once, with no reload, and is kept', async ({ page }) => {

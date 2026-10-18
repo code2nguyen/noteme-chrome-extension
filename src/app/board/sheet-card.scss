@@ -38,7 +38,7 @@
 .sheet__title {
   flex: 1;
   min-width: 0;
-  --c2-inline-edit--font-size: 17px;
+  --c2-inline-edit--font-size: calc(17px * var(--ntm-text-scale));
   --c2-inline-edit--font-weight: 600;
   --c2-inline-edit__placeholder--color: var(--ntm-muted);
   --c2-inline-edit__hover--background: var(--c2-theme--color-surface-container);
@@ -77,7 +77,7 @@ c2-icon-button.sheet__action[id^='move-']::part(button) {
 .sheet__sheet {
   --c2-spreadsheet--max-height: 100%;
   --c2-spreadsheet--border-radius: 6px;
-  --c2-spreadsheet--font-size: 13px;
+  --c2-spreadsheet--font-size: calc(13px * var(--ntm-text-scale));
   --c2-spreadsheet__cell--height: 30px;
   --c2-spreadsheet__row-header--width: 36px;
 }

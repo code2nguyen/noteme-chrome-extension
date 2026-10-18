@@ -32,13 +32,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
   --c2-feather-icon--size: 14px;
 }
 
 .page-card__title {
-  font-size: 17px;
+  font-size: calc(17px * var(--ntm-text-scale));
   font-weight: 600;
   line-height: 1.3;
 }
@@ -51,7 +51,7 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  font-size: 14px;
+  font-size: calc(14px * var(--ntm-text-scale));
   line-height: 1.5;
   color: var(--c2-theme--color-on-surface-variant);
 }
