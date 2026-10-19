@@ -2,6 +2,31 @@
 
 Generated from the commit history by `npm run changelog`; do not edit by hand.
 
+## 3.0.3
+
+### New
+
+- I18n: French and Vietnamese for page tables, formula help and cell styles
+- Search: a page's tables read as their cells in search and previews
+- Sheet: a sheet note type, worked on its card
+- A note's edit time counts minutes, never seconds
+- Settings: a text size, from Small to Larger
+- Archive, older notes: a page, flow, list or sheet previewed as it looks
+
+### Fixes
+
+- Page, flow: the actions button is the board header's size
+- Archive: a note archived right after an edit is archived, not removed as empty
+- Sheet: a sheet wider than its card scrolls inside it, not widen the card
+- Sheet: a new sheet left unnamed no longer names its first column at a later rename
+- Sheet: a letter typed in a selected cell stays in the cell, and a refused copy says so
+- Archive, older notes: an empty page, flow, list or sheet says "Nothing written yet" again
+- I18n: in French, a sheet is a "feuille de calcul", not a "tableau"
+
+### Faster
+
+- Board: a page's or sheet's card height is measured once its text changes, not on every redraw
+
 ## 3.0.2
 
 ### New
