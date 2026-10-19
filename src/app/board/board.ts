@@ -135,6 +135,8 @@ export class Board {
    * note being written. Hovering New counts again once the pointer has moved off it.
    */
   private newHoverMuted = false;
+  /** Removes the listener that lifts newHoverMuted, when it lifts or the board goes. */
+  private readonly newHoverWatch = new AbortController();
   private readonly route = inject(ActivatedRoute);
 
   readonly ExtensionId = ExtensionId;
@@ -347,6 +349,7 @@ export class Board {
     inject(DestroyRef).onDestroy(() => {
       this.boardLoadedSubscription.unsubscribe();
       clearTimeout(this.newMenuTimer);
+      this.newHoverWatch.abort();
     });
     // A click on New once the mouse has opened the menu must not leave it shut.
     afterNextRender(() =>
@@ -471,10 +474,10 @@ export class Board {
     const onMove = (event: PointerEvent) => {
       if (!(event.target as Element | null)?.closest?.('.navbar__new')) {
         this.newHoverMuted = false;
-        document.removeEventListener('pointermove', onMove, true);
+        this.newHoverWatch.abort();
       }
     };
-    document.addEventListener('pointermove', onMove, true);
+    document.addEventListener('pointermove', onMove, { capture: true, signal: this.newHoverWatch.signal });
   }
 
   /**
