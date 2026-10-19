@@ -26,6 +26,9 @@ export function newSheet(): SheetDoc {
 const isObject = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
 
+/** A cell's input as stored: text, whatever the sheet or the stored JSON holds it as. */
+export const cellText = (value: unknown): string => (value == null ? '' : String(value));
+
 /** Read a stored sheet defensively: anything malformed falls back to a new sheet's part rather than breaking the card. */
 export function parseSheet(data: string | null | undefined): SheetDoc {
   let raw: unknown;
@@ -42,7 +45,7 @@ export function parseSheet(data: string | null | undefined): SheetDoc {
     ? raw['columns'].map((column) => (isObject(column) ? column : {}))
     : fresh.columns;
   const rowsOf = Array.isArray(raw['data']) ? raw['data'] : [];
-  const cells = rowsOf.map((row) => (Array.isArray(row) ? row.map((cell) => (cell == null ? '' : String(cell))) : []));
+  const cells = rowsOf.map((row) => (Array.isArray(row) ? row.map(cellText) : []));
   const rows =
     typeof raw['rows'] === 'number' && raw['rows'] > 0 ? Math.floor(raw['rows']) : Math.max(fresh.rows, cells.length);
   return {

@@ -22,7 +22,7 @@ import { filter } from 'rxjs/operators';
 import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
-import { parseSheet, serializeSheet, SheetDoc, sheetToMarkdown } from '../sheet/sheet-doc';
+import { cellText, parseSheet, serializeSheet, SheetDoc, sheetToMarkdown } from '../sheet/sheet-doc';
 import { ArtBoardItem } from '../store/models';
 import { DataType } from '../store/models/data-type';
 import { bringIntoView } from './bring-into-view';
@@ -45,8 +45,9 @@ const ROW_HEADER_WIDTH = 36;
 const BORDERS = 2;
 const MIN_COLUMN_WIDTH = 96;
 
-/** A cell's input as stored: text, whatever the sheet holds it as. */
-const cellText = (value: unknown) => (value == null ? '' : String(value));
+/** The sheet's columns, one entry each: it holds them as a count until one is named, resized or formatted. */
+const columnsOf = (sheet: Spreadsheet): SpreadsheetColumn[] =>
+  Array.isArray(sheet.columns) ? sheet.columns : Array.from({ length: sheet.columns }, () => ({}));
 
 /**
  * A sheet, worked on right on the board: a c2-spreadsheet (with its own right-click menu) whose cells, column names,
@@ -161,9 +162,7 @@ export class SheetCard {
     if (!sheet || !grid) {
       return;
     }
-    const columns: SpreadsheetColumn[] = Array.isArray(sheet.columns)
-      ? sheet.columns
-      : Array.from({ length: sheet.columns }, () => ({}));
+    const columns = columnsOf(sheet);
     const shared = columns.filter((column) => !column.width).length;
     if (!shared) {
       return;
@@ -179,9 +178,7 @@ export class SheetCard {
     if (!sheet) {
       return undefined;
     }
-    const columns: SpreadsheetColumn[] = Array.isArray(sheet.columns)
-      ? sheet.columns
-      : Array.from({ length: sheet.columns }, () => ({}));
+    const columns = columnsOf(sheet);
     return {
       columns,
       data: (sheet.data ?? []).map((row) => (Array.isArray(row) ? row.map(cellText) : [])),
@@ -255,7 +252,7 @@ export class SheetCard {
     if (!sheet) {
       return;
     }
-    const column = Array.isArray(sheet.columns) ? sheet.columns.length : sheet.columns;
+    const column = columnsOf(sheet).length;
     sheet.insertColumns(column);
     this.save();
     sheet.renameColumn(column);

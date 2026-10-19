@@ -30,9 +30,8 @@
 
 .sheet__icon {
   flex: none;
-  width: 18px;
-  height: 18px;
-  color: var(--ntm-accent);
+  --c2-phosphor-icon--size: 18px;
+  --c2-phosphor-icon--color: var(--ntm-accent);
 }
 
 .sheet__title {
