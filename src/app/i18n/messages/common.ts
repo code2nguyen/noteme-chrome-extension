@@ -27,7 +27,7 @@ export const commonFr: Translation<typeof commonEn> = {
   'common.page': 'Feuille',
   'common.flow': 'Flux',
   'common.list': 'À faire',
-  'common.sheet': 'Tableau',
+  'common.sheet': 'Feuille de calcul',
   'common.notes': 'Notes',
   'common.archive': 'Archives',
   'common.settings': 'Réglages',
