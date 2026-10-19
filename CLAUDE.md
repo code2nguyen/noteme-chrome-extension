@@ -18,3 +18,13 @@ Then:
 - The `c2n-components` skill (`.claude/skills/c2n-components/SKILL.md`) has the full workflow.
 
 <!-- c2n:end -->
+
+## Before opening a pull request
+
+Pull requests target `develop`. Before opening one, review the branch's changes and act on what the reviews find:
+
+1. Run `/code-review` on the branch. Fix the confirmed bugs. For a finding left unfixed, say why (not a real bug, out of scope, or left for a follow-up).
+2. Run `/security-review` on the branch and handle its findings the same way.
+3. Re-run the checks the fixes touched, then open the pull request. Its description lists what each review found and what was done about it.
+
+Do not open a pull request while either review still has an unanswered finding.
