@@ -218,6 +218,14 @@ export class SheetCard {
     }
   }
 
+  /**
+   * The new sheet's title closed without a name (Escape, or left as it was): its first column is not named after all.
+   * Later, so a commit on the way out still opens it.
+   */
+  endFresh(): void {
+    setTimeout(() => (this.fresh = false));
+  }
+
   /** Open the title for writing, once the field is defined (a new sheet renders before its module has loaded). */
   async rename(): Promise<void> {
     await loadElements();

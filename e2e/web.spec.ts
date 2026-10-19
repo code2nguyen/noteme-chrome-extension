@@ -858,6 +858,25 @@ test('a sheet grown past its card scrolls inside it, and the card keeps its size
   await shot(page, 'sheet-card-grown');
 });
 
+test('a new sheet left unnamed does not name its first column at a later rename', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  const title = card.getByRole('textbox', { name: 'Sheet title' });
+  await expect(title).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(title).toHaveCount(0);
+
+  await card.getByRole('button', { name: 'Sheet actions' }).first().click();
+  await card.locator('c2-menu-item[value="rename"]').click();
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Trip budget');
+  await page.keyboard.press('Enter');
+  await expect(title).toHaveCount(0);
+  await page.waitForTimeout(100);
+  await expect(card.getByRole('textbox', { name: 'Name of column A' })).toHaveCount(0);
+});
+
 test('a sheet is named, filled and styled on its card, kept after a reload, and found by a cell', async ({ page }) => {
   await openBoard(page);
   await page.keyboard.press('s');

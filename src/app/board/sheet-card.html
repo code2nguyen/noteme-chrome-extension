@@ -8,6 +8,8 @@
       [attr.placeholder]="t('common.untitled.sheet')"
       [attr.label]="t('board.sheet.title')"
       (change)="onTitleChange($event)"
+      (edit-cancel)="endFresh()"
+      (focusout)="endFresh()"
     ></c2-inline-edit>
     <!-- Moves the sheet's tile: its c2-masonry-item names this button in move-handle. -->
     <c2-icon-button
