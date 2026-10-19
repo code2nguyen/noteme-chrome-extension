@@ -321,14 +321,22 @@ export class Board {
     return cardRows(item, () => this.contentSize(item));
   }
 
-  /** What a card that follows its content measures (card-rows.ts): a page's text length, a sheet's lines. */
+  /**
+   * What a card that follows its content measures (card-rows.ts): a page's text length, a sheet's lines. Bound in the
+   * template, so it runs on every change detection: each note is measured again only once its data changes.
+   */
   private contentSize(item: ArtBoardItem): number {
     const data = this.itemData()[item.id]?.data ?? '';
-    if (item.extensionId === ExtensionId.Sheet) {
-      return sheetLines(parseSheet(data));
+    const cached = this.contentSizes.get(item.id);
+    if (cached?.data === data) {
+      return cached.size;
     }
-    return pageMarkdownToText(data).length;
+    const size =
+      item.extensionId === ExtensionId.Sheet ? sheetLines(parseSheet(data)) : pageMarkdownToText(data).length;
+    this.contentSizes.set(item.id, { data, size });
+    return size;
   }
+  private readonly contentSizes = new Map<string, { data: string; size: number }>();
 
   /** The store already searched (fuse.js); the autocomplete shows every result it is given. */
   readonly matchAll = () => true;
