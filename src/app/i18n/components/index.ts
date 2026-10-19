@@ -15,6 +15,7 @@ import * as select from './select';
 import * as sheet from './sheet';
 import * as spinner from './spinner';
 import * as splitPanel from './split-panel';
+import * as spreadsheet from './spreadsheet';
 import * as switchField from './switch';
 import * as textField from './text-field';
 import * as timeInput from './time-input';
@@ -43,6 +44,7 @@ export function registerComponentTranslations(): void {
       sheet: sheet.fr,
       spinner: spinner.fr,
       'split-panel': splitPanel.fr,
+      spreadsheet: spreadsheet.fr,
       switch: switchField.fr,
       'text-field': textField.fr,
       'time-input': timeInput.fr,
@@ -65,6 +67,7 @@ export function registerComponentTranslations(): void {
       sheet: sheet.vi,
       spinner: spinner.vi,
       'split-panel': splitPanel.vi,
+      spreadsheet: spreadsheet.vi,
       switch: switchField.vi,
       'text-field': textField.vi,
       'time-input': timeInput.vi,

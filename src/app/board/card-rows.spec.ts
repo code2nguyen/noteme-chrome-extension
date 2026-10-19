@@ -47,6 +47,16 @@ describe('card rows', () => {
     expect(storedRows(newItem(ExtensionId.Flow), 7, () => 0)).toBe(7);
   });
 
+  it('a new sheet card is as tall as its rows, up to twelve, until it is resized', () => {
+    const sheet = newItem(ExtensionId.Sheet);
+    expect(cardRows(sheet, () => 3)).toBe(8);
+    expect(cardRows(sheet, () => 12)).toBe(16);
+    expect(cardRows(sheet, () => 40)).toBe(16);
+    expect(storedRows(sheet, 8, () => 3)).toBe(0);
+    expect(storedRows(sheet, 11, () => 3)).toBe(11);
+    expect(cardRows(newItem(ExtensionId.Sheet, 11), () => 3)).toBe(11);
+  });
+
   it('reads a page text only for a card that follows its excerpt', () => {
     const length = vi.fn(() => 100);
     cardRows(newItem(ExtensionId.Page, 4), length);

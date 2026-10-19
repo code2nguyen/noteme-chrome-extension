@@ -29,7 +29,7 @@
   justify-content: space-between;
   gap: 8px 12px;
   min-height: 52px;
-  font-size: 15px;
+  font-size: calc(15px * var(--ntm-text-scale));
 }
 
 .settings__select {
@@ -43,7 +43,7 @@
   align-items: center;
   gap: 12px;
   padding: 4px 0 12px;
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
 
   img {
@@ -62,14 +62,14 @@
 
 .settings__switch {
   min-height: 52px;
-  font-size: 15px;
+  font-size: calc(15px * var(--ntm-text-scale));
   --c2-switch__container--flex-direction: row-reverse;
   --c2-switch__container--justify-content: space-between;
 }
 
 .settings__text {
   margin: 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--ntm-text-scale));
   line-height: 1.5;
   color: var(--c2-theme--color-on-surface-variant);
 }

@@ -67,6 +67,18 @@ export const noteDefaultProperties: Record<ExtensionId, DefaultNoteProperties> =
     colorIndex: 0,
     properties: {},
   },
+  // A sheet is worked on right on its card too, twice a note's width for its columns; it is as tall as its rows
+  // (board/card-rows.ts) until it is resized.
+  [ExtensionId.Sheet]: {
+    extensionId: ExtensionId.Sheet,
+    gridPosition: {
+      order: -1,
+      rows: 0,
+      screenColumns: { Large: 6, Medium: 6, Small: 6, XSmall: 1 },
+    },
+    colorIndex: 0,
+    properties: {},
+  },
 };
 
 /** What a note's paper is made of: its colour, and the pad and ruling picked in the paper picker. */

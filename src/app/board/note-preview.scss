@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.preview__empty {
+  margin: 0;
+  color: var(--ntm-muted);
+}
+
+// A page or a flow in a frame of its own; a list and a sheet draw their own.
+.preview__frame {
+  overflow: hidden;
+  border: 1px solid var(--ntm-line);
+  border-radius: 12px;
+  background: var(--c2-theme--color-surface);
+}
+
+// As tall as the preview has room for: past it, the page scrolls inside.
+.preview__frame--page {
+  max-height: 420px;
+  overflow: auto;
+  padding: 8px 4px;
+}
+
+// The flow, still, fitted to its frame, in its card's colours (flow-card.scss).
+.preview__flow {
+  --c2-flow--height: 300px;
+  --c2-flow--border: none;
+  --c2-flow--border-radius: 0;
+  --c2-flow--background-color: transparent;
+  --c2-flow__dot--color: transparent;
+  --c2-flow__node--background-color: var(--c2-theme--color-surface);
+  --c2-flow__edge--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--color: var(--c2-theme--color-on-surface-variant);
+  --c2-flow__edge-label--background-color: var(--c2-theme--color-surface-container-low);
+  --c2-flow__edge-label--border: 1px solid var(--ntm-line);
+  --c2-flow__marker--display: none;
+  --c2-flow__shape--border-color: var(--ntm-line);
+}
+
+.preview__sheet {
+  --c2-spreadsheet--max-height: 400px;
+  --c2-spreadsheet--font-size: calc(13px * var(--ntm-text-scale));
+  --c2-spreadsheet__cell--height: 30px;
+}

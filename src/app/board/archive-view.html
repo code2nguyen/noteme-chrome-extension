@@ -21,6 +21,7 @@
       <c2-button value="Page">{{ t('archive.filter.page', counts().Page) }}</c2-button>
       <c2-button value="Flow">{{ t('archive.filter.flow', counts().Flow) }}</c2-button>
       <c2-button value="List">{{ t('archive.filter.list', counts().List) }}</c2-button>
+      <c2-button value="Sheet">{{ t('archive.filter.sheet', counts().Sheet) }}</c2-button>
     </c2-button-group>
     <c2-menu
       class="archive__sort"
@@ -78,6 +79,9 @@
                 @case ('List') {
                   <c2-feather-check-square></c2-feather-check-square>
                 }
+                @case ('Sheet') {
+                  <c2-phosphor-table></c2-phosphor-table>
+                }
                 @default {
                   <c2-phosphor-notepad></c2-phosphor-notepad>
                 }
@@ -134,6 +138,9 @@
           @case ('List') {
             <c2-feather-check-square></c2-feather-check-square>
           }
+          @case ('Sheet') {
+            <c2-phosphor-table></c2-phosphor-table>
+          }
           @default {
             <c2-phosphor-notepad></c2-phosphor-notepad>
           }
@@ -143,7 +150,7 @@
     </header>
     <p class="archive__meta">
       {{ t('archive.meta.edited', t(kindKey(note.kind)), note.kind) }}
-      <c2-relative-time [date]="note.edited"></c2-relative-time>
+      <c2-relative-time min-unit="minute" [date]="note.edited"></c2-relative-time>
       {{ t('archive.meta.archived', shortDate(note.archived), note.kind) }}
     </p>
     @if (note.kind === 'Note') {
@@ -157,13 +164,12 @@
         [value]="markdown(note.id)"
       ></c2-notepad>
     } @else {
-      <div class="archive__doc">
-        @for (line of lines(note.id); track $index) {
-          <p>{{ line }}</p>
-        } @empty {
-          <p class="archive__empty-doc">{{ t('archive.nothingWritten') }}</p>
-        }
-      </div>
+      <ntm-note-preview
+        [kind]="note.kind"
+        [item]="note.item"
+        [data]="data()[note.id]"
+        [label]="note.label"
+      ></ntm-note-preview>
     }
     <div class="archive__actions">
       <c2-button class="archive__restore ntm-action" (click)="restoreNotes([note])">

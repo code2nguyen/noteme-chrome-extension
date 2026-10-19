@@ -27,7 +27,7 @@
   --c2-todo-list__container--border-radius: var(--c2-theme--radius-lg, 8px);
   --c2-todo-list__container--padding: 14px 16px;
   --c2-todo-list__container--gap: 12px;
-  --c2-todo-list__heading--font-size: 17px;
+  --c2-todo-list__heading--font-size: calc(17px * var(--ntm-text-scale));
   --c2-todo-list__ring--size: 40px;
 }
 

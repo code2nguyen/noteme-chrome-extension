@@ -25,7 +25,7 @@ import { ArtBoardItem } from '../store/models';
     <a class="flow-card" [routerLink]="['/flow', item().id]" [queryParams]="item().boardId ? {} : { from: 'archive' }">
       <span class="flow-card__kind">
         <c2-feather-share-2 aria-hidden="true"></c2-feather-share-2>
-        <span>{{ t('common.flow') }} · <c2-relative-time [date]="edited()"></c2-relative-time></span>
+        <span>{{ t('common.flow') }} · <c2-relative-time min-unit="minute" [date]="edited()"></c2-relative-time></span>
       </span>
       <span class="flow-card__title" [class.flow-card__title--untitled]="!title()">{{
         title() || t('common.untitled.flow')

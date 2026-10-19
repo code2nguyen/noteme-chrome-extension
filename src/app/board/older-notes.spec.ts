@@ -139,6 +139,7 @@ describe('to-do lists', () => {
       Page: 0,
       Flow: 0,
       List: 2,
+      Sheet: 0,
     });
   });
 

@@ -1,4 +1,4 @@
-import { expect, type Page, test as base } from '@playwright/test';
+import { expect, type Locator, type Page, test as base } from '@playwright/test';
 import {
   archivePreview,
   archiveRows,
@@ -567,6 +567,16 @@ test('changing the paper colour is saved on the note', async ({ page }) => {
   await expect(card(page).locator('c2-notepad')).toHaveAttribute('pad', 'legal');
 });
 
+test('a note archived with nothing written is removed, not kept in the Archive', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
+  await card(page).locator('c2-menu-item[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(page.locator('.board__empty [slot="title"]')).toHaveText('The archive is empty');
+});
+
 test('archive a note, find it in the Archive and restore it to the board', async ({ page }) => {
   await openBoard(page);
   await newNote(page);
@@ -816,6 +826,204 @@ test('arrange: cards move and resize without a mode, and the order is kept after
   expect(resized.height).toBeGreaterThan(heightBefore + 20);
 });
 
+test('a sheet grown past its card scrolls inside it, and the card keeps its size', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  const size = () =>
+    card.evaluate((element) => {
+      const paper = element.querySelector('.sheet__paper')!;
+      return { width: element.getBoundingClientRect().width, overflow: paper.scrollWidth - paper.clientWidth };
+    });
+  const height = async () => (await card.boundingBox())!.height;
+  const shortHeight = await height();
+  const before = await size();
+  for (let i = 0; i < 8; i++) {
+    await card.getByRole('button', { name: 'Add a column' }).click();
+    await page.keyboard.press('Escape');
+  }
+  for (let i = 0; i < 15; i++) {
+    await card.getByRole('button', { name: 'Add a row' }).click();
+  }
+  await expect(card.locator('c2-spreadsheet #cell-K18')).toHaveCount(1);
+  expect(await size()).toEqual({ width: before.width, overflow: 0 });
+  // The sheet scrolls, across and down, inside the card.
+  const scroller = card.locator('c2-spreadsheet .scroller');
+  expect(await scroller.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  // Taller, once saved, as tall as twelve rows: past them the sheet scrolls down too.
+  await expect.poll(height).toBeGreaterThan(shortHeight + 200);
+  expect(await scroller.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
+  await shot(page, 'sheet-card-grown');
+});
+
+test('a new sheet left unnamed does not name its first column at a later rename', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  const title = card.getByRole('textbox', { name: 'Sheet title' });
+  await expect(title).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(title).toHaveCount(0);
+
+  await card.getByRole('button', { name: 'Sheet actions' }).first().click();
+  await card.locator('c2-menu-item[value="rename"]').click();
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Trip budget');
+  await page.keyboard.press('Enter');
+  await expect(title).toHaveCount(0);
+  await page.waitForTimeout(100);
+  await expect(card.getByRole('textbox', { name: 'Name of column A' })).toHaveCount(0);
+});
+
+test("typing in a sheet's selected cell writes in it, and starts no note, page or sheet", async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+
+  const stored = () =>
+    page.evaluate(() =>
+      Object.entries(localStorage)
+        .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+        .map(([, value]) => JSON.parse(value))
+        .filter((data) => data.dataType === 'sheet')
+        .map((data) => data.data as string)
+        .join(''),
+    );
+  await card.locator('c2-spreadsheet #cell-A1').click();
+  await page.keyboard.type('Nuts and pasta');
+  await page.keyboard.press('Enter');
+  await expect(card.locator('c2-spreadsheet #cell-A1')).toContainText('Nuts and pasta');
+  await expect.poll(stored).toContain('Nuts and pasta');
+  await expect(page).toHaveURL(/#\/main-board/);
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await expect(card).toHaveCount(1);
+});
+
+test('a sheet copied as a table says so, and says so too when the clipboard refuses it', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await card.locator('c2-spreadsheet #cell-A1').click();
+  await page.keyboard.type('Hotel');
+  await page.keyboard.press('Enter');
+  const copy = async () => {
+    await card.locator('c2-menu c2-icon-button[slot="trigger"]').click();
+    await card.locator('c2-menu-item[value="copy-table"]').click();
+  };
+
+  await copy();
+  await expect(page.locator('c2-toast')).toContainText('Copied: paste it in a page');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Hotel');
+
+  await page.evaluate(() => {
+    navigator.clipboard.writeText = () =>
+      Promise.reject(new DOMException('Document is not focused.', 'NotAllowedError'));
+  });
+  await copy();
+  await expect(page.locator('c2-toast', { hasText: 'Couldn’t copy' })).toBeVisible();
+});
+
+test('a sheet is named, filled and styled on its card, kept after a reload, and found by a cell', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card).toHaveCount(1);
+  const cell = (ref: string) => card.locator(`c2-spreadsheet #cell-${ref}`);
+
+  // A new sheet asks for its title, then its first column's name; Tab goes on to the next column.
+  const title = card.getByRole('textbox', { name: 'Sheet title' });
+  await expect(title).toBeFocused();
+  await page.keyboard.type('Trip budget');
+  await page.keyboard.press('Enter');
+  await expect(card.getByRole('textbox', { name: 'Name of column A' })).toBeFocused();
+  await page.keyboard.type('Item');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type('Cost');
+  await page.keyboard.press('Enter');
+
+  await cell('A1').click();
+  await page.keyboard.type('Hotel');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type('420');
+  await page.keyboard.press('Enter');
+  await cell('A2').click();
+  await page.keyboard.type('Taxi');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type('30');
+  await page.keyboard.press('Enter');
+
+  // Its own right-click menu: bold for the selection.
+  await cell('A1').click();
+  await page.keyboard.press('Shift+ArrowDown');
+  await cell('A1').click({ button: 'right' });
+  await card.locator('c2-menu-item[value="bold"]').click();
+  await expect(cell('A2')).toHaveClass(/bold/);
+  await shot(page, 'sheet-card');
+
+  // Elsewhere on the board, the sheet shows no selection left behind.
+  await expect(cell('A1')).not.toHaveCSS('outline-style', 'none');
+  await card.getByRole('button', { name: 'Sheet actions' }).first().focus();
+  await expect(cell('A1')).toHaveCSS('outline-style', 'none');
+  await expect(cell('A2')).toHaveCSS('background-image', 'none');
+
+  const stored = () =>
+    page.evaluate(() =>
+      Object.entries(localStorage)
+        .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+        .map(([, value]) => JSON.parse(value))
+        .filter((data) => data.dataType === 'sheet')
+        .map((data) => {
+          const sheet = JSON.parse(data.data);
+          return [
+            data.properties?.title,
+            sheet.columns.map((column: { label?: string }) => column.label ?? ''),
+            sheet.data,
+            sheet.styles,
+          ];
+        }),
+    );
+  await expect.poll(stored).toEqual([
+    [
+      'Trip budget',
+      ['Item', 'Cost', ''],
+      [
+        ['Hotel', '420'],
+        ['Taxi', '30'],
+      ],
+      { A1: { bold: true }, A2: { bold: true } },
+    ],
+  ]);
+
+  await page.reload();
+  await expect(cell('A2')).toHaveText('Taxi');
+  await expect(cell('A2')).toHaveClass(/bold/);
+
+  // The formula bar, from the card's menu.
+  await card.getByRole('button', { name: 'Sheet actions' }).click();
+  await card.locator('c2-menu-item[value="formula-bar"]').click();
+  await expect(card.locator('c2-spreadsheet .formula-input')).toBeVisible();
+
+  // The search finds it by a cell, and lights it up on the board.
+  const search = page.locator('c2-autocomplete input');
+  await search.click();
+  await search.pressSequentially('taxi');
+  const result = page.locator('c2-autocomplete c2-list-item', { hasText: 'Trip budget' });
+  await expect(result).toContainText('Sheet ·');
+  await result.click();
+  await expect(card.locator('.sheet__beam')).toHaveCount(1);
+
+  await card.getByRole('button', { name: 'Sheet actions' }).click();
+  await card.locator('c2-menu-item[value="delete"]').click();
+  await expect(card).toHaveCount(0);
+});
+
 test('phone width: one column, no horizontal scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openBoard(page);
@@ -963,6 +1171,26 @@ test.describe('home', () => {
     await expect.poll(() => page.evaluate(() => document.activeElement?.localName)).toBe('c2-notepad');
     await page.keyboard.type('From home');
     await expect(page.locator('ntm-note-card c2-notepad .ProseMirror')).toHaveText('From home');
+  });
+
+  test('"+ Note" does not open the New menu under the pointer it leaves on New', async ({ page }) => {
+    const plus = page.locator('.home__glass-button', { hasText: 'Note' });
+    await plus.click();
+    await expect(page.locator('ntm-note-card')).toHaveCount(1);
+    const menu = page.locator('c2-menu.navbar__new');
+    const isOpen = () => menu.evaluate((element) => (element as HTMLElement & { open: boolean }).open);
+    // The pointer comes to rest on New, wherever Home's button left it, and nudges: no menu, the note keeps the keys.
+    const button = await page.locator('.navbar__new-button').boundingBox();
+    await page.mouse.move(button!.x + button!.width / 2, button!.y + button!.height / 2);
+    await page.mouse.move(button!.x + button!.width / 2 + 2, button!.y + button!.height / 2 + 1);
+    await page.waitForTimeout(400);
+    expect(await isOpen()).toBe(false);
+    await page.keyboard.type('Still here');
+    await expect(page.locator('ntm-note-card c2-notepad .ProseMirror')).toHaveText('Still here');
+    // Once the pointer has been away, resting on New opens it again.
+    await page.mouse.move(400, 600);
+    await page.locator('.navbar__new-button').hover();
+    await expect.poll(isOpen).toBe(true);
   });
 
   test('Home searches in place: a note picked opens the board on it, lit up, and a page opens full screen', async ({
@@ -1571,6 +1799,109 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
   // Back on Home, the note just opened comes first.
   await page.goto('/');
   await expect(titles).toHaveText(['Wi-Fi password', 'Launch checklist', 'Groceries', 'Book ideas']);
+});
+test('the Archive says a list with no task has nothing written, rather than showing it blank', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await expect(list.getByRole('textbox', { name: 'List title' })).toBeFocused();
+  await page.keyboard.type('Someday');
+  await page.keyboard.press('Enter');
+  await list.locator('c2-menu.todo__actions c2-icon-button[slot="trigger"]').click();
+  await list.locator('c2-menu-item[value="archive"]').click();
+  await expect(list).toHaveCount(0);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await archiveRows(page).filter({ hasText: 'Someday' }).click();
+  await expect(archivePreview(page).locator('ntm-note-preview')).toHaveText('Nothing written yet.');
+  await expect(archivePreview(page).locator('c2-todo-list')).toHaveCount(0);
+});
+
+test('the Archive shows a page, a list and a sheet as they look, not as their text', async ({ page }) => {
+  await openBoard(page);
+  // A list and a sheet, archived from their cards right after an edit, before it is saved: archived, not removed as
+  // empty.
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await expect(list.getByRole('textbox', { name: 'List title' })).toBeFocused();
+  await page.keyboard.type('Groceries');
+  await page.keyboard.press('Enter');
+  const add = list.getByRole('textbox', { name: 'New task' });
+  await add.fill('Bread');
+  await add.press('Enter');
+  await list.locator('c2-menu.todo__actions c2-icon-button[slot="trigger"]').click();
+  await list.locator('c2-menu-item[value="archive"]').click();
+  await expect(list).toHaveCount(0);
+
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('s');
+  const sheet = page.locator('ntm-sheet-card');
+  await expect(sheet.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.type('Budget');
+  await page.keyboard.press('Enter');
+  await expect(sheet.getByRole('textbox', { name: 'Name of column A' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await sheet.locator('c2-spreadsheet #cell-A1').click();
+  await page.keyboard.type('Hotel');
+  await page.keyboard.press('Enter');
+  await sheet.locator('c2-menu c2-icon-button[slot="trigger"]').click();
+  await sheet.locator('c2-menu-item[value="archive"]').click();
+  await expect(tiles(page)).toHaveCount(0);
+
+  // A page, archived from its own view.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('p');
+  await expect(page).toHaveURL(/#\/page\//);
+  await page.locator('ntm-page-view c2-page-editor .ProseMirror').click();
+  await page.keyboard.type('## Packing');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('Passports');
+  await page.locator('ntm-page-view c2-menu c2-icon-button[slot="trigger"]').click();
+  await page.locator('ntm-page-view c2-menu-item[value="archive"]').click();
+  await expect(page).toHaveURL(/#\/main-board/);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(archiveRows(page)).toHaveCount(3);
+  await archiveRows(page).filter({ hasText: 'Packing' }).click();
+  await expect(archivePreview(page).locator('c2-page-editor h2')).toHaveText('Packing');
+  await shot(page, 'archive-page-preview');
+  await archiveRows(page).filter({ hasText: 'Groceries' }).click();
+  await expect(archivePreview(page).locator('c2-todo-list').getByRole('checkbox')).toHaveCount(1);
+  await shot(page, 'archive-list-preview');
+  await archiveRows(page).filter({ hasText: 'Budget' }).click();
+  await expect(archivePreview(page).locator('c2-spreadsheet #cell-A1')).toHaveText('Hotel');
+  await expect(archivePreview(page).locator('c2-spreadsheet #cell-A1')).toHaveCSS('outline-style', 'none');
+  await shot(page, 'archive-sheet-preview');
+});
+
+test('the text size picked in Settings scales the text of Noteme and of its notes, and is kept', async ({ page }) => {
+  const fontSize = (locator: Locator) => locator.evaluate((element) => getComputedStyle(element).fontSize);
+  await openBoard(page);
+  await page.locator('c2-masonry').click({ position: { x: 5, y: 5 }, force: true });
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('n');
+  const writing = page.locator('ntm-note-card c2-notepad .ProseMirror').first();
+  await expect(writing).toBeVisible();
+  expect(await fontSize(writing)).toBe('20px');
+
+  await page.goto('/#/?settings=1');
+  const sizes = page.locator('ntm-settings-panel c2-button-group[aria-labelledby="settings-text-size"]');
+  await sizes.locator('c2-button', { hasText: 'Larger' }).click();
+  await expect.poll(() => fontSize(page.locator('body'))).toBe('20px');
+  // Noteme's own sizes (15px for a settings row).
+  await expect.poll(() => fontSize(page.locator('ntm-settings-panel .settings__row').first())).toBe('18.75px');
+  await shot(page, 'text-size-settings');
+
+  // Kept after a reload; a note's writing follows (a sticky note's 20px).
+  await page.goto('/#/main-board');
+  await expect.poll(() => fontSize(writing)).toBe('25px');
+  await writing.click();
+  await page.keyboard.type('Bigger text, still on its lines');
+  await shot(page, 'text-size-board');
+
+  await page.goto('/#/?settings=1');
+  await sizes.locator('c2-button', { hasText: 'Default' }).click();
+  await expect.poll(() => fontSize(page.locator('body'))).toBe('16px');
 });
 
 test('the language picked in Settings changes the whole app at once, with no reload, and is kept', async ({ page }) => {

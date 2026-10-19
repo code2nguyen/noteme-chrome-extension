@@ -22,6 +22,12 @@ describe('parseSettings', () => {
     expect(parseSettings({ features: 'plan' }).features).toEqual([]);
   });
 
+  it('keeps a known text size only', () => {
+    expect(parseSettings(null).textSize).toBe('default');
+    expect(parseSettings({ textSize: 'larger' }).textSize).toBe('larger');
+    expect(parseSettings({ textSize: 'huge' }).textSize).toBe('default');
+  });
+
   it('shows notes on Home by default, in a known order only', () => {
     expect(parseSettings(null).homeNotes).toBe('auto');
     expect(parseSettings({ homeNotes: 'pinned' }).homeNotes).toBe('pinned');

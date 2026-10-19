@@ -1,7 +1,7 @@
 import { DestroyRef, effect, inject, Injectable, signal } from '@angular/core';
 import { localeTag, resolveLanguage } from '../i18n/language';
 import { STORAGE_API } from '../services/storage.api';
-import { parseSettings, Settings } from './settings';
+import { parseSettings, Settings, TEXT_SCALES } from './settings';
 
 const MIRROR_KEY = 'noteme-settings';
 /** Set while the mirror holds a change chrome.storage.sync has not accepted yet. */
@@ -98,6 +98,10 @@ export class SettingsService {
     // The page's language: the c2 components and the relative times follow it, with no reload.
     effect(() => {
       document.documentElement.lang = localeTag(resolveLanguage(this.state().language));
+    });
+    // The text size: every size in Noteme's stylesheets is multiplied by it (styles.scss).
+    effect(() => {
+      document.documentElement.style.setProperty('--ntm-text-scale', String(TEXT_SCALES[this.state().textSize]));
     });
     // Notes follow the switch too, also when another tab flips it.
     effect(() => this.storage.setSyncEnabled(this.state().sync));

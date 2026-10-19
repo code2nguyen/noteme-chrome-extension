@@ -1,6 +1,7 @@
 import { flowText, parseFlow } from '../flow/flow-doc';
 import { ItemData } from '../store/models';
 import { parseTasks, tasksText } from '../todo/todo-doc';
+import { parseSheet, sheetText } from '../sheet/sheet-doc';
 import { DataType } from '../store/models/data-type';
 
 export function uuid(): string {
@@ -43,6 +44,16 @@ export function markdownToText(markdown: string): string {
 export function pageMarkdownToText(markdown: string): string {
   return (
     markdown
+      // A table: its options comment and delimiter row go, each row reads as its cells.
+      .replace(/^[ \t]*<!--[ \t]*table:.*-->[ \t]*$/gm, '')
+      .replace(/^[ \t]*\|?[ \t]*:?-+:?[ \t]*(\|[ \t]*:?-+:?[ \t]*)+\|?[ \t]*$/gm, '')
+      .replace(/^[ \t]*\|(.*?)(?<!\\)\|?[ \t]*$/gm, (_, cells: string) =>
+        cells
+          .split(/(?<!\\)\|/)
+          .map((cell) => cell.trim())
+          .filter(Boolean)
+          .join(' · '),
+      )
       .replace(/^(`{3,}|~{3,}).*$/gm, '')
       .replace(/^\s{0,3}(#{1,6}\s+|>\s?|[-*+]\s+\[[ xX]\]\s+|[-*+]\s+|\d+[.)]\s+)/gm, '')
       .replace(/^\s*([-*_])(\s*\1){2,}\s*$/gm, '')
@@ -64,6 +75,10 @@ export function getText(data: unknown, type: string, properties?: ItemData['prop
   if (type === DataType.TODO) {
     const tasks = typeof data === 'string' ? tasksText(parseTasks(data)) : '';
     return [properties?.title?.trim(), tasks].filter(Boolean).join('\n');
+  }
+  if (type === DataType.SHEET) {
+    const cells = typeof data === 'string' ? sheetText(parseSheet(data)) : '';
+    return [properties?.title?.trim(), cells].filter(Boolean).join('\n');
   }
   if (type === DataType.PAGE) {
     const body = typeof data === 'string' ? pageMarkdownToText(data) : '';
@@ -90,6 +105,7 @@ export const IndexableItemTypes: string[] = [
   DataType.PAGE,
   DataType.FLOW,
   DataType.TODO,
+  DataType.SHEET,
 ];
 
 export function without<T>(values: T[], value: T): T[] {

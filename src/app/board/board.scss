@@ -51,7 +51,7 @@
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: calc(15px * var(--ntm-text-scale));
   --c2-feather-icon--size: 16px;
 
   &:hover {
@@ -86,7 +86,7 @@
   --c2-kbd--color: color-mix(in srgb, var(--c2-theme--color-on-surface) 55%, transparent);
   --c2-kbd--border: 1px solid var(--ntm-line);
   --c2-kbd--border-radius: 6px;
-  --c2-kbd--font-size: 11px;
+  --c2-kbd--font-size: calc(11px * var(--ntm-text-scale));
   --c2-kbd--letter-spacing: 0.06em;
 }
 
@@ -132,7 +132,7 @@
   --c2-status-panel__container--gap: 20px;
   --c2-status-panel__container--max-width: 100%;
   --c2-status-panel__illustration--size: 140px;
-  --c2-status-panel__title--font-size: 18px;
+  --c2-status-panel__title--font-size: calc(18px * var(--ntm-text-scale));
   --c2-status-panel__title--line-height: 26px;
   --c2-status-panel__description--color: var(--ntm-muted);
 }
@@ -243,7 +243,7 @@
 
 .navbar__older-count {
   --c2-badge--height: 18px;
-  --c2-badge--font-size: 11px;
+  --c2-badge--font-size: calc(11px * var(--ntm-text-scale));
   --c2-badge__neutral--background: var(--ntm-line);
   --c2-badge__neutral--color: var(--c2-theme--color-on-surface);
 }
@@ -286,7 +286,7 @@
 .older__intro {
   margin: 0 8px 12px;
   color: var(--ntm-muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
 }
 
 .older__kinds {
@@ -302,7 +302,7 @@
 
 .older__month {
   margin: 18px 8px 6px;
-  font-size: 11px;
+  font-size: calc(11px * var(--ntm-text-scale));
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -367,13 +367,13 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: calc(13.5px * var(--ntm-text-scale));
 }
 
 .older__date {
   flex: none;
   color: var(--ntm-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ntm-text-scale));
   font-weight: 400;
 }
 
@@ -387,19 +387,10 @@
   --c2-notepad__focus--outline: none;
 }
 
-.older__excerpt {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--c2-theme--color-surface-container);
-  color: var(--c2-theme--color-on-surface);
-  line-height: 1.5;
-}
-
 .older__meta {
   margin: 10px 2px;
   color: var(--ntm-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ntm-text-scale));
 }
 
 .older__actions {

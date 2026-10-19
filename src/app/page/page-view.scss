@@ -14,6 +14,10 @@
   min-height: 60px;
   padding: 0 20px;
   background: var(--c2-theme--color-surface-container-low);
+  // The actions button as the board header's: a 16px icon in a circle as tall as the back link.
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+  --c2-icon-button__state-layer--size: 36px;
   --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant);
   --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
 }
@@ -29,7 +33,7 @@
   color: inherit;
   text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+  font-size: calc(14px * var(--ntm-text-scale));
   --c2-feather-icon--size: 16px;
 
   &:hover {
@@ -38,7 +42,7 @@
 }
 
 .page-bar__status {
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
 }
 
@@ -83,7 +87,7 @@
   // that much, the text lines up with the page below it.
   display: block;
   margin-inline-start: -8px;
-  --c2-inline-edit--font-size: 40px;
+  --c2-inline-edit--font-size: calc(40px * var(--ntm-text-scale));
   --c2-inline-edit--font-weight: 700;
   --c2-inline-edit--line-height: 1.2;
   --c2-inline-edit--padding-block: 3px;
@@ -99,7 +103,7 @@
 
 .page__meta {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--ntm-text-scale));
   color: var(--c2-theme--color-on-surface-variant);
 }
 
@@ -109,7 +113,7 @@
   }
 
   .page__title {
-    --c2-inline-edit--font-size: 32px;
+    --c2-inline-edit--font-size: calc(32px * var(--ntm-text-scale));
   }
 
   .page__editor {

@@ -110,6 +110,12 @@
       <span slot="description">{{ t('board.new.list') }}</span>
       <span slot="shortcut">T</span>
     </c2-menu-item>
+    <c2-menu-item value="sheet">
+      <c2-phosphor-table slot="prefix-icon"></c2-phosphor-table>
+      {{ t('common.sheet') }}
+      <span slot="description">{{ t('board.new.sheet') }}</span>
+      <span slot="shortcut">S</span>
+    </c2-menu-item>
   </c2-menu>
 
   <c2-icon-button [attr.aria-label]="t('common.settings')" [tooltip]="t('common.settings')" (click)="openSettings()">
@@ -245,6 +251,17 @@
               (pin)="pin(item)"
               (unpin)="unpin(item)"
             />
+          } @else if (item.extensionId === ExtensionId.Sheet) {
+            <ntm-sheet-card
+              [item]="item"
+              [pinned]="!!item.starred"
+              [autofocus]="item.id === focusItemId()"
+              (archive)="archive(item)"
+              (remove)="removeNote(item)"
+              (pin)="pin(item)"
+              (unpin)="unpin(item)"
+              (copied)="onSheetCopied($event)"
+            />
           } @else {
             <ntm-note-card
               [item]="item"
@@ -287,6 +304,7 @@
     <c2-button value="Page">{{ t('board.older.pages') }} · {{ olderCounts().Page }}</c2-button>
     <c2-button value="Flow">{{ t('board.older.flows') }} · {{ olderCounts().Flow }}</c2-button>
     <c2-button value="List">{{ t('board.older.lists') }} · {{ olderCounts().List }}</c2-button>
+    <c2-button value="Sheet">{{ t('board.older.sheets') }} · {{ olderCounts().Sheet }}</c2-button>
   </c2-button-group>
   <c2-search-field
     class="older__filter"
@@ -318,6 +336,9 @@
                 @case ('List') {
                   <c2-feather-check-square></c2-feather-check-square>
                 }
+                @case ('Sheet') {
+                  <c2-phosphor-table></c2-phosphor-table>
+                }
                 @default {
                   <c2-phosphor-notepad></c2-phosphor-notepad>
                 }
@@ -339,10 +360,16 @@
                   [value]="olderText(note.id)"
                 ></c2-notepad>
               } @else {
-                <p class="older__excerpt">{{ note.excerpt || t('board.older.nothingWritten') }}</p>
+                <ntm-note-preview
+                  [kind]="note.kind"
+                  [item]="note.item"
+                  [data]="itemData()[note.id]"
+                  [label]="note.label"
+                ></ntm-note-preview>
               }
               <p class="older__meta">
-                {{ t(shortKindKey(note.kind)) }} · <c2-relative-time [date]="note.edited"></c2-relative-time>
+                {{ t(shortKindKey(note.kind)) }} ·
+                <c2-relative-time min-unit="minute" [date]="note.edited"></c2-relative-time>
               </p>
               <div class="older__actions">
                 <c2-button class="older__pin" (click)="pin(note.item, true)">

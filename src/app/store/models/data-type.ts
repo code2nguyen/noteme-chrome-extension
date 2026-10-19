@@ -12,6 +12,8 @@ export enum DataType {
   FLOW = 'flow',
   /** A to-do list: its tasks as a JSON array (c2-todo-list's `TodoTask`); the title is in `properties.title`. */
   TODO = 'todo',
+  /** A sheet: c2-spreadsheet's columns, inputs and styles as JSON (sheet/sheet-doc.ts); the title is in `properties.title`. */
+  SHEET = 'sheet',
   BLOB = 'blob',
   NA = 'NA',
 }

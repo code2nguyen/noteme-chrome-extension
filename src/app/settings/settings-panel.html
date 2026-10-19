@@ -19,6 +19,22 @@
       </c2-button-group>
     </div>
     <div class="settings__row">
+      <span id="settings-text-size">{{ t('settings.textSize') }}</span>
+      <c2-button-group
+        selection="single"
+        appearance="segmented"
+        size="s"
+        aria-labelledby="settings-text-size"
+        [value]="settings().textSize"
+        (change)="choose('textSize', $event)"
+      >
+        <c2-button value="small">{{ t('settings.textSize.small') }}</c2-button>
+        <c2-button value="default">{{ t('settings.textSize.default') }}</c2-button>
+        <c2-button value="large">{{ t('settings.textSize.large') }}</c2-button>
+        <c2-button value="larger">{{ t('settings.textSize.larger') }}</c2-button>
+      </c2-button-group>
+    </div>
+    <div class="settings__row">
       <span id="settings-language">{{ t('settings.language') }}</span>
       <c2-select
         class="settings__select"

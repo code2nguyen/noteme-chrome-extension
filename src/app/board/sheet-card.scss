@@ -1,0 +1,158 @@
+// The sheet fills its masonry tile; past the rows that fit, it scrolls inside the card.
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--c2-theme--radius-lg, 8px);
+}
+
+.sheet__paper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid var(--ntm-line);
+  border-radius: inherit;
+  background: var(--c2-theme--color-surface);
+  color: var(--c2-theme--color-on-surface);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sheet__icon {
+  flex: none;
+  --c2-phosphor-icon--size: 18px;
+  --c2-phosphor-icon--color: var(--ntm-accent);
+}
+
+.sheet__title {
+  flex: 1;
+  min-width: 0;
+  --c2-inline-edit--font-size: calc(17px * var(--ntm-text-scale));
+  --c2-inline-edit--font-weight: 600;
+  --c2-inline-edit__placeholder--color: var(--ntm-muted);
+  --c2-inline-edit__hover--background: var(--c2-theme--color-surface-container);
+  --c2-inline-edit__editor--background: var(--c2-theme--color-surface-container-low);
+  --c2-inline-edit__editor--border: 1px solid var(--c2-theme--color-primary);
+  --c2-inline-edit__focus--outline: var(--c2-theme--focus-ring);
+}
+
+// The tile's actions in the sheet's header, the size of a list's.
+.sheet__action {
+  --c2-icon-button__icon--width: 14px;
+  --c2-icon-button__icon--height: 14px;
+  --c2-icon-button__state-layer--size: 28px;
+  --c2-icon-button__icon--color: var(--ntm-muted);
+  --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface);
+}
+
+// The move button drags the tile: a grab hand, and a touch drag moves it rather than scrolling the board.
+c2-icon-button.sheet__action[id^='move-'] {
+  touch-action: none;
+}
+
+c2-icon-button.sheet__action[id^='move-']::part(button) {
+  cursor: grab;
+}
+
+// A grid of one cell the size left in the card: the sheet stretches to it, so its own max-height of 100% lets it
+// scroll there rather than push the card taller, and its columns scroll across rather than push the card wider.
+.sheet__grid {
+  display: grid;
+  flex: 1;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+}
+
+.sheet__sheet {
+  --c2-spreadsheet--max-height: 100%;
+  --c2-spreadsheet--border-radius: 6px;
+  --c2-spreadsheet--font-size: calc(13px * var(--ntm-text-scale));
+  --c2-spreadsheet__cell--height: 30px;
+  --c2-spreadsheet__row-header--width: 36px;
+}
+
+.sheet__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.sheet__add {
+  --c2-button__container--height: 28px;
+  --c2-button__container--padding-left: 10px;
+  --c2-button__container--padding-right: 10px;
+  --c2-button__container--gap: 4px;
+  --c2-button__container--border-radius: 6px;
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface);
+  --c2-button__container--border: 1px solid var(--ntm-line);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
+  --c2-button__icon--size: 13px;
+}
+
+// Picked from the search: a light runs twice around the sheet, as around a list (todo-card.scss).
+.sheet__beam {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 2px var(--ntm-accent),
+    inset 0 0 28px color-mix(in srgb, var(--ntm-accent) 30%, transparent);
+  animation: sheet-beam 3.6s ease-out forwards;
+}
+
+.sheet__beam-light {
+  --c2-border-beam__beam--width: 2px;
+  --c2-border-beam__beam--size: 120px;
+  --c2-border-beam__beam--radius: var(--c2-theme--radius-lg, 8px);
+  --c2-border-beam__beam--color-from: var(--ntm-accent);
+  --c2-border-beam__beam--color-to: color-mix(in srgb, var(--ntm-accent) 30%, white);
+  --c2-border-beam__beam--opacity: 1;
+  --c2-border-beam__beam--filter: drop-shadow(0 0 6px color-mix(in srgb, var(--ntm-accent) 70%, transparent));
+  --c2-border-beam__beam--duration: 3s;
+}
+
+@keyframes sheet-beam {
+  from {
+    opacity: 0;
+  }
+  8%,
+  85% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// Without motion, a ring that fades: its end still clears the highlight.
+@media (prefers-reduced-motion: reduce) {
+  .sheet__beam {
+    animation-name: sheet-ring;
+  }
+}
+
+@keyframes sheet-ring {
+  from,
+  85% {
+    box-shadow: inset 0 0 0 2px var(--ntm-accent);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}

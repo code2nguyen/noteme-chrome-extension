@@ -78,7 +78,7 @@
   --c2-button__container--color: var(--ntm-muted);
   --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container);
   --c2-button__container__active--background-color: var(--c2-theme--color-surface-container);
-  --c2-button__container--font-size: 12px;
+  --c2-button__container--font-size: calc(12px * var(--ntm-text-scale));
   --c2-button__icon--size: 14px;
 }
 
@@ -123,12 +123,12 @@
 
 .archive__label {
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: calc(13.5px * var(--ntm-text-scale));
 }
 
 .archive__date {
   color: var(--ntm-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--ntm-text-scale));
 }
 
 .archive__none {
@@ -199,7 +199,7 @@
   border-radius: 12px;
   background: var(--c2-theme--color-surface-container);
   box-shadow: 0 10px 26px rgb(0 0 0 / 38%);
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
   --c2-icon-button__icon--width: 14px;
   --c2-icon-button__icon--height: 14px;
   --c2-icon-button__state-layer--size: 28px;
@@ -211,7 +211,7 @@
     --c2-button__container--padding-left: 10px;
     --c2-button__container--padding-right: 12px;
     --c2-button__container--gap: 5px;
-    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-size: calc(13px * var(--ntm-text-scale));
     --c2-button__icon--size: 13px;
   }
 }
@@ -240,7 +240,7 @@
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
-  font-size: 18px;
+  font-size: calc(18px * var(--ntm-text-scale));
   font-weight: 700;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -252,7 +252,7 @@
 .archive__meta {
   margin: -6px 0 0;
   color: var(--ntm-muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--ntm-text-scale));
 }
 
 .archive__paper {
@@ -261,22 +261,6 @@
   --c2-notepad__sheet--rotate: 0deg;
   --c2-notepad__stack--display: none;
   --c2-notepad__focus--outline: none;
-}
-
-.archive__doc {
-  padding: 16px 20px;
-  border: 1px solid var(--ntm-line);
-  border-radius: 12px;
-  background: var(--c2-theme--color-surface-container-low);
-  line-height: 1.55;
-
-  p {
-    margin: 0 0 6px;
-  }
-}
-
-.archive__empty-doc {
-  color: var(--ntm-muted);
 }
 
 .archive__actions {

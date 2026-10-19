@@ -16,6 +16,7 @@ const KIND_KEYS: Record<NoteKind, MessageKey> = {
   Page: 'common.page',
   Flow: 'common.flow',
   List: 'common.list',
+  Sheet: 'common.sheet',
 };
 
 const UNTITLED_KEYS: Record<NoteKind, MessageKey> = {
@@ -23,4 +24,5 @@ const UNTITLED_KEYS: Record<NoteKind, MessageKey> = {
   Page: 'common.untitled.page',
   Flow: 'common.untitled.flow',
   List: 'common.untitled.list',
+  Sheet: 'common.untitled.sheet',
 };

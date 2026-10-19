@@ -1,0 +1,113 @@
+<article class="sheet__paper" [attr.aria-label]="title() || t('common.untitled.sheet')">
+  <header class="sheet__head">
+    <c2-phosphor-table class="sheet__icon" aria-hidden="true"></c2-phosphor-table>
+    <c2-inline-edit
+      #titleEdit
+      class="sheet__title"
+      [value]="title()"
+      [attr.placeholder]="t('common.untitled.sheet')"
+      [attr.label]="t('board.sheet.title')"
+      (change)="onTitleChange($event)"
+      (edit-cancel)="endFresh()"
+      (focusout)="endFresh()"
+    ></c2-inline-edit>
+    <!-- Moves the sheet's tile: its c2-masonry-item names this button in move-handle. -->
+    <c2-icon-button
+      class="sheet__action"
+      [id]="'move-' + item().id"
+      [attr.aria-label]="t('board.sheet.move')"
+      [tooltip]="t('board.move')"
+    >
+      <c2-feather-move></c2-feather-move>
+    </c2-icon-button>
+    <c2-menu
+      class="sheet__action"
+      placement="bottom-end"
+      [attr.aria-label]="t('board.sheet.actions')"
+      (menu-select)="onMenu($event)"
+    >
+      <c2-icon-button slot="trigger" [attr.aria-label]="t('board.sheet.actions')" [tooltip]="t('board.more')">
+        <c2-feather-more-vertical></c2-feather-more-vertical>
+      </c2-icon-button>
+      <c2-menu-item value="rename">
+        <c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>
+        {{ t('board.rename') }}
+      </c2-menu-item>
+      <hr />
+      <c2-menu-item type="checkbox" value="formula-bar" [checked]="formulaBar()">
+        {{ t('board.sheet.formulaBar') }}
+      </c2-menu-item>
+      <c2-menu-item type="checkbox" value="totals" [checked]="summary()">
+        {{ t('board.sheet.totals') }}
+      </c2-menu-item>
+      <hr />
+      <c2-menu-item value="copy-table">
+        <c2-feather-copy slot="prefix-icon"></c2-feather-copy>
+        {{ t('board.sheet.copyTable') }}
+      </c2-menu-item>
+      <c2-menu-item value="download-csv">
+        <c2-feather-download slot="prefix-icon"></c2-feather-download>
+        {{ t('board.sheet.downloadCsv') }}
+      </c2-menu-item>
+      <hr />
+      @if (pinned()) {
+        <c2-menu-item value="unpin">
+          <c2-phosphor-push-pin-slash slot="prefix-icon"></c2-phosphor-push-pin-slash>
+          {{ t('board.unpin') }}
+        </c2-menu-item>
+      } @else {
+        <c2-menu-item value="pin">
+          <c2-phosphor-push-pin slot="prefix-icon"></c2-phosphor-push-pin>
+          {{ t('board.pin') }}
+        </c2-menu-item>
+      }
+      <c2-menu-item value="archive">
+        <c2-feather-archive slot="prefix-icon"></c2-feather-archive>
+        {{ t('board.toArchive') }}
+      </c2-menu-item>
+      <c2-menu-item value="delete" destructive>
+        <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+        {{ t('board.sheet.delete') }}
+      </c2-menu-item>
+    </c2-menu>
+  </header>
+
+  <div class="sheet__grid" #grid>
+    <c2-spreadsheet
+      #sheet
+      class="sheet__sheet"
+      [style.--c2-spreadsheet__cell--width.px]="cellWidth()"
+      context-menu
+      hide-selection-on-blur
+      rename-columns
+      [label]="title() || t('common.untitled.sheet')"
+      [data]="doc().data"
+      [columns]="doc().columns"
+      [rows]="doc().rows"
+      [styles]="doc().styles"
+      [formulaBar]="formulaBar()"
+      [summary]="summary()"
+      (input)="save()"
+      (style-change)="save()"
+      (column-rename)="save()"
+      (column-resize)="save()"
+    ></c2-spreadsheet>
+  </div>
+
+  <footer class="sheet__foot">
+    <c2-button class="sheet__add" [attr.aria-label]="t('board.sheet.addRowLabel')" (click)="addRow()">
+      <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+      {{ t('board.sheet.addRow') }}
+    </c2-button>
+    <c2-button class="sheet__add" [attr.aria-label]="t('board.sheet.addColumnLabel')" (click)="addColumn()">
+      <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+      {{ t('board.sheet.addColumn') }}
+    </c2-button>
+  </footer>
+</article>
+@if (blinking()) {
+  <!-- Picked from the search: a light runs twice around the sheet, then fades (as on a list). -->
+  <span class="sheet__beam">
+    <c2-border-beam class="sheet__beam-light"></c2-border-beam>
+  </span>
+}
