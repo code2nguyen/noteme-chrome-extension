@@ -613,9 +613,13 @@ export class Board {
     });
   }
 
-  /** A sheet copied as a table: where it goes. */
-  onSheetCopied(): void {
-    this.toasts()?.nativeElement.show({ message: this.t('board.sheet.copied'), duration: 3000, noIcon: true });
+  /** A sheet copied as a table: where it goes, or that the clipboard refused it. */
+  onSheetCopied(copied: boolean): void {
+    this.toasts()?.nativeElement.show({
+      message: this.t(copied ? 'board.sheet.copied' : 'board.sheet.copyFailed'),
+      duration: 3000,
+      noIcon: true,
+    });
   }
 
   /** Notes deleted forever from the Archive view, once confirmed there. */
@@ -838,15 +842,15 @@ export class Board {
   }
 
   private typing(event: KeyboardEvent): boolean {
-    return event
-      .composedPath()
-      .some(
-        (target) =>
-          target instanceof HTMLElement &&
-          (target.isContentEditable ||
-            /^(input|textarea|select)$/i.test(target.localName) ||
-            target.localName.startsWith('c2-menu')),
-      );
+    return event.composedPath().some(
+      (target) =>
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          /^(input|textarea|select)$/i.test(target.localName) ||
+          target.localName.startsWith('c2-menu') ||
+          // A selected cell takes a letter as the start of its edit, with the focus on the grid, not on a field.
+          target.localName === 'c2-spreadsheet'),
+    );
   }
 
   private findSearchResult(id: string): ArtBoardItem | undefined {

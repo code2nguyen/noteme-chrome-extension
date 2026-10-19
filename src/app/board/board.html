@@ -260,7 +260,7 @@
               (remove)="removeNote(item)"
               (pin)="pin(item)"
               (unpin)="unpin(item)"
-              (copied)="onSheetCopied()"
+              (copied)="onSheetCopied($event)"
             />
           } @else {
             <ntm-note-card

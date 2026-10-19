@@ -877,6 +877,59 @@ test('a new sheet left unnamed does not name its first column at a later rename'
   await expect(card.getByRole('textbox', { name: 'Name of column A' })).toHaveCount(0);
 });
 
+test("typing in a sheet's selected cell writes in it, and starts no note, page or sheet", async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+
+  const stored = () =>
+    page.evaluate(() =>
+      Object.entries(localStorage)
+        .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+        .map(([, value]) => JSON.parse(value))
+        .filter((data) => data.dataType === 'sheet')
+        .map((data) => data.data as string)
+        .join(''),
+    );
+  await card.locator('c2-spreadsheet #cell-A1').click();
+  await page.keyboard.type('Nuts and pasta');
+  await page.keyboard.press('Enter');
+  await expect(card.locator('c2-spreadsheet #cell-A1')).toContainText('Nuts and pasta');
+  await expect.poll(stored).toContain('Nuts and pasta');
+  await expect(page).toHaveURL(/#\/main-board/);
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await expect(card).toHaveCount(1);
+});
+
+test('a sheet copied as a table says so, and says so too when the clipboard refuses it', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openBoard(page);
+  await page.keyboard.press('s');
+  const card = page.locator('ntm-sheet-card');
+  await expect(card.getByRole('textbox', { name: 'Sheet title' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await card.locator('c2-spreadsheet #cell-A1').click();
+  await page.keyboard.type('Hotel');
+  await page.keyboard.press('Enter');
+  const copy = async () => {
+    await card.locator('c2-menu c2-icon-button[slot="trigger"]').click();
+    await card.locator('c2-menu-item[value="copy-table"]').click();
+  };
+
+  await copy();
+  await expect(page.locator('c2-toast')).toContainText('Copied: paste it in a page');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Hotel');
+
+  await page.evaluate(() => {
+    navigator.clipboard.writeText = () =>
+      Promise.reject(new DOMException('Document is not focused.', 'NotAllowedError'));
+  });
+  await copy();
+  await expect(page.locator('c2-toast', { hasText: 'Couldn’t copy' })).toBeVisible();
+});
+
 test('a sheet is named, filled and styled on its card, kept after a reload, and found by a cell', async ({ page }) => {
   await openBoard(page);
   await page.keyboard.press('s');

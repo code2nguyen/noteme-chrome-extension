@@ -86,7 +86,8 @@ export class SheetCard {
   readonly pin = output<void>();
   readonly unpin = output<void>();
   /** Copied as a table: the board says where to paste it. */
-  readonly copied = output<void>();
+  /** Copied as a table, or not (the clipboard refused it). */
+  readonly copied = output<boolean>();
 
   readonly title = signal('');
   /** The stored sheet, as last read: the spreadsheet holds the edits since, and is only handed changes made elsewhere. */
@@ -274,7 +275,11 @@ export class SheetCard {
     } else if (value === 'copy-table') {
       const doc = this.current();
       if (doc) {
-        void navigator.clipboard.writeText(sheetToMarkdown(doc)).then(() => this.copied.emit());
+        // Refused when the page has lost the focus or the browser blocks the clipboard: said rather than silent.
+        navigator.clipboard.writeText(sheetToMarkdown(doc)).then(
+          () => this.copied.emit(true),
+          () => this.copied.emit(false),
+        );
       }
     } else if (value === 'download-csv' && sheet) {
       this.download(sheet.toCSV());
