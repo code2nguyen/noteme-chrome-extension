@@ -2,6 +2,11 @@
   display: block;
 }
 
+.preview__empty {
+  margin: 0;
+  color: var(--ntm-muted);
+}
+
 // A page or a flow in a frame of its own; a list and a sheet draw their own.
 .preview__frame {
   overflow: hidden;

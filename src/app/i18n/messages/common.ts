@@ -19,6 +19,7 @@ export const commonEn = {
   'common.untitled.flow': 'Untitled flow',
   'common.untitled.list': 'Untitled to do',
   'common.untitled.sheet': 'Untitled sheet',
+  'common.nothingWritten': 'Nothing written yet.',
 };
 
 export const commonFr: Translation<typeof commonEn> = {
@@ -38,7 +39,8 @@ export const commonFr: Translation<typeof commonEn> = {
   'common.untitled.page': 'Feuille sans titre',
   'common.untitled.flow': 'Flux sans titre',
   'common.untitled.list': 'À faire sans titre',
-  'common.untitled.sheet': 'Tableau sans titre',
+  'common.untitled.sheet': 'Feuille de calcul sans titre',
+  'common.nothingWritten': 'Rien d’écrit pour l’instant.',
 };
 
 export const commonVi: Translation<typeof commonEn> = {
@@ -59,4 +61,5 @@ export const commonVi: Translation<typeof commonEn> = {
   'common.untitled.flow': 'Sơ đồ chưa đặt tên',
   'common.untitled.list': 'Việc cần làm chưa đặt tên',
   'common.untitled.sheet': 'Bảng tính chưa đặt tên',
+  'common.nothingWritten': 'Chưa có nội dung.',
 };

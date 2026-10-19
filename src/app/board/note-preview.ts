@@ -1,9 +1,19 @@
-import { ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, effect, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  CUSTOM_ELEMENTS_SCHEMA,
+  effect,
+  inject,
+  input,
+} from '@angular/core';
 import type { TodoListLook } from '@c2n/components/todo-list';
 
 import { parseFlow } from '../flow/flow-doc';
 import { flowNodes } from '../flow/flow-nodes';
-import { parseSheet } from '../sheet/sheet-doc';
+import { I18n } from '../i18n/i18n.service';
+import { pageMarkdownToText } from '../services/utils';
+import { parseSheet, sheetText } from '../sheet/sheet-doc';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { parseTasks } from '../todo/todo-doc';
 import { NoteKind } from './older-notes';
@@ -29,49 +39,53 @@ const ELEMENTS: Partial<Record<NoteKind, () => Promise<unknown>>> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    @switch (kind()) {
-      @case ('Page') {
-        <div class="preview__frame preview__frame--page">
-          <c2-page-editor readonly [attr.label]="label()" [value]="text()"></c2-page-editor>
-        </div>
-      }
-      @case ('Flow') {
-        <div class="preview__frame">
-          <c2-flow
-            class="preview__flow"
-            inert
-            locked
-            no-card
-            no-context-menu
-            fit-min-zoom="0.5"
-            [nodes]="flowNodes()"
-            [edges]="flow().edges"
-          ></c2-flow>
-        </div>
-      }
-      @case ('List') {
-        <c2-todo-list
-          class="preview__list"
-          readonly
-          progress="ring"
-          [heading]="title()"
-          [tasks]="tasks()"
-          [look]="look()"
-        ></c2-todo-list>
-      }
-      @case ('Sheet') {
-        <c2-spreadsheet
-          class="preview__sheet"
-          readonly
-          hide-selection-on-blur
-          [label]="label()"
-          [data]="sheet().data"
-          [columns]="sheet().columns"
-          [rows]="sheet().rows"
-          [styles]="sheet().styles"
-          [formulaBar]="false"
-          [summary]="sheet().summary"
-        ></c2-spreadsheet>
+    @if (empty()) {
+      <p class="preview__empty">{{ t('common.nothingWritten') }}</p>
+    } @else {
+      @switch (kind()) {
+        @case ('Page') {
+          <div class="preview__frame preview__frame--page">
+            <c2-page-editor readonly [attr.label]="label()" [value]="text()"></c2-page-editor>
+          </div>
+        }
+        @case ('Flow') {
+          <div class="preview__frame">
+            <c2-flow
+              class="preview__flow"
+              inert
+              locked
+              no-card
+              no-context-menu
+              fit-min-zoom="0.5"
+              [nodes]="flowNodes()"
+              [edges]="flow().edges"
+            ></c2-flow>
+          </div>
+        }
+        @case ('List') {
+          <c2-todo-list
+            class="preview__list"
+            readonly
+            progress="ring"
+            [heading]="title()"
+            [tasks]="tasks()"
+            [look]="look()"
+          ></c2-todo-list>
+        }
+        @case ('Sheet') {
+          <c2-spreadsheet
+            class="preview__sheet"
+            readonly
+            hide-selection-on-blur
+            [label]="label()"
+            [data]="sheet().data"
+            [columns]="sheet().columns"
+            [rows]="sheet().rows"
+            [styles]="sheet().styles"
+            [formulaBar]="false"
+            [summary]="sheet().summary"
+          ></c2-spreadsheet>
+        }
       }
     }
   `,
@@ -91,6 +105,22 @@ export class NotePreview {
   readonly tasks = computed(() => parseTasks(this.data()?.data));
   readonly look = computed(() => (this.item().properties['look'] as TodoListLook | undefined) ?? {});
   readonly sheet = computed(() => parseSheet(this.data()?.data));
+  /** Nothing to draw: said in words rather than shown as a blank page, canvas, list or grid. */
+  readonly empty = computed(() => {
+    switch (this.kind()) {
+      case 'Page':
+        return !pageMarkdownToText(this.text()).trim();
+      case 'Flow':
+        return this.flow().nodes.length === 0;
+      case 'List':
+        return this.tasks().length === 0;
+      case 'Sheet':
+        return !sheetText(this.sheet()).trim();
+      default:
+        return false;
+    }
+  });
+  readonly t = inject(I18n).t;
 
   constructor() {
     effect(() => void ELEMENTS[this.kind()]?.());

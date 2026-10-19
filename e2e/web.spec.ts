@@ -1800,6 +1800,22 @@ test('Home shows the notes in a carousel under Notes, in the order chosen in Set
   await page.goto('/');
   await expect(titles).toHaveText(['Wi-Fi password', 'Launch checklist', 'Groceries', 'Book ideas']);
 });
+test('the Archive says a list with no task has nothing written, rather than showing it blank', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await expect(list.getByRole('textbox', { name: 'List title' })).toBeFocused();
+  await page.keyboard.type('Someday');
+  await page.keyboard.press('Enter');
+  await list.locator('c2-menu.todo__actions c2-icon-button[slot="trigger"]').click();
+  await list.locator('c2-menu-item[value="archive"]').click();
+  await expect(list).toHaveCount(0);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await archiveRows(page).filter({ hasText: 'Someday' }).click();
+  await expect(archivePreview(page).locator('ntm-note-preview')).toHaveText('Nothing written yet.');
+  await expect(archivePreview(page).locator('c2-todo-list')).toHaveCount(0);
+});
 
 test('the Archive shows a page, a list and a sheet as they look, not as their text', async ({ page }) => {
   await openBoard(page);
