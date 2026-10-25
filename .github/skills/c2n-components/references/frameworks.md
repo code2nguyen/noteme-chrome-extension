@@ -101,7 +101,7 @@ With Emulated encapsulation, keep host `::part(name)` rules in a global styleshe
 
 `CUSTOM_ELEMENTS_SCHEMA` on the component is the only required configuration. `[rows]="…"` writes a property with `setProperty`; `(selection-change)` binds the event by its real name. A **static** attribute stays an attribute, so a camelCase property needs `[rowKey]="'id'"` or the real attribute name (`row-key`) — the lowercase spelling `rowkey` is forwarded to `row-key` with a warning.
 
-Forms: Angular's built-in value accessors match `input`/`select`/`textarea` only, so `ngModel` and `formControlName` do nothing on a c2 control without `@c2n/angular`. Add `imports: [FormsModule, ...C2_FORM_ACCESSORS]`.
+Forms: Angular's built-in value accessors match `input`/`select`/`textarea` only, so `ngModel` or `formControlName` on a c2 control without `@c2n/angular` throws `NG01203: No value accessor for form control`. Do not reach for `ngDefaultControl`: it never reads a toggle's `checked`. Add `imports: [FormsModule, ...C2_FORM_ACCESSORS]`.
 
 The schema turns off template type checking, so `$event` is a bare `Event`: take the component's event-map type in the handler rather than `$any` at the call site.
 
@@ -140,7 +140,14 @@ binding on a tag that has not upgraded yet silently falls back to an attribute.
   Server rendering writes attributes only, and `String(rows)` is `[object Object]`, so a route that
   server-renders its data passes `rows={JSON.stringify(rows)}` — parsed as an attribute on the server and as a
   property on the client.
+- **SvelteKit**: register the elements from `init` in `src/hooks.client.ts` (awaited before hydration, never run
+  on the server) rather than from a layout script. Set function properties (`renderItem`, `rowPart`,
+  `renderCell`) from an attachment (`{@attach (el) => (el.renderItem = render)}`): the server would stringify
+  them into attributes. For an array property whose converter does not parse a string property, pass
+  `browser ? value : JSON.stringify(value)`. See the `close-workbench-sveltekit` example app.
 - **camelCase properties**: spell the attribute the component declares (`row-key`, not `rowKey`).
+- **Numbers**: write them in braces. For an attribute that is also a property (`precision`, `position`, `min`),
+  Svelte assigns the property, so `precision="0"` hands a `Number` property the string `"0"`; `precision={0}` is right.
 - **Two-way binding**: `bind:value` applies to form elements and Svelte components, not to a custom element, so
   bind by hand. Every c2n form control re-emits the inner control's native `input` and `change`, which is what
   makes `value={draft} oninput={(event) => (draft = event.currentTarget.value)}` enough.
