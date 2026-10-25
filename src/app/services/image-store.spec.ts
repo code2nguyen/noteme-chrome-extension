@@ -40,5 +40,7 @@ describe('images', () => {
     expect(markdownToText(`See ![chart|320](noteme-image:${A}) here`)).toBe('See chart here');
     expect(pageMarkdownToText(`See ![chart|320](noteme-image:${A}) here`)).toBe('See chart here');
     expect(markdownToText('a \\![b](c)')).toBe('a ![b](c)');
+    // An escaped backslash, then an image.
+    expect(markdownToText(`a \\\\![chart|320](noteme-image:${A})`)).toBe('a \\chart');
   });
 });

@@ -103,13 +103,21 @@ function readSides(edge: Partial<ArrowSides>): ArrowSides {
 }
 
 /** The ports of an arrow that are fields of its boxes; any other is dropped, and the arrow meets the box. */
-function readPorts(nodes: readonly FlowBox[], edge: Partial<ArrowRef>): ArrowPorts {
+function readPorts(nodes: readonly FlowBox[] | FieldIds, edge: Partial<ArrowRef>): ArrowPorts {
+  const fields = Array.isArray(nodes) ? fieldIds(nodes) : (nodes as FieldIds);
   const has = (box: string | undefined, field: unknown) =>
-    typeof field === 'string' && !!nodes.find((node) => node.id === box)?.fields?.some((entry) => entry.id === field);
+    typeof field === 'string' && box !== undefined && !!fields.get(box)?.has(field);
   return {
     ...(has(edge.source, edge.sourcePort) ? { sourcePort: edge.sourcePort } : {}),
     ...(has(edge.target, edge.targetPort) ? { targetPort: edge.targetPort } : {}),
   };
+}
+
+/** Each box's field ids, by the box's id. */
+type FieldIds = ReadonlyMap<string, ReadonlySet<string>>;
+
+function fieldIds(nodes: readonly FlowBox[]): FieldIds {
+  return new Map(nodes.map((node) => [node.id, new Set(node.fields?.map((field) => field.id))]));
 }
 
 function readMarkers(edge: Partial<FlowArrow>): Pick<FlowArrow, 'sourceMarker' | 'targetMarker'> {
@@ -176,16 +184,21 @@ export function parseFlow(data: string | null | undefined): FlowDoc {
     ];
   });
   const ids = new Set(nodes.map((node) => node.id));
+  const fields = fieldIds(nodes);
   const edges: FlowArrow[] = [];
+  // Each kept arrow's boxes and fields, so a second one is found without comparing it with every arrow.
+  const kept = new Set<string>();
   for (const edge of Array.isArray(doc.edges) ? doc.edges : []) {
     if (!edge || !ids.has(edge.source) || !ids.has(edge.target)) {
       continue;
     }
-    const ref = { source: edge.source, target: edge.target, ...readPorts(nodes, edge) };
+    const ref = { source: edge.source, target: edge.target, ...readPorts(fields, edge) };
     // A port dropped (its field gone) can make an arrow the same as another: one arrow per pair, as connect() keeps.
-    if (isLoop(ref) || edges.some((kept) => isArrow(kept, ref))) {
+    const key = JSON.stringify([ref.source, ref.target, ref.sourcePort ?? null, ref.targetPort ?? null]);
+    if (isLoop(ref) || kept.has(key)) {
       continue;
     }
+    kept.add(key);
     const label = typeof edge.label === 'string' ? edge.label.trim() : '';
     edges.push({
       source: ref.source,

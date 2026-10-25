@@ -39,10 +39,12 @@ export class ImageCleanup {
   }
 
   private due(): boolean {
+    // A stored time that is not a number, or a storage that cannot be read, runs it: never would leave the images.
     try {
-      return Date.now() - Number(localStorage.getItem(LAST_RUN_KEY) ?? 0) > EVERY_MS;
+      const last = Number(localStorage.getItem(LAST_RUN_KEY) ?? 0);
+      return !Number.isFinite(last) || Date.now() - last > EVERY_MS;
     } catch {
-      return false;
+      return true;
     }
   }
 

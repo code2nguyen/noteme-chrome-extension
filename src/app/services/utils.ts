@@ -33,9 +33,9 @@ export function isNotNullOrUndefined<T>(input: null | undefined | T): input is T
 
 /**
  * An image (`![alt|320](src)`, as c2-notepad and c2-page-editor write it), on its own line or beside text, reads as
- * its alt text. A typed `\![` is escaped, not an image.
+ * its alt text. A typed `\![` is escaped, not an image; after `\\` (an escaped backslash) it is one.
  */
-const IMAGE = /(?<!\\)!\[((?:\\.|[^\]\\])*)\]\((?:<[^>\n]*>|[^\s()]+)\)/g;
+const IMAGE = /(?<!(?:^|[^\\])(?:\\\\)*\\)!\[((?:\\.|[^\]\\])*)\]\((?:<[^>\n]*>|[^\s()]+)\)/g;
 
 function imagesToText(markdown: string): string {
   return markdown.replace(IMAGE, (_, label: string) => label.replace(/(?<!\\)\|\d+$/, ''));
