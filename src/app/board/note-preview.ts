@@ -10,8 +10,9 @@ import {
 import type { TodoListLook } from '@c2n/components/todo-list';
 
 import { parseFlow } from '../flow/flow-doc';
-import { flowNodes } from '../flow/flow-nodes';
+import { FlowIcons, flowNodes } from '../flow/flow-nodes';
 import { I18n } from '../i18n/i18n.service';
+import { ImageStore } from '../services/image-store';
 import { pageMarkdownToText } from '../services/utils';
 import { parseSheet, sheetText } from '../sheet/sheet-doc';
 import { ArtBoardItem, ItemData } from '../store/models';
@@ -45,7 +46,12 @@ const ELEMENTS: Partial<Record<NoteKind, () => Promise<unknown>>> = {
       @switch (kind()) {
         @case ('Page') {
           <div class="preview__frame preview__frame--page">
-            <c2-page-editor readonly [attr.label]="label()" [value]="text()"></c2-page-editor>
+            <c2-page-editor
+              readonly
+              [attr.label]="label()"
+              [imageResolver]="images.resolve"
+              [value]="text()"
+            ></c2-page-editor>
           </div>
         }
         @case ('Flow') {
@@ -101,7 +107,9 @@ export class NotePreview {
   readonly text = computed(() => this.data()?.data ?? '');
   readonly title = computed(() => this.data()?.properties?.title?.trim() ?? '');
   readonly flow = computed(() => parseFlow(this.data()?.data));
-  readonly flowNodes = computed(() => flowNodes(this.flow()));
+  /** The icon elements its c2-flow draws, kept across redraws. */
+  private readonly icons: FlowIcons = new Map();
+  readonly flowNodes = computed(() => flowNodes(this.flow(), this.icons));
   readonly tasks = computed(() => parseTasks(this.data()?.data));
   readonly look = computed(() => (this.item().properties['look'] as TodoListLook | undefined) ?? {});
   readonly sheet = computed(() => parseSheet(this.data()?.data));
@@ -121,6 +129,8 @@ export class NotePreview {
     }
   });
   readonly t = inject(I18n).t;
+  /** Draws the notes' images (and saves those pasted into an editable one). */
+  readonly images = inject(ImageStore);
 
   constructor() {
     effect(() => void ELEMENTS[this.kind()]?.());

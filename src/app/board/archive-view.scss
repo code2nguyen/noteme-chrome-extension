@@ -14,6 +14,9 @@
   --c2-split-panel__handle--background: var(--c2-theme--color-surface-container);
   --c2-split-panel__handle--border: 1px solid var(--ntm-line);
   --c2-split-panel__handle--color: var(--ntm-muted);
+  // Its panels scroll in its shadow root, where the page's scrollbar style (styles.scss) does not reach: the same look.
+  --c2-split-panel__scrollbar__thumb--color: var(--ntm-scrollbar);
+  --c2-split-panel__scrollbar__thumb__hover--color: var(--ntm-scrollbar-hover);
 }
 
 .archive--narrow {
@@ -50,15 +53,29 @@
   top: 0;
   z-index: 2;
   display: flex;
+  // A longer language (French) or a narrow pane: the order goes under the kinds rather than past the pane's edge.
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 4px 16px 10px 22px;
   background: var(--ntm-canvas);
 }
 
-.archive__kinds {
+// Select all and the kinds stay on one line, the kinds scrolling on their own when even they do not fit the pane
+// (rather than the whole list sideways); the order is what wraps.
+.archive__filters {
   display: flex;
-  width: fit-content;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+// Sized to the row's 30px controls; its width follows the kind picked.
+.archive__kind-select {
+  flex: none;
+  --c2-select__button--min-height: 30px;
+  --c2-select__button--padding: 4px 8px 4px 10px;
+  --c2-select__button--font-size: calc(13px * var(--ntm-text-scale));
 }
 
 .archive__sort {
@@ -186,39 +203,44 @@
 
 // The checked rows' actions, floating at the bottom of the list: compact, so it covers little of the list.
 .archive__bulk {
-  position: sticky;
-  bottom: 14px;
-  z-index: 3;
-  align-self: center;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: -44px;
-  padding: 4px 4px 4px 12px;
-  border: 1px solid var(--ntm-line);
-  border-radius: 12px;
-  background: var(--c2-theme--color-surface-container);
-  box-shadow: 0 10px 26px rgb(0 0 0 / 38%);
-  font-size: calc(13px * var(--ntm-text-scale));
-  --c2-icon-button__icon--width: 14px;
-  --c2-icon-button__icon--height: 14px;
-  --c2-icon-button__state-layer--size: 28px;
-  --c2-icon-button__icon--color: var(--ntm-muted);
+  --c2-action-bar--inset-bottom: 14px;
+  --c2-action-bar--z-index: 3;
+  --c2-action-bar__container--background: var(--c2-theme--color-surface-container);
+  --c2-action-bar__container--color: var(--c2-theme--color-on-surface);
+  --c2-action-bar__container--border: 1px solid var(--ntm-line);
+  --c2-action-bar__container--border-radius: 14px;
+  --c2-action-bar__container--box-shadow: 0 10px 26px rgb(0 0 0 / 38%);
+  --c2-action-bar__container--padding: 7px 7px 7px 16px;
+  --c2-action-bar__container--gap: 10px;
+  // It fades in place: hidden a few pixels lower, as it slides by default, it would overflow the pane and scroll it.
+  --c2-action-bar__container--offset: 0px;
+  --c2-action-bar__label--font-size: calc(13px * var(--ntm-text-scale));
+  --c2-action-bar__label--font-weight: 600;
+  --c2-action-bar__label--color: var(--c2-theme--color-on-surface);
+  --c2-action-bar__divider--border-left: 1px solid var(--ntm-line);
+  --c2-action-bar__divider--height: 22px;
+  --c2-action-bar__actions--gap: 8px;
+  --c2-action-bar__clear--size: 32px;
+  // Round like the buttons beside it, and darkened on hover with the bar's own text colour, not lit up.
+  --c2-action-bar__clear--border-radius: 999px;
+  --c2-action-bar__clear--color: var(--ntm-muted);
+  --c2-action-bar__clear__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface) 9%, transparent);
+  --c2-action-bar__clear__hover--color: var(--c2-theme--color-on-surface);
+  --c2-action-bar__clear__focus--outline: 2px solid color-mix(in srgb, var(--ntm-accent) 50%, transparent);
+  --c2-action-bar__clear-icon--size: 15px;
 
   .archive__restore,
   .archive__delete {
-    --c2-button__container--height: 28px;
-    --c2-button__container--padding-left: 10px;
-    --c2-button__container--padding-right: 12px;
-    --c2-button__container--gap: 5px;
+    --c2-button__container--height: 34px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 14px;
+    --c2-button__container--gap: 6px;
     --c2-button__container--font-size: calc(13px * var(--ntm-text-scale));
-    --c2-button__icon--size: 13px;
+    --c2-button__icon--size: 14px;
   }
 }
 
 .archive__bulk-count {
-  margin-right: 2px;
-  font-weight: 600;
   white-space: nowrap;
 }
 

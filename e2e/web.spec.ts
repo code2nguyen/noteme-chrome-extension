@@ -475,6 +475,83 @@ test('a to-do list is named, filled and checked off on its card, and kept after 
   await expect(list).toHaveCount(0);
 });
 
+/** Pastes a 400×200 PNG into an editor's surface, as a screenshot is. */
+async function pasteScreenshot(surface: Locator): Promise<void> {
+  await surface.evaluate(async (element) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 200;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = '#2563eb';
+    context.fillRect(0, 0, 400, 200);
+    const blob = await new Promise<Blob>((resolve) => canvas.toBlob((png) => resolve(png!), 'image/png'));
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([blob], 'shot.png', { type: 'image/png' }));
+    const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'clipboardData', { value: transfer });
+    element.dispatchEvent(event);
+  });
+}
+
+const drawnWidth = (surface: Locator) =>
+  surface.locator('.image-block img').evaluate((image: HTMLImageElement) => (image.complete ? image.naturalWidth : 0));
+
+const storedData = (page: Page) =>
+  page.evaluate(() =>
+    Object.entries(localStorage)
+      .filter(([key]) => key.startsWith('noteme-dev:ITEM_DATA__'))
+      .map(([, value]) => JSON.parse(value).data as string),
+  );
+
+test('an image pasted into a note or a page is kept on the device, out of the text, and drawn again after a reload', async ({
+  page,
+}) => {
+  await openBoard(page);
+  const note = await newNote(page);
+  await page.keyboard.type('Screenshot:');
+  await page.keyboard.press('Enter');
+  await pasteScreenshot(notepadSurface(note));
+  await expect.poll(() => drawnWidth(notepadSurface(note))).toBe(400);
+  // The note holds an id; the image itself is in IndexedDB, not in localStorage or chrome.storage.
+  await expect
+    .poll(() => storedData(page))
+    .toEqual([expect.stringMatching(/^Screenshot:\n!\[\]\(noteme-image:[\w-]{36}\)$/)]);
+
+  await newPage(page);
+  await page.keyboard.type('With a picture');
+  await page.keyboard.press('Enter');
+  await pasteScreenshot(pageSurface(page));
+  await expect.poll(() => drawnWidth(pageSurface(page))).toBe(400);
+  await expect(page.locator('.page-bar__status')).toHaveText(/^Saved/);
+  await shot(page, '04b-page-image');
+  const data = await storedData(page);
+  expect(data.find((text) => text !== data[0] && text.includes('noteme-image:'))).toMatch(
+    /!\[\]\(noteme-image:[\w-]{36}\)/,
+  );
+  expect(JSON.stringify(data)).not.toContain('data:image');
+
+  await page.reload();
+  await expect.poll(() => drawnWidth(pageSurface(page))).toBe(400);
+  await page.goto('/#/main-board');
+  await openBoard(page);
+  const kept = page.locator('ntm-note-card').filter({ hasText: 'Screenshot:' });
+  await expect.poll(() => drawnWidth(notepadSurface(kept))).toBe(400);
+  // The card grows to hold the image: nothing of it is cut off.
+  await expect
+    .poll(() =>
+      kept.evaluate((element) => {
+        const tile = element.closest('c2-masonry-item')!.getBoundingClientRect();
+        const image = element
+          .querySelector('c2-notepad')!
+          .shadowRoot!.querySelector('.image-block img')!
+          .getBoundingClientRect();
+        return image.bottom <= tile.bottom;
+      }),
+    )
+    .toBe(true);
+  await shot(page, '03b-note-image');
+});
+
 test('delete a note', async ({ page }) => {
   await openBoard(page);
   await newNote(page);
@@ -625,16 +702,11 @@ test('the Archive restores several notes at once, and deletes forever only once 
   await expect(archiveRows(page)).toHaveText([/Spare keys/, /Old budget/, /Tram times/]);
   await expect(archivePreview(page).locator('.archive__title')).toHaveText('Spare keys');
 
-  // Select all acts on the rows listed: a note the filter hides keeps its tick.
   await archiveRows(page).nth(0).locator('c2-checkbox').click();
-  await page.locator('.archive__kinds c2-button[value="Page"]').click();
-  await expect(archiveRows(page)).toHaveCount(0);
-  await page.locator('.archive__all').click();
-  await page.locator('.archive__kinds c2-button[value="all"]').click();
   await expect(page.locator('.archive__bulk-count')).toHaveText('1 selected');
-
   await archiveRows(page).nth(2).locator('c2-checkbox').click();
   await expect(page.locator('.archive__bulk-count')).toHaveText('2 selected');
+  await shot(page, '06c-archive-action-bar');
   // Ticking a row leaves the preview where it was.
   await archiveRows(page).nth(1).click();
   await archiveRows(page).nth(2).locator('c2-checkbox').click();
@@ -659,6 +731,55 @@ test('the Archive restores several notes at once, and deletes forever only once 
   await page.reload();
   await openBoard(page);
   await expect(page.locator('ntm-note-card')).toHaveCount(2);
+});
+
+test('the kind filter of the Archive and of Older notes offers only the kinds they hold, with their counts', async ({
+  page,
+}) => {
+  await openBoard(page);
+  for (const text of ['Tram times', 'Old budget']) {
+    await newNote(page);
+    await page.keyboard.type(text);
+    await page.waitForTimeout(500);
+    await card(page).getByRole('button', { name: 'Note actions' }).click();
+    await card(page).locator('c2-menu-item[value="archive"]').click();
+    await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  }
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  const kinds = page.locator('c2-select.archive__kind-select');
+  await expect(kinds.locator('c2-list-item')).toHaveText([/All · 2/, /Notes · 2/]);
+  await kinds.click();
+  await kinds.locator('c2-list-item[value="Note"]').click();
+  await expect(kinds).toHaveJSProperty('value', ['Note']);
+  await expect(archiveRows(page)).toHaveCount(2);
+  await shot(page, '06b-archive-kinds');
+});
+
+test('select all in the Archive acts on the kind listed: a note the filter hides keeps its tick', async ({ page }) => {
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Tram times');
+  await page.waitForTimeout(500);
+  await card(page).getByRole('button', { name: 'Note actions' }).click();
+  await card(page).locator('c2-menu-item[value="archive"]').click();
+  await expect(page.locator('ntm-note-card')).toHaveCount(0);
+  await newPage(page);
+  await editTitleAndChoose(page, PAGE_TITLE, PAGE_MENU, 'Old recipes', 'archive');
+  await expect(page).toHaveURL(/#\/main-board$/);
+
+  await page.locator('.navbar__views c2-button[value="archive"]').click();
+  await expect(archiveRows(page)).toHaveCount(2);
+  await archiveRows(page).filter({ hasText: 'Tram times' }).locator('c2-checkbox').click();
+  const kinds = page.locator('c2-select.archive__kind-select');
+  await kinds.click();
+  await kinds.locator('c2-list-item[value="Page"]').click();
+  await expect(archiveRows(page)).toHaveText([/Old recipes/]);
+  // Nothing listed is ticked yet: select all ticks the page, and leaves the hidden note ticked.
+  await page.locator('.archive__all').click();
+  await kinds.click();
+  await kinds.locator('c2-list-item[value="all"]').click();
+  await expect(archiveRows(page)).toHaveCount(2);
+  await expect(page.locator('.archive__bulk-count')).toHaveText('2 selected');
 });
 
 test('the Archive view filters by the search, and N brings back the board with a new note', async ({ page }) => {
@@ -1710,6 +1831,61 @@ test('Plan is off until switched on in Settings, and switched off it leaves the 
   await plan.click();
   await page.keyboard.press('Escape');
   await expect(page.locator('ntm-board .navbar__link', { hasText: 'Plan' })).toHaveCount(0);
+});
+
+test('Older notes fits a narrow window in French: its kinds scroll in their row, the panel only up and down', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 520, height: 930 });
+  await page.evaluate(() => {
+    const set = (key: string, value: unknown) => localStorage.setItem(`noteme-dev:${key}`, JSON.stringify(value));
+    const date = new Date(Date.now() - 90 * 86_400_000).toISOString();
+    const ids = Array.from({ length: 40 }, (_, index) => `old-${index}`);
+    set('_ART_BOARD_ITEM__IDS', ids);
+    set('_ART_BOARD__ART_BOARD_ITEM_IDS__defaultArtBoard', ids);
+    ids.forEach((id, order) => {
+      set(`ART_BOARD_ITEM__${id}`, {
+        id,
+        boardId: 'defaultArtBoard',
+        extensionId: 'ntm-text-note-element',
+        colorIndex: 0,
+        gridPosition: { order, rows: 10, screenColumns: { Large: 3, Medium: 3, Small: 3, XSmall: 1 } },
+        properties: {},
+        modifiedDate: date,
+      });
+      set(`ITEM_DATA__${id}`, {
+        id,
+        dataType: 'markdown',
+        empty: false,
+        data: `Note ${order}`,
+        createdDate: date,
+        modifiedDate: date,
+      });
+    });
+    localStorage.setItem(
+      'noteme-settings',
+      JSON.stringify({ ...JSON.parse(localStorage.getItem('noteme-settings') ?? '{}'), language: 'fr' }),
+    );
+  });
+  await page.reload();
+  await openBoard(page);
+  await page.locator('.navbar__older').click();
+  const body = page.locator('c2-sheet.older .c2-sheet__body');
+  await expect(page.locator('c2-sheet.older .older__note').first()).toBeVisible();
+  await page
+    .locator('c2-sheet.older [part="panel"]')
+    .evaluate((panel) =>
+      Promise.all(panel.getAnimations().map((animation) => animation.finished.catch(() => undefined))),
+    );
+  const overflow = await body.evaluate((element) => ({
+    sideways: element.scrollWidth - element.clientWidth,
+    down: element.scrollHeight - element.clientHeight,
+    scrollbar: getComputedStyle(element).scrollbarWidth,
+  }));
+  expect(overflow.sideways).toBeLessThanOrEqual(0);
+  expect(overflow.down).toBeGreaterThan(0);
+  expect(overflow.scrollbar).toBe('thin');
+  await shot(page, '05b-older-notes-fr');
 });
 
 test('Home shows the notes in a carousel under Notes, in the order chosen in Settings, and opens one on the board', async ({

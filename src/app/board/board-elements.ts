@@ -1,5 +1,6 @@
 // The c2 elements of the board, loaded with its route.
 import '@c2n/components/accordion';
+import '@c2n/components/action-bar';
 import '@c2n/components/autocomplete';
 import '@c2n/components/badge';
 import '@c2n/components/border-beam';
@@ -16,6 +17,7 @@ import '@c2n/components/modal';
 import '@c2n/components/relative-time';
 import { loadNotepadFont } from '@c2n/components/notepad';
 import '@c2n/components/search-field';
+import '@c2n/components/select';
 import '@c2n/components/sheet';
 import '@c2n/components/spinner';
 import '@c2n/components/split-panel';

@@ -21,7 +21,7 @@ import {
 
 /**
  * The right-click menu of a flow box: its shape, paper and ink as rows of choices that apply at once (the menu stays
- * open to try them), an icon picker, and Duplicate. c2-flow renders the rows in its own shadow root, out of reach of
+ * open to try them), an icon picker, its fields, and Duplicate. c2-flow renders the rows in its own shadow root, out of reach of
  * the app's stylesheets, so they are built here as elements and the swatches carry their colour inline. Built each
  * time the menu opens, with the text in the language of the moment (`t`).
  */
@@ -32,6 +32,7 @@ export type BoxMenuChoice =
   | { kind: 'paper'; paper: BoxPaper | undefined }
   | { kind: 'ink'; ink: BoxInk | undefined }
   | { kind: 'icon'; icon: BoxIcon | undefined }
+  | { kind: 'fields' }
   | { kind: 'duplicate' };
 
 export function readBoxMenuValue(value: string): BoxMenuChoice | null {
@@ -48,6 +49,7 @@ export function readBoxMenuValue(value: string): BoxMenuChoice | null {
       return name === 'auto' || isBoxInk(name) ? { kind, ink: name === 'auto' ? undefined : name } : null;
     case 'icon':
       return name === 'none' || isBoxIcon(name) ? { kind, icon: name === 'none' ? undefined : name } : null;
+    case 'fields':
     case 'duplicate':
       return { kind };
     default:
@@ -68,7 +70,11 @@ const SHAPE_GLYPHS: Record<BoxShape, string> = {
 const SWATCH =
   'display:block;box-sizing:border-box;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1px rgb(0 0 0 / 28%)';
 
-function element(tag: string, attributes: Record<string, string | boolean> = {}, ...children: (Node | string)[]) {
+export function element(
+  tag: string,
+  attributes: Record<string, string | boolean> = {},
+  ...children: (Node | string)[]
+) {
   const node = document.createElement(tag);
   for (const [name, value] of Object.entries(attributes)) {
     if (value !== false) {
@@ -105,7 +111,7 @@ function choice(group: string, name: string, label: string, checked: boolean, lo
   );
 }
 
-function iconElement(icon: BoxIcon | 'smiley' | 'prohibit' | 'copy', slot?: string): HTMLElement {
+function iconElement(icon: BoxIcon | 'smiley' | 'prohibit' | 'copy' | 'rows', slot?: string): HTMLElement {
   return element(`c2-phosphor-${icon}`, slot ? { slot, 'aria-hidden': 'true' } : { 'aria-hidden': 'true' });
 }
 
@@ -191,6 +197,14 @@ export function boxMenu(box: FlowBox, t: I18n['t']): Node[] {
           t('flow.menu.noIcon'),
         ),
       ),
+    ),
+    // A box's fields make it a table of a data schema, its arrows joining field to field.
+    element(
+      'c2-menu-item',
+      { value: 'box:fields' },
+      iconElement('rows', 'prefix-icon'),
+      t('flow.menu.fields'),
+      ...(box.fields?.length ? [element('span', { slot: 'shortcut' }, String(box.fields.length))] : []),
     ),
     element('c2-menu-item', { value: 'box:duplicate' }, iconElement('copy', 'prefix-icon'), t('flow.menu.duplicate')),
     element('hr'),

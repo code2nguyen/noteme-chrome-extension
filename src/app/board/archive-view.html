@@ -1,28 +1,26 @@
 <ng-template #list>
   <div class="archive__tools">
-    <c2-checkbox
-      class="archive__all"
-      [attr.aria-label]="t('archive.selectAll')"
-      [checked]="allChecked()"
-      [indeterminate]="checkedNotes().length > 0 && !allChecked()"
-      (change)="toggleAll($event)"
-    ></c2-checkbox>
-    <c2-button-group
-      class="archive__kinds"
-      selection="single"
-      appearance="segmented"
-      size="s"
-      [attr.aria-label]="t('archive.kinds')"
-      [value]="kind()"
-      (change)="onKind($event)"
-    >
-      <c2-button value="all">{{ t('archive.filter.all', notes().length) }}</c2-button>
-      <c2-button value="Note">{{ t('archive.filter.note', counts().Note) }}</c2-button>
-      <c2-button value="Page">{{ t('archive.filter.page', counts().Page) }}</c2-button>
-      <c2-button value="Flow">{{ t('archive.filter.flow', counts().Flow) }}</c2-button>
-      <c2-button value="List">{{ t('archive.filter.list', counts().List) }}</c2-button>
-      <c2-button value="Sheet">{{ t('archive.filter.sheet', counts().Sheet) }}</c2-button>
-    </c2-button-group>
+    <div class="archive__filters">
+      <c2-checkbox
+        #selectAll
+        class="archive__all"
+        [attr.aria-label]="t('archive.selectAll')"
+        [checked]="allChecked()"
+        [indeterminate]="checkedNotes().length > 0 && !allChecked()"
+        (change)="toggleAll($event)"
+      ></c2-checkbox>
+      <c2-select
+        class="archive__kind-select"
+        required
+        [attr.aria-label]="t('archive.kinds')"
+        [value]="[kind()]"
+        (selection-change)="onKind($event)"
+      >
+        @for (option of kindOptions(); track option.value) {
+          <c2-list-item [value]="option.value">{{ option.label }}</c2-list-item>
+        }
+      </c2-select>
+    </div>
     <c2-menu
       class="archive__sort"
       placement="bottom-end"
@@ -98,26 +96,18 @@
     </c2-list>
   }
 
-  @if (checkedNotes().length > 0) {
-    <div class="archive__bulk" role="toolbar" [attr.aria-label]="t('archive.selection')">
-      <span class="archive__bulk-count">{{ t('archive.selected', checkedNotes().length) }}</span>
-      <c2-button class="archive__restore ntm-action" (click)="restoreNotes(checkedNotes())">
-        <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
-        {{ t('archive.restore') }}
-      </c2-button>
-      <c2-button class="archive__delete" (click)="askRemove(checkedNotes())">
-        <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
-        {{ t('common.delete') }}
-      </c2-button>
-      <c2-icon-button
-        [attr.aria-label]="t('archive.clearSelection')"
-        [attr.tooltip]="t('archive.clear')"
-        (click)="clearChecked()"
-      >
-        <c2-feather-x></c2-feather-x>
-      </c2-icon-button>
-    </div>
-  }
+  <!-- What to do with the checked notes: slides in while some are checked; its × and Escape uncheck them. -->
+  <c2-action-bar class="archive__bulk" [count]="checkedNotes().length" (clear)="clearChecked(true)">
+    <span slot="label" class="archive__bulk-count">{{ t('archive.selected', checkedNotes().length) }}</span>
+    <c2-button class="archive__restore ntm-action" (click)="restoreNotes(checkedNotes(), true)">
+      <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+      {{ t('archive.restore') }}
+    </c2-button>
+    <c2-button class="archive__delete" (click)="askRemove(checkedNotes(), true)">
+      <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+      {{ t('common.delete') }}
+    </c2-button>
+  </c2-action-bar>
 </ng-template>
 
 <ng-template #previewPane let-note>
@@ -161,6 +151,7 @@
         [attr.pad]="note.item.properties['pad'] ?? 'notebook'"
         [attr.paper]="note.item.properties['paper'] ?? 'lined'"
         [attr.paper-color]="paperColor(note.item)"
+        [imageResolver]="images.resolve"
         [value]="markdown(note.id)"
       ></c2-notepad>
     } @else {
@@ -210,7 +201,7 @@
   </c2-split-panel>
 }
 
-<c2-modal class="archive__confirm" [open]="!!confirming()" (close)="confirming.set(null)">
+<c2-modal class="archive__confirm" [open]="!!confirming()" (close)="onConfirmClosed()">
   @if (confirming(); as items) {
     <span slot="title">{{ confirmText(items) }}</span>
     <p>{{ t('archive.confirm.text', items.length) }}</p>

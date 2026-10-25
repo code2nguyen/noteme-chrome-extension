@@ -10,6 +10,8 @@
     [attr.paper]="paper()"
     [attr.paper-color]="paperColor()"
     [style.--c2-notepad__sheet--rotate]="tilt()"
+    [imageResolver]="images.resolve"
+    [imageUpload]="images.upload"
     [value]="value()"
     (input)="onTextInput($event)"
     (change)="onTextInput($event)"

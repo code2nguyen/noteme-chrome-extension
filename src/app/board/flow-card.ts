@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 
 import { parseFlow } from '../flow/flow-doc';
-import { flowNodes } from '../flow/flow-nodes';
+import { FlowIcons, flowNodes } from '../flow/flow-nodes';
 import { I18n } from '../i18n/i18n.service';
 import { DataService } from '../services/data.service';
 import { ArtBoardItem } from '../store/models';
@@ -58,7 +58,9 @@ export class FlowCard {
 
   readonly title = computed(() => this.data()?.properties?.title?.trim() ?? '');
   private readonly doc = computed(() => parseFlow(this.data()?.data));
-  readonly nodes = computed(() => flowNodes(this.doc()));
+  /** The icon elements its c2-flow draws, kept across redraws. */
+  private readonly icons: FlowIcons = new Map();
+  readonly nodes = computed(() => flowNodes(this.doc(), this.icons));
   readonly edges = computed(() => this.doc().edges);
   readonly edited = computed(() => {
     const item = this.item();

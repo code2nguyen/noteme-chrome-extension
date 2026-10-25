@@ -1,0 +1,55 @@
+<c2-sheet class="fields" side="right" no-scroll-lock [open]="!!box()" (close)="closed.emit()">
+  @if (box(); as current) {
+    <span slot="title">{{ t('flow.fields.title', current.label) }}</span>
+    @if (fields().length === 0) {
+      <p class="fields__empty">{{ t('flow.fields.empty') }}</p>
+    } @else {
+      <ul class="fields__list">
+        @for (field of fields(); track field.id) {
+          <li class="fields__row">
+            <c2-select
+              class="fields__key"
+              fit-size
+              required
+              [attr.aria-label]="t('flow.fields.key', field.name)"
+              [value]="[field.key ?? 'none']"
+              (change)="onKey(field, $event)"
+            >
+              @for (key of keys; track key) {
+                <c2-list-item [value]="key" [attr.label]="keyShort(key)">{{ keyLabel(key) }}</c2-list-item>
+              }
+            </c2-select>
+            <c2-text-field
+              class="fields__name"
+              [attr.data-field]="field.id"
+              [attr.aria-label]="t('flow.fields.name')"
+              [attr.placeholder]="t('flow.fields.name')"
+              [value]="field.name"
+              (change)="onName(field, $event)"
+              (keydown)="onNameKeydown(field, $event)"
+            ></c2-text-field>
+            <c2-text-field
+              class="fields__type"
+              [attr.aria-label]="t('flow.fields.type', field.name)"
+              [attr.placeholder]="t('flow.fields.type.placeholder')"
+              [value]="field.type ?? ''"
+              (change)="onType(field, $event)"
+            ></c2-text-field>
+            <c2-icon-button
+              [attr.aria-label]="t('flow.fields.delete', field.name)"
+              [attr.tooltip]="t('flow.fields.delete', field.name)"
+              (click)="remove(field)"
+            >
+              <c2-feather-trash-2></c2-feather-trash-2>
+            </c2-icon-button>
+          </li>
+        }
+      </ul>
+    }
+    <c2-button class="fields__add" (click)="add()">
+      <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+      {{ t('flow.fields.add') }}
+    </c2-button>
+    <p class="fields__hint">{{ t('flow.fields.hint') }}</p>
+  }
+</c2-sheet>

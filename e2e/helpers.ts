@@ -28,7 +28,7 @@ export function tiles(page: Page): Locator {
 
 /** The rows of the Archive's list, in the order it shows them. */
 export function archiveRows(page: Page): Locator {
-  return page.locator('ntm-archive-view c2-list-item');
+  return page.locator('ntm-archive-view c2-list-item.archive__row');
 }
 
 /** The Archive's preview of the row picked. */

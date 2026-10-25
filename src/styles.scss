@@ -251,3 +251,15 @@ c2-notepad[pad='index-card'] {
   --c2-spreadsheet__help-accent--color: var(--c2-theme--color-primary);
   --c2-spreadsheet__reference-1--color: var(--c2-theme--color-primary);
 }
+
+// Every view's messages (Toasts): on the surface, an action such as Undo in the accent colour.
+.app__toasts {
+  --c2-toast-region__container--width: auto;
+  --c2-toast__container--background: var(--c2-theme--color-surface-container);
+  --c2-toast__container--border: 1px solid var(--ntm-line);
+  --c2-toast__container--box-shadow: 0 12px 32px rgb(0 0 0 / 35%);
+  --c2-toast__action--color: var(--ntm-accent);
+  --c2-toast__action--font-weight: 600;
+  --c2-toast__progress--color: var(--ntm-accent);
+  --c2-toast__progress--background: color-mix(in srgb, var(--ntm-accent) 20%, transparent);
+}
