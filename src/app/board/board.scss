@@ -273,6 +273,8 @@
 // The Older notes sheet.
 .older {
   --c2-sheet--size: min(460px, 100vw);
+  --c2-sheet__body__scrollbar__thumb--color: var(--ntm-scrollbar);
+  --c2-sheet__body__scrollbar__thumb__hover--color: var(--ntm-scrollbar-hover);
   --c2-sheet__body--padding-top: 4px;
   --c2-sheet__body--padding-right: 16px;
   --c2-sheet__body--padding-left: 16px;
@@ -289,15 +291,20 @@
   font-size: calc(13px * var(--ntm-text-scale));
 }
 
-.older__kinds {
+.older__filters {
   display: flex;
-  margin: 0 8px 10px;
-  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  margin: 0 8px 4px;
+}
+
+.older__kind-select {
+  flex: none;
 }
 
 .older__filter {
-  display: block;
-  margin: 0 8px 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .older__month {
@@ -433,16 +440,4 @@
 .older__none {
   margin: 24px 8px;
   color: var(--ntm-muted);
-}
-
-// The pin message: on the surface, its Undo in the accent colour.
-.board__toasts {
-  --c2-toast-region__container--width: auto;
-  --c2-toast__container--background: var(--c2-theme--color-surface-container);
-  --c2-toast__container--border: 1px solid var(--ntm-line);
-  --c2-toast__container--box-shadow: 0 12px 32px rgb(0 0 0 / 35%);
-  --c2-toast__action--color: var(--ntm-accent);
-  --c2-toast__action--font-weight: 600;
-  --c2-toast__progress--color: var(--ntm-accent);
-  --c2-toast__progress--background: color-mix(in srgb, var(--ntm-accent) 20%, transparent);
 }

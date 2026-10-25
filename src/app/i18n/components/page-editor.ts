@@ -28,6 +28,12 @@ export const fr: TranslatedMessages = {
   dividerDescription: 'Séparer les sections',
   table: 'Tableau',
   tableDescription: 'Lignes et colonnes, avec sommes et formules',
+  image: 'Image',
+  imageDescription: 'Une image, collée ou déposée',
+  resizeImage:
+    'Faites glisser pour redimensionner, double-cliquez pour la taille d’origine (Alt+← et Alt+→ sur une image sélectionnée)',
+  imageMissing: 'Image indisponible sur cet appareil',
+  imageSaving: 'Enregistrement de l’image…',
 
   blocksSection: 'Blocs',
   coloursSection: 'Couleurs',
@@ -155,6 +161,11 @@ export const vi: TranslatedMessages = {
   dividerDescription: 'Phân tách các phần',
   table: 'Bảng',
   tableDescription: 'Hàng và cột, có tổng và công thức',
+  image: 'Hình ảnh',
+  imageDescription: 'Một hình ảnh, dán hoặc thả vào',
+  resizeImage: 'Kéo để đổi kích thước, nhấp đúp để về kích thước gốc (Alt+← và Alt+→ khi ảnh đang được chọn)',
+  imageMissing: 'Ảnh không có trên thiết bị này',
+  imageSaving: 'Đang lưu ảnh…',
 
   blocksSection: 'Khối',
   coloursSection: 'Màu sắc',

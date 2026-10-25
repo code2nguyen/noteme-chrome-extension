@@ -1,0 +1,47 @@
+// Beside the canvas, wide enough for a key, a name and a type on one line.
+.fields {
+  --c2-sheet--size: 440px;
+}
+
+.fields__empty,
+.fields__hint {
+  margin: 0 0 16px;
+  color: var(--c2-theme--color-on-surface-variant);
+  font-size: calc(13px * var(--ntm-text-scale));
+}
+
+.fields__hint {
+  margin: 16px 0 0;
+}
+
+.fields__list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fields__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+  --c2-icon-button__state-layer--size: 32px;
+}
+
+.fields__key {
+  flex: 0 0 76px;
+}
+
+.fields__name {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.fields__type {
+  flex: 0 1 110px;
+  min-width: 0;
+}

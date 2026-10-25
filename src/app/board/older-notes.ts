@@ -27,6 +27,34 @@ export function countKinds(notes: readonly { kind: NoteKind }[]): Record<NoteKin
   return counts;
 }
 
+const FILTER_KEYS = {
+  all: 'archive.filter.all',
+  Note: 'archive.filter.note',
+  Page: 'archive.filter.page',
+  Flow: 'archive.filter.flow',
+  List: 'archive.filter.list',
+  Sheet: 'archive.filter.sheet',
+} as const;
+
+/**
+ * The choices of a list's kind filter (the Archive, Older notes): all, then each kind it holds, with its count. A kind
+ * with no note is left out, unless it is the one picked, which stays until another is.
+ */
+export function kindOptions(
+  counts: Record<NoteKind, number>,
+  picked: 'all' | NoteKind,
+  t: I18n['t'],
+): { value: 'all' | NoteKind; label: string }[] {
+  const total = NOTE_KINDS.reduce((sum, kind) => sum + counts[kind], 0);
+  return [
+    { value: 'all' as const, label: t(FILTER_KEYS.all, total) },
+    ...NOTE_KINDS.filter((kind) => counts[kind] > 0 || kind === picked).map((kind) => ({
+      value: kind,
+      label: t(FILTER_KEYS[kind], counts[kind]),
+    })),
+  ];
+}
+
 /** What the Older notes sheet (and the search) says about a note: its kind, first line and the rest of its text. */
 export interface NoteSummary {
   id: string;

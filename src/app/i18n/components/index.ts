@@ -1,5 +1,6 @@
 import { addTranslations } from '@c2n/core/localize.js';
 
+import * as actionBar from './action-bar';
 import * as autocomplete from './autocomplete';
 import * as carousel from './carousel';
 import * as checkbox from './checkbox';
@@ -13,6 +14,7 @@ import * as pageEditor from './page-editor';
 import * as searchField from './search-field';
 import * as select from './select';
 import * as sheet from './sheet';
+import * as skipLink from './skip-link';
 import * as spinner from './spinner';
 import * as splitPanel from './split-panel';
 import * as spreadsheet from './spreadsheet';
@@ -29,6 +31,7 @@ import * as todoList from './todo-list';
 export function registerComponentTranslations(): void {
   addTranslations({
     fr: {
+      'action-bar': actionBar.fr,
       autocomplete: autocomplete.fr,
       carousel: carousel.fr,
       checkbox: checkbox.fr,
@@ -42,6 +45,7 @@ export function registerComponentTranslations(): void {
       'search-field': searchField.fr,
       select: select.fr,
       sheet: sheet.fr,
+      'skip-link': skipLink.fr,
       spinner: spinner.fr,
       'split-panel': splitPanel.fr,
       spreadsheet: spreadsheet.fr,
@@ -52,6 +56,7 @@ export function registerComponentTranslations(): void {
       'todo-list': todoList.fr,
     },
     vi: {
+      'action-bar': actionBar.vi,
       autocomplete: autocomplete.vi,
       carousel: carousel.vi,
       checkbox: checkbox.vi,
@@ -65,6 +70,7 @@ export function registerComponentTranslations(): void {
       'search-field': searchField.vi,
       select: select.vi,
       sheet: sheet.vi,
+      'skip-link': skipLink.vi,
       spinner: spinner.vi,
       'split-panel': splitPanel.vi,
       spreadsheet: spreadsheet.vi,

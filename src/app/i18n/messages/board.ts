@@ -63,11 +63,6 @@ export const boardEn = {
   'board.older': 'Older notes',
   'board.older.intro': 'Notes you haven’t edited lately. Pin one to keep it on the board.',
   'board.older.kinds': 'Kind of note',
-  'board.older.all': 'All',
-  'board.older.pages': 'Papers',
-  'board.older.flows': 'Flows',
-  'board.older.lists': 'To do',
-  'board.older.sheets': 'Sheets',
   'board.older.filter': 'Filter older notes',
   'board.older.none': 'No older note matches.',
   'board.toast.back': (count: number, title: string) =>
@@ -137,11 +132,6 @@ export const boardFr: Translation<typeof boardEn> = {
   'board.older.intro':
     'Les notes que vous n’avez pas modifiées récemment. Épinglez-en une pour la garder sur le tableau.',
   'board.older.kinds': 'Type de note',
-  'board.older.all': 'Toutes',
-  'board.older.pages': 'Feuilles',
-  'board.older.flows': 'Flux',
-  'board.older.lists': 'À faire',
-  'board.older.sheets': 'Feuilles de calcul',
   'board.older.filter': 'Filtrer les notes plus anciennes',
   'board.older.none': 'Aucune note plus ancienne ne correspond.',
   'board.toast.back': (count, title) =>
@@ -210,11 +200,6 @@ export const boardVi: Translation<typeof boardEn> = {
   'board.older': 'Ghi chú cũ hơn',
   'board.older.intro': 'Những ghi chú bạn chưa sửa gần đây. Ghim một ghi chú để giữ nó trên bảng.',
   'board.older.kinds': 'Loại ghi chú',
-  'board.older.all': 'Tất cả',
-  'board.older.pages': 'Giấy',
-  'board.older.flows': 'Sơ đồ',
-  'board.older.lists': 'Việc cần làm',
-  'board.older.sheets': 'Bảng tính',
   'board.older.filter': 'Lọc ghi chú cũ hơn',
   'board.older.none': 'Không có ghi chú cũ nào khớp.',
   'board.toast.back': (count, title) =>

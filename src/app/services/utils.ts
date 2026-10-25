@@ -31,9 +31,34 @@ export function isNotNullOrUndefined<T>(input: null | undefined | T): input is T
   return input != null;
 }
 
+/**
+ * An image (`![alt|320](src)`, as c2-notepad and c2-page-editor write it), on its own line or beside text, reads as
+ * its alt text. A typed `\![` is escaped, not an image; after `\\` (an escaped backslash) it is one.
+ */
+const IMAGE = /(?<!(?:^|[^\\])(?:\\\\)*\\)!\[((?:\\.|[^\]\\])*)\]\((?:<[^>\n]*>|[^\s()]+)\)/g;
+
+function imagesToText(markdown: string): string {
+  return markdown.replace(IMAGE, (_, label: string) => label.replace(/(?<!\\)\|\d+$/, ''));
+}
+
+/** A fenced code block or an inline code span: what it holds is text as written. */
+const CODE =
+  /^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^ {0,3}\1[ \t]*$|(?![\s\S]))|(`+)[^`\n](?:[^\n]*?[^`\n])?\2(?!`)/gm;
+
+/** Applies `rewrite` to the markdown outside its code, which is kept as written. */
+function outsideCode(markdown: string, rewrite: (text: string) => string): string {
+  let result = '';
+  let last = 0;
+  for (const match of markdown.matchAll(CODE)) {
+    result += rewrite(markdown.slice(last, match.index)) + match[0];
+    last = match.index + match[0].length;
+  }
+  return result + rewrite(markdown.slice(last));
+}
+
 /** Strip the c2-notepad markup so the text can be indexed and previewed. */
 export function markdownToText(markdown: string): string {
-  return markdown
+  return imagesToText(markdown)
     .replace(/^- \[[ xX]\] /gm, '')
     .replace(/<\/?(u|span|mark)\b[^>]*>/g, '')
     .replace(/(?<!\\)(\*\*|~~|==|\*)/g, '')
@@ -43,7 +68,10 @@ export function markdownToText(markdown: string): string {
 /** Strip page markdown (c2-page-editor's GFM) down to its words, for search and previews. */
 export function pageMarkdownToText(markdown: string): string {
   return (
-    markdown
+    // An empty line is written <br>, as is a line break in a table cell: neither is text. A <br> in code is.
+    outsideCode(imagesToText(markdown), (text) =>
+      text.replace(/^[ \t]*<br\s*\/?>[ \t]*$/gim, '').replace(/<br\s*\/?>/gi, ' '),
+    )
       // A table: its options comment and delimiter row go, each row reads as its cells.
       .replace(/^[ \t]*<!--[ \t]*table:.*-->[ \t]*$/gm, '')
       .replace(/^[ \t]*\|?[ \t]*:?-+:?[ \t]*(\|[ \t]*:?-+:?[ \t]*)+\|?[ \t]*$/gm, '')

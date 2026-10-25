@@ -63,6 +63,7 @@
         (edge-add)="onEdgeAdd($event)"
         (edge-delete)="onEdgeDelete($event)"
         (edge-edit)="onEdgeEdit($event)"
+        (row-move)="onRowMove($event)"
         (layout-change)="onLayoutChange($event)"
       >
         <c2-icon-button
@@ -100,6 +101,12 @@
         </p>
       }
     </div>
+    <ntm-fields-sheet
+      [doc]="doc()"
+      [boxId]="fieldsOf()"
+      (changed)="onFieldsChange($event)"
+      (closed)="fieldsOf.set(null)"
+    ></ntm-fields-sheet>
   </main>
 } @else {
   <!-- Nothing to edit until the stored flow is read: a box added now would be overwritten by it. -->

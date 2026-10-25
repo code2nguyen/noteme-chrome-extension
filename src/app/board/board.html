@@ -290,29 +290,27 @@
     >{{ t('board.older') }} <span class="older__count">· {{ older().length }}</span></span
   >
   <p class="older__intro">{{ t('board.older.intro') }}</p>
-  <c2-button-group
-    class="older__kinds"
-    selection="single"
-    appearance="segmented"
-    size="s"
-    [attr.aria-label]="t('board.older.kinds')"
-    [value]="olderKind()"
-    (change)="onOlderKind($event)"
-  >
-    <c2-button value="all">{{ t('board.older.all') }}</c2-button>
-    <c2-button value="Note">{{ t('common.notes') }} · {{ olderCounts().Note }}</c2-button>
-    <c2-button value="Page">{{ t('board.older.pages') }} · {{ olderCounts().Page }}</c2-button>
-    <c2-button value="Flow">{{ t('board.older.flows') }} · {{ olderCounts().Flow }}</c2-button>
-    <c2-button value="List">{{ t('board.older.lists') }} · {{ olderCounts().List }}</c2-button>
-    <c2-button value="Sheet">{{ t('board.older.sheets') }} · {{ olderCounts().Sheet }}</c2-button>
-  </c2-button-group>
-  <c2-search-field
-    class="older__filter"
-    [attr.placeholder]="t('board.older.filter')"
-    debounce="150"
-    (search)="onOlderSearch($event)"
-  >
-  </c2-search-field>
+  <!-- The filter field takes the row; the kind is picked at its end, so the row fits a narrow panel in any language. -->
+  <div class="older__filters">
+    <c2-search-field
+      class="older__filter"
+      [attr.placeholder]="t('board.older.filter')"
+      debounce="150"
+      (search)="onOlderSearch($event)"
+    >
+    </c2-search-field>
+    <c2-select
+      class="older__kind-select"
+      required
+      [attr.aria-label]="t('board.older.kinds')"
+      [value]="[olderKind()]"
+      (selection-change)="onOlderKind($event)"
+    >
+      @for (option of olderKindOptions(); track option.value) {
+        <c2-list-item [value]="option.value">{{ option.label }}</c2-list-item>
+      }
+    </c2-select>
+  </div>
   @for (group of olderGroups(); track group.label) {
     <h3 class="older__month">{{ group.label }}</h3>
     <c2-accordion class="older__list">
@@ -357,6 +355,7 @@
                   [attr.pad]="note.item.properties['pad'] ?? 'notebook'"
                   [attr.paper]="note.item.properties['paper'] ?? 'lined'"
                   [attr.paper-color]="paperColor(note.item)"
+                  [imageResolver]="images.resolve"
                   [value]="olderText(note.id)"
                 ></c2-notepad>
               } @else {
@@ -407,12 +406,3 @@
     <p class="older__none">{{ t('board.older.none') }}</p>
   }
 </c2-sheet>
-
-<!-- "Pinned to the board", with its Undo. -->
-<c2-toast-region
-  #toasts
-  class="board__toasts"
-  position="bottom-center"
-  (toast-action)="onToastAction($event)"
-  (toast-dismiss)="onToastDismiss($event)"
-></c2-toast-region>

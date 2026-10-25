@@ -4,10 +4,12 @@ import {
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
+  ElementRef,
   inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Dictionary } from '@ngrx/entity';
@@ -15,13 +17,23 @@ import type { SelectionChangeEventDetail } from '@c2n/components/list';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 
 import { I18n } from '../i18n/i18n.service';
+import { ImageStore } from '../services/image-store';
 import { kindKey } from '../i18n/kinds';
 import type { MessageKey } from '../i18n/messages';
 import { paperColorFor } from '../note-config';
 import { FULL_SCREEN } from '../services/search-results';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { NotePreview } from './note-preview';
-import { archivedOn, countKinds, groupByMonth, isNoteKind, NoteKind, NoteSummary, summarize } from './older-notes';
+import {
+  archivedOn,
+  countKinds,
+  groupByMonth,
+  isNoteKind,
+  kindOptions,
+  NoteKind,
+  NoteSummary,
+  summarize,
+} from './older-notes';
 
 /** An archived note as the list shows it: its summary, and when it was archived. */
 export interface ArchivedNote extends NoteSummary {
@@ -65,6 +77,8 @@ const NARROW = '(max-width: 760px)';
 export class ArchiveView {
   private readonly i18n = inject(I18n);
   readonly t = this.i18n.t;
+  /** Draws the notes' images (and saves those pasted into an editable one). */
+  readonly images = inject(ImageStore);
   readonly kindKey = kindKey;
 
   /** What is archived, or what of it matches the search. */
@@ -91,6 +105,9 @@ export class ArchiveView {
   readonly checked = signal<ReadonlySet<string>>(new Set());
   /** The notes waiting for "Delete forever" to be confirmed. */
   readonly confirming = signal<ArtBoardItem[] | null>(null);
+  /** Whether those notes are the checked ones, asked from the action bar, which is gone once they are. */
+  private confirmingChecked = false;
+  private readonly selectAll = viewChild<ElementRef<HTMLElement>>('selectAll');
 
   private readonly media = matchMedia(NARROW);
   readonly narrow = signal(this.media.matches);
@@ -103,6 +120,7 @@ export class ArchiveView {
   });
 
   readonly counts = computed(() => countKinds(this.notes()));
+  readonly kindOptions = computed(() => kindOptions(this.counts(), this.kind(), this.t));
 
   /** The notes listed: of the chosen kind, in the chosen order. */
   readonly shown = computed(() => {
@@ -145,7 +163,7 @@ export class ArchiveView {
   }
 
   onKind(event: Event): void {
-    const value = (event as CustomEvent<{ value: string }>).detail.value;
+    const [value] = (event as CustomEvent<{ value: string[] }>).detail.value;
     this.kind.set(isNoteKind(value) ? value : 'all');
   }
 
@@ -206,18 +224,44 @@ export class ArchiveView {
     });
   }
 
-  clearChecked(): void {
+  /** Unchecks every note; from the action bar (`refocus`), the focus it held goes back to the list. */
+  clearChecked(refocus = false): void {
     this.checked.set(new Set());
+    if (refocus) {
+      this.focusList();
+    }
   }
 
-  restoreNotes(notes: ArchivedNote[]): void {
+  /** Restores notes; the checked ones from the action bar, which hides with them, giving the focus back to the list. */
+  restoreNotes(notes: ArchivedNote[], refocus = false): void {
     this.leaving(notes);
     this.restore.emit(notes.map((note) => note.item));
+    if (refocus) {
+      this.focusList();
+    }
   }
 
   /** Delete asks first: there is no coming back from it. */
-  askRemove(notes: ArchivedNote[]): void {
+  askRemove(notes: ArchivedNote[], fromBar = false): void {
+    this.confirmingChecked = fromBar;
     this.confirming.set(notes.map((note) => note.item));
+  }
+
+  /**
+   * The confirmation closed. Asked from the action bar, it would give the focus back to a Delete button the bar has
+   * hidden with the notes, or kept for a later selection: the list takes it instead.
+   */
+  onConfirmClosed(): void {
+    this.confirming.set(null);
+    if (this.confirmingChecked) {
+      this.confirmingChecked = false;
+      this.focusList();
+    }
+  }
+
+  /** The list's first control, the box that checks every note: where the focus goes when the action bar hides. */
+  private focusList(): void {
+    this.selectAll()?.nativeElement.focus();
   }
 
   confirmRemove(): void {

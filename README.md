@@ -4,19 +4,79 @@ Noteme is a Chrome extension that replaces the new tab page with a personal note
 
 ## Features
 
-- Text notes (a ruled notepad with bold, italic, underline, strike, highlights, inks and checklists) and code notes
-  (syntax highlighting for JavaScript, TypeScript, JSX/TSX, HTML, CSS and JSON)
-- To-do lists (`c2-todo-list`), checked off right on their card: drag to reorder, swipe to archive, a progress ring
-- A board you can arrange: move notes by their handle and resize them by their edges
-- Archive, full-text search across notes and archive
-- Sync between your Chrome profiles through `chrome.storage.sync`, once switched on in Settings (off by default)
+### Home
+
+The new tab opens on Home: a clock (which opens your notes), the date, a quote of the day, your most visited sites and
+a photo behind it all.
+
+- Photos from Wikimedia Commons, one a day by default or changed automatically, by theme, and downloaded ahead so the
+  tab opens at once; "Change now" moves to the next one.
+- Quotes from bundled, public-domain lists in English, French and Vietnamese (proverbs, folk verse and classical
+  lines), mostly in the browser's language, ordered so no two days in a row share a theme or an author.
+- Your notes in a carousel under the clock.
+
+### Notes on a board
+
+The board (`main-board`) holds every kind of note as a card, laid out by `c2-masonry`. **New** (or a key on the board:
+<kbd>N</kbd> a note, <kbd>P</kbd> a page, <kbd>F</kbd> a flow, <kbd>T</kbd> a to-do list) adds one:
+
+- **Note**: a quick thought on ruled paper (`c2-notepad`): bold, italic, underline, strike, inks, highlighters and
+  checklists; pads, rulings and paper colours from its Paper button.
+  Paste or drop an image (a screenshot, a copied picture) into a note or a page; click it to resize it from its
+  handle, or with Alt+← and Alt+→.
+- **Page**: a full page (`c2-page-editor`), opened on its own: headings, lists, to-dos, quotes, code blocks, dividers
+  and tables with sums, formulas and cell styles; Markdown shortcuts and a `/` menu.
+- **Flow**: boxes and arrows (`c2-flow`): shapes, papers, inks and icons from a box's right-click menu, labelled
+  arrows, and add, tidy up and fit from a toolbar. A box can hold **fields** (a name, a type, a primary or foreign key)
+  to design a data schema: arrows run between two fields, and each end shows its cardinality (one, zero or one,
+  many…) from the arrow's right-click menu.
+- **To-do list**: tasks checked off right on the card (`c2-todo-list`): drag to reorder, swipe to archive, a progress
+  ring, renamed in its heading.
+- **Sheet**: rows, columns and formulas worked on its card (`c2-spreadsheet`), with the totals of the selection;
+  copied cells paste into a page as a table.
+
+- Arrange the board: move cards by their handle, resize them by their edges, pin one so it stays in place.
+- Notes you have not edited lately move to **Older notes**, filtered by kind; pin one to bring it back to the board.
+- **Archive** clears notes off the board and keeps them, as a list with a preview of each; select several to restore or
+  delete them together from the action bar.
+- **Search** (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>K</kbd>) finds words anywhere: in notes, pages and their tables,
+  flows, lists and the archive.
+
+### Plan
+
+An optional week and month calendar (`c2-week-planner`, `c2-month-planner`), switched on under Settings → Features:
+plans for a whole day or with a start and end time.
+
+### Settings
+
+- Theme light, dark or following the system; text size from Small to Larger.
+- Language: English, French or Vietnamese, the c2n components included.
+- What Home shows: clock, date, quote, site shortcuts, photos and their themes.
+- **Sync** with your Chrome profile (`chrome.storage.sync`), off by default. Quick notes and to-do lists sync; pages,
+  flows and sheets stay on the device, as does a note too long for Chrome sync (8 KB an item, about 100 KB in all).
+  Notes refused by a full sync storage are sent again once room is freed.
+
+Everything else is kept on the device in `chrome.storage.local`. Images pasted or dropped into a note or a page are
+kept on the device too, in IndexedDB (`noteme-images`), and never sync: a note holds only `noteme-image:<id>`, so a
+synced note shows a placeholder for its images on another computer. An image pasted from a web page is copied there
+too, so it is not fetched from its site again; one whose site does not let other pages read it (no CORS) keeps its
+web address and loads from that site. Images no note refers to any more are deleted after a week.
 
 ## Stack
 
 Angular 22 (standalone, zoneless, signals) with NgRx 22 for the store, and the [c2n web components](https://code2nguyen.github.io/web-components/)
-(`@c2n/*`) for every piece of UI: `c2-masonry` for the board, `c2-notepad` and `c2-code-editor` for the notes,
-`c2-tabs`, `c2-autocomplete`, `c2-button-group`, `c2-menu`, `c2-icon-button`, `c2-select`, `c2-spinner` and the Feather
-icon set. The theme comes from `@c2n/theme`; `src/styles.scss` maps the Noteme palette onto its tokens.
+1.0.17 (`@c2n/components`, `@c2n/core`, `@c2n/feather-icons`, `@c2n/phosphor-icons`, `@c2n/symbols`) for every piece
+of UI: `c2-masonry` for the board; `c2-notepad`, `c2-page-editor`, `c2-flow`, `c2-todo-list` and `c2-spreadsheet` for
+the notes; `c2-week-planner` and `c2-month-planner` for Plan; `c2-split-panel` and `c2-action-bar` for the archive;
+`c2-carousel` on Home; `c2-skip-link`, `c2-modal`, `c2-sheet`, `c2-menu`, `c2-search-field`, `c2-select`,
+`c2-toast-region` and the rest of the controls. The theme comes from `@c2n/components/theme.css`; `src/styles.scss`
+maps the Noteme palette onto its `--c2-theme--*` tokens.
+
+Translations are Noteme's own (`src/app/i18n`): typed message keys in English, French and Vietnamese, and the c2n
+components' French and Vietnamese registered with `addTranslations` (`src/app/i18n/components`).
+
+`AGENTS.md` and `CLAUDE.md` hold the rules for coding agents (use a `c2-*` element for every control, check its API
+with the c2n MCP server, validate the markup); `npx c2n-skill install` refreshes the c2n skill and MCP configuration.
 
 ## Develop
 
@@ -45,11 +105,11 @@ To try changes to the c2n components before they are published, link a checkout 
 this one (`C2N_REPO` points elsewhere). package.json and the lockfile keep the published versions.
 
 ```sh
-# in ../web-components, after each change
+# in ../web-components: npm install first (the umbrella package is generated from the installed components), then after each change
 npm run build -w packages/umbrella && npm run build -w packages/icons/feather-icons && npm run build -w packages/tools/theme
 
 # back in this repository
-npm run c2n:link     # node_modules/@c2n/components, feather-icons and theme -> ../web-components
+npm run c2n:link     # node_modules/@c2n/components, core, feather-icons and theme -> ../web-components
 npm run c2n:unlink   # back to the published packages
 ```
 

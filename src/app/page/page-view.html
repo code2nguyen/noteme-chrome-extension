@@ -45,6 +45,8 @@
       class="page__editor"
       [attr.label]="t('common.page')"
       [attr.placeholder]="t('page.placeholder')"
+      [imageResolver]="images.resolve"
+      [imageUpload]="images.upload"
       [value]="value()"
       (input)="onEditorInput($event)"
     >

@@ -19,6 +19,7 @@ import { filter } from 'rxjs/operators';
 import { colorIndexFor, paperColorFor } from '../note-config';
 import { getCurrentDate } from '../services/utils';
 import { I18n } from '../i18n/i18n.service';
+import { ImageStore } from '../services/image-store';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { ArtBoardItem } from '../store/models';
@@ -44,6 +45,8 @@ import { bringIntoView } from './bring-into-view';
 })
 export class NoteCard {
   readonly t = inject(I18n).t;
+  /** Draws the notes' images (and saves those pasted into an editable one). */
+  readonly images = inject(ImageStore);
   private readonly dataService = inject(DataService);
   private readonly instanceId = inject(INSTANCE_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);

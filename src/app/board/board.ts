@@ -19,7 +19,6 @@ import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete
 import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/components/masonry';
 import type { Menu, MenuSelectEventDetail } from '@c2n/components/menu';
 import type { SearchFieldSearchDetail } from '@c2n/components/search-field';
-import type { ToastRegion } from '@c2n/components/toast';
 import { Dictionary } from '@ngrx/entity';
 import { combineLatest, of, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, switchMap, take } from 'rxjs/operators';
@@ -36,6 +35,9 @@ import { ArtBoardItemApiActions, ItemDataActions } from '../store/actions';
 import { ArtBoardItem, DEFAULT_BOARD_ID, ItemData } from '../store/models';
 import { selectIsAllLoadedItemDatas, selectItemDataEntities, selectItemDatasLoadFailed } from '../store/reducers';
 import { I18n } from '../i18n/i18n.service';
+import { ImageStore } from '../services/image-store';
+import { Toasts } from '../services/toasts';
+import { ImageCleanup } from '../services/image-cleanup';
 import type { MessageKey } from '../i18n/messages';
 import { hasFeature } from '../settings/settings';
 import { SettingsPanel } from '../settings/settings-panel';
@@ -53,6 +55,7 @@ import {
   countKinds,
   groupByMonth,
   isNoteKind,
+  kindOptions,
   NoteKind,
   NoteSummary,
   rearrange,
@@ -113,6 +116,8 @@ export class Board {
   /** The app's locale as a stream, made once here: toObservable needs the injection context. */
   private readonly locale$ = toObservable(this.i18n.locale);
   readonly t = this.i18n.t;
+  /** Draws the notes' images (and saves those pasted into an editable one). */
+  readonly images = inject(ImageStore);
   readonly shortKindKey = shortKindKey;
   private readonly settings = inject(SettingsService).settings;
   /** Plan is optional: its link shows only while it is switched on in Settings. */
@@ -124,7 +129,7 @@ export class Board {
   private readonly todoCards = viewChildren(TodoCard);
   private readonly sheetCards = viewChildren(SheetCard);
   private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
-  private readonly toasts = viewChild<ElementRef<ToastRegion>>('toasts');
+  private readonly toasts = inject(Toasts);
   private readonly newMenu = viewChild<ElementRef<Menu>>('newMenu');
   /** Opens or closes the New menu a moment after the mouse arrives or leaves; either cancels the other. */
   private newMenuTimer?: ReturnType<typeof setTimeout>;
@@ -258,6 +263,7 @@ export class Board {
   });
   /** How many older notes there are of each kind, for the filter. */
   readonly olderCounts = computed(() => countKinds(this.olderSummaries()));
+  readonly olderKindOptions = computed(() => kindOptions(this.olderCounts(), this.olderKind(), this.t));
   readonly olderGroups = computed(() => {
     const kind = this.olderKind();
     const words = this.olderQuery().trim().toLowerCase();
@@ -352,6 +358,8 @@ export class Board {
     toObservable(this.searchQuery).subscribe((query) => this.dataService.searchArtBoardItem(query));
     // Every note's text, for when each was last edited: the board shows the recent ones.
     this.store.dispatch(ItemDataActions.getAllItemData());
+    // With every note read, the images none refers to any more can go.
+    inject(ImageCleanup).run();
     this.deviceSync.sync();
     this.handleHomeActions();
     inject(DestroyRef).onDestroy(() => {
@@ -614,7 +622,7 @@ export class Board {
       this.restore(item);
     }
     const title = items.length === 1 ? summarize(items[0], this.itemData(), this.t).label : '';
-    this.toasts()?.nativeElement.show({
+    this.toasts.show({
       message: this.t('board.toast.back', items.length, title),
       duration: 4000,
       noIcon: true,
@@ -623,7 +631,7 @@ export class Board {
 
   /** A sheet copied as a table: where it goes, or that the clipboard refused it. */
   onSheetCopied(copied: boolean): void {
-    this.toasts()?.nativeElement.show({
+    this.toasts.show({
       message: this.t(copied ? 'board.sheet.copied' : 'board.sheet.copyFailed'),
       duration: 3000,
       noIcon: true,
@@ -679,16 +687,15 @@ export class Board {
     this.olderOpenId.set(null);
     this.olderRendered.set(new Set());
     this.highlight(item.id);
-    const toasts = this.toasts()?.nativeElement;
-    if (toasts) {
-      const id = toasts.show({
+    this.toasts.show(
+      {
         message: this.t('board.toast.pinned', summarize(item, this.itemData(), this.t).label),
         actionLabel: this.t('common.undo'),
         actionPlacement: 'end',
         duration: 6000,
         noIcon: true,
-      });
-      this.undoes.set(id, () => {
+      },
+      () => {
         const current = this.boardItems().find((candidate) => candidate.id === item.id) ?? item;
         this.dataService.updateArtBoardItem({
           ...current,
@@ -696,27 +703,14 @@ export class Board {
           starredDate: undefined,
           gridPosition: { ...current.gridPosition, order: previous.order },
         });
-      });
-    }
+      },
+    );
   }
 
   /** Unpin a note. It stays on the board until the next visit, if it is not among the recent ones: not gone from under the pointer. */
   unpin(item: ArtBoardItem): void {
     this.reveal(item.id);
     this.dataService.updateArtBoardItem({ ...item, starred: false, starredDate: undefined });
-  }
-
-  /** What each message's Undo does, by the message's id. */
-  private readonly undoes = new Map<string, () => void>();
-
-  onToastAction(event: Event): void {
-    const { id } = (event as CustomEvent<{ id: string }>).detail;
-    this.undoes.get(id)?.();
-    this.undoes.delete(id);
-  }
-
-  onToastDismiss(event: Event): void {
-    this.undoes.delete((event as CustomEvent<{ id: string }>).detail.id);
   }
 
   /** A note of the sheet opened or closed: only the open one's content is drawn. */
@@ -739,7 +733,7 @@ export class Board {
   }
 
   onOlderKind(event: Event): void {
-    const value = (event as CustomEvent<{ value: string }>).detail.value;
+    const [value] = (event as CustomEvent<{ value: string[] }>).detail.value;
     this.olderKind.set(isNoteKind(value) ? value : 'all');
   }
 

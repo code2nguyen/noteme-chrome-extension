@@ -32,6 +32,7 @@ import { combineLatest, EMPTY } from 'rxjs';
 import { filter, map, switchMap, take, tap, timeout } from 'rxjs/operators';
 
 import { I18n } from '../i18n/i18n.service';
+import { ImageStore } from '../services/image-store';
 import { DataService } from '../services/data.service';
 import { INSTANCE_ID } from '../services/instance-id';
 import { pageMarkdownToText } from '../services/utils';
@@ -63,6 +64,8 @@ export class PageView {
   private readonly editor = viewChild<ElementRef<PageEditor>>('editor');
   readonly i18n = inject(I18n);
   readonly t = this.i18n.t;
+  /** Draws the notes' images (and saves those pasted into an editable one). */
+  readonly images = inject(ImageStore);
 
   readonly id = toSignal(this.route.paramMap.pipe(map((params) => params.get('id') ?? '')), { initialValue: '' });
   readonly title = signal('');

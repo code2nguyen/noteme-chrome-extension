@@ -32,6 +32,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type {
   Flow,
   FlowContextMenuContext,
+  FlowEdgeAddDetail,
   FlowEdgeEditDetail,
   FlowEdgeEventDetail,
   FlowLayoutChangeDetail,
@@ -40,6 +41,7 @@ import type {
   FlowNodeAddDetail,
   FlowNodeDeleteDetail,
   FlowNodeEditDetail,
+  FlowRowMoveDetail,
 } from '@c2n/components/flow';
 import type { MenuSelectEventDetail } from '@c2n/components/menu';
 import type { InlineEdit } from '@c2n/components/inline-edit';
@@ -52,24 +54,29 @@ import { INSTANCE_ID } from '../services/instance-id';
 import { uuid } from '../services/utils';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { DataType } from '../store/models/data-type';
+import { arrowMenu, readArrowMenuValue } from './arrow-menu';
 import { boxMenu, readBoxMenuValue } from './box-menu';
+import { FieldsSheet } from './fields-sheet';
 import {
   addBox,
-  ArrowSides,
+  ArrowRef,
   connect,
   deleteBox,
   disconnect,
   duplicateBox,
   EMPTY_FLOW,
   FlowDoc,
+  isArrow,
   labelArrow,
+  markArrow,
+  moveField,
   parseFlow,
   placeBoxes,
   renameBox,
   serializeFlow,
   styleBox,
 } from './flow-doc';
-import { flowNodes } from './flow-nodes';
+import { FlowIcons, flowNodes } from './flow-nodes';
 
 /**
  * A flow note, full screen: a title and an editable c2-flow. The flow never changes its own boxes: each of its events
@@ -80,7 +87,7 @@ import { flowNodes } from './flow-nodes';
   selector: 'ntm-flow-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [RouterLink],
+  imports: [RouterLink, FieldsSheet],
   templateUrl: './flow-view.html',
   styleUrl: './flow-view.scss',
 })
@@ -119,16 +126,26 @@ export class FlowView {
   /** Deleted or archived from its menu: leaving it must not remove it. */
   private deleted = false;
 
+  /** The box whose fields are open in the sheet beside the canvas, or `null`. */
+  readonly fieldsOf = signal<string | null>(null);
+
+  /** The icon elements its c2-flow draws, kept across redraws. */
+  private readonly icons: FlowIcons = new Map();
   /** What c2-flow draws: the boxes as its nodes, placed where they were left, in their shape, colours and icon. */
-  readonly nodes = computed<FlowNode[]>(() => flowNodes(this.doc()));
+  readonly nodes = computed<FlowNode[]>(() => flowNodes(this.doc(), this.icons));
 
   /**
-   * A box's right-click menu: its look and Duplicate, before the flow's Rename and Delete. The canvas keeps its own.
-   * Built each time it opens, in the language of the moment.
+   * A box's right-click menu: its look, its fields and Duplicate, before the flow's Rename and Delete; an arrow's: how
+   * its ends are drawn, before Edit label and Delete. The canvas keeps its own. Built each time it opens, in the
+   * language of the moment.
    */
-  readonly renderContextMenu = ({ node, defaultItems }: FlowContextMenuContext): unknown => {
+  readonly renderContextMenu = ({ node, edge, defaultItems }: FlowContextMenuContext): unknown => {
     const box = node && this.doc().nodes.find((entry) => entry.id === node.id);
-    return box ? [...boxMenu(box, this.t), defaultItems] : undefined;
+    if (box) {
+      return [...boxMenu(box, this.t), defaultItems];
+    }
+    const arrow = edge && this.doc().edges.find((entry) => isArrow(entry, edge));
+    return arrow ? [...arrowMenu(arrow, this.t), defaultItems] : undefined;
   };
   readonly edges = computed(() => this.doc().edges);
   readonly empty = computed(() => this.doc().nodes.length === 0);
@@ -165,6 +182,14 @@ export class FlowView {
         }
       });
 
+    // The fields sheet closes for good with its box (deleted here, or gone in a flow saved by another tab), rather than
+    // opening again by itself should that box come back.
+    effect(() => {
+      const id = this.fieldsOf();
+      if (id && !this.doc().nodes.some((node) => node.id === id)) {
+        this.fieldsOf.set(null);
+      }
+    });
     effect((onCleanup) => {
       const field = this.titleField()?.nativeElement;
       if (field) {
@@ -200,10 +225,10 @@ export class FlowView {
   }
 
   onNodeAdd(event: Event): void {
-    // An arrow dropped on empty canvas makes a box, joined by the sides it was drawn between.
-    const { position, source, ...sides } = (event as CustomEvent<FlowNodeAddDetail & ArrowSides>).detail;
+    // An arrow dropped on empty canvas makes a box, joined by the sides (or from the field) it was drawn between.
+    const { position, source, ...ends } = (event as CustomEvent<FlowNodeAddDetail>).detail;
     const id = uuid();
-    this.change(addBox(this.doc(), id, position, source, sides, this.t('flow.newBox')));
+    this.change(addBox(this.doc(), id, position, source, ends, this.t('flow.newBox')));
     // Name it straight away, as in any diagram tool: once Angular has handed the new box to c2-flow and it has drawn
     // it.
     afterNextRender(
@@ -228,28 +253,46 @@ export class FlowView {
   }
 
   onEdgeAdd(event: Event): void {
-    // The sides an arrow was drawn between come with it (c2-flow's sourceSide and targetSide).
-    const { source, target, ...sides } = (event as CustomEvent<FlowEdgeEventDetail & ArrowSides>).detail;
-    this.change(connect(this.doc(), source, target, sides));
+    // The sides an arrow was drawn between come with it (c2-flow's sourceSide and targetSide), or the fields it joins.
+    const { source, target, ...ends } = (event as CustomEvent<FlowEdgeAddDetail>).detail;
+    this.change(connect(this.doc(), source, target, ends));
   }
 
   onEdgeDelete(event: Event): void {
-    const { source, target } = (event as CustomEvent<FlowEdgeEventDetail>).detail;
-    this.change(disconnect(this.doc(), source, target));
+    this.change(disconnect(this.doc(), arrowRef((event as CustomEvent<FlowEdgeEventDetail>).detail)));
   }
 
   onEdgeEdit(event: Event): void {
-    const { source, target, label } = (event as CustomEvent<FlowEdgeEditDetail>).detail;
-    this.change(labelArrow(this.doc(), source, target, label));
+    const { label, ...edge } = (event as CustomEvent<FlowEdgeEditDetail>).detail;
+    this.change(labelArrow(this.doc(), arrowRef(edge), label));
+  }
+
+  /** A field dragged by its grip (or moved from the keyboard) to another place among its box's. */
+  onRowMove(event: Event): void {
+    const { id, from, to } = (event as CustomEvent<FlowRowMoveDetail>).detail;
+    this.change(moveField(this.doc(), id, from, to));
+  }
+
+  /** An edit from the fields sheet, to the flow as it is now. */
+  onFieldsChange(edit: (doc: FlowDoc) => FlowDoc): void {
+    this.change(edit(this.doc()));
   }
 
   onLayoutChange(event: Event): void {
     this.change(placeBoxes(this.doc(), (event as CustomEvent<FlowLayoutChangeDetail>).detail.positions));
   }
 
-  /** A row of a box's menu: its look changes at once; Duplicate puts a copy beside it. */
+  /**
+   * A row of a box's menu: its look changes at once; Fields opens the sheet of its fields; Duplicate puts a copy beside
+   * it. A row of an arrow's menu draws one of its ends.
+   */
   onBoxMenu(event: Event): void {
-    const { value, node } = (event as CustomEvent<FlowMenuSelectDetail>).detail;
+    const { value, node, edge } = (event as CustomEvent<FlowMenuSelectDetail>).detail;
+    const end = readArrowMenuValue(value);
+    if (end && edge) {
+      this.change(markArrow(this.doc(), arrowRef(edge), end.end, end.marker));
+      return;
+    }
     const choice = readBoxMenuValue(value);
     if (!choice || !node) {
       return;
@@ -267,6 +310,9 @@ export class FlowView {
         return;
       case 'icon':
         this.change(styleBox(doc, node.id, { icon: choice.icon }));
+        return;
+      case 'fields':
+        this.fieldsOf.set(node.id);
         return;
       case 'duplicate':
         this.change(duplicateBox(doc, node.id, uuid(), this.flow()?.nativeElement.getLayout()[node.id]));
@@ -353,6 +399,7 @@ export class FlowView {
     // Nothing of the last one carries over: its being archived.
     this.archived.set(false);
     this.found.set(null);
+    this.fieldsOf.set(null);
   }
 
   /** A flow left with no title and no box is removed, as when the view is destroyed. */
@@ -382,4 +429,9 @@ export class FlowView {
     this.boundData = undefined;
     this.deleted = false;
   }
+}
+
+/** Which arrow an event of c2-flow names: its boxes, and its fields when it joins fields. */
+function arrowRef({ source, target, sourcePort, targetPort }: ArrowRef): ArrowRef {
+  return { source, target, ...(sourcePort ? { sourcePort } : {}), ...(targetPort ? { targetPort } : {}) };
 }

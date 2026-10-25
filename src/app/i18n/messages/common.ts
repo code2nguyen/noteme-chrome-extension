@@ -20,6 +20,9 @@ export const commonEn = {
   'common.untitled.list': 'Untitled to do',
   'common.untitled.sheet': 'Untitled sheet',
   'common.nothingWritten': 'Nothing written yet.',
+  'common.image.tooLarge': 'This image is too large: 10 MB at most.',
+  'common.image.notImage': 'Only images can be pasted or dropped here.',
+  'common.image.notSaved': 'The image could not be saved on this device.',
 };
 
 export const commonFr: Translation<typeof commonEn> = {
@@ -41,6 +44,9 @@ export const commonFr: Translation<typeof commonEn> = {
   'common.untitled.list': 'À faire sans titre',
   'common.untitled.sheet': 'Feuille de calcul sans titre',
   'common.nothingWritten': 'Rien d’écrit pour l’instant.',
+  'common.image.tooLarge': 'Cette image est trop lourde : 10 Mo au plus.',
+  'common.image.notImage': 'Seules des images peuvent être collées ou déposées ici.',
+  'common.image.notSaved': 'L’image n’a pas pu être enregistrée sur cet appareil.',
 };
 
 export const commonVi: Translation<typeof commonEn> = {
@@ -62,4 +68,7 @@ export const commonVi: Translation<typeof commonEn> = {
   'common.untitled.list': 'Việc cần làm chưa đặt tên',
   'common.untitled.sheet': 'Bảng tính chưa đặt tên',
   'common.nothingWritten': 'Chưa có nội dung.',
+  'common.image.tooLarge': 'Ảnh quá lớn: tối đa 10 MB.',
+  'common.image.notImage': 'Chỉ có thể dán hoặc thả ảnh vào đây.',
+  'common.image.notSaved': 'Không thể lưu ảnh trên thiết bị này.',
 };

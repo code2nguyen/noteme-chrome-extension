@@ -14,11 +14,28 @@ export interface BoxStyle {
   icon?: BoxIcon;
 }
 
+/** A field is a key of its box (a table's primary key), or points at another box's (a foreign key). */
+export type FieldKey = 'primary' | 'foreign';
+
+const FIELD_KEYS: readonly string[] = ['primary', 'foreign'];
+
+/** A row of a box, as a column of a table in a data schema; arrows can leave or arrive at it (c2-flow's ports). */
+export interface BoxField {
+  /** Unique within its box. */
+  id: string;
+  name: string;
+  /** Free text, such as `uuid` or `text`; absent when none is given. */
+  type?: string;
+  key?: FieldKey;
+}
+
 export interface FlowBox extends BoxStyle {
   id: string;
   label: string;
   /** Top-left corner on the canvas; absent until placed, then the auto layout decides. */
   position?: { x: number; y: number };
+  /** Absent on a box without fields, which is drawn as its label only. */
+  fields?: BoxField[];
 }
 
 /** A side of a box, where an arrow leaves or arrives (c2-flow's FlowSide). */
@@ -38,7 +55,27 @@ export interface FlowArrow {
   /** The sides of the boxes it was drawn from and to; absent, the flow's direction decides (out right, in left). */
   sourceSide?: ArrowSide;
   targetSide?: ArrowSide;
+  /** The fields it leaves and arrives at, as a foreign key points at a primary key; absent, the box itself. */
+  sourcePort?: string;
+  targetPort?: string;
+  /** How each end is drawn; absent, the start plain and the end an arrowhead. */
+  sourceMarker?: ArrowMarker;
+  targetMarker?: ArrowMarker;
 }
+
+/**
+ * How an end of an arrow is drawn (c2-flow's FlowEdgeMarker): an arrowhead, nothing, or the crow's foot of a
+ * cardinality, as in an entity-relationship diagram.
+ */
+export const ARROW_MARKERS = ['arrow', 'none', 'one', 'zero-one', 'many', 'one-many', 'zero-many'] as const;
+export type ArrowMarker = (typeof ARROW_MARKERS)[number];
+
+export function isArrowMarker(value: unknown): value is ArrowMarker {
+  return typeof value === 'string' && (ARROW_MARKERS as readonly string[]).includes(value);
+}
+
+/** The marker an end has when the arrow names none. */
+export const DEFAULT_MARKERS = { source: 'none', target: 'arrow' } as const satisfies Record<string, ArrowMarker>;
 
 /** The sides an arrow was drawn between, without any it does not have. */
 export interface ArrowSides {
@@ -46,11 +83,67 @@ export interface ArrowSides {
   targetSide?: ArrowSide;
 }
 
+/** The fields an arrow joins, without any it does not have. */
+export interface ArrowPorts {
+  sourcePort?: string;
+  targetPort?: string;
+}
+
+/** Which arrow: two boxes, and the fields it joins when it joins fields (two boxes can be joined field by field). */
+export interface ArrowRef extends ArrowPorts {
+  source: string;
+  target: string;
+}
+
 function readSides(edge: Partial<ArrowSides>): ArrowSides {
   return {
     ...(isArrowSide(edge.sourceSide) ? { sourceSide: edge.sourceSide } : {}),
     ...(isArrowSide(edge.targetSide) ? { targetSide: edge.targetSide } : {}),
   };
+}
+
+/** The ports of an arrow that are fields of its boxes; any other is dropped, and the arrow meets the box. */
+function readPorts(nodes: readonly FlowBox[] | FieldIds, edge: Partial<ArrowRef>): ArrowPorts {
+  const fields = Array.isArray(nodes) ? fieldIds(nodes) : (nodes as FieldIds);
+  const has = (box: string | undefined, field: unknown) =>
+    typeof field === 'string' && box !== undefined && !!fields.get(box)?.has(field);
+  return {
+    ...(has(edge.source, edge.sourcePort) ? { sourcePort: edge.sourcePort } : {}),
+    ...(has(edge.target, edge.targetPort) ? { targetPort: edge.targetPort } : {}),
+  };
+}
+
+/** Each box's field ids, by the box's id. */
+type FieldIds = ReadonlyMap<string, ReadonlySet<string>>;
+
+function fieldIds(nodes: readonly FlowBox[]): FieldIds {
+  return new Map(nodes.map((node) => [node.id, new Set(node.fields?.map((field) => field.id))]));
+}
+
+function readMarkers(edge: Partial<FlowArrow>): Pick<FlowArrow, 'sourceMarker' | 'targetMarker'> {
+  return {
+    ...(isArrowMarker(edge.sourceMarker) && edge.sourceMarker !== DEFAULT_MARKERS.source
+      ? { sourceMarker: edge.sourceMarker }
+      : {}),
+    ...(isArrowMarker(edge.targetMarker) && edge.targetMarker !== DEFAULT_MARKERS.target
+      ? { targetMarker: edge.targetMarker }
+      : {}),
+  };
+}
+
+/** Whether `edge` is the arrow `ref` names: the same boxes, through the same fields. */
+export function isArrow(edge: FlowArrow, ref: ArrowRef): boolean {
+  return (
+    edge.source === ref.source &&
+    edge.target === ref.target &&
+    edge.sourcePort === ref.sourcePort &&
+    edge.targetPort === ref.targetPort
+  );
+}
+
+/** A box joined to itself only from one of its fields to another, as a table referencing itself. */
+function isLoop(ref: ArrowRef): boolean {
+  return ref.source === ref.target && (!ref.sourcePort || !ref.targetPort || ref.sourcePort === ref.targetPort);
 }
 
 export interface FlowDoc {
@@ -79,17 +172,59 @@ export function parseFlow(data: string | null | undefined): FlowDoc {
       node.position && Number.isFinite(node.position.x) && Number.isFinite(node.position.y)
         ? { x: node.position.x, y: node.position.y }
         : undefined;
-    return [{ id: node.id, label: node.label, ...(position ? { position } : {}), ...readStyle(node) }];
+    const fields = readFields(node.fields);
+    return [
+      {
+        id: node.id,
+        label: node.label,
+        ...(position ? { position } : {}),
+        ...readStyle(node),
+        ...(fields.length ? { fields } : {}),
+      },
+    ];
   });
   const ids = new Set(nodes.map((node) => node.id));
-  const edges = (Array.isArray(doc.edges) ? doc.edges : []).flatMap((edge): FlowArrow[] => {
-    if (!edge || !ids.has(edge.source) || !ids.has(edge.target) || edge.source === edge.target) {
+  const fields = fieldIds(nodes);
+  const edges: FlowArrow[] = [];
+  // Each kept arrow's boxes and fields, so a second one is found without comparing it with every arrow.
+  const kept = new Set<string>();
+  for (const edge of Array.isArray(doc.edges) ? doc.edges : []) {
+    if (!edge || !ids.has(edge.source) || !ids.has(edge.target)) {
+      continue;
+    }
+    const ref = { source: edge.source, target: edge.target, ...readPorts(fields, edge) };
+    // A port dropped (its field gone) can make an arrow the same as another: one arrow per pair, as connect() keeps.
+    const key = JSON.stringify([ref.source, ref.target, ref.sourcePort ?? null, ref.targetPort ?? null]);
+    if (isLoop(ref) || kept.has(key)) {
+      continue;
+    }
+    kept.add(key);
+    const label = typeof edge.label === 'string' ? edge.label.trim() : '';
+    edges.push({
+      source: ref.source,
+      target: ref.target,
+      ...(label ? { label } : {}),
+      ...readSides(edge),
+      ...(ref.sourcePort ? { sourcePort: ref.sourcePort } : {}),
+      ...(ref.targetPort ? { targetPort: ref.targetPort } : {}),
+      ...readMarkers(edge),
+    });
+  }
+  return { nodes, edges };
+}
+
+/** A box's stored fields, each once, without a malformed one or an unknown key. */
+function readFields(value: unknown): BoxField[] {
+  const seen = new Set<string>();
+  return (Array.isArray(value) ? (value as Partial<BoxField>[]) : []).flatMap((field): BoxField[] => {
+    if (!field || typeof field.id !== 'string' || typeof field.name !== 'string' || seen.has(field.id)) {
       return [];
     }
-    const label = typeof edge.label === 'string' ? edge.label.trim() : '';
-    return [{ source: edge.source, target: edge.target, ...(label ? { label } : {}), ...readSides(edge) }];
+    seen.add(field.id);
+    const type = typeof field.type === 'string' ? field.type.trim() : '';
+    const key = typeof field.key === 'string' && FIELD_KEYS.includes(field.key) ? field.key : undefined;
+    return [{ id: field.id, name: field.name, ...(type ? { type } : {}), ...(key ? { key } : {}) }];
   });
-  return { nodes, edges };
 }
 
 /** The style a stored box has, without anything unknown (a shape or colour from a later version is dropped). */
@@ -106,18 +241,24 @@ export function serializeFlow(doc: FlowDoc): string {
   return JSON.stringify(doc);
 }
 
-/** A box named `label` (written into the document: it stays in the language it was made in). */
+/**
+ * A box named `label` (written into the document: it stays in the language it was made in), connected from `source`
+ * (from its field `sourcePort`, when the arrow was drawn from one).
+ */
 export function addBox(
   doc: FlowDoc,
   id: string,
   position: { x: number; y: number },
   source?: string,
-  sides: ArrowSides = {},
+  ends: ArrowSides & Pick<ArrowPorts, 'sourcePort'> = {},
   label = NEW_BOX_LABEL,
 ): FlowDoc {
   const edges =
     source && doc.nodes.some((node) => node.id === source)
-      ? [...doc.edges, { source, target: id, ...readSides(sides) }]
+      ? [
+          ...doc.edges,
+          { source, target: id, ...readSides(ends), ...readPorts(doc.nodes, { source, sourcePort: ends.sourcePort }) },
+        ]
       : doc.edges;
   return { nodes: [...doc.nodes, { id, label, position }], edges };
 }
@@ -138,14 +279,20 @@ export function deleteBox(doc: FlowDoc, id: string): FlowDoc {
   };
 }
 
-/** An arrow from `source` to `target`, between the sides it was drawn from and to; once per pair of boxes. */
-export function connect(doc: FlowDoc, source: string, target: string, sides: ArrowSides = {}): FlowDoc {
-  const exists = doc.edges.some((edge) => edge.source === source && edge.target === target);
-  return exists || source === target ? doc : { ...doc, edges: [...doc.edges, { source, target, ...readSides(sides) }] };
+/**
+ * An arrow from `source` to `target`, between the sides it was drawn from and to, or the fields; once per pair of boxes
+ * (per pair of fields, for an arrow between fields).
+ */
+export function connect(doc: FlowDoc, source: string, target: string, ends: ArrowSides & ArrowPorts = {}): FlowDoc {
+  const ref = { source, target, ...readPorts(doc.nodes, { source, target, ...ends }) };
+  if (isLoop(ref) || doc.edges.some((edge) => isArrow(edge, ref))) {
+    return doc;
+  }
+  return { ...doc, edges: [...doc.edges, { ...ref, ...readSides(ends) }] };
 }
 
-export function disconnect(doc: FlowDoc, source: string, target: string): FlowDoc {
-  return { ...doc, edges: doc.edges.filter((edge) => edge.source !== source || edge.target !== target) };
+export function disconnect(doc: FlowDoc, ref: ArrowRef): FlowDoc {
+  return { ...doc, edges: doc.edges.filter((edge) => !isArrow(edge, ref)) };
 }
 
 /** Keep where the boxes are now (after a drag, or once the flow pinned the auto layout). */
@@ -196,10 +343,10 @@ export function duplicateBox(doc: FlowDoc, id: string, newId: string, at?: { x: 
   return { ...doc, nodes: [...doc.nodes.slice(0, index + 1), copy, ...doc.nodes.slice(index + 1)] };
 }
 
-/** Names the arrow from `source` to `target`; an empty label removes it. */
-export function labelArrow(doc: FlowDoc, source: string, target: string, label: string): FlowDoc {
+/** Names the arrow `ref`; an empty label removes it. */
+export function labelArrow(doc: FlowDoc, ref: ArrowRef, label: string): FlowDoc {
   const text = label.trim();
-  const index = doc.edges.findIndex((edge) => edge.source === source && edge.target === target);
+  const index = doc.edges.findIndex((edge) => isArrow(edge, ref));
   const edge = doc.edges[index];
   if (!edge || (edge.label ?? '') === text) {
     return doc;
@@ -211,10 +358,98 @@ export function labelArrow(doc: FlowDoc, source: string, target: string, label: 
   return { ...doc, edges };
 }
 
-/** The words of a flow, for search and the card: its box labels in order, then the arrows' labels. */
+/** Draws one end of the arrow `ref` as `marker`; its default (the start plain, the end an arrowhead) is not stored. */
+export function markArrow(doc: FlowDoc, ref: ArrowRef, end: 'source' | 'target', marker: ArrowMarker): FlowDoc {
+  const key = end === 'source' ? 'sourceMarker' : 'targetMarker';
+  const index = doc.edges.findIndex((edge) => isArrow(edge, ref));
+  const edge = doc.edges[index];
+  if (!edge || (edge[key] ?? DEFAULT_MARKERS[end]) === marker) {
+    return doc;
+  }
+  const { [key]: _marker, ...rest } = edge;
+  const edges = [...doc.edges];
+  edges[index] = { ...rest, ...(marker !== DEFAULT_MARKERS[end] ? { [key]: marker } : {}) };
+  return { ...doc, edges };
+}
+
+/** The box `id` with its fields changed by `change`; the same document when there is no such box. */
+function withFields(doc: FlowDoc, id: string, change: (fields: BoxField[]) => BoxField[]): FlowDoc {
+  const box = doc.nodes.find((node) => node.id === id);
+  if (!box) {
+    return doc;
+  }
+  const fields = change(box.fields ?? []);
+  if (fields === (box.fields ?? [])) {
+    return doc;
+  }
+  const { fields: _fields, ...rest } = box;
+  const next: FlowBox = fields.length ? { ...rest, fields } : rest;
+  return { ...doc, nodes: doc.nodes.map((node) => (node === box ? next : node)) };
+}
+
+/** A field at the end of box `id`'s, named `name`. */
+export function addField(doc: FlowDoc, id: string, fieldId: string, name: string): FlowDoc {
+  return withFields(doc, id, (fields) =>
+    fields.some((field) => field.id === fieldId) ? fields : [...fields, { id: fieldId, name }],
+  );
+}
+
+/**
+ * Changes a field of box `id`: each key given is set, or cleared when empty or `undefined`. An empty name keeps the one
+ * it had (a field is always named). The same document when nothing changes.
+ */
+export function editField(
+  doc: FlowDoc,
+  id: string,
+  fieldId: string,
+  change: Partial<Pick<BoxField, 'name' | 'type' | 'key'>>,
+): FlowDoc {
+  return withFields(doc, id, (fields) => {
+    const field = fields.find((entry) => entry.id === fieldId);
+    if (!field) {
+      return fields;
+    }
+    const name = change.name?.trim() || field.name;
+    const type = 'type' in change ? change.type?.trim() || undefined : field.type;
+    const key = 'key' in change ? change.key : field.key;
+    if (name === field.name && type === field.type && key === field.key) {
+      return fields;
+    }
+    const next: BoxField = { id: field.id, name, ...(type ? { type } : {}), ...(key ? { key } : {}) };
+    return fields.map((entry) => (entry === field ? next : entry));
+  });
+}
+
+/** Removes a field of box `id`, and the arrows that leave or arrive at it. */
+export function deleteField(doc: FlowDoc, id: string, fieldId: string): FlowDoc {
+  const next = withFields(doc, id, (fields) =>
+    fields.some((field) => field.id === fieldId) ? fields.filter((field) => field.id !== fieldId) : fields,
+  );
+  if (next === doc) {
+    return doc;
+  }
+  const through = (edge: FlowArrow) =>
+    (edge.source === id && edge.sourcePort === fieldId) || (edge.target === id && edge.targetPort === fieldId);
+  return { ...next, edges: next.edges.filter((edge) => !through(edge)) };
+}
+
+/** Moves the field at index `from` of box `id`'s to index `to` (counted once it is taken out, as c2-flow's row-move). */
+export function moveField(doc: FlowDoc, id: string, from: number, to: number): FlowDoc {
+  return withFields(doc, id, (fields) => {
+    if (from === to || !fields[from] || to < 0 || to >= fields.length) {
+      return fields;
+    }
+    const next = [...fields];
+    const [field] = next.splice(from, 1);
+    next.splice(to, 0, field);
+    return next;
+  });
+}
+
+/** The words of a flow, for search and the card: its box labels (each with its fields) in order, then the arrows' labels. */
 export function flowText(doc: FlowDoc): string {
   return [
-    ...doc.nodes.map((node) => node.label),
+    ...doc.nodes.flatMap((node) => [node.label, ...(node.fields ?? []).map((field) => field.name)]),
     ...doc.edges.flatMap((edge) => (edge.label ? [edge.label] : [])),
   ].join('\n');
 }

@@ -26,3 +26,7 @@ import '@c2n/phosphor-icons/icons/sun.js';
 import '@c2n/phosphor-icons/icons/umbrella.js';
 import '@c2n/phosphor-icons/icons/user.js';
 import '@c2n/phosphor-icons/icons/warning.js';
+// A field's key, and the box menu's Fields row.
+import '@c2n/phosphor-icons/icons/key.js';
+import '@c2n/phosphor-icons/icons/link-simple.js';
+import '@c2n/phosphor-icons/icons/rows.js';
