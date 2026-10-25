@@ -2,6 +2,12 @@
 
 Generated from the commit history by `npm run changelog`; do not edit by hand.
 
+## 3.0.4
+
+### New
+
+- Images in notes and pages, fields in flow boxes to design a data schema, and a kind filter in the Archive and Older notes
+
 ## 3.0.3
 
 ### New
