@@ -165,6 +165,10 @@ export class Board {
     { initialValue: 'notes' as BoardView },
   );
   readonly inNotesView = computed(() => this.view() === 'notes');
+  /** The archived note the address bar picked (`?view=archive&note=<id>`): the Archive opens on it. */
+  readonly archiveNote = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('note'))), {
+    initialValue: null,
+  });
   /** Settings open in a sheet over the board, as over Home (`?settings=1`), so closing it comes back here. */
   readonly settingsOpen = toSignal(this.route.queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,

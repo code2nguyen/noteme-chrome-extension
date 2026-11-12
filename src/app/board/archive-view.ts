@@ -4,6 +4,7 @@ import {
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   input,
@@ -84,6 +85,8 @@ export class ArchiveView {
   /** What is archived, or what of it matches the search. */
   readonly items = input.required<ArtBoardItem[]>();
   readonly data = input.required<Dictionary<ItemData>>();
+  /** A note to open on: one picked in the address bar (`?view=archive&note=<id>`). */
+  readonly note = input<string | null>(null);
 
   readonly restore = output<ArtBoardItem[]>();
   readonly remove = output<ArtBoardItem[]>();
@@ -157,6 +160,13 @@ export class ArchiveView {
   readonly allChecked = computed(() => this.shown().length > 0 && this.checkedNotes().length === this.shown().length);
 
   constructor() {
+    // Open on the note asked for; it shows once the archive is read.
+    effect(() => {
+      const id = this.note();
+      if (id) {
+        this.chosenId.set(id);
+      }
+    });
     const onChange = (event: MediaQueryListEvent) => this.narrow.set(event.matches);
     this.media.addEventListener('change', onChange);
     inject(DestroyRef).onDestroy(() => this.media.removeEventListener('change', onChange));

@@ -5,7 +5,8 @@ import { untitledKey } from '../i18n/kinds';
 import { ArtBoardItem, ItemData } from '../store/models';
 import { formatRelativeTime, toDate } from '@c2n/components/relative-time';
 
-import { getText, plainLine } from './utils';
+import { noteLabel } from './search-index';
+import { getText } from './utils';
 
 /** A search result as a row of the search field: its first line, and what it is and when it was edited. */
 export interface SearchSuggestion {
@@ -13,8 +14,6 @@ export interface SearchSuggestion {
   label: string;
   description: string;
 }
-
-const PREVIEW_LENGTH = 80;
 
 export { FULL_SCREEN } from '../extension-id';
 
@@ -31,16 +30,15 @@ export function searchSuggestions(
   return items.map((item) => {
     const itemData = data[item.id];
     const text = itemData ? getText(itemData.data, itemData.dataType, itemData.properties) : '';
-    // Its first line as text: "1. Pack" reads "Pack", as in the Older notes and the Archive.
-    const firstLine = text.split('\n').map(plainLine).find(Boolean) ?? '';
     const kind = kindOf(item);
-    const label = firstLine || t(untitledKey(kind));
+    // Its first line as text: "1. Pack" reads "Pack", as in the Older notes and the Archive.
+    const label = noteLabel(text) || t(untitledKey(kind));
     const dataModified = itemData?.empty ? undefined : itemData?.modifiedDate;
     const date = toDate(dataModified ?? item.dataModifiedDate ?? item.modifiedDate);
     const edited = date ? formatRelativeTime(date, new Date(), { locale }) : '';
     return {
       id: item.id,
-      label: label.length > PREVIEW_LENGTH ? label.slice(0, PREVIEW_LENGTH) + '…' : label,
+      label,
       description: `${t(shortKindKey(kind))} · ${edited}`,
     };
   });

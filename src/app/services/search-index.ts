@@ -1,7 +1,7 @@
 import type { IFuseOptions } from 'fuse.js';
 
 import type { ItemData } from '../store/models';
-import { getText } from './utils';
+import { getText, plainLine } from './utils';
 
 /** A note as the search reads it: its words, whatever its kind. */
 export interface SearchDocument {
@@ -23,3 +23,14 @@ export const toSearchDocument = (item: ItemData): SearchDocument => ({
   id: item.id,
   text: getText(item.data, item.dataType, item.properties),
 });
+
+const LABEL_LENGTH = 80;
+
+/**
+ * A note's text as one line to list it by: its first line with words, as text ("1. Pack" reads "Pack"), cut short.
+ * Empty when nothing is written: the caller names it ("Untitled page").
+ */
+export function noteLabel(text: string): string {
+  const firstLine = text.split('\n').map(plainLine).find(Boolean) ?? '';
+  return firstLine.length > LABEL_LENGTH ? firstLine.slice(0, LABEL_LENGTH) + '…' : firstLine;
+}

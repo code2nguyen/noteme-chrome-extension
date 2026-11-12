@@ -10,16 +10,13 @@ import { untitledKey } from '../app/i18n/kinds';
 import type { Language } from '../app/i18n/language';
 import { message } from '../app/i18n/messages';
 import { isSupportedNote, normalizeArtBoardItem, normalizeItemData } from '../app/services/migration';
-import { SEARCH_OPTIONS, SearchDocument, toSearchDocument } from '../app/services/search-index';
-import { IndexableItemTypes, plainLine } from '../app/services/utils';
+import { noteLabel, SEARCH_OPTIONS, SearchDocument, toSearchDocument } from '../app/services/search-index';
+import { ART_BOARD_ITEM_PREFIX, ITEM_DATA_PREFIX } from '../app/services/storage-keys';
+import { IndexableItemTypes } from '../app/services/utils';
 import type { ArtBoardItem, ItemData } from '../app/store/models';
 
 /** Chrome shows a handful of rows under the address bar. */
 export const MAX_SUGGESTIONS = 6;
-const LABEL_LENGTH = 80;
-// The keys of a note's text and of its card (storage.api.ts).
-const ITEM_DATA_PREFIX = 'ITEM_DATA__';
-const ART_BOARD_ITEM_PREFIX = 'ART_BOARD_ITEM__';
 
 export interface OmniboxNote extends SearchDocument {
   kind: ReturnType<typeof kindOf>;
@@ -38,14 +35,17 @@ function parse(value: unknown): unknown {
   }
 }
 
-/** Where a note opens. An archived note, list or sheet has no place on the board: the Archive holds it. */
+/**
+ * Where a note opens. An archived note, list or sheet has no place on the board: the Archive opens on it. Each note
+ * has an address of its own, or Chrome would show the rows sharing one as a single row.
+ */
 export function notePath(item: ArtBoardItem): string {
   const route = FULL_SCREEN[item.extensionId];
   const id = encodeURIComponent(item.id);
   if (route) {
     return `#${route}/${id}${item.boardId ? '' : '?from=archive'}`;
   }
-  return item.boardId ? `#/main-board?show=${id}` : '#/main-board?view=archive';
+  return item.boardId ? `#/main-board?show=${id}` : `#/main-board?view=archive&note=${id}`;
 }
 
 /**
@@ -72,12 +72,11 @@ export function omniboxNotes(stored: Record<string, unknown>): OmniboxNote[] {
     if (!text.trim()) {
       continue;
     }
-    const firstLine = text.split('\n').map(plainLine).find(Boolean) ?? '';
     notes.push({
       id: note.id,
       text,
       kind: kindOf(note),
-      label: firstLine.length > LABEL_LENGTH ? firstLine.slice(0, LABEL_LENGTH) + '…' : firstLine,
+      label: noteLabel(text),
       archived: !note.boardId,
       path: notePath(note),
     });
@@ -89,12 +88,18 @@ export function omniboxIndex(notes: OmniboxNote[]): Fuse<OmniboxNote> {
   return new Fuse(notes, SEARCH_OPTIONS as ConstructorParameters<typeof Fuse<OmniboxNote>>[1]);
 }
 
-/** A row's description is XML to Chrome (`<dim>`, `<match>`): a note's own text must not read as markup. */
+/**
+ * A row's description is XML to Chrome (`<dim>`, `<match>`): a note's own text must not read as markup, nor hold what
+ * XML cannot (a control character, half of a character cut by the label's length), or Chrome refuses every row.
+ */
 export function escapeXml(text: string): string {
-  return text.replace(
-    /[&<>"']/g,
-    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char] ?? char,
-  );
+  return text
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '')
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '')
+    .replace(
+      /[&<>"']/g,
+      (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char] ?? char,
+    );
 }
 
 /** The notes matching the words typed, as rows: each holds the address it opens (`base` is the extension's root). */

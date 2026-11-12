@@ -32,6 +32,11 @@ export class I18n {
   readonly locale = computed(() => localeTag(this.language()));
 
   constructor() {
+    // The page's language: the c2 components and the relative times follow it, with no reload. The one spoken, not
+    // the one wanted: while a language is being read, or if it cannot be, the page stays whole in the previous one.
+    effect(() => {
+      document.documentElement.lang = this.locale();
+    });
     effect(() => {
       const language = this.wanted();
       loadLanguage(language).then(

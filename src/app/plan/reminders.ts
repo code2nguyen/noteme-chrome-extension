@@ -41,22 +41,45 @@ export function isReminderDue(item: PlanItem, lead: number, now: number): boolea
   return reminderAt(item, lead) <= now && now < reminderExpires(item);
 }
 
+/** When a timed plan starts, in ms. */
+function startsAt(item: PlanItem & { start: string }): number {
+  return at(item.date, minutesOf(item.start));
+}
+
+/** A plan at the time it is set for: moved, it is another one to announce. */
+export function reminderKey(item: PlanItem): string {
+  return `${item.id}@${item.date}T${item.start ?? ''}`;
+}
+
 export interface Reminder {
   /** The alarm's name: `plan:<id>`. */
   name: string;
   when: number;
 }
 
-/** The reminders still to come, the nearest first, `limit` at most. */
+/**
+ * The reminders still to come, the nearest first, `limit` at most. A plan with a time whose reminder is already past
+ * but which has not started (it was just added, or reminders just switched on, less than the lead before it) is
+ * announced when it starts instead, unless it was announced already (`reminded` holds its `reminderKey`).
+ */
 export function upcomingReminders(
   items: readonly PlanItem[],
   lead: number,
   now: number,
   limit = MAX_REMINDERS,
+  reminded: ReadonlySet<string> = new Set(),
 ): Reminder[] {
   return items
-    .map((item) => ({ name: REMINDER_PREFIX + item.id, when: reminderAt(item, lead) }))
-    .filter((reminder) => reminder.when > now)
+    .flatMap((item): Reminder[] => {
+      const name = REMINDER_PREFIX + item.id;
+      const when = reminderAt(item, lead);
+      if (when > now) {
+        return [{ name, when }];
+      }
+      return isTimed(item) && startsAt(item) > now && !reminded.has(reminderKey(item))
+        ? [{ name, when: startsAt(item) }]
+        : [];
+    })
     .sort((a, b) => a.when - b.when)
     .slice(0, limit);
 }

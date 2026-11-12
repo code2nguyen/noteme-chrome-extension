@@ -13,7 +13,7 @@ describe('Toasts', () => {
     const shown: ToastOptions[] = [];
     toasts.attach({ show: (options: ToastOptions) => (shown.push(options), 't1') } as unknown as ToastRegion);
     expect(shown).toEqual([]);
-    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve));
     expect(load).toHaveBeenCalledOnce();
     expect(shown).toEqual([{ message: 'Pinned' }]);
     toasts.acted('t1');

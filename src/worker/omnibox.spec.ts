@@ -71,7 +71,7 @@ describe('omniboxNotes', () => {
   it('opens a page full screen, a note on the board and an archived list in the Archive', () => {
     expect(byId['note'].path).toBe('#/main-board?show=note');
     expect(byId['page'].path).toBe('#/page/page?from=archive');
-    expect(byId['list'].path).toBe('#/main-board?view=archive');
+    expect(byId['list'].path).toBe('#/main-board?view=archive&note=list');
   });
 
   it('reads a 2.x Quill note stored as an object, as the app does', () => {
@@ -100,6 +100,13 @@ describe('omniboxSuggestions', () => {
 });
 
 describe('escapeXml', () => {
+  it('leaves out what XML cannot hold: control characters, and half a character cut by the label', () => {
+    expect(escapeXml('a\u0000b\u0008c\u001Fd')).toBe('abcd');
+    expect(escapeXml('tab\there')).toBe('tab\there');
+    expect(escapeXml('cut \uD83D')).toBe('cut ');
+    expect(escapeXml('whole \uD83D\uDE00')).toBe('whole \uD83D\uDE00');
+  });
+
   it('keeps a note from writing markup in its row', () => {
     expect(escapeXml(`<match>a</match> & "b" 'c'`)).toBe(
       '&lt;match&gt;a&lt;/match&gt; &amp; &quot;b&quot; &apos;c&apos;',

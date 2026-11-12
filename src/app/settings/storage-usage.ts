@@ -1,6 +1,3 @@
-/** chrome.storage.sync's QUOTA_BYTES: all it holds for one extension. */
-export const CHROME_SYNC_BYTES = 102_400;
-
 /** How much room Noteme takes, as Settings › Storage shows it; a part this browser cannot measure is left out. */
 export interface StorageUsage {
   /** The notes, plans and settings in chrome.storage.local, in bytes. */
@@ -71,12 +68,12 @@ export async function readStorageUsage(syncOn: boolean): Promise<StorageUsage> {
     }),
     part(async () => {
       if (syncOn && sync && local) {
-        const [used, keys] = await Promise.all([sync.getBytesInUse(null), local.getKeys()]);
-        usage.sync = {
-          used,
-          quota: CHROME_SYNC_BYTES,
-          waiting: waitingNotes(keys),
-        };
+        // getKeys is Chrome 130+: without it the quota still shows, with no count of the notes waiting.
+        const [used, keys] = await Promise.all([
+          sync.getBytesInUse(null),
+          typeof local.getKeys === 'function' ? local.getKeys().catch(() => []) : [],
+        ]);
+        usage.sync = { used, quota: chrome.storage.sync.QUOTA_BYTES, waiting: waitingNotes(keys) };
       }
     }),
   ]);

@@ -8,6 +8,7 @@
  */
 import { Observable } from 'rxjs';
 import { InjectionToken } from '@angular/core';
+import { ART_BOARD_ITEM_PREFIX, ITEM_DATA_PREFIX } from './storage-keys';
 
 export const STORAGE_API = new InjectionToken<StorageApi>('Storage API Service');
 export interface StorageApi {
@@ -32,11 +33,11 @@ export function artBoardItemIdsKey(): string {
 }
 
 export function artBoardItemKey(artBoardItemId: string): string {
-  return `ART_BOARD_ITEM__${artBoardItemId}`;
+  return ART_BOARD_ITEM_PREFIX + artBoardItemId;
 }
 
 export function itemDataKey(itemDataId: string): string {
-  return `ITEM_DATA__${itemDataId}`;
+  return ITEM_DATA_PREFIX + itemDataId;
 }
 
 export function userKey(): string {

@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, mockPhotoSources, newNote, newPage, notepadSurface, openBoard, shot } from './helpers';
+import { archivePreview, card, mockPhotoSources, newNote, newPage, notepadSurface, openBoard, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -431,6 +431,16 @@ test('"nm" in the address bar searches the notes', async ({ context, newTab }) =
       modifiedDate: dates.modifiedDate,
     },
     ITEM_DATA__shopping: { id: 'shopping', dataType: 'markdown', empty: false, ...dates, data: 'Oat milk <b>\neggs' },
+    // Archived: not on the board.
+    ART_BOARD_ITEM__recipe: {
+      id: 'recipe',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 2,
+      gridPosition: grid(2),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__recipe: { id: 'recipe', dataType: 'markdown', empty: false, ...dates, data: 'Rice milk pudding' },
     ART_BOARD_ITEM__trip: {
       id: 'trip',
       extensionId: 'ntm-page',
@@ -460,14 +470,26 @@ test('"nm" in the address bar searches the notes', async ({ context, newTab }) =
         event.dispatch('milk', resolve);
       }),
   );
-  expect(suggestions).toEqual([
+  // In the search's order of best match; here, by what each row says.
+  const rows = (suggestions as { content: string; description: string }[]).sort((a, b) =>
+    a.description.localeCompare(b.description),
+  );
+  expect(rows).toEqual([
     { content: `${base}#/main-board?show=shopping`, description: 'Oat milk &lt;b&gt; <dim>Note</dim>' },
+    // An archived note has a row, and an address, of its own.
+    {
+      content: `${base}#/main-board?view=archive&note=recipe`,
+      description: 'Rice milk pudding <dim>Note · Archive</dim>',
+    },
     { content: `${base}#/page/trip?from=archive`, description: 'Trip <dim>Paper · Archive</dim>' },
   ]);
 
   // A row picked opens its note: the board, with the note lit up.
   await page.goto(`${base}#/main-board?show=shopping`);
   await expect(card(page)).toContainText('Oat milk');
+  // An archived note opens the Archive on it.
+  await page.goto(`${base}#/main-board?view=archive&note=recipe`);
+  await expect(archivePreview(page)).toContainText('Rice milk pudding');
   // Words entered as they are: the board's search, on them.
   await page.goto(`${base}#/main-board?search=1&q=porto`);
   const search = page.locator('ntm-board .navbar__search-field');

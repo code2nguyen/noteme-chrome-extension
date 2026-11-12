@@ -1,5 +1,4 @@
 import { DestroyRef, effect, inject, Injectable, signal } from '@angular/core';
-import { localeTag, resolveLanguage } from '../i18n/language';
 import { STORAGE_API } from '../services/storage.api';
 import { parseSettings, Settings, TEXT_SCALES } from './settings';
 
@@ -94,10 +93,6 @@ export class SettingsService {
     effect(() => {
       const theme = this.state().theme;
       document.documentElement.dataset['theme'] = theme === 'auto' ? (this.systemDark() ? 'dark' : 'light') : theme;
-    });
-    // The page's language: the c2 components and the relative times follow it, with no reload.
-    effect(() => {
-      document.documentElement.lang = localeTag(resolveLanguage(this.state().language));
     });
     // The text size: every size in Noteme's stylesheets is multiplied by it (styles.scss).
     effect(() => {

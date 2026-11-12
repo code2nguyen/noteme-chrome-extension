@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PlanItem } from './plan';
-import { isReminderDue, reminderAt, reminderPlan, reminderText, upcomingReminders } from './reminders';
+import { isReminderDue, reminderAt, reminderKey, reminderPlan, reminderText, upcomingReminders } from './reminders';
 
 const at = (year: number, month: number, day: number, hour = 0, minute = 0) =>
   new Date(year, month - 1, day, hour, minute).getTime();
@@ -53,8 +53,21 @@ describe('upcomingReminders', () => {
     ]);
   });
 
-  it('leaves out one whose time has come, and keeps to the limit', () => {
-    expect(upcomingReminders([dinner], 10, at(2026, 11, 20, 18, 50))).toEqual([]);
+  it('announces a plan when it starts if its reminder was missed: added, or reminders switched on, inside the lead', () => {
+    const late = at(2026, 11, 20, 18, 55);
+    expect(upcomingReminders([dinner], 10, late)).toEqual([{ name: 'plan:dinner', when: at(2026, 11, 20, 19, 0) }]);
+    // Not twice: it was announced at its time.
+    expect(upcomingReminders([dinner], 10, late, 200, new Set([reminderKey(dinner)]))).toEqual([]);
+    // Moved, it is another plan to announce.
+    const moved: PlanItem = { ...dinner, start: '19:30', end: '21:00' };
+    expect(upcomingReminders([moved], 60, late, 200, new Set([reminderKey(dinner)]))).toEqual([
+      { name: 'plan:dinner', when: at(2026, 11, 20, 19, 30) },
+    ]);
+  });
+
+  it('leaves out one that has started or whose day has begun, and keeps to the limit', () => {
+    expect(upcomingReminders([dinner], 10, at(2026, 11, 20, 19, 0))).toEqual([]);
+    expect(upcomingReminders([trip], 10, at(2026, 11, 21, 9, 0))).toEqual([]);
     expect(upcomingReminders([trip, dinner], 10, at(2026, 11, 10), 1)).toEqual([
       { name: 'plan:dinner', when: at(2026, 11, 20, 18, 50) },
     ]);

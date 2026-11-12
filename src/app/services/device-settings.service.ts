@@ -42,8 +42,11 @@ export class DeviceSettingsService {
     chrome.storage.onChanged.addListener((changes, area) => {
       const change = changes[DEVICE_SETTINGS_KEY];
       if (area === 'local' && change && typeof change.newValue === 'string' && change.newValue !== this.written) {
-        this.written = change.newValue;
-        this.adopt(parseDeviceSettings(change.newValue));
+        const theirs = parseDeviceSettings(change.newValue);
+        this.adopt(theirs);
+        // Their write stands: this tab writes again when its own settings change, not because they differ from the
+        // other tab's for a moment (two tabs would otherwise overwrite each other in turn).
+        this.written = this.serialize(theirs);
       }
     });
     effect(() => {
@@ -51,14 +54,7 @@ export class DeviceSettingsService {
       if (!reminders) {
         return;
       }
-      const settings = this.settings();
-      const record: DeviceSettings = {
-        language: settings.language,
-        clock: settings.clock,
-        plan: hasFeature(settings, 'plan'),
-        ...reminders,
-      };
-      const serialized = JSON.stringify(record);
+      const serialized = this.serialize(reminders);
       if (serialized !== this.written) {
         this.written = serialized;
         chrome.storage.local
@@ -66,6 +62,19 @@ export class DeviceSettingsService {
           .catch((error: unknown) => console.error('Could not save the reminders', error));
       }
     });
+  }
+
+  /** The record as this tab would write it: its own settings, with the reminders given. */
+  private serialize({ reminders, reminderLead }: Reminders): string {
+    const settings = this.settings();
+    const record: DeviceSettings = {
+      language: settings.language,
+      clock: settings.clock,
+      plan: hasFeature(settings, 'plan'),
+      reminders,
+      reminderLead,
+    };
+    return JSON.stringify(record);
   }
 
   /** Switching reminders on asks Chrome for the notifications permission; a refusal leaves them off. */

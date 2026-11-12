@@ -23,6 +23,10 @@ if (process.argv.includes('--sync')) {
   if (!existsSync(resolve(build, 'manifest.json'))) {
     throw new Error('No build in dist/noteme-chrome-extension: run npm run build first');
   }
+  // The manifest names it; `ng build` alone does not write it.
+  if (!existsSync(resolve(build, 'background.js'))) {
+    throw new Error('No background.js in the build: run npm run build, which builds the worker after the page');
+  }
   const manifest = readJson(resolve(build, 'manifest.json')).version;
   if (manifest !== version) {
     throw new Error(

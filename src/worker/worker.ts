@@ -11,18 +11,33 @@ import { message } from '../app/i18n/messages';
 // A worker cannot wait for a language to load: every one comes with it.
 import '../app/i18n/messages/all';
 import { parsePlans, PlanItem } from '../app/plan/plan';
-import { isReminderDue, REMINDER_PREFIX, reminderPlan, reminderText, upcomingReminders } from '../app/plan/reminders';
+import {
+  isReminderDue,
+  REMINDER_PREFIX,
+  reminderKey,
+  reminderPlan,
+  reminderText,
+  upcomingReminders,
+} from '../app/plan/reminders';
 import { DEVICE_SETTINGS_KEY, DeviceSettings, parseDeviceSettings } from '../app/services/device-settings';
+import { ART_BOARD_ITEM_PREFIX, ITEM_DATA_PREFIX, PLAN_KEY } from '../app/services/storage-keys';
 import { escapeXml, omniboxIndex, OmniboxNote, omniboxNotes, omniboxSuggestions, omniboxTarget } from './omnibox';
 
-/** The one record holding every plan (plan.service.ts). */
-const PLAN_KEY = 'PLAN__ITEMS';
 const BASE = chrome.runtime.getURL('index.html');
 const ICON = chrome.runtime.getURL('assets/icons/noteme-icon-128.png');
 
-async function deviceSettings(): Promise<DeviceSettings> {
-  const stored = await chrome.storage.local.get(DEVICE_SETTINGS_KEY);
-  return parseDeviceSettings(stored[DEVICE_SETTINGS_KEY]);
+/** The settings as last read, for as long as Chrome keeps the worker; read again once they change. */
+let cachedSettings: Promise<DeviceSettings> | undefined;
+
+function deviceSettings(): Promise<DeviceSettings> {
+  cachedSettings ??= chrome.storage.local.get(DEVICE_SETTINGS_KEY).then(
+    (stored) => parseDeviceSettings(stored[DEVICE_SETTINGS_KEY]),
+    (error: unknown) => {
+      cachedSettings = undefined;
+      throw error;
+    },
+  );
+  return cachedSettings;
 }
 
 function parseJson(text: unknown): unknown {
@@ -59,16 +74,25 @@ chrome.omnibox.onInputStarted.addListener(() => {
   void notesIndex().catch(() => undefined);
 });
 
+/** Counts what is typed: an answer found for letters typed before the latest ones is dropped. */
+let typed = 0;
+
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
+  const current = ++typed;
   void (async () => {
-    const language = resolveLanguage((await deviceSettings()).language);
-    const query = text.trim();
-    if (query) {
-      void chrome.omnibox.setDefaultSuggestion({
-        description: message(language, 'omnibox.search', `<match>${escapeXml(query)}</match>`),
-      });
+    const [{ language: setting }, notes] = await Promise.all([deviceSettings(), notesIndex()]);
+    if (current !== typed) {
+      return;
     }
-    suggest(omniboxSuggestions(await notesIndex(), text, BASE, language));
+    const language = resolveLanguage(setting);
+    const query = text.trim();
+    // Chrome's own row: what Enter searches for, or with nothing typed yet, what "nm" does.
+    void chrome.omnibox.setDefaultSuggestion({
+      description: query
+        ? message(language, 'omnibox.search', `<match>${escapeXml(query)}</match>`)
+        : escapeXml(message(language, 'board.search')),
+    });
+    suggest(omniboxSuggestions(notes, text, BASE, language));
   })().catch((error: unknown) => console.error('Noteme could not search the notes', error));
 });
 
@@ -88,9 +112,17 @@ chrome.omnibox.onInputEntered.addListener((text, disposition) => {
  * starts and after each reminder: alarms no plan asks for any more are cleared, the others set to their time.
  */
 async function scheduleReminders(): Promise<void> {
-  const [settings, items, alarms] = await Promise.all([deviceSettings(), plans(), chrome.alarms.getAll()]);
+  const [settings, items, alarms, announced] = await Promise.all([
+    deviceSettings(),
+    plans(),
+    chrome.alarms.getAll(),
+    reminded(),
+  ]);
   const now = Date.now();
-  const wanted = settings.plan && settings.reminders ? upcomingReminders(items, settings.reminderLead, now) : [];
+  const wanted =
+    settings.plan && settings.reminders
+      ? upcomingReminders(items, settings.reminderLead, now, undefined, new Set(announced))
+      : [];
   const names = new Set(wanted.map((reminder) => reminder.name));
   const set = new Map(alarms.map((alarm) => [alarm.name, alarm.scheduledTime]));
   await Promise.all([
@@ -102,6 +134,19 @@ async function scheduleReminders(): Promise<void> {
       .filter((reminder) => set.get(reminder.name) !== reminder.when)
       .map((reminder) => chrome.alarms.create(reminder.name, { when: reminder.when })),
   ]);
+}
+
+/**
+ * The plans announced, each at the time it is set for (`reminderKey`), so one announced before it starts is not
+ * announced again when it does. Kept for the browser session (chrome.storage.session): the worker itself comes and
+ * goes.
+ */
+const REMINDED_KEY = 'reminded';
+
+async function reminded(): Promise<string[]> {
+  const stored = await chrome.storage.session.get(REMINDED_KEY);
+  const keys: unknown = stored[REMINDED_KEY];
+  return Array.isArray(keys) ? keys.filter((key): key is string => typeof key === 'string') : [];
 }
 
 async function remind(name: string): Promise<void> {
@@ -122,6 +167,10 @@ async function remind(name: string): Promise<void> {
       title: item.title,
       message: reminderText(item, settings.clock, localeTag(language), message(language, 'plan.allDay')),
     });
+    // Only the plans still there are kept, so the list stays as short as the plans are few.
+    const current = new Set(items.map(reminderKey));
+    const announced = [...(await reminded()).filter((key) => current.has(key)), reminderKey(item)];
+    await chrome.storage.session.set({ [REMINDED_KEY]: [...new Set(announced)] });
   }
   await scheduleReminders();
 }
@@ -168,10 +217,13 @@ chrome.storage.onChanged.addListener((changes, area) => {
     return;
   }
   const keys = Object.keys(changes);
+  if (keys.includes(DEVICE_SETTINGS_KEY)) {
+    cachedSettings = undefined;
+  }
   if (keys.includes(PLAN_KEY) || keys.includes(DEVICE_SETTINGS_KEY)) {
     reschedule();
   }
-  if (keys.some((key) => key.startsWith('ITEM_DATA__') || key.startsWith('ART_BOARD_ITEM__'))) {
+  if (keys.some((key) => key.startsWith(ITEM_DATA_PREFIX) || key.startsWith(ART_BOARD_ITEM_PREFIX))) {
     index = undefined;
   }
 });

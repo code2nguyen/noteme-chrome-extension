@@ -1,11 +1,11 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { INSTANCE_ID } from '../services/instance-id';
 import { STORAGE_API } from '../services/storage.api';
+import { PLAN_KEY } from '../services/storage-keys';
 import { uuid } from '../services/utils';
 import { parsePlans, PlanItem } from './plan';
 
-/** The one record holding every plan: small, so it is read and written whole. */
-export const PLAN_KEY = 'PLAN__ITEMS';
+export { PLAN_KEY };
 
 /**
  * The plans, as a signal. Each change writes the whole list (a few KB at most); another tab's change arrives through
