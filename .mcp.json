@@ -2,8 +2,8 @@
   "mcpServers": {
     "c2n": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@c2n/mcp@1.0.17"]
+      "command": "node",
+      "args": ["node_modules/@c2n/mcp/dist/cli.js"]
     }
   }
 }

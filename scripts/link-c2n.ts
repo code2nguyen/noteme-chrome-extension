@@ -1,11 +1,12 @@
 // Points the installed c2n packages at a local checkout of the web-components repo, to try component changes in the
 // app before they are published. package.json and the lockfile stay on the published versions.
 //
-//   node scripts/link-c2n.ts             -> node_modules/@c2n/{components,core,feather-icons,theme} link to ../web-components
+//   node scripts/link-c2n.ts             -> node_modules/@c2n/{components,core,feather-icons,theme,mcp} link to ../web-components
 //   node scripts/link-c2n.ts --unlink    -> back to the published packages (npm install)
 //
 // C2N_REPO overrides where the checkout is. Build it first, and again after each change (wireit skips what is fresh):
 //   npm run build -w packages/umbrella && npm run build -w packages/icons/feather-icons && npm run build -w packages/tools/theme
+//   npm run build:tools   (the MCP server's catalog, after the root build)
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, rmSync, symlinkSync } from 'node:fs';
@@ -20,6 +21,8 @@ const links = {
   'feather-icons': 'packages/icons/feather-icons',
   // The theme stylesheet @c2n/components/theme.css imports, with every component's token mapping.
   theme: 'packages/tools/theme',
+  // The MCP server the agents run (.mcp.json): its catalog must know the components of the checkout.
+  mcp: 'packages/tools/mcp',
 };
 
 const target = (name: string) => resolve(root, 'node_modules/@c2n', name);
