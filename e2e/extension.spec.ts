@@ -57,7 +57,9 @@ async function stored(page: Page, area: 'local' | 'sync', key: string) {
 /** Sync is on unless switched off in Settings: put the switch where the test wants it. */
 async function setSync(page: Page, on: boolean): Promise<void> {
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
-  const control = page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' });
+  const control = page
+    .locator('ntm-settings-panel .settings__row', { hasText: 'Sync with your Chrome profile' })
+    .locator('c2-switch');
   await expect(control).toBeVisible();
   if ((await control.evaluate((element) => (element as HTMLInputElement).checked)) !== on) {
     await control.click();
@@ -275,7 +277,7 @@ test('a new profile syncs without being asked, and Settings says how the sync is
   await panel.locator('.settings__sync-status').scrollIntoViewIfNeeded();
   await shot(page, 'extension-settings-sync-status');
   // Switched off, there is no status to give.
-  await panel.locator('c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await panel.locator('.settings__row', { hasText: 'Sync with your Chrome profile' }).locator('c2-switch').click();
   await expect(status).toHaveCount(0);
   await expect(panel.locator('c2-banner')).toHaveCount(0);
 });
@@ -406,17 +408,29 @@ test('Settings says how much room the notes take, and Chrome sync while it is on
   const page = await newTab();
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
   const storage = page.locator('ntm-settings-panel .settings__storage');
-  await expect(
-    storage.locator('.settings__row', { hasText: 'Notes on this computer' }).locator('.settings__value'),
-  ).toHaveText(/^[\d.,]+ (kB|MB)$/);
-  await expect(storage.locator('.settings__row', { hasText: 'Images and photos' })).toBeVisible();
-  await expect(storage.locator('c2-progress')).toContainText('Chrome sync');
-  await expect(storage.locator('c2-progress')).toContainText(/of 100 kB/);
+  const device = storage.locator('c2-distribution-bar');
+  await expect(device).toContainText('On this computer');
+  await expect(device.locator('.settings__value')).toHaveText(/^[\d.,]+ (kB|MB)$/);
+  // Each part names its size in the legend, inside the bar's shadow root.
+  await expect(device.getByText(/^Notes · [\d.,]+ (kB|MB)$/)).toBeVisible();
+  await expect(device.getByText(/^Images and photos · [\d.,]+ (kB|MB)$/)).toBeVisible();
+  const quota = storage.locator('c2-meter');
+  await expect(quota).toContainText('Chrome sync');
+  await expect(quota.getByText(/of 100 kB/)).toBeVisible();
   await storage.scrollIntoViewIfNeeded();
   await shot(page, 'extension-settings-storage');
+  // What stays on the computer is explained behind the heading's (i).
+  const help = storage.locator('c2-toggletip');
+  await expect(help).not.toHaveAttribute('open');
+  await help.getByRole('button').click();
+  await expect(help).toHaveAttribute('open');
+  await expect(help).toContainText('kept on this computer only');
   // Chrome sync is not read, and not shown, while sync is off.
-  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
-  await expect(storage.locator('c2-progress')).toHaveCount(0);
+  await page
+    .locator('ntm-settings-panel .settings__row', { hasText: 'Sync with your Chrome profile' })
+    .locator('c2-switch')
+    .click();
+  await expect(storage.locator('c2-meter')).toHaveCount(0);
 });
 
 /** The background service worker, started by Chrome with the extension. */
@@ -436,7 +450,9 @@ test('a plan has a reminder alarm while reminders are on', async ({ context, new
   await page.locator('ntm-settings-panel .settings__features').click();
   await page.locator('ntm-settings-panel .settings__features c2-list-item', { hasText: 'Plan' }).click();
   await page.keyboard.press('Escape');
-  await expect(page.locator('ntm-settings-panel c2-switch', { hasText: 'Reminders' })).toBeVisible();
+  await expect(
+    page.locator('ntm-settings-panel .settings__row', { hasText: 'Reminders' }).locator('c2-switch'),
+  ).toBeVisible();
   await shot(page, 'extension-settings-reminders');
 
   const tomorrow = new Date();

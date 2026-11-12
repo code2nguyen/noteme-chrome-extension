@@ -80,8 +80,11 @@ export const settingsFr: Translation<typeof settingsEn> = {
   'settings.sync.error.other': (detail: string) => `Chrome a répondu : ${detail}`,
   'settings.sync.text':
     'Désactivée, tout reste sur cet ordinateur. Feuilles, flux et agenda restent sur cet ordinateur dans tous les cas pour le moment : leur synchronisation via votre Google Drive arrive bientôt.',
+  'settings.about': (topic: string) => `À propos : ${topic}`,
   'settings.storage': 'Stockage',
-  'settings.storage.notes': 'Notes sur cet ordinateur',
+  'settings.storage.device': 'Sur cet ordinateur',
+  'settings.storage.part': (name: string, size: string) => `${name} · ${size}`,
+  'settings.storage.notes': 'Notes',
   'settings.storage.files': 'Images et photos',
   'settings.storage.sync': 'Synchronisation Chrome',
   'settings.storage.sync.value': (used: string, total: string) => `${used} sur ${total}`,

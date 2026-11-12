@@ -1,7 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { StorageApi } from './storage.api';
+import { DEV_STORAGE_PREFIX } from './storage-keys';
 
-const PREFIX = 'noteme-dev:';
+const PREFIX = DEV_STORAGE_PREFIX;
 
 /**
  * Storage used by `ng serve`, where the chrome.* APIs do not exist. Records live in localStorage so a reload keeps

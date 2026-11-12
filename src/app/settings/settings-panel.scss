@@ -60,11 +60,11 @@
   }
 }
 
-.settings__switch {
-  min-height: 52px;
-  font-size: calc(15px * var(--ntm-text-scale));
-  --c2-switch__container--flex-direction: row-reverse;
-  --c2-switch__container--justify-content: space-between;
+// A setting's name with the (i) that explains it.
+.settings__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .settings__text {
@@ -79,16 +79,46 @@
   color: var(--c2-theme--color-on-surface-variant);
 }
 
-// Chrome sync's quota: the row's own text size and colours, the bar in the theme's.
+// A group's heading with the (i) that explains it: the bubble has the sheet's own text, not the heading's capitals.
+.settings__head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+
+  .settings__heading {
+    margin: 0;
+  }
+}
+
+.settings__help {
+  --c2-toggletip--font-size: calc(14px * var(--ntm-text-scale));
+  --c2-toggletip--max-width: 320px;
+}
+
+// What the device holds, part by part, in the row's own text size.
+.settings__device {
+  margin: 12px 0;
+  --c2-distribution-bar__label--color: var(--c2-theme--color-on-surface);
+  --c2-distribution-bar__label--font-size: calc(15px * var(--ntm-text-scale));
+  --c2-distribution-bar__label--font-weight: 400;
+  --c2-distribution-bar__legend--color: var(--c2-theme--color-on-surface);
+  --c2-distribution-bar__legend--font-size: calc(13px * var(--ntm-text-scale));
+  --c2-distribution-bar__legend-value--color: var(--c2-theme--color-on-surface-variant);
+  // The legend already says each part's size; the hover bubble would add the number of bytes, bare.
+  --c2-distribution-bar__tooltip--display: none;
+}
+
+// Chrome sync's quota: the row's own text size and colours, the bar in the theme's until it fills up.
 .settings__quota {
   margin: 12px 0;
-  --c2-progress__label--color: var(--c2-theme--color-on-surface);
-  --c2-progress__label--font-size: calc(15px * var(--ntm-text-scale));
-  --c2-progress__value--color: var(--c2-theme--color-on-surface-variant);
-  --c2-progress__value--font-size: calc(15px * var(--ntm-text-scale));
-  --c2-progress__value--font-weight: 400;
-  --c2-progress__track--background-color: var(--c2-theme--color-primary-container);
-  --c2-progress__indicator--background-color: var(--c2-theme--color-primary);
+  --c2-meter__label--color: var(--c2-theme--color-on-surface);
+  --c2-meter__label--font-size: calc(15px * var(--ntm-text-scale));
+  --c2-meter__label--font-weight: 400;
+  --c2-meter__value--color: var(--c2-theme--color-on-surface-variant);
+  --c2-meter__value--font-size: calc(15px * var(--ntm-text-scale));
+  --c2-meter__track--background-color: var(--c2-theme--color-primary-container);
+  --c2-meter__indicator--background-color: var(--c2-theme--color-primary);
 }
 
 .settings__sync-status {

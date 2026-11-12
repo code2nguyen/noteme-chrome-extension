@@ -29,6 +29,7 @@ import { INSTANCE_ID } from '../services/instance-id';
 import { ArtBoardItem } from '../store/models';
 import { DataType } from '../store/models/data-type';
 import { parseTasks, serializeTasks, TodoTask } from '../todo/todo-doc';
+import { storeTodoLook } from '../todo/todo-storage';
 import { bringIntoView } from './bring-into-view';
 
 /**
@@ -103,6 +104,11 @@ export class TodoCard {
         });
       onCleanup(() => subscription.unsubscribe());
     });
+
+    // storage-key keeps the filter tab (All, To do, Done) on this computer. The component keeps a copy of the look
+    // there too and draws the list from it: that copy is made the look kept with the note, which another computer may
+    // have changed, before the list reads it.
+    effect(() => storeTodoLook(this.itemId(), this.look()));
 
     effect(() => {
       if (this.autofocus()) {
