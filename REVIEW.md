@@ -21,7 +21,7 @@ nits that Prettier or ESLint already settle, and findings in generated or build 
 - **2.x data is migrated when read, never rewritten** (`services/migration.ts`). A note keeps its stored form until the
   user edits it. Flag any code that writes migrated data back without an edit, or that drops fields 2.x stored.
 - **Stored formats are a contract.** The keys (`ART_BOARD_ITEM__<id>`, `ITEM_DATA__<id>`, the board's index lists,
-  `PLAN__ITEMS`, `noteme-settings`) and the shape of each `DataType` are read by older and newer versions on other
+  `PLAN__ITEMS`, `DEVICE__SETTINGS`, `noteme-settings`) and the shape of each `DataType` are read by older and newer versions on other
   devices. A change to them needs a reader for the old shape, and a parser that falls back instead of throwing
   (`parseSheet` is the pattern): one malformed record must not break the board.
 - **Empty versus archived.** An empty note is removed instead of archived. Check that a note with unsaved text is never
@@ -39,9 +39,15 @@ nits that Prettier or ESLint already settle, and findings in generated or build 
 
 ## 3. Extension and security
 
-- **Permissions:** `storage` and `unlimitedStorage`, plus optional `topSites` and `favicon`. A new permission, host
+- **Permissions:** `storage`, `unlimitedStorage` and `alarms` (none of them shown at install), plus optional
+  `topSites`, `favicon` and `notifications` (asked for when reminders are switched on). A new permission, host
   permission or `content_security_policy` change affects every user's install prompt and the store review. Flag it,
   and check it is requested only when the feature needs it.
+- **The background worker** (`src/worker`, `background.js`) answers the address bar ("nm words") and shows the plans'
+  reminders. It only reads storage, never writes notes or plans. Chrome stops it when idle: it must keep nothing in
+  memory that it cannot read again, and register its listeners at start. It opens only this extension's own pages;
+  a note's text in an address-bar row is escaped (`escapeXml`), since Chrome reads the row as XML. Its record
+  (`DEVICE__SETTINGS`) is this device's and never syncs.
 - **Manifest V3:** no remote code, `eval`, `new Function` or scripts loaded from a URL.
 - **Network:** the only outside calls are Wikimedia Commons (`home/background*.ts`: the search API and the photos it
   returns). A new host is a privacy question as much as a code one. Commons answers are untrusted: credits are stripped

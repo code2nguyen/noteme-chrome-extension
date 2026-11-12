@@ -2,7 +2,7 @@ import { computed, inject, Injectable } from '@angular/core';
 
 import { SettingsService } from '../settings/settings.service';
 import { localeTag, resolveLanguage } from './language';
-import { CATALOGS, MessageArgs, MessageKey } from './messages';
+import { message, MessageArgs, MessageKey } from './messages';
 
 /**
  * Noteme's language, from Settings (Auto follows the browser), and its text in it. `t` reads the language signal, so a
@@ -16,8 +16,6 @@ export class I18n {
   /** For dates and numbers (Intl) and `<html lang>`, which the c2 components follow. */
   readonly locale = computed(() => localeTag(this.language()));
 
-  readonly t = <K extends MessageKey>(key: K, ...args: MessageArgs<K>): string => {
-    const message = CATALOGS[this.language()][key] as string | ((...values: unknown[]) => string);
-    return typeof message === 'function' ? message(...args) : message;
-  };
+  readonly t = <K extends MessageKey>(key: K, ...args: MessageArgs<K>): string =>
+    message(this.language(), key, ...args);
 }

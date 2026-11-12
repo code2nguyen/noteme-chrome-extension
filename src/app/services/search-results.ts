@@ -1,6 +1,5 @@
 import { Dictionary } from '@ngrx/entity';
 
-import { ExtensionId } from '../extension-id';
 import { kindOf, shortKindKey, Translate } from '../board/older-notes';
 import { untitledKey } from '../i18n/kinds';
 import { ArtBoardItem, ItemData } from '../store/models';
@@ -17,11 +16,7 @@ export interface SearchSuggestion {
 
 const PREVIEW_LENGTH = 80;
 
-/** The notes that open full screen, and their route; a quick note and a to-do list are shown on the board instead. */
-export const FULL_SCREEN: Partial<Record<ExtensionId, string>> = {
-  [ExtensionId.Page]: '/page',
-  [ExtensionId.Flow]: '/flow',
-};
+export { FULL_SCREEN } from '../extension-id';
 
 /**
  * The search results (the store's, from fuse.js) as rows for the home and board search fields, in the app's language:

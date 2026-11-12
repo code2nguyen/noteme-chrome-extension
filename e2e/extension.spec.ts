@@ -342,3 +342,138 @@ test('notes sync through the Chrome profile; pages stay on this computer', async
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${pageId}`)).toBeUndefined();
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${noteId}`)).toBeDefined();
 });
+
+test('Settings says how much room the notes take, and Chrome sync once it is on', async ({ newTab }) => {
+  const page = await newTab();
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  const storage = page.locator('ntm-settings-panel .settings__storage');
+  await expect(
+    storage.locator('.settings__row', { hasText: 'Notes on this computer' }).locator('.settings__value'),
+  ).toHaveText(/^[\d.,]+ (kB|MB)$/);
+  await expect(storage.locator('.settings__row', { hasText: 'Images and photos' })).toBeVisible();
+  // Chrome sync is not read, and not shown, while sync is off.
+  await expect(storage.locator('c2-progress')).toHaveCount(0);
+
+  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await expect(storage.locator('c2-progress')).toContainText('Chrome sync');
+  await expect(storage.locator('c2-progress')).toContainText(/of 100 kB/);
+  await storage.scrollIntoViewIfNeeded();
+  await shot(page, 'extension-settings-storage');
+});
+
+/** The background service worker, started by Chrome with the extension. */
+async function worker(context: BrowserContext) {
+  return context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker'));
+}
+
+test('a plan has a reminder alarm while reminders are on', async ({ context, newTab }) => {
+  const page = await newTab();
+  const background = await worker(context);
+  const alarms = () =>
+    background.evaluate(async () =>
+      (await chrome.alarms.getAll()).map((alarm) => ({ name: alarm.name, when: alarm.scheduledTime })),
+    );
+  // Plan on, as Settings › Features switches it.
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  await page.locator('ntm-settings-panel .settings__features').click();
+  await page.locator('ntm-settings-panel .settings__features c2-list-item', { hasText: 'Plan' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('ntm-settings-panel c2-switch', { hasText: 'Reminders' })).toBeVisible();
+  await shot(page, 'extension-settings-reminders');
+
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = [tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate()]
+    .map((part) => String(part).padStart(2, '0'))
+    .join('-');
+  const device = { language: 'auto', clock: '24h', plan: true, reminderLead: 15 };
+  await seed(page, 'local', {
+    PLAN__ITEMS: {
+      items: [
+        { id: 'dentist', title: 'Dentist', date: day, start: '10:00', end: '11:00' },
+        { id: 'trip', title: 'Trip', date: day },
+        { id: 'past', title: 'Done', date: '2020-01-01', start: '10:00', end: '11:00' },
+      ],
+    },
+    DEVICE__SETTINGS: { ...device, reminders: true },
+  });
+  const at = (hours: number, minutes: number) => new Date(tomorrow).setHours(hours, minutes, 0, 0);
+  // A quarter of an hour before the dentist, and at 9:00 for the trip; nothing for what is over.
+  await expect.poll(alarms).toEqual([
+    { name: 'plan:trip', when: at(9, 0) },
+    { name: 'plan:dentist', when: at(9, 45) },
+  ]);
+
+  // The plan moved to the afternoon: its alarm follows.
+  await seed(page, 'local', {
+    PLAN__ITEMS: { items: [{ id: 'dentist', title: 'Dentist', date: day, start: '15:00', end: '16:00' }] },
+  });
+  await expect.poll(alarms).toEqual([{ name: 'plan:dentist', when: at(14, 45) }]);
+
+  await seed(page, 'local', { DEVICE__SETTINGS: { ...device, reminders: false } });
+  await expect.poll(alarms).toEqual([]);
+  // The record is this device's: it never goes to chrome.storage.sync.
+  expect(await stored(page, 'sync', 'DEVICE__SETTINGS')).toBeUndefined();
+});
+
+test('"nm" in the address bar searches the notes', async ({ context, newTab }) => {
+  const page = await newTab();
+  const base = page.url().split('#')[0];
+  await seed(page, 'local', {
+    ...board(['shopping']),
+    ART_BOARD_ITEM__shopping: {
+      id: 'shopping',
+      boardId: 'defaultArtBoard',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 1,
+      gridPosition: grid(0),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__shopping: { id: 'shopping', dataType: 'markdown', empty: false, ...dates, data: 'Oat milk <b>\neggs' },
+    ART_BOARD_ITEM__trip: {
+      id: 'trip',
+      extensionId: 'ntm-page',
+      colorIndex: 0,
+      gridPosition: grid(1),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__trip: {
+      id: 'trip',
+      dataType: 'page',
+      empty: false,
+      ...dates,
+      data: 'Lisbon, then Porto. Buy milk.',
+      properties: { title: 'Trip' },
+    },
+  });
+
+  // What Chrome asks the worker as words are typed after "nm ", and what it answers.
+  const background = await worker(context);
+  const suggestions = await background.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const event = chrome.omnibox.onInputChanged as unknown as {
+          dispatch(text: string, suggest: (rows: unknown) => void): void;
+        };
+        event.dispatch('milk', resolve);
+      }),
+  );
+  expect(suggestions).toEqual([
+    { content: `${base}#/main-board?show=shopping`, description: 'Oat milk &lt;b&gt; <dim>Note</dim>' },
+    { content: `${base}#/page/trip?from=archive`, description: 'Trip <dim>Paper · Archive</dim>' },
+  ]);
+
+  // A row picked opens its note: the board, with the note lit up.
+  await page.goto(`${base}#/main-board?show=shopping`);
+  await expect(card(page)).toContainText('Oat milk');
+  // Words entered as they are: the board's search, on them.
+  await page.goto(`${base}#/main-board?search=1&q=porto`);
+  const search = page.locator('ntm-board .navbar__search-field');
+  await expect(search).toHaveJSProperty('value', 'porto');
+  await expect(search).toHaveJSProperty('open', true);
+  await expect(search.locator('c2-list-item', { hasText: 'Trip' })).toBeVisible();
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await shot(page, 'extension-omnibox-search');
+});

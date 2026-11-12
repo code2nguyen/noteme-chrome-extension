@@ -3,9 +3,11 @@ import {
   Component,
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
+  effect,
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import './settings-elements';
 import type { Select } from '@c2n/components/select';
@@ -16,8 +18,11 @@ import { LANGUAGE_NAMES, LANGUAGES } from '../i18n/language';
 import type { MessageKey } from '../i18n/messages';
 import type { ShownPhoto } from '../home/background.service';
 import { TopSitesService } from '../home/top-sites.service';
+import { REMINDER_LEADS, ReminderLead } from '../services/device-settings';
+import { DeviceSettingsService } from '../services/device-settings.service';
 import { Feature, FEATURES, formatDate, hasFeature, Settings } from './settings';
 import { SettingsService } from './settings.service';
+import { formatBytes, readStorageUsage, StorageUsage } from './storage-usage';
 
 /**
  * Settings, in a sheet over Home: the page stays visible behind it, so each change shows at once. Everything saves
@@ -33,6 +38,7 @@ import { SettingsService } from './settings.service';
 export class SettingsPanel {
   private readonly service = inject(SettingsService);
   private readonly topSites = inject(TopSitesService);
+  private readonly device = inject(DeviceSettingsService);
   private readonly i18n = inject(I18n);
   readonly t = this.i18n.t;
 
@@ -62,6 +68,45 @@ export class SettingsPanel {
       label: formatDate(new Date(), format, this.i18n.locale()),
     })),
   );
+
+  /** Reminders of the plans: in the extension only, where the background worker shows them. */
+  readonly remindersSupported = this.device.supported;
+  readonly reminders = this.device.reminders;
+  readonly reminderLead = this.device.reminderLead;
+  readonly reminderLeads = REMINDER_LEADS;
+
+  /** How much room Noteme takes, measured each time the sheet opens and when sync is switched. */
+  private readonly usage = signal<StorageUsage>({});
+  readonly storage = computed(() => {
+    const { notes, files, sync } = this.usage();
+    const size = (bytes: number) => formatBytes(bytes, this.i18n.locale());
+    return {
+      notes: notes === undefined ? null : size(notes),
+      files: files === undefined ? null : size(files),
+      sync: sync && {
+        used: sync.used,
+        quota: sync.quota,
+        text: this.t('settings.storage.sync.value', size(sync.used), size(sync.quota)),
+        waiting: sync.waiting,
+      },
+    };
+  });
+  readonly hasStorage = computed(() => {
+    const { notes, files, sync } = this.storage();
+    return notes !== null || files !== null || !!sync;
+  });
+
+  constructor() {
+    effect((onCleanup) => {
+      if (!this.open()) {
+        return;
+      }
+      let current = true;
+      onCleanup(() => (current = false));
+      // The answer of an earlier measure (sync since switched) is dropped.
+      void readStorageUsage(this.settings().sync).then((usage) => current && this.usage.set(usage));
+    });
+  }
 
   choose<K extends keyof Settings>(key: K, event: Event): void {
     const value = (event as CustomEvent<{ value: string }>).detail.value;
@@ -107,5 +152,18 @@ export class SettingsPanel {
     const granted = await this.topSites.request();
     control.checked = granted;
     this.service.update({ shortcuts: granted });
+  }
+
+  /** Turning reminders on asks Chrome for the notifications permission; a refusal leaves them off. */
+  async toggleReminders(event: Event): Promise<void> {
+    const control = event.target as Switch;
+    control.checked = await this.device.setReminders(control.checked);
+  }
+
+  chooseReminderLead(event: Event): void {
+    const minutes = Number((event.target as Select).value[0]);
+    if (REMINDER_LEADS.includes(minutes as ReminderLead)) {
+      this.device.setReminderLead(minutes as ReminderLead);
+    }
   }
 }

@@ -19,3 +19,9 @@ const fr: Translation<Catalog> = { ...commonFr, ...settingsFr, ...homeFr, ...boa
 const vi: Translation<Catalog> = { ...commonVi, ...settingsVi, ...homeVi, ...boardVi, ...archiveVi, ...viewsVi };
 
 export const CATALOGS: Record<Language, Translation<Catalog>> = { en, fr, vi };
+
+/** A message in a language, with the values it takes: what `I18n.t` says, for code outside Angular (the worker). */
+export function message<K extends MessageKey>(language: Language, key: K, ...args: MessageArgs<K>): string {
+  const text = CATALOGS[language][key] as string | ((...values: unknown[]) => string);
+  return typeof text === 'function' ? text(...args) : text;
+}

@@ -35,6 +35,10 @@ export function syncsWithChromeProfile(key: string, value: unknown): boolean {
   if (key.startsWith('PLAN__')) {
     return false;
   }
+  // This device's own records (what the background worker reads: device-settings.ts).
+  if (key.startsWith('DEVICE__')) {
+    return false;
+  }
   return true;
 }
 

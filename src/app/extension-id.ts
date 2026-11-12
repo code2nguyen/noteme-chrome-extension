@@ -11,3 +11,9 @@ export enum ExtensionId {
   /** Rows, columns and formulas (c2-spreadsheet), worked on right on its card. */
   Sheet = 'ntm-sheet',
 }
+
+/** The notes that open full screen, and their route; a quick note, a to-do list and a sheet are shown on the board. */
+export const FULL_SCREEN: Partial<Record<ExtensionId, string>> = {
+  [ExtensionId.Page]: '/page',
+  [ExtensionId.Flow]: '/flow',
+};

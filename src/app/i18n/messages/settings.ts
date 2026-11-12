@@ -58,12 +58,27 @@ export const settingsEn = {
   'settings.weekStart': 'Week starts on',
   'settings.weekStart.monday': 'Monday',
   'settings.weekStart.sunday': 'Sunday',
+  'settings.reminders': 'Reminders',
+  'settings.reminders.description':
+    'A notification before a plan with a time starts, and at 9:00 for one that lasts all day',
+  'settings.reminderLead': 'Remind me',
+  'settings.reminderLead.option': (minutes: number) =>
+    minutes === 0 ? 'When it starts' : minutes === 60 ? '1 hour before' : `${minutes} minutes before`,
   'settings.sync': 'Sync',
   'settings.sync.switch': 'Sync with your Chrome profile',
   'settings.sync.description':
     'Notes, to dos and settings follow you to every computer where you sign in to Chrome and switch this on',
   'settings.sync.text':
     'Off, everything stays on this computer. Papers, flows and plans stay on this computer either way for now: syncing them through your Google Drive is coming.',
+  'settings.storage': 'Storage',
+  'settings.storage.notes': 'Notes on this computer',
+  'settings.storage.files': 'Images and photos',
+  'settings.storage.sync': 'Chrome sync',
+  'settings.storage.sync.value': (used: string, total: string) => `${used} of ${total}`,
+  'settings.storage.waiting': (count: number) =>
+    count === 1 ? '1 note is waiting for room in Chrome sync.' : `${count} notes are waiting for room in Chrome sync.`,
+  'settings.storage.text':
+    'Images pasted into notes and the photos downloaded for Home are kept on this computer only.',
 };
 
 export const settingsFr: Translation<typeof settingsEn> = {
@@ -123,12 +138,29 @@ export const settingsFr: Translation<typeof settingsEn> = {
   'settings.weekStart': 'La semaine commence le',
   'settings.weekStart.monday': 'Lundi',
   'settings.weekStart.sunday': 'Dimanche',
+  'settings.reminders': 'Rappels',
+  'settings.reminders.description':
+    'Une notification avant ce qui est prévu à une heure précise, et à 9 h pour ce qui dure toute la journée',
+  'settings.reminderLead': 'Me prévenir',
+  'settings.reminderLead.option': (minutes: number) =>
+    minutes === 0 ? 'Au début' : minutes === 60 ? '1 heure avant' : `${minutes} minutes avant`,
   'settings.sync': 'Synchronisation',
   'settings.sync.switch': 'Synchroniser avec votre profil Chrome',
   'settings.sync.description':
     'Notes, À faire et réglages vous suivent sur chaque ordinateur où vous vous connectez à Chrome et activez cette option',
   'settings.sync.text':
     'Désactivée, tout reste sur cet ordinateur. Feuilles, flux et agenda restent sur cet ordinateur dans tous les cas pour le moment : leur synchronisation via votre Google Drive arrive bientôt.',
+  'settings.storage': 'Stockage',
+  'settings.storage.notes': 'Notes sur cet ordinateur',
+  'settings.storage.files': 'Images et photos',
+  'settings.storage.sync': 'Synchronisation Chrome',
+  'settings.storage.sync.value': (used: string, total: string) => `${used} sur ${total}`,
+  'settings.storage.waiting': (count: number) =>
+    count === 1
+      ? '1 note attend de la place dans la synchronisation Chrome.'
+      : `${count} notes attendent de la place dans la synchronisation Chrome.`,
+  'settings.storage.text':
+    'Les images collées dans les notes et les photos téléchargées pour l’accueil restent sur cet ordinateur.',
 };
 
 export const settingsVi: Translation<typeof settingsEn> = {
@@ -187,10 +219,23 @@ export const settingsVi: Translation<typeof settingsEn> = {
   'settings.weekStart': 'Tuần bắt đầu vào',
   'settings.weekStart.monday': 'Thứ Hai',
   'settings.weekStart.sunday': 'Chủ Nhật',
+  'settings.reminders': 'Nhắc nhở',
+  'settings.reminders.description':
+    'Thông báo trước khi một kế hoạch có giờ bắt đầu, và lúc 9:00 cho kế hoạch kéo dài cả ngày',
+  'settings.reminderLead': 'Nhắc tôi',
+  'settings.reminderLead.option': (minutes: number) =>
+    minutes === 0 ? 'Khi bắt đầu' : minutes === 60 ? 'Trước 1 giờ' : `Trước ${minutes} phút`,
   'settings.sync': 'Đồng bộ',
   'settings.sync.switch': 'Đồng bộ với hồ sơ Chrome của bạn',
   'settings.sync.description':
     'Ghi chú, việc cần làm và cài đặt theo bạn đến mọi máy tính mà bạn đăng nhập Chrome và bật mục này',
   'settings.sync.text':
     'Khi tắt, mọi thứ ở lại trên máy tính này. Hiện tại giấy, sơ đồ và kế hoạch luôn ở lại trên máy tính này: tính năng đồng bộ chúng qua Google Drive sắp ra mắt.',
+  'settings.storage': 'Dung lượng',
+  'settings.storage.notes': 'Ghi chú trên máy tính này',
+  'settings.storage.files': 'Hình ảnh và ảnh nền',
+  'settings.storage.sync': 'Đồng bộ Chrome',
+  'settings.storage.sync.value': (used: string, total: string) => `${used} trên ${total}`,
+  'settings.storage.waiting': (count: number) => `${count} ghi chú đang chờ chỗ trống trong đồng bộ Chrome.`,
+  'settings.storage.text': 'Hình ảnh dán vào ghi chú và ảnh tải về cho Trang chủ chỉ được lưu trên máy tính này.',
 };

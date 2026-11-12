@@ -73,3 +73,20 @@
   line-height: 1.5;
   color: var(--c2-theme--color-on-surface-variant);
 }
+
+.settings__value {
+  font-variant-numeric: tabular-nums;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+// Chrome sync's quota: the row's own text size and colours, the bar in the theme's.
+.settings__quota {
+  margin: 12px 0;
+  --c2-progress__label--color: var(--c2-theme--color-on-surface);
+  --c2-progress__label--font-size: calc(15px * var(--ntm-text-scale));
+  --c2-progress__value--color: var(--c2-theme--color-on-surface-variant);
+  --c2-progress__value--font-size: calc(15px * var(--ntm-text-scale));
+  --c2-progress__value--font-weight: 400;
+  --c2-progress__track--background-color: var(--c2-theme--color-primary-container);
+  --c2-progress__indicator--background-color: var(--c2-theme--color-primary);
+}

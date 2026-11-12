@@ -41,11 +41,17 @@ The board (`main-board`) holds every kind of note as a card, laid out by `c2-mas
   delete them together from the action bar.
 - **Search** (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>K</kbd>) finds words anywhere: in notes, pages and their tables,
   flows, lists and the archive.
+- **From the address bar**: type `nm`, a space, then words, in any tab. The notes that hold them are listed under the
+  bar; pick one to open it, or press Enter to open the board's search on the words.
 
 ### Plan
 
 An optional week and month calendar (`c2-week-planner`, `c2-month-planner`), switched on under Settings → Features:
 plans for a whole day or with a start and end time.
+
+**Reminders** (Settings → Plan, off by default) show a notification before a plan starts: when it starts, or 5
+minutes to an hour before, and at 9:00 for a plan that lasts all day. Switching them on asks Chrome for the
+notifications permission. A click on a reminder opens the plan's week.
 
 ### Settings
 
@@ -55,6 +61,8 @@ plans for a whole day or with a start and end time.
 - **Sync** with your Chrome profile (`chrome.storage.sync`), off by default. Quick notes and to-do lists sync; pages,
   flows and sheets stay on the device, as does a note too long for Chrome sync (8 KB an item, about 100 KB in all).
   Notes refused by a full sync storage are sent again once room is freed.
+- **Storage**: how much room the notes take on the computer, the images and photos kept with them, and, with sync on,
+  how full Chrome sync is and how many notes wait for room in it.
 
 Everything else is kept on the device in `chrome.storage.local`. Images pasted or dropped into a note or a page are
 kept on the device too, in IndexedDB (`noteme-images`), and never sync: a note holds only `noteme-image:<id>`, so a
@@ -75,6 +83,12 @@ maps the Noteme palette onto its `--c2-theme--*` tokens.
 Translations are Noteme's own (`src/app/i18n`): typed message keys in English, French and Vietnamese, and the c2n
 components' French and Vietnamese registered with `addTranslations` (`src/app/i18n/components`).
 
+The page is the whole app but for a small background service worker (`src/worker`, built into `background.js` by
+`scripts/build-worker.ts` with esbuild): it answers the address bar and shows the reminders, with one `chrome.alarms`
+alarm per plan to come. It shares the app's framework-free code (search, plans, texts) and can import nothing that
+needs a document: Angular, NgRx or a c2 element in its imports fails the build. What it needs from the settings, which
+live in `localStorage` where it cannot read, the app copies to `DEVICE__SETTINGS` in `chrome.storage.local`.
+
 `AGENTS.md` and `CLAUDE.md` hold the rules for coding agents (use a `c2-*` element for every control, check its API
 with the c2n MCP server, validate the markup); `npx c2n-skill install` refreshes the c2n skill and MCP configuration.
 
@@ -86,7 +100,8 @@ Requires Node.js 22.22.2+ or 24.15+.
 npm install
 npm start          # http://localhost:4200, notes are kept in localStorage instead of chrome.storage
 npm run watch      # rebuild dist/ on change, for loading as an unpacked extension
-npm run build      # production build in dist/noteme-chrome-extension
+npm run watch:worker  # next to it, once its first build is done: rebuild the background worker on change
+npm run build      # production build in dist/noteme-chrome-extension: the page, then the background worker
 npm test           # unit tests (vitest)
 npm run e2e        # build, then Playwright: the web build and the unpacked extension (real chrome.storage)
 npm run lint

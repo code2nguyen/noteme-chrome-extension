@@ -4,8 +4,15 @@
   "description": "__MSG_appDescription__",
   "default_locale": "en",
   "version": "3.0.4",
-  "permissions": ["storage", "unlimitedStorage"],
-  "optional_permissions": ["topSites", "favicon"],
+  "permissions": ["storage", "unlimitedStorage", "alarms"],
+  "optional_permissions": ["topSites", "favicon", "notifications"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "omnibox": {
+    "keyword": "nm"
+  },
   "icons": {
     "16": "assets/icons/noteme-icon-16.png",
     "32": "assets/icons/noteme-icon-32.png",
