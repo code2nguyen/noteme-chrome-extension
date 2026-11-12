@@ -59,6 +59,8 @@ async function switchOnSync(page: Page): Promise<void> {
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
   await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
   await page.keyboard.press('Escape');
+  // Closed for good: the sheet leaves the URL once it has closed, which would close one opened again meanwhile.
+  await expect(page).not.toHaveURL(/settings=1/);
 }
 
 const board = (ids: string[]) => ({
