@@ -140,6 +140,8 @@ export class Board {
    * Opened from "+ Note" on Home: the pointer rests where New appears, and resting there must not open the menu over the
    * note being written. Hovering New counts again once the pointer has moved off it.
    */
+  /** Stops the wait for the New menu's toggle that is still pending, if any (afterNewMenuToggle). */
+  private newMenuFocusWait?: () => void;
   private newHoverMuted = false;
   /** Removes the listener that lifts newHoverMuted, when it lifts or the board goes. */
   private readonly newHoverWatch = new AbortController();
@@ -487,13 +489,7 @@ export class Board {
           // (a new one, the pointer resting where New appears after "+ Note" on Home) still can.
           const focused = deepActiveElement();
           menu.open = true;
-          this.afterNewMenuToggle(menu, () => {
-            if (focused && focused !== document.body) {
-              focused.focus({ preventScroll: true });
-            } else if (menu.contains(document.activeElement)) {
-              (document.activeElement as HTMLElement).blur();
-            }
-          });
+          this.afterNewMenuToggle(menu, focused);
         }
       }, 120);
     } else if (this.newMenuHovered) {
@@ -502,33 +498,43 @@ export class Board {
         const focused = deepActiveElement();
         menu.open = false;
         this.newMenuHovered = false;
-        this.afterNewMenuToggle(menu, () => {
-          if (focused && focused !== document.body && !menu.contains(focused)) {
-            focused.focus({ preventScroll: true });
-          } else if (menu.contains(document.activeElement)) {
-            (document.activeElement as HTMLElement).blur();
-          }
-        });
+        this.afterNewMenuToggle(menu, focused);
       }, 250);
     }
   }
 
   /**
-   * Run once the menu has moved the focus for its opening or closing. It does so when its popover says it toggled,
-   * which is a task of its own: a frame later was sometimes too early, and the focus then stayed on New (or in the
-   * menu), where N no longer starts a note. Soon in any case, should the popover not say so.
+   * Put the focus back where it was (`focused`), or nowhere, once the menu has moved it for its opening or closing.
+   * The menu does so when its popover says it toggled, which is a task of its own: a frame later was sometimes too
+   * early, and the focus then stayed on New (or in the menu), where N no longer starts a note. Soon in any case,
+   * should the popover not say so. Only a focus the menu holds is moved: one the user has put elsewhere meanwhile
+   * stays there. A wait still pending (the mouse came and left at once) is dropped for the new one.
    */
-  private afterNewMenuToggle(menu: HTMLElement, run: () => void): void {
+  private afterNewMenuToggle(menu: HTMLElement, focused: HTMLElement | null): void {
+    this.newMenuFocusWait?.();
     let done = false;
-    const once = () => {
-      if (!done) {
-        done = true;
-        menu.removeEventListener('toggle', once);
-        run();
+    const stop = () => {
+      done = true;
+      menu.removeEventListener('toggle', restore);
+      clearTimeout(timer);
+    };
+    const restore = () => {
+      if (done) {
+        return;
+      }
+      stop();
+      if (!menu.contains(document.activeElement)) {
+        return;
+      }
+      if (focused && focused !== document.body && !menu.contains(focused) && focused.isConnected) {
+        focused.focus({ preventScroll: true });
+      } else {
+        (document.activeElement as HTMLElement).blur();
       }
     };
-    menu.addEventListener('toggle', once);
-    setTimeout(once, 300);
+    menu.addEventListener('toggle', restore);
+    const timer = setTimeout(restore, 300);
+    this.newMenuFocusWait = stop;
   }
 
   /** Ignore the pointer resting on New until it moves off it (see newHoverMuted). */
