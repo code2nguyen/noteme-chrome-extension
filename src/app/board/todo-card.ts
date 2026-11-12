@@ -41,6 +41,15 @@ function loadElements(): Promise<unknown> {
   return elements;
 }
 
+/** Drop what c2-todo-list kept in localStorage for a list (its `storage-key`): the filter tab, and its copy of the look. */
+function forgetList(id: string): void {
+  try {
+    localStorage.removeItem(`c2-todo-list:${id}`);
+  } catch {
+    // Storage can be blocked; nothing to forget then.
+  }
+}
+
 /**
  * A to-do list, worked through right on the board: a c2-todo-list whose tasks and title are stored as they change,
  * with the tile's actions (move, its menu) in the list's header, after its palette button as on a note. The
@@ -104,6 +113,17 @@ export class TodoCard {
       onCleanup(() => subscription.unsubscribe());
     });
 
+    // storage-key keeps the filter tab (All, To do, Done) on this computer. It keeps a copy of the look there too, and
+    // puts it back at the first render: the look kept with the note, which another computer may have changed, wins.
+    afterNextRender(async () => {
+      await loadElements();
+      const list = this.list()?.nativeElement;
+      await list?.updateComplete;
+      if (list) {
+        list.look = this.look();
+      }
+    });
+
     effect(() => {
       if (this.autofocus()) {
         afterNextRender(() => void this.rename(), { injector: this.injector });
@@ -143,6 +163,7 @@ export class TodoCard {
     } else if (value === 'archive') {
       this.archive.emit();
     } else if (value === 'delete') {
+      forgetList(this.item().id);
       this.remove.emit();
     } else if (value === 'pin') {
       this.pin.emit();
