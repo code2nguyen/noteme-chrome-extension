@@ -77,8 +77,11 @@ export const settingsVi: Translation<typeof settingsEn> = {
   'settings.sync.error.other': (detail: string) => `Chrome trả lời: ${detail}`,
   'settings.sync.text':
     'Khi tắt, mọi thứ ở lại trên máy tính này. Hiện tại giấy, sơ đồ và kế hoạch luôn ở lại trên máy tính này: tính năng đồng bộ chúng qua Google Drive sắp ra mắt.',
+  'settings.about': (topic: string) => `Giới thiệu: ${topic}`,
   'settings.storage': 'Dung lượng',
-  'settings.storage.notes': 'Ghi chú trên máy tính này',
+  'settings.storage.device': 'Trên máy tính này',
+  'settings.storage.part': (name: string, size: string) => `${name} · ${size}`,
+  'settings.storage.notes': 'Ghi chú',
   'settings.storage.files': 'Hình ảnh và ảnh nền',
   'settings.storage.sync': 'Đồng bộ Chrome',
   'settings.storage.sync.value': (used: string, total: string) => `${used} trên ${total}`,

@@ -76,8 +76,11 @@ export const settingsEn = {
   'settings.sync.error.other': (detail: string) => `Chrome said: ${detail}`,
   'settings.sync.text':
     'Off, everything stays on this computer. Papers, flows and plans stay on this computer either way for now: syncing them through your Google Drive is coming.',
+  'settings.about': (topic: string) => `About: ${topic}`,
   'settings.storage': 'Storage',
-  'settings.storage.notes': 'Notes on this computer',
+  'settings.storage.device': 'On this computer',
+  'settings.storage.part': (name: string, size: string) => `${name} · ${size}`,
+  'settings.storage.notes': 'Notes',
   'settings.storage.files': 'Images and photos',
   'settings.storage.sync': 'Chrome sync',
   'settings.storage.sync.value': (used: string, total: string) => `${used} of ${total}`,

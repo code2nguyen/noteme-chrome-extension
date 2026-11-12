@@ -1297,7 +1297,7 @@ test.describe('home', () => {
     await sheet.locator('c2-button', { hasText: 'Light' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-    await sheet.locator('c2-switch', { hasText: 'Quote of the day' }).click();
+    await sheet.locator('.settings__row', { hasText: 'Quote of the day' }).locator('c2-switch').click();
     await expect(page.locator('.home__quote')).toHaveCount(0);
     await shot(page, '04-settings-light');
 

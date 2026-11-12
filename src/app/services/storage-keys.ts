@@ -9,3 +9,6 @@ export const ART_BOARD_ITEM_PREFIX = 'ART_BOARD_ITEM__';
 export const ITEM_DATA_PREFIX = 'ITEM_DATA__';
 /** The one record holding every plan: small, so it is read and written whole. */
 export const PLAN_KEY = 'PLAN__ITEMS';
+
+/** Where the build served outside the extension keeps the records, in localStorage (dev-storage.api.ts). */
+export const DEV_STORAGE_PREFIX = 'noteme-dev:';

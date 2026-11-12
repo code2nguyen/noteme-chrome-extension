@@ -79,10 +79,19 @@
         }
       </c2-select>
     </div>
-    <c2-switch class="settings__switch" [checked]="settings().quote" (change)="toggle('quote', $event)">
-      {{ t('settings.quote') }}
-      <span slot="description">{{ t('settings.quote.description') }}</span>
-    </c2-switch>
+    <div class="settings__row">
+      <span class="settings__label">
+        <span id="settings-quote">{{ t('settings.quote') }}</span>
+        <c2-toggletip class="settings__help" [attr.label]="t('settings.about', t('settings.quote'))">
+          {{ t('settings.quote.description') }}
+        </c2-toggletip>
+      </span>
+      <c2-switch
+        aria-labelledby="settings-quote"
+        [checked]="settings().quote"
+        (change)="toggle('quote', $event)"
+      ></c2-switch>
+    </div>
     <div class="settings__row">
       <span id="settings-home-notes">{{ t('settings.homeNotes') }}</span>
       <c2-button-group
@@ -100,19 +109,37 @@
       </c2-button-group>
     </div>
     @if (shortcutsSupported) {
-      <c2-switch class="settings__switch" [checked]="settings().shortcuts" (change)="toggleShortcuts($event)">
-        {{ t('settings.shortcuts') }}
-        <span slot="description">{{ t('settings.shortcuts.description') }}</span>
-      </c2-switch>
+      <div class="settings__row">
+        <span class="settings__label">
+          <span id="settings-shortcuts">{{ t('settings.shortcuts') }}</span>
+          <c2-toggletip class="settings__help" [attr.label]="t('settings.about', t('settings.shortcuts'))">
+            {{ t('settings.shortcuts.description') }}
+          </c2-toggletip>
+        </span>
+        <c2-switch
+          aria-labelledby="settings-shortcuts"
+          [checked]="settings().shortcuts"
+          (change)="toggleShortcuts($event)"
+        ></c2-switch>
+      </div>
     }
   </section>
 
   <section class="settings__group" aria-labelledby="settings-background">
     <h2 id="settings-background" class="settings__heading">{{ t('settings.background') }}</h2>
-    <c2-switch class="settings__switch" [checked]="settings().photos" (change)="toggle('photos', $event)">
-      {{ t('settings.photos') }}
-      <span slot="description">{{ t('settings.photos.description') }}</span>
-    </c2-switch>
+    <div class="settings__row">
+      <span class="settings__label">
+        <span id="settings-photos">{{ t('settings.photos') }}</span>
+        <c2-toggletip class="settings__help" [attr.label]="t('settings.about', t('settings.photos'))">
+          {{ t('settings.photos.description') }}
+        </c2-toggletip>
+      </span>
+      <c2-switch
+        aria-labelledby="settings-photos"
+        [checked]="settings().photos"
+        (change)="toggle('photos', $event)"
+      ></c2-switch>
+    </div>
     @if (settings().photos) {
       <div class="settings__row">
         <span id="settings-themes">{{ t('settings.photoThemes') }}</span>
@@ -153,7 +180,16 @@
   </section>
 
   <section class="settings__group" aria-labelledby="settings-features">
-    <h2 id="settings-features" class="settings__heading">{{ t('settings.features') }}</h2>
+    <div class="settings__head">
+      <h2 id="settings-features" class="settings__heading">{{ t('settings.features') }}</h2>
+      <c2-toggletip
+        class="settings__help"
+        placement="bottom-start"
+        [attr.label]="t('settings.about', t('settings.features'))"
+      >
+        {{ t('settings.features.text') }}
+      </c2-toggletip>
+    </div>
     <div class="settings__row">
       <span id="settings-feature-list">{{ t('settings.features.on') }}</span>
       <c2-select
@@ -171,9 +207,6 @@
         }
       </c2-select>
     </div>
-    <p class="settings__text">
-      {{ t('settings.features.text') }}
-    </p>
   </section>
 
   @if (planOn()) {
@@ -194,10 +227,19 @@
         </c2-button-group>
       </div>
       @if (remindersSupported) {
-        <c2-switch class="settings__switch" [checked]="reminders()" (change)="toggleReminders($event)">
-          {{ t('settings.reminders') }}
-          <span slot="description">{{ t('settings.reminders.description') }}</span>
-        </c2-switch>
+        <div class="settings__row">
+          <span class="settings__label">
+            <span id="settings-reminders">{{ t('settings.reminders') }}</span>
+            <c2-toggletip class="settings__help" [attr.label]="t('settings.about', t('settings.reminders'))">
+              {{ t('settings.reminders.description') }}
+            </c2-toggletip>
+          </span>
+          <c2-switch
+            aria-labelledby="settings-reminders"
+            [checked]="reminders()"
+            (change)="toggleReminders($event)"
+          ></c2-switch>
+        </div>
         @if (reminders()) {
           <div class="settings__row">
             <span id="settings-reminder-lead">{{ t('settings.reminderLead') }}</span>
@@ -218,11 +260,29 @@
   }
 
   <section class="settings__group" aria-labelledby="settings-sync">
-    <h2 id="settings-sync" class="settings__heading">{{ t('settings.sync') }}</h2>
-    <c2-switch class="settings__switch" [checked]="settings().sync" (change)="toggle('sync', $event)">
-      {{ t('settings.sync.switch') }}
-      <span slot="description">{{ t('settings.sync.description') }}</span>
-    </c2-switch>
+    <div class="settings__head">
+      <h2 id="settings-sync" class="settings__heading">{{ t('settings.sync') }}</h2>
+      <c2-toggletip
+        class="settings__help"
+        placement="bottom-start"
+        [attr.label]="t('settings.about', t('settings.sync'))"
+      >
+        {{ t('settings.sync.text') }}
+      </c2-toggletip>
+    </div>
+    <div class="settings__row">
+      <span class="settings__label">
+        <span id="settings-sync-switch">{{ t('settings.sync.switch') }}</span>
+        <c2-toggletip class="settings__help" [attr.label]="t('settings.about', t('settings.sync.switch'))">
+          {{ t('settings.sync.description') }}
+        </c2-toggletip>
+      </span>
+      <c2-switch
+        aria-labelledby="settings-sync-switch"
+        [checked]="settings().sync"
+        (change)="toggle('sync', $event)"
+      ></c2-switch>
+    </div>
     @if (settings().sync && syncSupported) {
       <div class="settings__row settings__sync-status">
         <span role="status">{{ syncText() }}</span>
@@ -243,36 +303,43 @@
         ></c2-banner>
       }
     }
-    <p class="settings__text">
-      {{ t('settings.sync.text') }}
-    </p>
   </section>
 
   @if (hasStorage()) {
     <section class="settings__group settings__storage" aria-labelledby="settings-storage">
-      <h2 id="settings-storage" class="settings__heading">{{ t('settings.storage') }}</h2>
-      @if (storage().notes; as notes) {
-        <div class="settings__row">
-          <span>{{ t('settings.storage.notes') }}</span>
-          <span class="settings__value">{{ notes }}</span>
-        </div>
-      }
-      @if (storage().files; as files) {
-        <div class="settings__row">
-          <span>{{ t('settings.storage.files') }}</span>
-          <span class="settings__value">{{ files }}</span>
-        </div>
+      <div class="settings__head">
+        <h2 id="settings-storage" class="settings__heading">{{ t('settings.storage') }}</h2>
+        <c2-toggletip
+          class="settings__help"
+          placement="bottom-start"
+          [attr.label]="t('settings.about', t('settings.storage'))"
+        >
+          {{ t('settings.storage.text') }}
+        </c2-toggletip>
+      </div>
+      @if (storage().device; as device) {
+        <c2-distribution-bar class="settings__device" [items]="device.items">
+          {{ t('settings.storage.device') }}
+          <span slot="header-end" class="settings__value">{{ device.total }}</span>
+        </c2-distribution-bar>
       }
       @if (storage().sync; as sync) {
-        <c2-progress class="settings__quota" [value]="sync.used" [max]="sync.quota">
+        <!-- Less is better: the bar turns amber from 70% of the quota and red from 90%. -->
+        <c2-meter
+          class="settings__quota"
+          optimum="0"
+          [value]="sync.used"
+          [max]="sync.quota"
+          [low]="sync.quota * 0.7"
+          [high]="sync.quota * 0.9"
+          [attr.value-text]="sync.text"
+        >
           {{ t('settings.storage.sync') }}
-          <span slot="value">{{ sync.text }}</span>
-        </c2-progress>
+        </c2-meter>
         @if (sync.waiting > 0) {
           <p class="settings__text settings__waiting">{{ t('settings.storage.waiting', sync.waiting) }}</p>
         }
       }
-      <p class="settings__text">{{ t('settings.storage.text') }}</p>
     </section>
   }
 </c2-sheet>

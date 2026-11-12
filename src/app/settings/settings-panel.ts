@@ -114,9 +114,22 @@ export class SettingsPanel {
   readonly storage = computed(() => {
     const { notes, files, sync } = this.usage();
     const size = (bytes: number) => formatBytes(bytes, this.i18n.locale());
+    // The parts this browser could measure, each with its size in its legend entry.
+    const parts = [
+      { key: 'notes', name: this.t('settings.storage.notes'), value: notes },
+      { key: 'files', name: this.t('settings.storage.files'), value: files },
+    ].filter((part): part is { key: string; name: string; value: number } => part.value !== undefined);
     return {
-      notes: notes === undefined ? null : size(notes),
-      files: files === undefined ? null : size(files),
+      device: parts.length
+        ? {
+            items: parts.map(({ key, name, value }) => ({
+              key,
+              value,
+              label: this.t('settings.storage.part', name, size(value)),
+            })),
+            total: size(parts.reduce((sum, part) => sum + part.value, 0)),
+          }
+        : null,
       sync: sync && {
         used: sync.used,
         quota: sync.quota,
@@ -126,8 +139,8 @@ export class SettingsPanel {
     };
   });
   readonly hasStorage = computed(() => {
-    const { notes, files, sync } = this.storage();
-    return notes !== null || files !== null || !!sync;
+    const { device, sync } = this.storage();
+    return !!device || !!sync;
   });
 
   constructor() {

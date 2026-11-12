@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatBytes, waitingNotes } from './storage-usage';
+import { devStorageBytes, formatBytes, waitingNotes } from './storage-usage';
 
 describe('formatBytes', () => {
   it('starts at kilobytes, with one decimal while the number is short', () => {
@@ -37,5 +37,21 @@ describe('waitingNotes', () => {
       ]),
     ).toBe(2);
     expect(waitingNotes([])).toBe(0);
+  });
+});
+
+describe('devStorageBytes', () => {
+  it("counts Noteme's records, keys and values, in bytes of UTF-8, and nothing else in localStorage", () => {
+    const entries = [
+      ['noteme-dev:ITEM_DATA__1', 'café'],
+      ['noteme-settings', 'not a record'],
+      ['noteme-dev:PLAN__ITEMS', '[]'],
+    ];
+    const storage = {
+      length: entries.length,
+      key: (index: number) => entries[index]?.[0] ?? null,
+      getItem: (key: string) => entries.find(([name]) => name === key)?.[1] ?? null,
+    };
+    expect(devStorageBytes(storage)).toBe('ITEM_DATA__1'.length + 5 + 'PLAN__ITEMS'.length + 2);
   });
 });
