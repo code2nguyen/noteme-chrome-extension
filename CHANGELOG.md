@@ -2,6 +2,25 @@
 
 Generated from the commit history by `npm run changelog`; do not edit by hand.
 
+## 3.0.5
+
+### New
+
+- Search the notes from the address bar with "nm", reminders for plans, and how much room Noteme takes in Settings
+- Sync: Notes sync with your Chrome profile from the start, and Settings says when they last synced, with a button to sync now
+- Notes: a web address written in a note opens as a link
+- Todo: a to-do list reopens on the tab it was left on (All, To do, Done)
+- Settings: storage is drawn as bars, and each setting's explanation opens from an ⓘ beside it
+
+### Fixes
+
+- Board: the focus no longer stays on New after its menu opened under the mouse
+
+### Faster
+
+- Home: Noteme is half the size to download: its own photos are stored as AVIF
+- A new tab opens faster: it loads a third less before showing Home
+
 ## 3.0.4
 
 ### New
