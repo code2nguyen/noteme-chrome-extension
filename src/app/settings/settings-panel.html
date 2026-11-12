@@ -193,6 +193,27 @@
           <c2-button value="sunday">{{ t('settings.weekStart.sunday') }}</c2-button>
         </c2-button-group>
       </div>
+      @if (remindersSupported) {
+        <c2-switch class="settings__switch" [checked]="reminders()" (change)="toggleReminders($event)">
+          {{ t('settings.reminders') }}
+          <span slot="description">{{ t('settings.reminders.description') }}</span>
+        </c2-switch>
+        @if (reminders()) {
+          <div class="settings__row">
+            <span id="settings-reminder-lead">{{ t('settings.reminderLead') }}</span>
+            <c2-select
+              class="settings__select"
+              aria-labelledby="settings-reminder-lead"
+              [value]="['' + reminderLead()]"
+              (change)="chooseReminderLead($event)"
+            >
+              @for (minutes of reminderLeads; track minutes) {
+                <c2-list-item [value]="'' + minutes">{{ t('settings.reminderLead.option', minutes) }}</c2-list-item>
+              }
+            </c2-select>
+          </div>
+        }
+      }
     </section>
   }
 
@@ -202,8 +223,56 @@
       {{ t('settings.sync.switch') }}
       <span slot="description">{{ t('settings.sync.description') }}</span>
     </c2-switch>
+    @if (settings().sync && syncSupported) {
+      <div class="settings__row settings__sync-status">
+        <span role="status">{{ syncText() }}</span>
+        @if (syncing()) {
+          <c2-spinner class="settings__syncing" [attr.label]="t('settings.sync.status.syncing')"></c2-spinner>
+        } @else {
+          <c2-icon-button class="settings__sync-now" [attr.tooltip]="t('settings.sync.now')" (click)="syncNow()">
+            <c2-feather-refresh-cw></c2-feather-refresh-cw>
+          </c2-icon-button>
+        }
+      </div>
+      @if (syncError(); as error) {
+        <c2-banner
+          class="settings__sync-error"
+          variant="error"
+          [attr.heading]="t('settings.sync.error')"
+          [attr.message]="error"
+        ></c2-banner>
+      }
+    }
     <p class="settings__text">
       {{ t('settings.sync.text') }}
     </p>
   </section>
+
+  @if (hasStorage()) {
+    <section class="settings__group settings__storage" aria-labelledby="settings-storage">
+      <h2 id="settings-storage" class="settings__heading">{{ t('settings.storage') }}</h2>
+      @if (storage().notes; as notes) {
+        <div class="settings__row">
+          <span>{{ t('settings.storage.notes') }}</span>
+          <span class="settings__value">{{ notes }}</span>
+        </div>
+      }
+      @if (storage().files; as files) {
+        <div class="settings__row">
+          <span>{{ t('settings.storage.files') }}</span>
+          <span class="settings__value">{{ files }}</span>
+        </div>
+      }
+      @if (storage().sync; as sync) {
+        <c2-progress class="settings__quota" [value]="sync.used" [max]="sync.quota">
+          {{ t('settings.storage.sync') }}
+          <span slot="value">{{ sync.text }}</span>
+        </c2-progress>
+        @if (sync.waiting > 0) {
+          <p class="settings__text settings__waiting">{{ t('settings.storage.waiting', sync.waiting) }}</p>
+        }
+      }
+      <p class="settings__text">{{ t('settings.storage.text') }}</p>
+    </section>
+  }
 </c2-sheet>

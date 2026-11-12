@@ -3,7 +3,8 @@ import { ExtensionId } from '../extension-id';
 import { noteDefaultProperties } from '../note-config';
 import { DataType } from '../store/models/data-type';
 import { ArtBoardItem, ItemData } from '../store/models';
-import { CATALOGS, MessageKey } from '../i18n/messages';
+import type { MessageKey } from '../i18n/messages';
+import { CATALOGS } from '../i18n/messages/all';
 import {
   countKinds,
   groupByMonth,

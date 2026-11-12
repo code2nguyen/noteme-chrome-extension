@@ -8,6 +8,7 @@
  */
 import { Observable } from 'rxjs';
 import { InjectionToken } from '@angular/core';
+import { ART_BOARD_ITEM_PREFIX, ITEM_DATA_PREFIX } from './storage-keys';
 
 export const STORAGE_API = new InjectionToken<StorageApi>('Storage API Service');
 export interface StorageApi {
@@ -17,10 +18,14 @@ export interface StorageApi {
   syncRemoteToLocal(): Promise<void>;
   remove(key: string | string[]): Observable<void>;
   getRemoteSyncStatus(): Observable<boolean>;
+  /** Records are on their way to the remote right now. */
+  isSending(): boolean;
   /** Switch syncing through the Chrome profile on or off for this tab (Settings › Sync). */
   setSyncEnabled(enabled: boolean): void;
   /** Send every record that syncs and is not on the remote yet: what was written while sync was off. */
   pushLocalToRemote(): Promise<void>;
+  /** "Sync now": take in what the remote has and send again what it refused. Never rejects: a failure is in the sync status. */
+  syncNow(): Promise<void>;
 }
 
 export function artBoardArtBoardItemIdsKey(boardId: string): string {
@@ -32,11 +37,11 @@ export function artBoardItemIdsKey(): string {
 }
 
 export function artBoardItemKey(artBoardItemId: string): string {
-  return `ART_BOARD_ITEM__${artBoardItemId}`;
+  return ART_BOARD_ITEM_PREFIX + artBoardItemId;
 }
 
 export function itemDataKey(itemDataId: string): string {
-  return `ITEM_DATA__${itemDataId}`;
+  return ITEM_DATA_PREFIX + itemDataId;
 }
 
 export function userKey(): string {

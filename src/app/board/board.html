@@ -149,6 +149,7 @@
     <ntm-archive-view
       [items]="items()"
       [data]="itemData()"
+      [note]="archiveNote()"
       (restore)="restoreMany($event)"
       (remove)="removeMany($event)"
       (open)="openArchived($event)"

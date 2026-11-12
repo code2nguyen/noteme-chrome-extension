@@ -7,15 +7,16 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  Injector,
   signal,
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import type { AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
+import type { Autocomplete, AutocompleteSelectEventDetail } from '@c2n/components/autocomplete';
 import type { MasonryLayoutChangeDetail, MasonryLayoutSnapshot } from '@c2n/components/masonry';
 import type { Menu, MenuSelectEventDetail } from '@c2n/components/menu';
 import type { SearchFieldSearchDetail } from '@c2n/components/search-field';
@@ -128,7 +129,7 @@ export class Board {
   private readonly cards = viewChildren(NoteCard);
   private readonly todoCards = viewChildren(TodoCard);
   private readonly sheetCards = viewChildren(SheetCard);
-  private readonly searchField = viewChild<ElementRef<HTMLElement>>('searchField');
+  private readonly searchField = viewChild<ElementRef<Autocomplete>>('searchField');
   private readonly toasts = inject(Toasts);
   private readonly newMenu = viewChild<ElementRef<Menu>>('newMenu');
   /** Opens or closes the New menu a moment after the mouse arrives or leaves; either cancels the other. */
@@ -164,6 +165,10 @@ export class Board {
     { initialValue: 'notes' as BoardView },
   );
   readonly inNotesView = computed(() => this.view() === 'notes');
+  /** The archived note the address bar picked (`?view=archive&note=<id>`): the Archive opens on it. */
+  readonly archiveNote = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('note'))), {
+    initialValue: null,
+  });
   /** Settings open in a sheet over the board, as over Home (`?settings=1`), so closing it comes back here. */
   readonly settingsOpen = toSignal(this.route.queryParamMap.pipe(map((params) => params.has('settings'))), {
     initialValue: false,
@@ -375,27 +380,51 @@ export class Board {
 
   /**
    * Home links here with `?new=note` (write a note), `?search=1` (search) or `?show=<id>` (a note picked in its search,
-   * shown as one picked here); each runs once, then leaves the URL.
+   * shown as one picked here), and so does the address bar (src/worker/omnibox.ts); each runs once, then leaves the
+   * URL.
    */
   private handleHomeActions(): void {
-    const params = this.route.snapshot.queryParamMap;
-    if (params.has('new')) {
-      this.muteNewHover();
-      const kind = params.get('new') === 'page' ? ExtensionId.Page : ExtensionId.TextNote;
-      // The new note goes before the first one, so wait until the board has read its notes.
-      this.boardLoaded.pipe(take(1)).subscribe(() => setTimeout(() => this.create(kind)));
-    }
-    if (params.has('search')) {
-      afterNextRender(() => this.searchField()?.nativeElement.focus());
-    }
-    const show = params.get('show');
-    if (show) {
-      this.reveal(show);
-      this.boardLoaded.pipe(take(1)).subscribe(() => this.highlight(show));
-    }
-    if (params.has('new') || params.has('search') || show) {
-      this.router.navigate([], { queryParams: {}, replaceUrl: true });
-    }
+    const injector = inject(Injector);
+    const destroyRef = inject(DestroyRef);
+    const suggestions = toObservable(this.suggestions);
+    // Followed, not read once: the address bar may point the board already open at a note or at words.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      if (params.has('new')) {
+        this.muteNewHover();
+        const kind = params.get('new') === 'page' ? ExtensionId.Page : ExtensionId.TextNote;
+        // The new note goes before the first one, so wait until the board has read its notes.
+        this.boardLoaded.pipe(take(1)).subscribe(() => setTimeout(() => this.create(kind)));
+      }
+      // The words typed in the address bar after "nm" and entered as they are (`?search=1&q=<words>`).
+      const words = params.get('q');
+      if (words) {
+        this.query.set(words);
+        // What they find opens under the field, as if they had been typed there.
+        suggestions
+          .pipe(
+            filter((rows) => rows.length > 0),
+            take(1),
+            takeUntilDestroyed(destroyRef),
+          )
+          .subscribe(() => {
+            const field = this.searchField()?.nativeElement;
+            if (field && this.query() === words) {
+              field.open = true;
+            }
+          });
+      }
+      if (params.has('search')) {
+        afterNextRender(() => this.searchField()?.nativeElement.focus(), { injector });
+      }
+      const show = params.get('show');
+      if (show) {
+        this.reveal(show);
+        this.boardLoaded.pipe(take(1)).subscribe(() => this.highlight(show));
+      }
+      if (params.has('new') || params.has('search') || words || show) {
+        this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      }
+    });
   }
 
   changeView(event: Event): void {

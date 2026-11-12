@@ -12,10 +12,20 @@ export class Toasts {
   private readonly actions = new Map<string, () => void>();
   /** Toasts asked for before the region was drawn, shown once it is. */
   private waiting: [ToastOptions, (() => void) | undefined][] = [];
+  private defined?: Promise<unknown>;
+  /**
+   * c2-toast-region's code, read with the first toast: most new tabs show none, so the region waits in the page as an
+   * unknown element until then, and is upgraded where it stands.
+   */
+  load: () => Promise<unknown> = () => import('@c2n/components/toast');
 
   /** The app root hands over its region once drawn. */
   attach(region: ToastRegion): void {
     this.region = region;
+    // Read ahead once the page is idle: the first toast (an Undo) then does not depend on a file read at that moment.
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => void this.define().catch(() => undefined));
+    }
     const waiting = this.waiting;
     this.waiting = [];
     for (const [options, onAction] of waiting) {
@@ -29,10 +39,25 @@ export class Toasts {
       this.waiting.push([options, onAction]);
       return;
     }
-    const id = this.region.show(options);
-    if (id && onAction) {
-      this.actions.set(id, onAction);
-    }
+    const region = this.region;
+    this.define().then(
+      () => {
+        const id = region.show(options);
+        if (id && onAction) {
+          this.actions.set(id, onAction);
+        }
+      },
+      (error: unknown) => console.error('Could not show a message', error),
+    );
+  }
+
+  /** c2-toast-region's code, read once; a failed read is tried again by the next toast. */
+  private define(): Promise<unknown> {
+    this.defined ??= this.load().catch((error: unknown) => {
+      this.defined = undefined;
+      throw error;
+    });
+    return this.defined;
   }
 
   /** The region's `toast-action`. */

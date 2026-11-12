@@ -1,5 +1,4 @@
 import { DestroyRef, effect, inject, Injectable, signal } from '@angular/core';
-import { localeTag, resolveLanguage } from '../i18n/language';
 import { STORAGE_API } from '../services/storage.api';
 import { parseSettings, Settings, TEXT_SCALES } from './settings';
 
@@ -7,6 +6,8 @@ const MIRROR_KEY = 'noteme-settings';
 /** Set while the mirror holds a change chrome.storage.sync has not accepted yet. */
 const UNSYNCED_KEY = 'noteme-settings-unsynced';
 const SYNC_KEY = 'NOTEME_SETTINGS';
+/** Set once this device has exchanged its notes with the profile for the first time (startSync). */
+const STARTED_KEY = 'noteme-sync-started';
 
 const hasChromeStorage = () => typeof chrome !== 'undefined' && !!chrome.storage?.sync;
 
@@ -95,10 +96,6 @@ export class SettingsService {
       const theme = this.state().theme;
       document.documentElement.dataset['theme'] = theme === 'auto' ? (this.systemDark() ? 'dark' : 'light') : theme;
     });
-    // The page's language: the c2 components and the relative times follow it, with no reload.
-    effect(() => {
-      document.documentElement.lang = localeTag(resolveLanguage(this.state().language));
-    });
     // The text size: every size in Noteme's stylesheets is multiplied by it (styles.scss).
     effect(() => {
       document.documentElement.style.setProperty('--ntm-text-scale', String(TEXT_SCALES[this.state().textSize]));
@@ -108,6 +105,11 @@ export class SettingsService {
 
     if (hasChromeStorage()) {
       this.loaded = this.state().sync ? this.readSynced() : Promise.resolve();
+      // Sync is on without ever having been switched on (it is the default): the first exchange, which the switch
+      // otherwise starts, happens here, once. What this device already holds goes up, what the profile holds comes in.
+      if (this.state().sync && readLocal(STARTED_KEY) === null) {
+        this.startSync();
+      }
       chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync' && changes[SYNC_KEY] && this.state().sync) {
           this.adopt(changes[SYNC_KEY].newValue);
@@ -157,6 +159,8 @@ export class SettingsService {
     this.storage
       .syncRemoteToLocal()
       .then(() => this.storage.pushLocalToRemote())
+      // Done once it went through: a first exchange that failed is tried again at the next start.
+      .then(() => writeLocal(STARTED_KEY, '1'))
       .catch((error: unknown) => console.error(error));
   }
 

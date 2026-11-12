@@ -10,6 +10,7 @@ const types = {
   '.css': 'text/css',
   '.json': 'application/json',
   '.png': 'image/png',
+  '.avif': 'image/avif',
   '.jpg': 'image/jpeg',
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',

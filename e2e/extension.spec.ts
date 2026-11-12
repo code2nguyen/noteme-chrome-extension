@@ -2,7 +2,7 @@ import { type BrowserContext, chromium, expect, type Page, test as base } from '
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { card, mockPhotoSources, newNote, newPage, notepadSurface, openBoard, shot } from './helpers';
+import { archivePreview, card, mockPhotoSources, newNote, newPage, notepadSurface, openBoard, shot } from './helpers';
 
 // The unpacked Manifest V3 build in Chromium, with the real chrome.storage.local and chrome.storage.sync.
 const test = base.extend<{ context: BrowserContext; newTab: () => Promise<Page> }>({
@@ -54,11 +54,18 @@ async function stored(page: Page, area: 'local' | 'sync', key: string) {
   return raw ? JSON.parse(raw) : undefined;
 }
 
-/** Sync is off until switched on in Settings. */
-async function switchOnSync(page: Page): Promise<void> {
+/** Sync is on unless switched off in Settings: put the switch where the test wants it. */
+async function setSync(page: Page, on: boolean): Promise<void> {
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
-  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  const control = page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' });
+  await expect(control).toBeVisible();
+  if ((await control.evaluate((element) => (element as HTMLInputElement).checked)) !== on) {
+    await control.click();
+  }
+  await expect(control).toHaveJSProperty('checked', on);
   await page.keyboard.press('Escape');
+  // Closed for good: the sheet leaves the URL once it has closed, which would close one opened again meanwhile.
+  await expect(page).not.toHaveURL(/settings=1/);
 }
 
 const board = (ids: string[]) => ({
@@ -200,28 +207,82 @@ test('2.x text notes open migrated, and are only rewritten when edited', async (
   );
 });
 
-test('nothing reaches chrome.storage.sync until sync is switched on, then what was written goes up', async ({
+test('with sync switched off nothing reaches chrome.storage.sync; switched on again, what was written goes up', async ({
   newTab,
 }) => {
   const page = await newTab();
+  await setSync(page, false);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Kept on this computer');
   const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
   await expect.poll(async () => (await stored(page, 'local', `ITEM_DATA__${id}`))?.data).toBe('Kept on this computer');
   await page.waitForTimeout(1500);
-  expect(await page.evaluate(() => chrome.storage.sync.get(null))).toEqual({});
+  // Neither the note nor its card: only what went up before the switch was turned off (the settings) is there.
+  const synced = Object.keys(await page.evaluate(() => chrome.storage.sync.get(null)));
+  expect(synced.filter((key) => key.includes(id))).toEqual([]);
 
-  await switchOnSync(page);
+  await setSync(page, true);
   await expect
     .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
     .toBe('Kept on this computer');
   await expect.poll(async () => (await stored(page, 'sync', 'NOTEME_SETTINGS'))?.sync).toBe(true);
 });
 
+test('a new profile syncs without being asked, and Settings says how the sync is going', async ({ newTab }) => {
+  const page = await newTab();
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Synced from the start');
+  const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
+    .toBe('Synced from the start');
+
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  const panel = page.locator('ntm-settings-panel');
+  const status = panel.locator('.settings__sync-status');
+  await expect(status).toContainText(/^Synced /);
+  await expect(panel.locator('c2-banner')).toHaveCount(0);
+
+  // "Sync now" takes in what the profile holds: a note another computer wrote.
+  await seed(page, 'sync', {
+    ART_BOARD_ITEM__remote: {
+      id: 'remote',
+      boardId: 'defaultArtBoard',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 3,
+      gridPosition: grid(1),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__remote: { id: 'remote', dataType: 'markdown', empty: false, ...dates, data: 'From the other computer' },
+  });
+  await status.locator('c2-icon-button').click();
+  await expect
+    .poll(async () => (await stored(page, 'local', 'ITEM_DATA__remote'))?.data)
+    .toBe('From the other computer');
+  await expect(status).toContainText(/^Synced /);
+
+  // What chrome.storage.sync refuses is said here, in words, until it goes through.
+  await seed(page, 'local', {
+    DEVICE__SYNC_STATUS: {
+      at: Date.now(),
+      error: { kind: 'full', detail: 'QUOTA_BYTES quota exceeded', at: Date.now() },
+    },
+  });
+  await expect(panel.locator('c2-banner')).toContainText('Chrome sync is full');
+  await panel.locator('.settings__sync-status').scrollIntoViewIfNeeded();
+  await shot(page, 'extension-settings-sync-status');
+  // Switched off, there is no status to give.
+  await panel.locator('c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await expect(status).toHaveCount(0);
+  await expect(panel.locator('c2-banner')).toHaveCount(0);
+});
+
 test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ newTab }) => {
   const page = await newTab();
-  await switchOnSync(page);
+  await setSync(page, true);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Synced across devices');
@@ -287,7 +348,7 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
 
 test('settings are kept in chrome.storage.sync once sync is on', async ({ newTab }) => {
   const page = await newTab();
-  await switchOnSync(page);
+  await setSync(page, true);
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
   const synced = () =>
     page.evaluate(() =>
@@ -304,7 +365,7 @@ test('settings are kept in chrome.storage.sync once sync is on', async ({ newTab
 
 test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {
   const page = await newTab();
-  await switchOnSync(page);
+  await setSync(page, true);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Synced note');
@@ -339,4 +400,160 @@ test('notes sync through the Chrome profile; pages stay on this computer', async
   expect(await stored(page, 'sync', `ITEM_DATA__${pageId}`)).toBeUndefined();
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${pageId}`)).toBeUndefined();
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${noteId}`)).toBeDefined();
+});
+
+test('Settings says how much room the notes take, and Chrome sync while it is on', async ({ newTab }) => {
+  const page = await newTab();
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  const storage = page.locator('ntm-settings-panel .settings__storage');
+  await expect(
+    storage.locator('.settings__row', { hasText: 'Notes on this computer' }).locator('.settings__value'),
+  ).toHaveText(/^[\d.,]+ (kB|MB)$/);
+  await expect(storage.locator('.settings__row', { hasText: 'Images and photos' })).toBeVisible();
+  await expect(storage.locator('c2-progress')).toContainText('Chrome sync');
+  await expect(storage.locator('c2-progress')).toContainText(/of 100 kB/);
+  await storage.scrollIntoViewIfNeeded();
+  await shot(page, 'extension-settings-storage');
+  // Chrome sync is not read, and not shown, while sync is off.
+  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await expect(storage.locator('c2-progress')).toHaveCount(0);
+});
+
+/** The background service worker, started by Chrome with the extension. */
+async function worker(context: BrowserContext) {
+  return context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker'));
+}
+
+test('a plan has a reminder alarm while reminders are on', async ({ context, newTab }) => {
+  const page = await newTab();
+  const background = await worker(context);
+  const alarms = () =>
+    background.evaluate(async () =>
+      (await chrome.alarms.getAll()).map((alarm) => ({ name: alarm.name, when: alarm.scheduledTime })),
+    );
+  // Plan on, as Settings › Features switches it.
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  await page.locator('ntm-settings-panel .settings__features').click();
+  await page.locator('ntm-settings-panel .settings__features c2-list-item', { hasText: 'Plan' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('ntm-settings-panel c2-switch', { hasText: 'Reminders' })).toBeVisible();
+  await shot(page, 'extension-settings-reminders');
+
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = [tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate()]
+    .map((part) => String(part).padStart(2, '0'))
+    .join('-');
+  const device = { language: 'auto', clock: '24h', plan: true, reminderLead: 15 };
+  await seed(page, 'local', {
+    PLAN__ITEMS: {
+      items: [
+        { id: 'dentist', title: 'Dentist', date: day, start: '10:00', end: '11:00' },
+        { id: 'trip', title: 'Trip', date: day },
+        { id: 'past', title: 'Done', date: '2020-01-01', start: '10:00', end: '11:00' },
+      ],
+    },
+    DEVICE__SETTINGS: { ...device, reminders: true },
+  });
+  const at = (hours: number, minutes: number) => new Date(tomorrow).setHours(hours, minutes, 0, 0);
+  // A quarter of an hour before the dentist, and at 9:00 for the trip; nothing for what is over.
+  await expect.poll(alarms).toEqual([
+    { name: 'plan:trip', when: at(9, 0) },
+    { name: 'plan:dentist', when: at(9, 45) },
+  ]);
+
+  // The plan moved to the afternoon: its alarm follows.
+  await seed(page, 'local', {
+    PLAN__ITEMS: { items: [{ id: 'dentist', title: 'Dentist', date: day, start: '15:00', end: '16:00' }] },
+  });
+  await expect.poll(alarms).toEqual([{ name: 'plan:dentist', when: at(14, 45) }]);
+
+  await seed(page, 'local', { DEVICE__SETTINGS: { ...device, reminders: false } });
+  await expect.poll(alarms).toEqual([]);
+  // The record is this device's: it never goes to chrome.storage.sync.
+  expect(await stored(page, 'sync', 'DEVICE__SETTINGS')).toBeUndefined();
+});
+
+test('"nm" in the address bar searches the notes', async ({ context, newTab }) => {
+  const page = await newTab();
+  const base = page.url().split('#')[0];
+  await seed(page, 'local', {
+    ...board(['shopping']),
+    ART_BOARD_ITEM__shopping: {
+      id: 'shopping',
+      boardId: 'defaultArtBoard',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 1,
+      gridPosition: grid(0),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__shopping: { id: 'shopping', dataType: 'markdown', empty: false, ...dates, data: 'Oat milk <b>\neggs' },
+    // Archived: not on the board.
+    ART_BOARD_ITEM__recipe: {
+      id: 'recipe',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 2,
+      gridPosition: grid(2),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__recipe: { id: 'recipe', dataType: 'markdown', empty: false, ...dates, data: 'Rice milk pudding' },
+    ART_BOARD_ITEM__trip: {
+      id: 'trip',
+      extensionId: 'ntm-page',
+      colorIndex: 0,
+      gridPosition: grid(1),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__trip: {
+      id: 'trip',
+      dataType: 'page',
+      empty: false,
+      ...dates,
+      data: 'Lisbon, then Porto. Buy milk.',
+      properties: { title: 'Trip' },
+    },
+  });
+
+  // What Chrome asks the worker as words are typed after "nm ", and what it answers.
+  const background = await worker(context);
+  const suggestions = await background.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const event = chrome.omnibox.onInputChanged as unknown as {
+          dispatch(text: string, suggest: (rows: unknown) => void): void;
+        };
+        event.dispatch('milk', resolve);
+      }),
+  );
+  // In the search's order of best match; here, by what each row says.
+  const rows = (suggestions as { content: string; description: string }[]).sort((a, b) =>
+    a.description.localeCompare(b.description),
+  );
+  expect(rows).toEqual([
+    { content: `${base}#/main-board?show=shopping`, description: 'Oat milk &lt;b&gt; <dim>Note</dim>' },
+    // An archived note has a row, and an address, of its own.
+    {
+      content: `${base}#/main-board?view=archive&note=recipe`,
+      description: 'Rice milk pudding <dim>Note · Archive</dim>',
+    },
+    { content: `${base}#/page/trip?from=archive`, description: 'Trip <dim>Paper · Archive</dim>' },
+  ]);
+
+  // A row picked opens its note: the board, with the note lit up.
+  await page.goto(`${base}#/main-board?show=shopping`);
+  await expect(card(page)).toContainText('Oat milk');
+  // An archived note opens the Archive on it.
+  await page.goto(`${base}#/main-board?view=archive&note=recipe`);
+  await expect(archivePreview(page)).toContainText('Rice milk pudding');
+  // Words entered as they are: the board's search, on them.
+  await page.goto(`${base}#/main-board?search=1&q=porto`);
+  const search = page.locator('ntm-board .navbar__search-field');
+  await expect(search).toHaveJSProperty('value', 'porto');
+  await expect(search).toHaveJSProperty('open', true);
+  await expect(search.locator('c2-list-item', { hasText: 'Trip' })).toBeVisible();
+  await expect(page).toHaveURL(/#\/main-board$/);
+  await shot(page, 'extension-omnibox-search');
 });

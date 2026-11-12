@@ -1165,7 +1165,7 @@ test.describe('home', () => {
     await mockPhotoSources(page, { offline: true });
     await page.evaluate(() => localStorage.removeItem('noteme-background'));
     await page.reload();
-    await expect(page.locator('.home__photo')).toHaveAttribute('src', /^assets\/bg\/bg-\d+-small\.jpg$/);
+    await expect(page.locator('.home__photo')).toHaveAttribute('src', /^assets\/bg\/bg-\d+\.avif$/);
     await expect(page.locator('.home__credit')).toHaveText('Photo from Noteme');
     // Chrome logs the failed requests itself; those are expected.
     await expect.poll(() => errors.some((error) => /ERR_INTERNET_DISCONNECTED/.test(error))).toBe(true);

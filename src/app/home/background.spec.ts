@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import commonsSearch from '../../../e2e/fixtures/commons-search.json';
 import {
   bundledPhoto,
+  bundledUrl,
   BUNDLED_PHOTO_COUNT,
   commonsSearchUrl,
   dayOfYear,
@@ -86,7 +87,9 @@ describe('Commons', () => {
 
 describe('bundledPhoto', () => {
   it('wraps around the shipped photos', () => {
-    expect(bundledPhoto(0).url).toBe('assets/bg/bg-0-small.jpg');
+    expect(bundledPhoto(0).url).toBe('assets/bg/bg-0.avif');
+    // One stored by an earlier version, when the photos were JPEGs.
+    expect(bundledUrl({ ...bundledPhoto(3), url: 'assets/bg/bg-3-small.jpg' })).toBe('assets/bg/bg-3.avif');
     expect(bundledPhoto(BUNDLED_PHOTO_COUNT + 2).id).toBe('noteme-2');
     expect(bundledPhoto(-1).id).toBe(`noteme-${BUNDLED_PHOTO_COUNT - 1}`);
     expect(bundledPhoto(3)).toMatchObject({ bundled: true, theme: 'noteme' });

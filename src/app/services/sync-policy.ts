@@ -4,7 +4,7 @@ import { readMirroredSettings } from '../settings/settings.service';
 import { DataType } from '../store/models/data-type';
 
 /**
- * Whether this device syncs through the Chrome profile when storage starts: off until switched on in Settings (Sync),
+ * Whether this device syncs through the Chrome profile when storage starts: on unless switched off in Settings (Sync),
  * then whatever the device chose. Read from the settings mirror, which is there before anything is written.
  */
 export const SYNC_ENABLED = new InjectionToken<boolean>('Sync with the Chrome profile', {
@@ -33,6 +33,10 @@ export function syncsWithChromeProfile(key: string, value: unknown): boolean {
   }
   // Plans stay on the device for now, with pages and flows; Google Drive sync will carry them.
   if (key.startsWith('PLAN__')) {
+    return false;
+  }
+  // This device's own records (what the background worker reads: device-settings.ts).
+  if (key.startsWith('DEVICE__')) {
     return false;
   }
   return true;

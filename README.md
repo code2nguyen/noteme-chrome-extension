@@ -41,20 +41,29 @@ The board (`main-board`) holds every kind of note as a card, laid out by `c2-mas
   delete them together from the action bar.
 - **Search** (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>K</kbd>) finds words anywhere: in notes, pages and their tables,
   flows, lists and the archive.
+- **From the address bar**: type `nm`, a space, then words, in any tab. The notes that hold them are listed under the
+  bar; pick one to open it, or press Enter to open the board's search on the words.
 
 ### Plan
 
 An optional week and month calendar (`c2-week-planner`, `c2-month-planner`), switched on under Settings → Features:
 plans for a whole day or with a start and end time.
 
+**Reminders** (Settings → Plan, off by default) show a notification before a plan starts: when it starts, or 5
+minutes to an hour before, and at 9:00 for a plan that lasts all day. Switching them on asks Chrome for the
+notifications permission. A click on a reminder opens the plan's week.
+
 ### Settings
 
 - Theme light, dark or following the system; text size from Small to Larger.
 - Language: English, French or Vietnamese, the c2n components included.
 - What Home shows: clock, date, quote, site shortcuts, photos and their themes.
-- **Sync** with your Chrome profile (`chrome.storage.sync`), off by default. Quick notes and to-do lists sync; pages,
+- **Sync** with your Chrome profile (`chrome.storage.sync`), on unless you switch it off. Settings says when the notes
+  were last synced, has a button to sync now, and says what went wrong when Chrome refuses a note. Quick notes and to-do lists sync; pages,
   flows and sheets stay on the device, as does a note too long for Chrome sync (8 KB an item, about 100 KB in all).
   Notes refused by a full sync storage are sent again once room is freed.
+- **Storage**: how much room the notes take on the computer, the images and photos kept with them, and, with sync on,
+  how full Chrome sync is and how many notes wait for room in it.
 
 Everything else is kept on the device in `chrome.storage.local`. Images pasted or dropped into a note or a page are
 kept on the device too, in IndexedDB (`noteme-images`), and never sync: a note holds only `noteme-image:<id>`, so a
@@ -69,11 +78,25 @@ Angular 22 (standalone, zoneless, signals) with NgRx 22 for the store, and the [
 of UI: `c2-masonry` for the board; `c2-notepad`, `c2-page-editor`, `c2-flow`, `c2-todo-list` and `c2-spreadsheet` for
 the notes; `c2-week-planner` and `c2-month-planner` for Plan; `c2-split-panel` and `c2-action-bar` for the archive;
 `c2-carousel` on Home; `c2-skip-link`, `c2-modal`, `c2-sheet`, `c2-menu`, `c2-search-field`, `c2-select`,
-`c2-toast-region` and the rest of the controls. The theme comes from `@c2n/components/theme.css`; `src/styles.scss`
-maps the Noteme palette onto its `--c2-theme--*` tokens.
+`c2-toast-region` and the rest of the controls. The theme is c2n's: its tokens (`@c2n/components/tokens.css`),
+which `src/styles.scss` maps the Noteme palette onto, and the base theme of the components Noteme uses
+(`src/c2n-theme.generated.css`). The whole base theme covers 144 components and is four times the size; `npm run
+theme` writes the part Noteme needs, and CI fails when it is out of date: run it after adding a c2 component or
+upgrading c2n.
 
 Translations are Noteme's own (`src/app/i18n`): typed message keys in English, French and Vietnamese, and the c2n
-components' French and Vietnamese registered with `addTranslations` (`src/app/i18n/components`).
+components' French and Vietnamese registered with `addTranslations` (`src/app/i18n/components`). English ships with
+the app; French and Vietnamese are files of their own, read before the app starts when Noteme speaks one of them.
+
+A new tab loads only what Home draws: each route and the settings sheet bring their own elements, and the search
+library and the toasts are read the first time they are used. The build's budgets (`angular.json`) sit just above
+today's sizes, so a change that makes the first load heavier fails the build.
+
+The page is the whole app but for a small background service worker (`src/worker`, built into `background.js` by
+`scripts/build-worker.ts` with esbuild): it answers the address bar and shows the reminders, with one `chrome.alarms`
+alarm per plan to come. It shares the app's framework-free code (search, plans, texts) and can import nothing that
+needs a document: Angular, NgRx or a c2 element in its imports fails the build. What it needs from the settings, which
+live in `localStorage` where it cannot read, the app copies to `DEVICE__SETTINGS` in `chrome.storage.local`.
 
 `AGENTS.md` and `CLAUDE.md` hold the rules for coding agents (use a `c2-*` element for every control, check its API
 with the c2n MCP server, validate the markup); `npx c2n-skill install` refreshes the c2n skill and MCP configuration.
@@ -86,12 +109,14 @@ Requires Node.js 22.22.2+ or 24.15+.
 npm install
 npm start          # http://localhost:4200, notes are kept in localStorage instead of chrome.storage
 npm run watch      # rebuild dist/ on change, for loading as an unpacked extension
-npm run build      # production build in dist/noteme-chrome-extension
+npm run watch:worker  # next to it, once its first build is done: rebuild the background worker on change
+npm run build      # production build in dist/noteme-chrome-extension: the page, then the background worker
 npm test           # unit tests (vitest)
 npm run e2e        # build, then Playwright: the web build and the unpacked extension (real chrome.storage)
 npm run lint
 npm run type-check
 npm run format:check
+npm run theme        # rewrite src/c2n-theme.generated.css (after adding a c2 component or upgrading c2n)
 ```
 
 The Playwright suites (`e2e/`) write screenshots of every verified state to `test-results/screenshots/`. Set

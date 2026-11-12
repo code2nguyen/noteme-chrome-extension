@@ -1,8 +1,4 @@
 import type { NoteKind } from '../../board/older-notes';
-import type { Translation } from './types';
-
-/** French plural: 0 and 1 are singular. */
-const frPlural = (count: number, one: string, many: string) => (count > 1 ? many : one);
 
 /** The Archive: its list, filters, preview, selection and the delete confirmation. */
 export const archiveEn = {
@@ -38,75 +34,4 @@ export const archiveEn = {
   'archive.confirm.one': (title: string) => `Delete “${title}” forever?`,
   'archive.confirm.many': (count: number) => `Delete ${count} archived notes forever?`,
   'archive.confirm.text': (count: number) => `${count === 1 ? 'It' : 'They'} can’t be brought back.`,
-};
-
-export const archiveFr: Translation<typeof archiveEn> = {
-  'archive.selectAll': 'Sélectionner toutes les notes affichées',
-  'archive.kinds': 'Type de note',
-  'archive.filter.all': (count) => `Tout · ${count}`,
-  'archive.filter.note': (count) => `Notes · ${count}`,
-  'archive.filter.page': (count) => `Feuilles · ${count}`,
-  'archive.filter.flow': (count) => `Flux · ${count}`,
-  'archive.filter.list': (count) => `À faire · ${count}`,
-  'archive.filter.sheet': (count) => `Feuilles de calcul · ${count}`,
-  'archive.sortBy': 'Trier par',
-  'archive.sort.archived': 'Date d’archivage',
-  'archive.sort.edited': 'Date de modification',
-  'archive.sort.name': 'Nom',
-  'archive.none.note': 'Aucune note archivée ici.',
-  'archive.none.page': 'Aucune feuille archivée ici.',
-  'archive.none.flow': 'Aucun flux archivé ici.',
-  'archive.none.list': 'Aucun À faire archivé ici.',
-  'archive.none.sheet': 'Aucune feuille de calcul archivée ici.',
-  'archive.list': 'Notes archivées',
-  'archive.select': (label) => `Sélectionner « ${label} »`,
-  'archive.selected': (count) => frPlural(count, `${count} sélectionnée`, `${count} sélectionnées`),
-  'archive.restore': 'Restaurer',
-  'archive.meta.edited': (name, kind) => `${name} · modifié${kind === 'Flow' || kind === 'Sheet' ? '' : 'e'}`,
-  'archive.meta.archived': (date, kind) => `· archivé${kind === 'Flow' || kind === 'Sheet' ? '' : 'e'} le ${date}`,
-  'archive.restoreToBoard': 'Remettre sur le tableau',
-  'archive.open': 'Ouvrir',
-  'archive.deleteForever': 'Supprimer définitivement',
-  'archive.resize': 'Redimensionner la liste',
-  'archive.confirm.one': (title) => `Supprimer « ${title} » définitivement ?`,
-  'archive.confirm.many': (count) =>
-    frPlural(
-      count,
-      `Supprimer ${count} note archivée définitivement ?`,
-      `Supprimer ${count} notes archivées définitivement ?`,
-    ),
-  'archive.confirm.text': () => 'Cette action est irréversible.',
-};
-
-export const archiveVi: Translation<typeof archiveEn> = {
-  'archive.selectAll': 'Chọn mọi ghi chú trong danh sách',
-  'archive.kinds': 'Loại ghi chú',
-  'archive.filter.all': (count) => `Tất cả · ${count}`,
-  'archive.filter.note': (count) => `Ghi chú · ${count}`,
-  'archive.filter.page': (count) => `Giấy · ${count}`,
-  'archive.filter.flow': (count) => `Sơ đồ · ${count}`,
-  'archive.filter.list': (count) => `Việc cần làm · ${count}`,
-  'archive.filter.sheet': (count) => `Bảng tính · ${count}`,
-  'archive.sortBy': 'Sắp xếp theo',
-  'archive.sort.archived': 'Lưu trữ gần đây',
-  'archive.sort.edited': 'Sửa gần đây',
-  'archive.sort.name': 'Tên',
-  'archive.none.note': 'Không có ghi chú nào được lưu trữ ở đây.',
-  'archive.none.page': 'Không có giấy nào được lưu trữ ở đây.',
-  'archive.none.flow': 'Không có sơ đồ nào được lưu trữ ở đây.',
-  'archive.none.list': 'Không có việc cần làm nào được lưu trữ ở đây.',
-  'archive.none.sheet': 'Không có bảng tính nào được lưu trữ ở đây.',
-  'archive.list': 'Ghi chú đã lưu trữ',
-  'archive.select': (label) => `Chọn “${label}”`,
-  'archive.selected': (count) => `Đã chọn ${count}`,
-  'archive.restore': 'Khôi phục',
-  'archive.meta.edited': (name) => `${name} · sửa`,
-  'archive.meta.archived': (date) => `· lưu trữ ngày ${date}`,
-  'archive.restoreToBoard': 'Khôi phục về bảng',
-  'archive.open': 'Mở',
-  'archive.deleteForever': 'Xóa vĩnh viễn',
-  'archive.resize': 'Đổi kích thước danh sách',
-  'archive.confirm.one': (title) => `Xóa vĩnh viễn “${title}”?`,
-  'archive.confirm.many': (count) => `Xóa vĩnh viễn ${count} ghi chú đã lưu trữ?`,
-  'archive.confirm.text': () => 'Không thể khôi phục lại.',
 };

@@ -1,4 +1,7 @@
-@use '@c2n/components/theme.css';
+// The c2n theme: its tokens, and the base theme of the components Noteme uses (scripts/theme-subset.ts writes it;
+// the whole base theme, @c2n/components/theme.css, maps 144 components and is four times the size).
+@use '@c2n/components/tokens.css';
+@use './c2n-theme.generated.css';
 
 @font-face {
   font-family: 'RedHatDisplay';

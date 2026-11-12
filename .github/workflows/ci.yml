@@ -33,6 +33,8 @@ jobs:
       - run: npm test
       - name: CHANGELOG.md is up to date
         run: npm run --silent changelog -- --check
+      - name: The c2n theme subset is up to date
+        run: npm run --silent theme -- --check
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       # Chromium only, against the production build: the web page and the unpacked extension.

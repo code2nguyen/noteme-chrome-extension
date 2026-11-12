@@ -47,7 +47,7 @@ export async function openBoard(page: Page): Promise<void> {
   await expect(board).toBeVisible();
 }
 
-const photo = readFileSync(join(import.meta.dirname, '..', 'src', 'assets', 'bg', 'bg-3-small.jpg'));
+const photo = readFileSync(join(import.meta.dirname, '..', 'src', 'assets', 'bg', 'bg-3.avif'));
 
 /** A Commons search answer: four usable photos, and a portrait, a small and an SVG file that must be skipped. */
 export const commonsSearch = JSON.parse(
@@ -89,7 +89,7 @@ export async function mockPhotoSources(
     requests.imageUrls.push(route.request().url());
     return offline
       ? route.abort('internetdisconnected')
-      : route.fulfill({ body: photo, contentType: 'image/jpeg', headers: cors });
+      : route.fulfill({ body: photo, contentType: 'image/avif', headers: cors });
   });
   return requests;
 }

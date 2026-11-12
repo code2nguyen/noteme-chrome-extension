@@ -1,5 +1,3 @@
-import type { Translation } from './types';
-
 /** Words used across the app: the kinds of note, and actions every view has. */
 export const commonEn = {
   'common.note': 'Note',
@@ -12,6 +10,8 @@ export const commonEn = {
   'common.settings': 'Settings',
   'common.cancel': 'Cancel',
   'common.undo': 'Undo',
+  /** The address bar's own row, after the keyword "nm": what Enter searches for. */
+  'omnibox.search': (query: string) => `Search Noteme for ${query}`,
   'common.delete': 'Delete',
   'common.loading': 'Loading…',
   'common.untitled.note': 'Empty note',
@@ -23,52 +23,4 @@ export const commonEn = {
   'common.image.tooLarge': 'This image is too large: 10 MB at most.',
   'common.image.notImage': 'Only images can be pasted or dropped here.',
   'common.image.notSaved': 'The image could not be saved on this device.',
-};
-
-export const commonFr: Translation<typeof commonEn> = {
-  'common.note': 'Note',
-  'common.page': 'Feuille',
-  'common.flow': 'Flux',
-  'common.list': 'À faire',
-  'common.sheet': 'Feuille de calcul',
-  'common.notes': 'Notes',
-  'common.archive': 'Archives',
-  'common.settings': 'Réglages',
-  'common.cancel': 'Annuler',
-  'common.undo': 'Annuler',
-  'common.delete': 'Supprimer',
-  'common.loading': 'Chargement…',
-  'common.untitled.note': 'Note vide',
-  'common.untitled.page': 'Feuille sans titre',
-  'common.untitled.flow': 'Flux sans titre',
-  'common.untitled.list': 'À faire sans titre',
-  'common.untitled.sheet': 'Feuille de calcul sans titre',
-  'common.nothingWritten': 'Rien d’écrit pour l’instant.',
-  'common.image.tooLarge': 'Cette image est trop lourde : 10 Mo au plus.',
-  'common.image.notImage': 'Seules des images peuvent être collées ou déposées ici.',
-  'common.image.notSaved': 'L’image n’a pas pu être enregistrée sur cet appareil.',
-};
-
-export const commonVi: Translation<typeof commonEn> = {
-  'common.note': 'Ghi chú',
-  'common.page': 'Giấy',
-  'common.flow': 'Sơ đồ',
-  'common.list': 'Việc cần làm',
-  'common.sheet': 'Bảng tính',
-  'common.notes': 'Ghi chú',
-  'common.archive': 'Lưu trữ',
-  'common.settings': 'Cài đặt',
-  'common.cancel': 'Hủy',
-  'common.undo': 'Hoàn tác',
-  'common.delete': 'Xóa',
-  'common.loading': 'Đang tải…',
-  'common.untitled.note': 'Ghi chú trống',
-  'common.untitled.page': 'Giấy chưa đặt tên',
-  'common.untitled.flow': 'Sơ đồ chưa đặt tên',
-  'common.untitled.list': 'Việc cần làm chưa đặt tên',
-  'common.untitled.sheet': 'Bảng tính chưa đặt tên',
-  'common.nothingWritten': 'Chưa có nội dung.',
-  'common.image.tooLarge': 'Ảnh quá lớn: tối đa 10 MB.',
-  'common.image.notImage': 'Chỉ có thể dán hoặc thả ảnh vào đây.',
-  'common.image.notSaved': 'Không thể lưu ảnh trên thiết bị này.',
 };

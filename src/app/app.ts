@@ -1,5 +1,4 @@
 import '@c2n/components/skip-link';
-import '@c2n/components/toast';
 
 import {
   afterNextRender,
@@ -14,6 +13,7 @@ import {
 import { RouterOutlet } from '@angular/router';
 import type { ToastRegion } from '@c2n/components/toast';
 import { I18n } from './i18n/i18n.service';
+import { DeviceSettingsService } from './services/device-settings.service';
 import { ImageRefusedError, ImageStore } from './services/image-store';
 import { Toasts } from './services/toasts';
 
@@ -45,6 +45,8 @@ export class App {
         this.toasts.attach(region);
       }
     });
+    // From the first tab on, the background worker knows the language and the reminders (device-settings.ts).
+    inject(DeviceSettingsService);
     const failures = inject(ImageStore).failures.subscribe((error) => {
       const reason = error instanceof ImageRefusedError ? error.reason : null;
       this.toasts.show({
