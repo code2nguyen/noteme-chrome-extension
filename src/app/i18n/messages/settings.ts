@@ -64,8 +64,16 @@ export const settingsEn = {
     minutes === 0 ? 'When it starts' : minutes === 60 ? '1 hour before' : `${minutes} minutes before`,
   'settings.sync': 'Sync',
   'settings.sync.switch': 'Sync with your Chrome profile',
-  'settings.sync.description':
-    'Notes, to dos and settings follow you to every computer where you sign in to Chrome and switch this on',
+  'settings.sync.description': 'Notes, to dos and settings follow you to every computer where you sign in to Chrome',
+  'settings.sync.status.synced': (when: string) => `Synced ${when}`,
+  'settings.sync.status.never': 'Not synced yet',
+  'settings.sync.status.syncing': 'Syncing…',
+  'settings.sync.now': 'Sync now',
+  'settings.sync.error': 'Sync did not go through',
+  'settings.sync.error.full':
+    'Chrome sync is full. Some notes stay on this computer until you delete or archive others; they are sent again as soon as there is room.',
+  'settings.sync.error.busy': 'Chrome is taking no more changes for the moment. Noteme will send the rest shortly.',
+  'settings.sync.error.other': (detail: string) => `Chrome said: ${detail}`,
   'settings.sync.text':
     'Off, everything stays on this computer. Papers, flows and plans stay on this computer either way for now: syncing them through your Google Drive is coming.',
   'settings.storage': 'Storage',

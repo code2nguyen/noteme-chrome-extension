@@ -90,3 +90,20 @@
   --c2-progress__track--background-color: var(--c2-theme--color-primary-container);
   --c2-progress__indicator--background-color: var(--c2-theme--color-primary);
 }
+
+.settings__sync-status {
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+// The size of the icon button beside it, so the row does not move when a sync starts.
+.settings__syncing {
+  margin: 8px;
+  --c2-spinner--size: 20px;
+  --c2-spinner--stroke-width: 3px;
+  --c2-spinner--color: var(--c2-theme--color-primary);
+}
+
+.settings__sync-error {
+  margin: 4px 0 12px;
+  --c2-banner__container--font-size: calc(14px * var(--ntm-text-scale));
+}

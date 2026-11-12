@@ -6,6 +6,8 @@ const MIRROR_KEY = 'noteme-settings';
 /** Set while the mirror holds a change chrome.storage.sync has not accepted yet. */
 const UNSYNCED_KEY = 'noteme-settings-unsynced';
 const SYNC_KEY = 'NOTEME_SETTINGS';
+/** Set once this device has exchanged its notes with the profile for the first time (startSync). */
+const STARTED_KEY = 'noteme-sync-started';
 
 const hasChromeStorage = () => typeof chrome !== 'undefined' && !!chrome.storage?.sync;
 
@@ -103,6 +105,11 @@ export class SettingsService {
 
     if (hasChromeStorage()) {
       this.loaded = this.state().sync ? this.readSynced() : Promise.resolve();
+      // Sync is on without ever having been switched on (it is the default): the first exchange, which the switch
+      // otherwise starts, happens here, once. What this device already holds goes up, what the profile holds comes in.
+      if (this.state().sync && readLocal(STARTED_KEY) === null) {
+        this.startSync();
+      }
       chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync' && changes[SYNC_KEY] && this.state().sync) {
           this.adopt(changes[SYNC_KEY].newValue);
@@ -137,6 +144,7 @@ export class SettingsService {
    * device's go up. Notes are pulled in first, then what this device wrote while sync was off is sent.
    */
   private startSync(): void {
+    writeLocal(STARTED_KEY, '1');
     if (hasChromeStorage()) {
       chrome.storage.sync.get(SYNC_KEY).then(
         (stored) => {

@@ -29,8 +29,11 @@ nits that Prettier or ESLint already settle, and findings in generated or build 
 
 ## 2. Sync through the Chrome profile
 
-- Sync is **off by default** and switched on in Settings. Nothing may read or write `chrome.storage.sync` while it is
-  off.
+- Sync is **on unless switched off** in Settings. Nothing may read or write `chrome.storage.sync` while it is off. A
+  device that never made the choice does its first exchange once (`noteme-sync-started`): what the profile holds comes
+  in, then what the device holds goes up.
+- How the sync is going is in `DEVICE__SYNC_STATUS` (`services/sync-status.ts`): when it last went through, and the
+  refusal still standing. It holds Chrome's error text, never a note's.
 - Only quick notes and to-do lists sync (`services/sync-policy.ts`). `chrome.storage.sync` allows 8 KB per item and
   about 100 KB in all. A write it refuses is marked for retry (`SYNC__RETRY__<key>`, one marker per key) and sent again
   as the record is then. Check new record types against the quota and the policy.

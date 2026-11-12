@@ -53,8 +53,9 @@ FASTER AND LIGHTER
 • New: a new tab opens faster, and Noteme is half the size to download.
 
 YOUR NOTES STAY YOURS
-• Everything is kept on your computer. There is no account and no Noteme server.
-• Sync is optional and off by default. Switched on, quick notes, to-do lists and settings follow your Chrome profile to your other computers. Pages, flows, sheets and images stay on the computer.
+• Your notes are kept on your computer. There is no account and no Noteme server.
+• Quick notes, to-do lists and settings sync through your own Chrome profile to your other computers, and you can switch that off in Settings. Pages, flows, sheets and images stay on the computer.
+• New: Settings says when your notes were last synced, lets you sync now, and tells you when something did not go through.
 • The only outside service Noteme contacts is Wikimedia Commons, for the photos.
 ```
 
@@ -73,7 +74,7 @@ notifications (optional): Shows a reminder before a plan starts. Requested only 
 ```
 
 ```
-storage: Keeps the user's notes, plans and settings on the device, and, when the user switches Sync on, quick notes and settings in chrome.storage.sync.
+storage: Keeps the user's notes, plans and settings on the device, and, unless the user switches Sync off, quick notes, to-do lists and settings in chrome.storage.sync.
 ```
 
 ```

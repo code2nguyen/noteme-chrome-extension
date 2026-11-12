@@ -65,8 +65,16 @@ export const settingsVi: Translation<typeof settingsEn> = {
     minutes === 0 ? 'Khi bắt đầu' : minutes === 60 ? 'Trước 1 giờ' : `Trước ${minutes} phút`,
   'settings.sync': 'Đồng bộ',
   'settings.sync.switch': 'Đồng bộ với hồ sơ Chrome của bạn',
-  'settings.sync.description':
-    'Ghi chú, việc cần làm và cài đặt theo bạn đến mọi máy tính mà bạn đăng nhập Chrome và bật mục này',
+  'settings.sync.description': 'Ghi chú, việc cần làm và cài đặt theo bạn đến mọi máy tính mà bạn đăng nhập Chrome',
+  'settings.sync.status.synced': (when: string) => `Đã đồng bộ ${when}`,
+  'settings.sync.status.never': 'Chưa đồng bộ',
+  'settings.sync.status.syncing': 'Đang đồng bộ…',
+  'settings.sync.now': 'Đồng bộ ngay',
+  'settings.sync.error': 'Đồng bộ chưa thành công',
+  'settings.sync.error.full':
+    'Bộ nhớ đồng bộ của Chrome đã đầy. Một số ghi chú ở lại trên máy tính này cho đến khi bạn xóa hoặc lưu trữ bớt ghi chú khác; chúng sẽ được gửi lại ngay khi có chỗ trống.',
+  'settings.sync.error.busy': 'Chrome tạm thời không nhận thêm thay đổi. Noteme sẽ gửi phần còn lại sau ít phút.',
+  'settings.sync.error.other': (detail: string) => `Chrome trả lời: ${detail}`,
   'settings.sync.text':
     'Khi tắt, mọi thứ ở lại trên máy tính này. Hiện tại giấy, sơ đồ và kế hoạch luôn ở lại trên máy tính này: tính năng đồng bộ chúng qua Google Drive sắp ra mắt.',
   'settings.storage': 'Dung lượng',

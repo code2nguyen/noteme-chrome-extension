@@ -5,6 +5,8 @@ import { StorageApi } from './storage.api';
 import { StoreSyncService } from './store-sync.service';
 import { INSTANCE_ID } from './instance-id';
 import { fitsChromeSyncItem, SYNC_ENABLED, syncsWithChromeProfile } from './sync-policy';
+import { ART_BOARD_ITEM_PREFIX, ITEM_DATA_PREFIX } from './storage-keys';
+import { parseSyncStatus, SYNC_STATUS_KEY, syncError, SyncStatus } from './sync-status';
 import { getTime } from './utils';
 
 type StoredRecord = Record<string, unknown> & { sourceId?: string; trust?: string; modifiedDate?: string };
@@ -17,6 +19,9 @@ type StoredRecord = Record<string, unknown> & { sourceId?: string; trust?: strin
  */
 export const SYNC_RETRY_PREFIX = 'SYNC__RETRY__';
 
+/** A note's card or its text: what "last synced" counts, not the settings or the board's lists. */
+const isNote = (key: string) => key.startsWith(ITEM_DATA_PREFIX) || key.startsWith(ART_BOARD_ITEM_PREFIX);
+
 @Injectable()
 export class ChromeStorageApi implements StorageApi {
   private readonly id = inject(INSTANCE_ID);
@@ -26,6 +31,10 @@ export class ChromeStorageApi implements StorageApi {
   remoteDataQueue: Array<{ key: string | string[]; value?: string; action: 'remove' | 'set' }> = [];
   writingToRemoteSubscription: Subscription | null = null;
   remoteSync$ = new BehaviorSubject(false);
+  /** A removal was refused: unlike a refused write, nothing marks it for a retry. */
+  private removeFailed = false;
+  /** A note went to chrome.storage.sync, or was removed from it, since the queue last emptied. */
+  private sentNotes = false;
   /** Off: chrome.storage.sync is neither written nor read, and its changes are ignored. */
   private syncEnabled = inject(SYNC_ENABLED);
 
@@ -38,6 +47,7 @@ export class ChromeStorageApi implements StorageApi {
       if (areaName === 'sync' && Object.values(changes).some((change) => change.newValue === undefined)) {
         void this.retryRefusedWrites();
       }
+      let received = false;
       for (const key of Object.keys(changes)) {
         const change = changes[key];
         const newValue = this.jsonParse(change.newValue);
@@ -45,6 +55,11 @@ export class ChromeStorageApi implements StorageApi {
         if (!newValue || newValue.sourceId !== this.id) {
           this.storeSync.sync(key, newValue, oldValue);
         }
+        // A note written elsewhere (another computer, another tab) arriving through the profile.
+        received ||= areaName === 'sync' && isNote(key) && !!newValue && newValue.sourceId !== this.id;
+      }
+      if (received) {
+        void this.report({ at: Date.now() });
       }
     });
     // What was refused before a restart.
@@ -113,9 +128,14 @@ export class ChromeStorageApi implements StorageApi {
               : this.chromeSyncApi.set({ [item.key as string]: item.value });
           // A refused write is retried once chrome.storage.sync takes a write again (room freed, a passing error over).
           write.then(
-            () => void this.retryRefusedWrites(),
+            () => {
+              this.sentNotes ||= (Array.isArray(item.key) ? item.key : [item.key]).some(isNote);
+              void this.retryRefusedWrites();
+            },
             (error: unknown) => {
               console.error(error);
+              void this.report({ error: syncError(error) });
+              this.removeFailed ||= item.action === 'remove';
               if (item.action === 'set') {
                 void this.localStorageApi.set({ [SYNC_RETRY_PREFIX + item.key]: '1' });
               }
@@ -125,6 +145,7 @@ export class ChromeStorageApi implements StorageApi {
         complete: () => {
           this.writingToRemoteSubscription = null;
           this.remoteSync$.next(true);
+          void this.reportSent();
         },
       });
   }
@@ -184,6 +205,65 @@ export class ChromeStorageApi implements StorageApi {
     if (this.syncEnabled && remoteKeys.length > 0) {
       this.remoteDataQueue.push({ key: remoteKeys, action: 'remove' });
       this.syncToRemote();
+    }
+  }
+
+  /**
+   * "Sync now" (Settings › Sync): take in what the profile has, then send again what it refused. A failure is said in
+   * the sync status, not thrown.
+   */
+  async syncNow(): Promise<void> {
+    if (!this.syncEnabled) {
+      return;
+    }
+    try {
+      await this.syncRemoteToLocal();
+      await this.retryRefusedWrites();
+    } catch (error) {
+      console.error(error);
+      await this.report({ error: syncError(error) });
+    }
+  }
+
+  /**
+   * The queue is empty. "Last synced" moves when a note was sent: it is the last time notes were exchanged, not the
+   * last time Noteme looked. What was refused before no longer stands when nothing waits to be sent again: a refused
+   * write leaves its marker (SYNC_RETRY_PREFIX) until it goes through or its note is deleted.
+   */
+  private async reportSent(): Promise<void> {
+    const removeFailed = this.removeFailed;
+    const sentNotes = this.sentNotes;
+    this.removeFailed = false;
+    this.sentNotes = false;
+    if (!this.syncEnabled) {
+      return;
+    }
+    try {
+      const waiting =
+        removeFailed || (await this.localStorageApi.getKeys()).some((key) => key.startsWith(SYNC_RETRY_PREFIX));
+      const change: Partial<SyncStatus> = {
+        ...(sentNotes ? { at: Date.now() } : {}),
+        ...(waiting ? {} : { error: undefined }),
+      };
+      if (Object.keys(change).length > 0) {
+        await this.report(change);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /**
+   * Note how the sync is going (sync-status.ts), for Settings and every other tab. Read and written whole: two tabs
+   * writing at once keep the later one's word, which is as true.
+   */
+  private async report(change: Partial<SyncStatus>): Promise<void> {
+    try {
+      const stored: Record<string, unknown> = await this.localStorageApi.get(SYNC_STATUS_KEY);
+      const status: SyncStatus = { ...parseSyncStatus(stored[SYNC_STATUS_KEY]), ...change };
+      await this.localStorageApi.set({ [SYNC_STATUS_KEY]: JSON.stringify(status) });
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -272,6 +352,8 @@ export class ChromeStorageApi implements StorageApi {
     const localItems = ((await this.getPromise(null)) as Record<string, unknown>) || {};
     const remoteKeys = Object.keys(remoteItems);
     const localKeys = Object.keys(localItems);
+    // Notes taken in from the profile: updated, added or removed here.
+    let received = 0;
     for (const remoteKey of remoteKeys) {
       if (!remoteKey.startsWith('ITEM_DATA__') && !remoteKey.startsWith('ART_BOARD_ITEM__')) {
         continue;
@@ -291,6 +373,7 @@ export class ChromeStorageApi implements StorageApi {
           remoteData['silent'] = false;
           await this.setPromise(remoteKey, remoteData, 'remote', remoteData.sourceId);
           this.storeSync.sync(remoteKey, remoteData, localData);
+          received++;
         }
       } else {
         // add
@@ -307,6 +390,7 @@ export class ChromeStorageApi implements StorageApi {
         remoteData['silent'] = false;
         await this.setPromise(remoteKey, remoteData, 'remote', remoteData.sourceId);
         this.storeSync.sync(remoteKey, remoteData, null);
+        received++;
       }
     }
 
@@ -317,9 +401,14 @@ export class ChromeStorageApi implements StorageApi {
           if (localData?.trust === 'remote') {
             await this.removePromise(localKey);
             this.storeSync.sync(localKey, null, localData);
+            received++;
           }
         }
       }
+    }
+    // "Last synced" moves when notes came in; a refusal of what this device sent stands until that goes through.
+    if (received > 0) {
+      await this.report({ at: Date.now() });
     }
   }
 }

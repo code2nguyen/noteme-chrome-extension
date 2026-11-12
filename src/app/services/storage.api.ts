@@ -22,6 +22,8 @@ export interface StorageApi {
   setSyncEnabled(enabled: boolean): void;
   /** Send every record that syncs and is not on the remote yet: what was written while sync was off. */
   pushLocalToRemote(): Promise<void>;
+  /** "Sync now": take in what the remote has and send again what it refused. Never rejects: a failure is in the sync status. */
+  syncNow(): Promise<void>;
 }
 
 export function artBoardArtBoardItemIdsKey(boardId: string): string {

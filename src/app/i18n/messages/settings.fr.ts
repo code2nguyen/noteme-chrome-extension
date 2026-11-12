@@ -67,7 +67,17 @@ export const settingsFr: Translation<typeof settingsEn> = {
   'settings.sync': 'Synchronisation',
   'settings.sync.switch': 'Synchroniser avec votre profil Chrome',
   'settings.sync.description':
-    'Notes, À faire et réglages vous suivent sur chaque ordinateur où vous vous connectez à Chrome et activez cette option',
+    'Notes, À faire et réglages vous suivent sur chaque ordinateur où vous vous connectez à Chrome',
+  'settings.sync.status.synced': (when: string) => `Synchronisé ${when}`,
+  'settings.sync.status.never': 'Pas encore synchronisé',
+  'settings.sync.status.syncing': 'Synchronisation…',
+  'settings.sync.now': 'Synchroniser maintenant',
+  'settings.sync.error': 'La synchronisation n’a pas abouti',
+  'settings.sync.error.full':
+    'La synchronisation Chrome est pleine. Certaines notes restent sur cet ordinateur tant que vous n’en supprimez ou n’en archivez pas d’autres ; elles sont renvoyées dès qu’il y a de la place.',
+  'settings.sync.error.busy':
+    'Chrome n’accepte plus de modifications pour le moment. Noteme enverra le reste sous peu.',
+  'settings.sync.error.other': (detail: string) => `Chrome a répondu : ${detail}`,
   'settings.sync.text':
     'Désactivée, tout reste sur cet ordinateur. Feuilles, flux et agenda restent sur cet ordinateur dans tous les cas pour le moment : leur synchronisation via votre Google Drive arrive bientôt.',
   'settings.storage': 'Stockage',

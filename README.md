@@ -58,7 +58,8 @@ notifications permission. A click on a reminder opens the plan's week.
 - Theme light, dark or following the system; text size from Small to Larger.
 - Language: English, French or Vietnamese, the c2n components included.
 - What Home shows: clock, date, quote, site shortcuts, photos and their themes.
-- **Sync** with your Chrome profile (`chrome.storage.sync`), off by default. Quick notes and to-do lists sync; pages,
+- **Sync** with your Chrome profile (`chrome.storage.sync`), on unless you switch it off. Settings says when the notes
+  were last synced, has a button to sync now, and says what went wrong when Chrome refuses a note. Quick notes and to-do lists sync; pages,
   flows and sheets stay on the device, as does a note too long for Chrome sync (8 KB an item, about 100 KB in all).
   Notes refused by a full sync storage are sent again once room is freed.
 - **Storage**: how much room the notes take on the computer, the images and photos kept with them, and, with sync on,

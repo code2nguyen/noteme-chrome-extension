@@ -54,10 +54,15 @@ async function stored(page: Page, area: 'local' | 'sync', key: string) {
   return raw ? JSON.parse(raw) : undefined;
 }
 
-/** Sync is off until switched on in Settings. */
-async function switchOnSync(page: Page): Promise<void> {
+/** Sync is on unless switched off in Settings: put the switch where the test wants it. */
+async function setSync(page: Page, on: boolean): Promise<void> {
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
-  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  const control = page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' });
+  await expect(control).toBeVisible();
+  if ((await control.evaluate((element) => (element as HTMLInputElement).checked)) !== on) {
+    await control.click();
+  }
+  await expect(control).toHaveJSProperty('checked', on);
   await page.keyboard.press('Escape');
   // Closed for good: the sheet leaves the URL once it has closed, which would close one opened again meanwhile.
   await expect(page).not.toHaveURL(/settings=1/);
@@ -202,28 +207,82 @@ test('2.x text notes open migrated, and are only rewritten when edited', async (
   );
 });
 
-test('nothing reaches chrome.storage.sync until sync is switched on, then what was written goes up', async ({
+test('with sync switched off nothing reaches chrome.storage.sync; switched on again, what was written goes up', async ({
   newTab,
 }) => {
   const page = await newTab();
+  await setSync(page, false);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Kept on this computer');
   const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
   await expect.poll(async () => (await stored(page, 'local', `ITEM_DATA__${id}`))?.data).toBe('Kept on this computer');
   await page.waitForTimeout(1500);
-  expect(await page.evaluate(() => chrome.storage.sync.get(null))).toEqual({});
+  // Neither the note nor its card: only what went up before the switch was turned off (the settings) is there.
+  const synced = Object.keys(await page.evaluate(() => chrome.storage.sync.get(null)));
+  expect(synced.filter((key) => key.includes(id))).toEqual([]);
 
-  await switchOnSync(page);
+  await setSync(page, true);
   await expect
     .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
     .toBe('Kept on this computer');
   await expect.poll(async () => (await stored(page, 'sync', 'NOTEME_SETTINGS'))?.sync).toBe(true);
 });
 
+test('a new profile syncs without being asked, and Settings says how the sync is going', async ({ newTab }) => {
+  const page = await newTab();
+  await openBoard(page);
+  await newNote(page);
+  await page.keyboard.type('Synced from the start');
+  const id = await card(page).evaluate((element) => element.closest('c2-masonry-item')!.getAttribute('item-id')!);
+  await expect
+    .poll(async () => (await stored(page, 'sync', `ITEM_DATA__${id}`))?.data, { timeout: 15_000 })
+    .toBe('Synced from the start');
+
+  await page.goto(page.url().split('#')[0] + '#/?settings=1');
+  const panel = page.locator('ntm-settings-panel');
+  const status = panel.locator('.settings__sync-status');
+  await expect(status).toContainText(/^Synced /);
+  await expect(panel.locator('c2-banner')).toHaveCount(0);
+
+  // "Sync now" takes in what the profile holds: a note another computer wrote.
+  await seed(page, 'sync', {
+    ART_BOARD_ITEM__remote: {
+      id: 'remote',
+      boardId: 'defaultArtBoard',
+      extensionId: 'ntm-text-note-element',
+      colorIndex: 3,
+      gridPosition: grid(1),
+      properties: {},
+      modifiedDate: dates.modifiedDate,
+    },
+    ITEM_DATA__remote: { id: 'remote', dataType: 'markdown', empty: false, ...dates, data: 'From the other computer' },
+  });
+  await status.locator('c2-icon-button').click();
+  await expect
+    .poll(async () => (await stored(page, 'local', 'ITEM_DATA__remote'))?.data)
+    .toBe('From the other computer');
+  await expect(status).toContainText(/^Synced /);
+
+  // What chrome.storage.sync refuses is said here, in words, until it goes through.
+  await seed(page, 'local', {
+    DEVICE__SYNC_STATUS: {
+      at: Date.now(),
+      error: { kind: 'full', detail: 'QUOTA_BYTES quota exceeded', at: Date.now() },
+    },
+  });
+  await expect(panel.locator('c2-banner')).toContainText('Chrome sync is full');
+  await panel.locator('.settings__sync-status').scrollIntoViewIfNeeded();
+  await shot(page, 'extension-settings-sync-status');
+  // Switched off, there is no status to give.
+  await panel.locator('c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await expect(status).toHaveCount(0);
+  await expect(panel.locator('c2-banner')).toHaveCount(0);
+});
+
 test('edits reach chrome.storage.sync and remote notes are pulled in', async ({ newTab }) => {
   const page = await newTab();
-  await switchOnSync(page);
+  await setSync(page, true);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Synced across devices');
@@ -289,7 +348,7 @@ test('an edit in one tab shows up in another open tab', async ({ newTab }) => {
 
 test('settings are kept in chrome.storage.sync once sync is on', async ({ newTab }) => {
   const page = await newTab();
-  await switchOnSync(page);
+  await setSync(page, true);
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
   const synced = () =>
     page.evaluate(() =>
@@ -306,7 +365,7 @@ test('settings are kept in chrome.storage.sync once sync is on', async ({ newTab
 
 test('notes sync through the Chrome profile; pages stay on this computer', async ({ newTab }) => {
   const page = await newTab();
-  await switchOnSync(page);
+  await setSync(page, true);
   await openBoard(page);
   await newNote(page);
   await page.keyboard.type('Synced note');
@@ -343,7 +402,7 @@ test('notes sync through the Chrome profile; pages stay on this computer', async
   expect(await stored(page, 'sync', `ART_BOARD_ITEM__${noteId}`)).toBeDefined();
 });
 
-test('Settings says how much room the notes take, and Chrome sync once it is on', async ({ newTab }) => {
+test('Settings says how much room the notes take, and Chrome sync while it is on', async ({ newTab }) => {
   const page = await newTab();
   await page.goto(page.url().split('#')[0] + '#/?settings=1');
   const storage = page.locator('ntm-settings-panel .settings__storage');
@@ -351,14 +410,13 @@ test('Settings says how much room the notes take, and Chrome sync once it is on'
     storage.locator('.settings__row', { hasText: 'Notes on this computer' }).locator('.settings__value'),
   ).toHaveText(/^[\d.,]+ (kB|MB)$/);
   await expect(storage.locator('.settings__row', { hasText: 'Images and photos' })).toBeVisible();
-  // Chrome sync is not read, and not shown, while sync is off.
-  await expect(storage.locator('c2-progress')).toHaveCount(0);
-
-  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
   await expect(storage.locator('c2-progress')).toContainText('Chrome sync');
   await expect(storage.locator('c2-progress')).toContainText(/of 100 kB/);
   await storage.scrollIntoViewIfNeeded();
   await shot(page, 'extension-settings-storage');
+  // Chrome sync is not read, and not shown, while sync is off.
+  await page.locator('ntm-settings-panel c2-switch', { hasText: 'Sync with your Chrome profile' }).click();
+  await expect(storage.locator('c2-progress')).toHaveCount(0);
 });
 
 /** The background service worker, started by Chrome with the extension. */

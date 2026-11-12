@@ -9,6 +9,7 @@ import { ChromeStorageApi, SYNC_RETRY_PREFIX } from './chrome-storage.api';
 import { INSTANCE_ID } from './instance-id';
 import { StoreSyncService } from './store-sync.service';
 import { SYNC_ENABLED } from './sync-policy';
+import { parseSyncStatus, SYNC_STATUS_KEY } from './sync-status';
 
 /** A storage area that keeps its records in a map. */
 function area(records: Record<string, string> = {}) {
@@ -124,6 +125,25 @@ describe('ChromeStorageApi', () => {
     expect(api.remoteDataQueue).toEqual([{ key: ['ART_BOARD_ITEM__a'], action: 'remove' }]);
   });
 
+  it('says notes were synced when one is sent, not when only a list is, nor when a look finds nothing new', async () => {
+    vi.useFakeTimers();
+    const { api, local } = setUp({}, { drain: true });
+    const status = () => parseSyncStatus(local.records[SYNC_STATUS_KEY]);
+    await api.setPromise('_ART_BOARD_ITEM__IDS', ['a']);
+    await vi.advanceTimersByTimeAsync(700 * 3);
+    expect(status().at).toBeUndefined();
+
+    await api.setPromise('ITEM_DATA__a', { id: 'a', dataType: DataType.MARKDOWN, data: 'Hi', empty: false });
+    await vi.advanceTimersByTimeAsync(700 * 3);
+    const sent = status().at;
+    expect(sent).toBeTypeOf('number');
+
+    // The profile holds nothing this device does not: the time stays the one of the last exchange.
+    await vi.advanceTimersByTimeAsync(60_000);
+    await api.syncRemoteToLocal();
+    expect(status().at).toBe(sent);
+  });
+
   describe('a note chrome.storage.sync refused (the area full)', () => {
     const note = (data: string) => ({ id: 'a', dataType: DataType.MARKDOWN, data, empty: false });
     const other = { ART_BOARD_ITEM__old: JSON.stringify({ id: 'old', extensionId: ExtensionId.TextNote }) };
@@ -179,7 +199,19 @@ describe('ChromeStorageApi', () => {
       expect(sync.remove).toHaveBeenCalledWith(['ITEM_DATA__a']);
       expect(sync.set).toHaveBeenCalledTimes(1);
       expect(sync.records).toEqual({});
-      expect(local.records).toEqual({});
+      // Nothing of the note is left: only the word that a write was refused.
+      expect(Object.keys(local.records)).toEqual([SYNC_STATUS_KEY]);
+    });
+
+    it('says so in the sync status, until what was refused goes through', async () => {
+      const { api, local } = await refused(other);
+      const status = () => parseSyncStatus(local.records[SYNC_STATUS_KEY]);
+      expect(status().error).toMatchObject({ kind: 'full', detail: 'QUOTA_BYTES quota exceeded' });
+      // Room freed: the note is sent again, and with the queue empty and nothing refused, it is synced.
+      await api.removePromise('ART_BOARD_ITEM__old');
+      await vi.advanceTimersByTimeAsync(700 * 4);
+      expect(status().error).toBeUndefined();
+      expect(status().at).toBeTypeOf('number');
     });
 
     it('is not sent over a newer copy that came from the remote', async () => {

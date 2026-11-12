@@ -38,6 +38,10 @@ export class DevStorageApi implements StorageApi {
     return Promise.resolve();
   }
 
+  syncNow(): Promise<void> {
+    return Promise.resolve();
+  }
+
   syncRemoteToLocal(): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, 1000));
   }

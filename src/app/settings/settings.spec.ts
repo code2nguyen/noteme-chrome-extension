@@ -35,10 +35,12 @@ describe('parseSettings', () => {
     expect(parseSettings({ homeNotes: 'random' }).homeNotes).toBe('auto');
   });
 
-  it('does not sync until switched on', () => {
-    expect(parseSettings(null).sync).toBe(false);
+  it('syncs unless switched off', () => {
+    expect(parseSettings(null).sync).toBe(true);
+    expect(parseSettings({ sync: false }).sync).toBe(false);
     expect(parseSettings({ sync: true }).sync).toBe(true);
-    expect(parseSettings({ sync: 'yes' }).sync).toBe(false);
+    // Not a choice: the default.
+    expect(parseSettings({ sync: 'no' }).sync).toBe(true);
   });
 
   it('keeps valid values and drops bad or unknown ones', () => {

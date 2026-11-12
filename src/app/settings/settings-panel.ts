@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import './settings-elements';
 import type { Select } from '@c2n/components/select';
+import { formatRelativeTime } from '@c2n/components/relative-time';
 import type { Switch } from '@c2n/components/switch';
 import { PHOTO_THEMES, PhotoTheme } from '../home/background';
 import { I18n } from '../i18n/i18n.service';
@@ -20,6 +21,7 @@ import type { ShownPhoto } from '../home/background.service';
 import { TopSitesService } from '../home/top-sites.service';
 import { REMINDER_LEADS, ReminderLead } from '../services/device-settings';
 import { DeviceSettingsService } from '../services/device-settings.service';
+import { SyncStatusService } from '../services/sync-status.service';
 import { Feature, FEATURES, formatDate, hasFeature, Settings } from './settings';
 import { SettingsService } from './settings.service';
 import { formatBytes, readStorageUsage, StorageUsage } from './storage-usage';
@@ -39,6 +41,7 @@ export class SettingsPanel {
   private readonly service = inject(SettingsService);
   private readonly topSites = inject(TopSitesService);
   private readonly device = inject(DeviceSettingsService);
+  private readonly syncStatus = inject(SyncStatusService);
   private readonly i18n = inject(I18n);
   readonly t = this.i18n.t;
 
@@ -75,6 +78,36 @@ export class SettingsPanel {
   readonly reminderLead = this.device.reminderLead;
   readonly reminderLeads = REMINDER_LEADS;
 
+  /** The sync with the Chrome profile, in the extension only: when it last went through, and what went wrong. */
+  readonly syncSupported = this.syncStatus.supported;
+  readonly syncing = this.syncStatus.syncing;
+  /** The time "5 minutes ago" is counted from: when the sheet opened, or the status last changed. */
+  private readonly now = signal(Date.now());
+  readonly syncText = computed(() => {
+    if (this.syncing()) {
+      return this.t('settings.sync.status.syncing');
+    }
+    const at = this.syncStatus.status().at;
+    return at === undefined
+      ? this.t('settings.sync.status.never')
+      : this.t(
+          'settings.sync.status.synced',
+          // Never "in 2 seconds": a status written a moment after the sheet opened is now.
+          formatRelativeTime(new Date(at), new Date(Math.max(this.now(), at)), { locale: this.i18n.locale() }),
+        );
+  });
+  readonly syncError = computed(() => {
+    const error = this.syncStatus.status().error;
+    if (!error) {
+      return null;
+    }
+    return error.kind === 'full'
+      ? this.t('settings.sync.error.full')
+      : error.kind === 'busy'
+        ? this.t('settings.sync.error.busy')
+        : this.t('settings.sync.error.other', error.detail);
+  });
+
   /** How much room Noteme takes, measured each time the sheet opens and when sync is switched. */
   private readonly usage = signal<StorageUsage>({});
   readonly storage = computed(() => {
@@ -97,10 +130,18 @@ export class SettingsPanel {
   });
 
   constructor() {
+    effect(() => {
+      // Counted again when the sheet opens and when the status changes.
+      this.open();
+      this.syncStatus.status();
+      this.now.set(Date.now());
+    });
     effect((onCleanup) => {
       if (!this.open()) {
         return;
       }
+      // Measured again once a sync has gone through.
+      this.syncStatus.status();
       let current = true;
       onCleanup(() => (current = false));
       // The answer of an earlier measure (sync since switched) is dropped.
@@ -158,6 +199,10 @@ export class SettingsPanel {
   async toggleReminders(event: Event): Promise<void> {
     const control = event.target as Switch;
     control.checked = await this.device.setReminders(control.checked);
+  }
+
+  syncNow(): void {
+    void this.syncStatus.syncNow();
   }
 
   chooseReminderLead(event: Event): void {

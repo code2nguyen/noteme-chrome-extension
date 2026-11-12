@@ -223,6 +223,26 @@
       {{ t('settings.sync.switch') }}
       <span slot="description">{{ t('settings.sync.description') }}</span>
     </c2-switch>
+    @if (settings().sync && syncSupported) {
+      <div class="settings__row settings__sync-status">
+        <span role="status">{{ syncText() }}</span>
+        @if (syncing()) {
+          <c2-spinner class="settings__syncing" [attr.label]="t('settings.sync.status.syncing')"></c2-spinner>
+        } @else {
+          <c2-icon-button class="settings__sync-now" [attr.tooltip]="t('settings.sync.now')" (click)="syncNow()">
+            <c2-feather-refresh-cw></c2-feather-refresh-cw>
+          </c2-icon-button>
+        }
+      </div>
+      @if (syncError(); as error) {
+        <c2-banner
+          class="settings__sync-error"
+          variant="error"
+          [attr.heading]="t('settings.sync.error')"
+          [attr.message]="error"
+        ></c2-banner>
+      }
+    }
     <p class="settings__text">
       {{ t('settings.sync.text') }}
     </p>

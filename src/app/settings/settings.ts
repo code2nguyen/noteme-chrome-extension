@@ -51,8 +51,8 @@ export interface Settings {
   /** The optional features switched on; may be none. */
   features: Feature[];
   /**
-   * Notes and settings sync through the Chrome profile (chrome.storage.sync). Chosen on each device: it never comes
-   * from the synced copy.
+   * Notes and settings sync through the Chrome profile (chrome.storage.sync): on unless switched off. Chosen on each
+   * device: it never comes from the synced copy.
    */
   sync: boolean;
 }
@@ -73,8 +73,8 @@ export const DEFAULT_SETTINGS: Settings = {
   weekStart: 'monday',
   // Every feature is opt-in: switched on in Settings.
   features: [],
-  // Nothing leaves the device until sync is switched on in Settings.
-  sync: false,
+  // Quick notes, to-do lists and settings follow the Chrome profile, until switched off in Settings.
+  sync: true,
 };
 
 const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {

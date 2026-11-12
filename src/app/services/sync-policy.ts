@@ -4,7 +4,7 @@ import { readMirroredSettings } from '../settings/settings.service';
 import { DataType } from '../store/models/data-type';
 
 /**
- * Whether this device syncs through the Chrome profile when storage starts: off until switched on in Settings (Sync),
+ * Whether this device syncs through the Chrome profile when storage starts: on unless switched off in Settings (Sync),
  * then whatever the device chose. Read from the settings mirror, which is there before anything is written.
  */
 export const SYNC_ENABLED = new InjectionToken<boolean>('Sync with the Chrome profile', {
