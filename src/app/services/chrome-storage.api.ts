@@ -35,6 +35,14 @@ export class ChromeStorageApi implements StorageApi {
   private removeFailed = false;
   /** A note went to chrome.storage.sync, or was removed from it, since the queue last emptied. */
   private sentNotes = false;
+  /** The writes handed to chrome.storage.sync that have not answered yet: the queue is sent once they all have. */
+  private writes: Promise<unknown>[] = [];
+  /** One report of the sync status at a time, so two never read the same record and overwrite each other. */
+  private reporting: Promise<void> = Promise.resolve();
+  /** One pass taking in the profile's notes at a time: two at once would both add the same note to the board. */
+  private pulling: Promise<void> = Promise.resolve();
+  /** Set while a retry waits for chrome.storage.sync to take writes again. */
+  private retryTimer?: ReturnType<typeof setTimeout>;
   /** Off: chrome.storage.sync is neither written nor read, and its changes are ignored. */
   private syncEnabled = inject(SYNC_ENABLED);
 
@@ -48,6 +56,7 @@ export class ChromeStorageApi implements StorageApi {
         void this.retryRefusedWrites();
       }
       let received = false;
+      const removed: string[] = [];
       for (const key of Object.keys(changes)) {
         const change = changes[key];
         const newValue = this.jsonParse(change.newValue);
@@ -55,11 +64,18 @@ export class ChromeStorageApi implements StorageApi {
         if (!newValue || newValue.sourceId !== this.id) {
           this.storeSync.sync(key, newValue, oldValue);
         }
-        // A note written elsewhere (another computer, another tab) arriving through the profile.
-        received ||= areaName === 'sync' && isNote(key) && !!newValue && newValue.sourceId !== this.id;
+        if (areaName === 'sync' && isNote(key)) {
+          // A note written elsewhere (another computer, another tab) arriving through the profile.
+          received ||= !!newValue && newValue.sourceId !== this.id;
+          if (change.newValue === undefined) {
+            removed.push(key);
+          }
+        }
       }
       if (received) {
         void this.report({ at: Date.now() });
+      } else if (removed.length > 0) {
+        void this.reportRemovedElsewhere(removed);
       }
     });
     // What was refused before a restart.
@@ -106,6 +122,10 @@ export class ChromeStorageApi implements StorageApi {
     return this.remoteSync$.asObservable();
   }
 
+  isSending(): boolean {
+    return this.writingToRemoteSubscription !== null;
+  }
+
   syncToRemote(): void {
     if (this.writingToRemoteSubscription) {
       return;
@@ -127,25 +147,35 @@ export class ChromeStorageApi implements StorageApi {
               ? this.chromeSyncApi.remove(item.key)
               : this.chromeSyncApi.set({ [item.key as string]: item.value });
           // A refused write is retried once chrome.storage.sync takes a write again (room freed, a passing error over).
-          write.then(
-            () => {
-              this.sentNotes ||= (Array.isArray(item.key) ? item.key : [item.key]).some(isNote);
-              void this.retryRefusedWrites();
-            },
-            (error: unknown) => {
-              console.error(error);
-              void this.report({ error: syncError(error) });
-              this.removeFailed ||= item.action === 'remove';
-              if (item.action === 'set') {
-                void this.localStorageApi.set({ [SYNC_RETRY_PREFIX + item.key]: '1' });
-              }
-            },
+          this.writes.push(
+            write.then(
+              () => {
+                this.sentNotes ||= (Array.isArray(item.key) ? item.key : [item.key]).some(isNote);
+                void this.retryRefusedWrites();
+              },
+              (error: unknown) => {
+                console.error(error);
+                const failure = syncError(error);
+                void this.report({ error: failure });
+                this.removeFailed ||= item.action === 'remove';
+                if (failure.kind === 'busy') {
+                  this.retryLater();
+                }
+                // Awaited before the queue is said to be sent: the marker is how that knows something still waits.
+                return item.action === 'set'
+                  ? this.localStorageApi.set({ [SYNC_RETRY_PREFIX + item.key]: '1' }).catch(() => undefined)
+                  : undefined;
+              },
+            ),
           );
         },
         complete: () => {
           this.writingToRemoteSubscription = null;
           this.remoteSync$.next(true);
-          void this.reportSent();
+          // The last write may still be on its way (the queue empties when it is handed over, not when it answers).
+          const writes = this.writes;
+          this.writes = [];
+          void Promise.allSettled(writes).then(() => this.reportSent());
         },
       });
   }
@@ -219,6 +249,10 @@ export class ChromeStorageApi implements StorageApi {
     try {
       await this.syncRemoteToLocal();
       await this.retryRefusedWrites();
+      // Nothing to send: said here, since no queue will empty to say it (a refusal that no longer stands is cleared).
+      if (!this.isSending()) {
+        await this.reportSent();
+      }
     } catch (error) {
       console.error(error);
       await this.report({ error: syncError(error) });
@@ -254,17 +288,46 @@ export class ChromeStorageApi implements StorageApi {
   }
 
   /**
-   * Note how the sync is going (sync-status.ts), for Settings and every other tab. Read and written whole: two tabs
-   * writing at once keep the later one's word, which is as true.
+   * Note how the sync is going (sync-status.ts), for Settings and every other tab. Read and written whole, one report
+   * after the other in this tab; two tabs writing at the same moment keep the later one's word.
    */
-  private async report(change: Partial<SyncStatus>): Promise<void> {
+  private report(change: Partial<SyncStatus>): Promise<void> {
+    this.reporting = this.reporting.then(async () => {
+      try {
+        const stored: Record<string, unknown> = await this.localStorageApi.get(SYNC_STATUS_KEY);
+        const status: SyncStatus = { ...parseSyncStatus(stored[SYNC_STATUS_KEY]), ...change };
+        await this.localStorageApi.set({ [SYNC_STATUS_KEY]: JSON.stringify(status) });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    return this.reporting;
+  }
+
+  /**
+   * Notes removed from chrome.storage.sync. By this device, its own copy went first (removePromise); one it still
+   * holds was deleted on another computer, which counts as notes exchanged.
+   */
+  private async reportRemovedElsewhere(keys: string[]): Promise<void> {
     try {
-      const stored: Record<string, unknown> = await this.localStorageApi.get(SYNC_STATUS_KEY);
-      const status: SyncStatus = { ...parseSyncStatus(stored[SYNC_STATUS_KEY]), ...change };
-      await this.localStorageApi.set({ [SYNC_STATUS_KEY]: JSON.stringify(status) });
+      const held: Record<string, unknown> = await this.localStorageApi.get(keys);
+      if (Object.keys(held).length > 0) {
+        await this.report({ at: Date.now() });
+      }
     } catch (error) {
       console.error(error);
     }
+  }
+
+  /**
+   * chrome.storage.sync takes no more writes for now (120 a minute, 1,800 an hour): what it refused is sent again in a
+   * minute, without waiting for the next edit.
+   */
+  private retryLater(): void {
+    this.retryTimer ??= setTimeout(() => {
+      this.retryTimer = undefined;
+      void this.retryRefusedWrites();
+    }, 60_000);
   }
 
   /**
@@ -344,7 +407,14 @@ export class ChromeStorageApi implements StorageApi {
    * Local => Remote
    *  - Not found => if trust = remote => remove from local
    */
-  async syncRemoteToLocal(): Promise<void> {
+  syncRemoteToLocal(): Promise<void> {
+    // After the pass under way, if any: it then finds the notes that one took in, and adds nothing twice.
+    const pass = this.pulling.catch(() => undefined).then(() => this.takeInRemote());
+    this.pulling = pass;
+    return pass;
+  }
+
+  private async takeInRemote(): Promise<void> {
     if (!this.syncEnabled) {
       return;
     }

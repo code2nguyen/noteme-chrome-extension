@@ -144,6 +144,20 @@ describe('ChromeStorageApi', () => {
     expect(status().at).toBe(sent);
   });
 
+  it('takes a note of the profile in once, when two passes are asked for at the same moment', async () => {
+    const { api, local, sync } = setUp();
+    sync.records['ART_BOARD_ITEM__r'] = JSON.stringify({
+      id: 'r',
+      boardId: 'defaultArtBoard',
+      extensionId: ExtensionId.TextNote,
+      modifiedDate: '2026-03-01T10:00:00.000Z',
+    });
+    // The board's pass and the first exchange, both at start-up.
+    await Promise.all([api.syncRemoteToLocal(), api.syncRemoteToLocal()]);
+    expect(JSON.parse(local.records['_ART_BOARD_ITEM__IDS'])).toEqual(['r']);
+    expect(JSON.parse(local.records['_ART_BOARD__ART_BOARD_ITEM_IDS__defaultArtBoard'])).toEqual(['r']);
+  });
+
   describe('a note chrome.storage.sync refused (the area full)', () => {
     const note = (data: string) => ({ id: 'a', dataType: DataType.MARKDOWN, data, empty: false });
     const other = { ART_BOARD_ITEM__old: JSON.stringify({ id: 'old', extensionId: ExtensionId.TextNote }) };

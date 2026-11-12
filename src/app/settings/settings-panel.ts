@@ -96,6 +96,7 @@ export class SettingsPanel {
           formatRelativeTime(new Date(at), new Date(Math.max(this.now(), at)), { locale: this.i18n.locale() }),
         );
   });
+  private readonly syncedAt = computed(() => this.syncStatus.status().at);
   readonly syncError = computed(() => {
     const error = this.syncStatus.status().error;
     if (!error) {
@@ -130,18 +131,21 @@ export class SettingsPanel {
   });
 
   constructor() {
-    effect(() => {
-      // Counted again when the sheet opens and when the status changes.
-      this.open();
+    effect((onCleanup) => {
+      // Counted again when the sheet opens, when the status changes, and every half minute while it is open.
       this.syncStatus.status();
       this.now.set(Date.now());
+      if (this.open()) {
+        const timer = setInterval(() => this.now.set(Date.now()), 30_000);
+        onCleanup(() => clearInterval(timer));
+      }
     });
     effect((onCleanup) => {
       if (!this.open()) {
         return;
       }
-      // Measured again once a sync has gone through.
-      this.syncStatus.status();
+      // Measured again once notes have been exchanged, not at every word of the status.
+      this.syncedAt();
       let current = true;
       onCleanup(() => (current = false));
       // The answer of an earlier measure (sync since switched) is dropped.
@@ -202,7 +206,7 @@ export class SettingsPanel {
   }
 
   syncNow(): void {
-    void this.syncStatus.syncNow();
+    void this.syncStatus.syncNow().then(() => this.now.set(Date.now()));
   }
 
   chooseReminderLead(event: Event): void {

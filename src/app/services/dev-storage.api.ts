@@ -30,6 +30,10 @@ export class DevStorageApi implements StorageApi {
     return of(true);
   }
 
+  isSending(): boolean {
+    return false;
+  }
+
   setSyncEnabled(): void {
     // No remote to switch.
   }

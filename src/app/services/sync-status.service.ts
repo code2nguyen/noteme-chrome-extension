@@ -34,7 +34,10 @@ export class SyncStatusService {
       }
     };
     chrome.storage.onChanged.addListener(listener);
-    // The storage says false when it starts sending, true once everything is sent; its first word is not news.
+    // The storage says false when it starts sending, true once everything is sent; its first word is not news, so
+    // whether it is sending right now is asked.
+    this.sending = this.storage.isSending();
+    this.update();
     const sent = this.storage
       .getRemoteSyncStatus()
       .pipe(skip(1))

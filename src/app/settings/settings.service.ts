@@ -144,7 +144,6 @@ export class SettingsService {
    * device's go up. Notes are pulled in first, then what this device wrote while sync was off is sent.
    */
   private startSync(): void {
-    writeLocal(STARTED_KEY, '1');
     if (hasChromeStorage()) {
       chrome.storage.sync.get(SYNC_KEY).then(
         (stored) => {
@@ -160,6 +159,8 @@ export class SettingsService {
     this.storage
       .syncRemoteToLocal()
       .then(() => this.storage.pushLocalToRemote())
+      // Done once it went through: a first exchange that failed is tried again at the next start.
+      .then(() => writeLocal(STARTED_KEY, '1'))
       .catch((error: unknown) => console.error(error));
   }
 
