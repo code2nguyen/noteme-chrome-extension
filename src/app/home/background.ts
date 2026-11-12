@@ -70,10 +70,19 @@ export function bundledPhoto(index: number): BackgroundPhoto {
   const n = ((index % BUNDLED_PHOTO_COUNT) + BUNDLED_PHOTO_COUNT) % BUNDLED_PHOTO_COUNT;
   return {
     id: `noteme-${n}`,
-    url: `assets/bg/bg-${n}-small.jpg`,
+    url: `assets/bg/bg-${n}.avif`,
     theme: 'noteme',
     bundled: true,
   };
+}
+
+/**
+ * The file of a bundled photo, from its number: one kept on screen or queued by an earlier version stored the path of
+ * a JPEG that no longer ships.
+ */
+export function bundledUrl(photo: BackgroundPhoto): string {
+  const match = /^noteme-(\d+)$/.exec(photo.id);
+  return match ? bundledPhoto(Number(match[1])).url : photo.url;
 }
 
 /** Whether the photo shown since `shownAt` is due for a change. */

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   BackgroundPhoto,
   bundledPhoto,
+  bundledUrl,
   BUNDLED_PHOTO_COUNT,
   commonsSearchUrl,
   isDue,
@@ -202,7 +203,7 @@ export class BackgroundService {
   /** The image of a photo, ready for an <img>: a bundled path, or an object URL of the cached download. */
   private async show(photo: BackgroundPhoto): Promise<ShownPhoto | null> {
     if (photo.bundled) {
-      return { ...photo, src: photo.url };
+      return { ...photo, src: bundledUrl(photo) };
     }
     try {
       const cached = await (await caches.open(CACHE_NAME)).match(photo.url);
