@@ -487,7 +487,7 @@ export class Board {
           // (a new one, the pointer resting where New appears after "+ Note" on Home) still can.
           const focused = deepActiveElement();
           menu.open = true;
-          requestAnimationFrame(() => {
+          this.afterNewMenuToggle(menu, () => {
             if (focused && focused !== document.body) {
               focused.focus({ preventScroll: true });
             } else if (menu.contains(document.activeElement)) {
@@ -502,7 +502,7 @@ export class Board {
         const focused = deepActiveElement();
         menu.open = false;
         this.newMenuHovered = false;
-        requestAnimationFrame(() => {
+        this.afterNewMenuToggle(menu, () => {
           if (focused && focused !== document.body && !menu.contains(focused)) {
             focused.focus({ preventScroll: true });
           } else if (menu.contains(document.activeElement)) {
@@ -511,6 +511,24 @@ export class Board {
         });
       }, 250);
     }
+  }
+
+  /**
+   * Run once the menu has moved the focus for its opening or closing. It does so when its popover says it toggled,
+   * which is a task of its own: a frame later was sometimes too early, and the focus then stayed on New (or in the
+   * menu), where N no longer starts a note. Soon in any case, should the popover not say so.
+   */
+  private afterNewMenuToggle(menu: HTMLElement, run: () => void): void {
+    let done = false;
+    const once = () => {
+      if (!done) {
+        done = true;
+        menu.removeEventListener('toggle', once);
+        run();
+      }
+    };
+    menu.addEventListener('toggle', once);
+    setTimeout(once, 300);
   }
 
   /** Ignore the pointer resting on New until it moves off it (see newHoverMuted). */
