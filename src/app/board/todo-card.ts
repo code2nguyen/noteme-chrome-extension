@@ -29,6 +29,7 @@ import { INSTANCE_ID } from '../services/instance-id';
 import { ArtBoardItem } from '../store/models';
 import { DataType } from '../store/models/data-type';
 import { parseTasks, serializeTasks, TodoTask } from '../todo/todo-doc';
+import { storeTodoLook } from '../todo/todo-storage';
 import { bringIntoView } from './bring-into-view';
 
 /**
@@ -39,15 +40,6 @@ let elements: Promise<unknown> | undefined;
 function loadElements(): Promise<unknown> {
   elements ??= Promise.all([import('@c2n/components/todo-list'), import('@c2n/feather-icons/icons/edit-2.js')]);
   return elements;
-}
-
-/** Drop what c2-todo-list kept in localStorage for a list (its `storage-key`): the filter tab, and its copy of the look. */
-function forgetList(id: string): void {
-  try {
-    localStorage.removeItem(`c2-todo-list:${id}`);
-  } catch {
-    // Storage can be blocked; nothing to forget then.
-  }
 }
 
 /**
@@ -113,16 +105,10 @@ export class TodoCard {
       onCleanup(() => subscription.unsubscribe());
     });
 
-    // storage-key keeps the filter tab (All, To do, Done) on this computer. It keeps a copy of the look there too, and
-    // puts it back at the first render: the look kept with the note, which another computer may have changed, wins.
-    afterNextRender(async () => {
-      await loadElements();
-      const list = this.list()?.nativeElement;
-      await list?.updateComplete;
-      if (list) {
-        list.look = this.look();
-      }
-    });
+    // storage-key keeps the filter tab (All, To do, Done) on this computer. The component keeps a copy of the look
+    // there too and draws the list from it: that copy is made the look kept with the note, which another computer may
+    // have changed, before the list reads it.
+    effect(() => storeTodoLook(this.itemId(), this.look()));
 
     effect(() => {
       if (this.autofocus()) {
@@ -163,7 +149,6 @@ export class TodoCard {
     } else if (value === 'archive') {
       this.archive.emit();
     } else if (value === 'delete') {
-      forgetList(this.item().id);
       this.remove.emit();
     } else if (value === 'pin') {
       this.pin.emit();

@@ -23,6 +23,7 @@ import { createEmptyItemData, getCurrentDate, isNotNullOrUndefined } from '../..
 import { normalizeItemData } from '../../services/migration';
 import { mergeItemDataUpdates } from '../item-data-updates';
 import { INSTANCE_ID } from '../../services/instance-id';
+import { forgetTodoList } from '../../todo/todo-storage';
 import { selectIsAllLoadedItemDatas, selectItemDataById } from '../reducers';
 
 @Injectable()
@@ -48,6 +49,16 @@ export class ItemDataEffects {
           ItemDataApiActions.deleteItemDataSuccess,
         ),
         tap((action) => this.deleted.add('artBoardItemId' in action ? action.artBoardItemId : action.itemDataId)),
+      ),
+    { dispatch: false },
+  );
+
+  /** A to-do list deleted here or elsewhere takes with it the filter tab this computer remembered for it. */
+  forgetTodoList$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ArtBoardItemApiActions.deleteArtBoardItemSuccess),
+        tap(({ artBoardItemId }) => forgetTodoList(artBoardItemId)),
       ),
     { dispatch: false },
   );

@@ -38,11 +38,19 @@ if (process.argv.includes('--unlink')) {
   console.log('@c2n packages are the published ones again');
 } else {
   // Every build is checked before anything is replaced: a missing one must not leave half the packages linked.
-  const unbuilt = Object.values(links).filter((path) => !existsSync(resolve(repo, path, 'dist')));
+  // The MCP server is the agents' tool, not the app's: without its build the published one stays, and says so.
+  const built = (path: string) => existsSync(resolve(repo, path, 'dist'));
+  const optional = new Set(['mcp']);
+  const unbuilt = Object.entries(links).filter(([name, path]) => !optional.has(name) && !built(path));
   if (unbuilt.length > 0) {
-    throw new Error(`No build in ${repo} for ${unbuilt.join(', ')}: run npm run build -w <path> there first`);
+    const paths = unbuilt.map(([, path]) => path).join(', ');
+    throw new Error(`No build in ${repo} for ${paths}: run npm run build -w <path> there first`);
   }
   for (const [name, path] of Object.entries(links)) {
+    if (!built(path)) {
+      console.log(`@c2n/${name} stays the published one: no build in ${path} (npm run build:tools in ${repo})`);
+      continue;
+    }
     const source = resolve(repo, path);
     rmSync(target(name), { recursive: true, force: true });
     symlinkSync(source, target(name), 'dir');

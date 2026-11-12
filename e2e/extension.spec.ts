@@ -420,10 +420,11 @@ test('Settings says how much room the notes take, and Chrome sync while it is on
   await storage.scrollIntoViewIfNeeded();
   await shot(page, 'extension-settings-storage');
   // What stays on the computer is explained behind the heading's (i).
-  await storage.locator('c2-toggletip').getByRole('button').click();
-  await expect(storage.locator('c2-toggletip')).toContainText('kept on this computer only');
-  await page.waitForTimeout(400);
-  await shot(page, 'extension-settings-help');
+  const help = storage.locator('c2-toggletip');
+  await expect(help).not.toHaveAttribute('open');
+  await help.getByRole('button').click();
+  await expect(help).toHaveAttribute('open');
+  await expect(help).toContainText('kept on this computer only');
   // Chrome sync is not read, and not shown, while sync is off.
   await page
     .locator('ntm-settings-panel .settings__row', { hasText: 'Sync with your Chrome profile' })

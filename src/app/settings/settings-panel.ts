@@ -118,7 +118,8 @@ export class SettingsPanel {
     const parts = [
       { key: 'notes', name: this.t('settings.storage.notes'), value: notes },
       { key: 'files', name: this.t('settings.storage.files'), value: files },
-    ].filter((part): part is { key: string; name: string; value: number } => part.value !== undefined);
+      // A part that takes no room has no segment to draw: it is left out like one that could not be measured.
+    ].filter((part): part is { key: string; name: string; value: number } => !!part.value);
     return {
       device: parts.length
         ? {

@@ -105,6 +105,8 @@
   --c2-distribution-bar__legend--color: var(--c2-theme--color-on-surface);
   --c2-distribution-bar__legend--font-size: calc(13px * var(--ntm-text-scale));
   --c2-distribution-bar__legend-value--color: var(--c2-theme--color-on-surface-variant);
+  // The legend already says each part's size; the hover bubble would add the number of bytes, bare.
+  --c2-distribution-bar__tooltip--display: none;
 }
 
 // Chrome sync's quota: the row's own text size and colours, the bar in the theme's until it fills up.

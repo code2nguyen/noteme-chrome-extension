@@ -87,7 +87,7 @@
         </c2-toggletip>
       </span>
       <c2-switch
-        aria-labelledby="settings-quote"
+        [attr.aria-label]="t('settings.quote')"
         [checked]="settings().quote"
         (change)="toggle('quote', $event)"
       ></c2-switch>
@@ -117,7 +117,7 @@
           </c2-toggletip>
         </span>
         <c2-switch
-          aria-labelledby="settings-shortcuts"
+          [attr.aria-label]="t('settings.shortcuts')"
           [checked]="settings().shortcuts"
           (change)="toggleShortcuts($event)"
         ></c2-switch>
@@ -135,7 +135,7 @@
         </c2-toggletip>
       </span>
       <c2-switch
-        aria-labelledby="settings-photos"
+        [attr.aria-label]="t('settings.photos')"
         [checked]="settings().photos"
         (change)="toggle('photos', $event)"
       ></c2-switch>
@@ -235,7 +235,7 @@
             </c2-toggletip>
           </span>
           <c2-switch
-            aria-labelledby="settings-reminders"
+            [attr.aria-label]="t('settings.reminders')"
             [checked]="reminders()"
             (change)="toggleReminders($event)"
           ></c2-switch>
@@ -278,7 +278,7 @@
         </c2-toggletip>
       </span>
       <c2-switch
-        aria-labelledby="settings-sync-switch"
+        [attr.aria-label]="t('settings.sync.switch')"
         [checked]="settings().sync"
         (change)="toggle('sync', $event)"
       ></c2-switch>
