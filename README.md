@@ -74,7 +74,7 @@ web address and loads from that site. Images no note refers to any more are dele
 ## Stack
 
 Angular 22 (standalone, zoneless, signals) with NgRx 22 for the store, and the [c2n web components](https://code2nguyen.github.io/web-components/)
-1.0.17 (`@c2n/components`, `@c2n/core`, `@c2n/feather-icons`, `@c2n/phosphor-icons`, `@c2n/symbols`) for every piece
+1.0.26 (`@c2n/components`, `@c2n/core`, `@c2n/feather-icons`, `@c2n/phosphor-icons`, `@c2n/symbols`) for every piece
 of UI: `c2-masonry` for the board; `c2-notepad`, `c2-page-editor`, `c2-flow`, `c2-todo-list` and `c2-spreadsheet` for
 the notes; `c2-week-planner` and `c2-month-planner` for Plan; `c2-split-panel` and `c2-action-bar` for the archive;
 `c2-carousel` on Home; `c2-skip-link`, `c2-modal`, `c2-sheet`, `c2-menu`, `c2-search-field`, `c2-select`,

@@ -1,3 +1,5 @@
+import { DEV_STORAGE_PREFIX } from '../services/storage-keys';
+
 /** How much room Noteme takes, as Settings › Storage shows it; a part this browser cannot measure is left out. */
 export interface StorageUsage {
   /** The notes, plans and settings in chrome.storage.local, in bytes. */
@@ -47,6 +49,19 @@ export function waitingNotes(keys: readonly string[]): number {
   return ids.size;
 }
 
+/** The size of the records the build served outside the extension keeps in localStorage, in bytes of UTF-8. */
+export function devStorageBytes(storage: Pick<Storage, 'length' | 'key' | 'getItem'>): number {
+  const encoder = new TextEncoder();
+  let bytes = 0;
+  for (let index = 0; index < storage.length; index++) {
+    const key = storage.key(index);
+    if (key?.startsWith(DEV_STORAGE_PREFIX)) {
+      bytes += encoder.encode(key.slice(DEV_STORAGE_PREFIX.length) + (storage.getItem(key) ?? '')).length;
+    }
+  }
+  return bytes;
+}
+
 /** Measure what can be measured; a part that fails is left out, never thrown. */
 export async function readStorageUsage(syncOn: boolean): Promise<StorageUsage> {
   const usage: StorageUsage = {};
@@ -55,9 +70,8 @@ export async function readStorageUsage(syncOn: boolean): Promise<StorageUsage> {
   const part = async (read: () => Promise<void>) => read().catch((error: unknown) => console.error(error));
   await Promise.all([
     part(async () => {
-      if (local) {
-        usage.notes = await local.getBytesInUse(null);
-      }
+      // Outside the extension the records are in localStorage (dev-storage.api.ts): the same measure, keys and values.
+      usage.notes = local ? await local.getBytesInUse(null) : devStorageBytes(localStorage);
     }),
     part(async () => {
       // The origin's IndexedDB and Cache Storage; chrome.storage is counted apart.

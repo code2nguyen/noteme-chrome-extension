@@ -394,6 +394,42 @@ test('the customize panel of a to-do list floats whole in the window, however sh
   await expect(panel).toHaveCount(0);
 });
 
+test('a to-do list reopens on the filter tab it was left on', async ({ page }) => {
+  await openBoard(page);
+  await page.keyboard.press('t');
+  const list = page.locator('ntm-todo-card');
+  await page.keyboard.type('Groceries');
+  await page.keyboard.press('Enter');
+  const add = list.getByRole('textbox', { name: 'New task' });
+  for (const task of ['Oat milk', 'Bread']) {
+    await add.fill(task);
+    await add.press('Enter');
+  }
+  await list.getByRole('checkbox').last().click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage).some(
+          ([key, value]) => key.startsWith('noteme-dev:ITEM_DATA__') && /done\W+true/.test(value),
+        ),
+      ),
+    )
+    .toBe(true);
+  await list.locator('c2-tab[for="filter-done"]').click();
+  await expect(list.getByRole('checkbox')).toHaveCount(1);
+
+  await page.reload();
+  await expect(list.locator('c2-tabs')).toHaveAttribute('selected-tab', 'filter-done');
+  await expect(list.getByRole('checkbox')).toHaveCount(1);
+
+  // Deleted, the list leaves nothing of it behind in localStorage.
+  await list.getByRole('button', { name: 'To do actions' }).click();
+  await list.locator('c2-menu-item[value="delete"]').click();
+  await expect
+    .poll(() => page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('c2-todo-list:'))))
+    .toEqual([]);
+});
+
 test('a to-do list is named, filled and checked off on its card, and kept after a reload', async ({ page }) => {
   await openBoard(page);
   await page.keyboard.press('t');
@@ -1261,7 +1297,7 @@ test.describe('home', () => {
     await sheet.locator('c2-button', { hasText: 'Light' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-    await sheet.locator('c2-switch', { hasText: 'Quote of the day' }).click();
+    await sheet.locator('.settings__row', { hasText: 'Quote of the day' }).locator('c2-switch').click();
     await expect(page.locator('.home__quote')).toHaveCount(0);
     await shot(page, '04-settings-light');
 
