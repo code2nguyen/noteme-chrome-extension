@@ -1,5 +1,4 @@
 import '@c2n/components/skip-link';
-import '@c2n/components/toast';
 
 import {
   afterNextRender,

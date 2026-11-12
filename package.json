@@ -24,6 +24,7 @@
     "c2n:link": "node scripts/link-c2n.ts",
     "c2n:unlink": "node scripts/link-c2n.ts --unlink",
     "changelog": "node scripts/changelog.ts",
+    "theme": "node scripts/theme-subset.ts",
     "version": "node scripts/package-extension.ts --sync && node scripts/changelog.ts --next && git add src/manifest.json CHANGELOG.md"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { localeTag, resolveLanguage } from './language';
-import { CATALOGS } from './messages';
+import { CATALOGS } from './messages/all';
 
 describe('resolveLanguage', () => {
   it('keeps a chosen language, whatever the browser says', () => {

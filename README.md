@@ -77,11 +77,19 @@ Angular 22 (standalone, zoneless, signals) with NgRx 22 for the store, and the [
 of UI: `c2-masonry` for the board; `c2-notepad`, `c2-page-editor`, `c2-flow`, `c2-todo-list` and `c2-spreadsheet` for
 the notes; `c2-week-planner` and `c2-month-planner` for Plan; `c2-split-panel` and `c2-action-bar` for the archive;
 `c2-carousel` on Home; `c2-skip-link`, `c2-modal`, `c2-sheet`, `c2-menu`, `c2-search-field`, `c2-select`,
-`c2-toast-region` and the rest of the controls. The theme comes from `@c2n/components/theme.css`; `src/styles.scss`
-maps the Noteme palette onto its `--c2-theme--*` tokens.
+`c2-toast-region` and the rest of the controls. The theme is c2n's: its tokens (`@c2n/components/tokens.css`),
+which `src/styles.scss` maps the Noteme palette onto, and the base theme of the components Noteme uses
+(`src/c2n-theme.generated.css`). The whole base theme covers 144 components and is four times the size; `npm run
+theme` writes the part Noteme needs, and CI fails when it is out of date: run it after adding a c2 component or
+upgrading c2n.
 
 Translations are Noteme's own (`src/app/i18n`): typed message keys in English, French and Vietnamese, and the c2n
-components' French and Vietnamese registered with `addTranslations` (`src/app/i18n/components`).
+components' French and Vietnamese registered with `addTranslations` (`src/app/i18n/components`). English ships with
+the app; French and Vietnamese are files of their own, read before the app starts when Noteme speaks one of them.
+
+A new tab loads only what Home draws: each route and the settings sheet bring their own elements, and the search
+library and the toasts are read the first time they are used. The build's budgets (`angular.json`) sit just above
+today's sizes, so a change that makes the first load heavier fails the build.
 
 The page is the whole app but for a small background service worker (`src/worker`, built into `background.js` by
 `scripts/build-worker.ts` with esbuild): it answers the address bar and shows the reminders, with one `chrome.alarms`
@@ -107,6 +115,7 @@ npm run e2e        # build, then Playwright: the web build and the unpacked exte
 npm run lint
 npm run type-check
 npm run format:check
+npm run theme        # rewrite src/c2n-theme.generated.css (after adding a c2 component or upgrading c2n)
 ```
 
 The Playwright suites (`e2e/`) write screenshots of every verified state to `test-results/screenshots/`. Set

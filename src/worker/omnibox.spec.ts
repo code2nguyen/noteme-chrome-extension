@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import '../app/i18n/messages/all';
 import { escapeXml, omniboxIndex, omniboxNotes, omniboxSuggestions, omniboxTarget } from './omnibox';
 
 const BASE = 'chrome-extension://abc/index.html';

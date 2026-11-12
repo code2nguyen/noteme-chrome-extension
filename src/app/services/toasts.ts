@@ -12,6 +12,12 @@ export class Toasts {
   private readonly actions = new Map<string, () => void>();
   /** Toasts asked for before the region was drawn, shown once it is. */
   private waiting: [ToastOptions, (() => void) | undefined][] = [];
+  private defined?: Promise<unknown>;
+  /**
+   * c2-toast-region's code, read with the first toast: most new tabs show none, so the region waits in the page as an
+   * unknown element until then, and is upgraded where it stands.
+   */
+  load: () => Promise<unknown> = () => import('@c2n/components/toast');
 
   /** The app root hands over its region once drawn. */
   attach(region: ToastRegion): void {
@@ -29,10 +35,21 @@ export class Toasts {
       this.waiting.push([options, onAction]);
       return;
     }
-    const id = this.region.show(options);
-    if (id && onAction) {
-      this.actions.set(id, onAction);
-    }
+    const region = this.region;
+    this.defined ??= this.load();
+    this.defined.then(
+      () => {
+        const id = region.show(options);
+        if (id && onAction) {
+          this.actions.set(id, onAction);
+        }
+      },
+      (error: unknown) => {
+        // Not read: the next toast tries again.
+        this.defined = undefined;
+        console.error('Could not show a message', error);
+      },
+    );
   }
 
   /** The region's `toast-action`. */

@@ -8,6 +8,8 @@ import type Fuse from 'fuse.js';
 
 import { localeTag, resolveLanguage } from '../app/i18n/language';
 import { message } from '../app/i18n/messages';
+// A worker cannot wait for a language to load: every one comes with it.
+import '../app/i18n/messages/all';
 import { parsePlans, PlanItem } from '../app/plan/plan';
 import { isReminderDue, REMINDER_PREFIX, reminderPlan, reminderText, upcomingReminders } from '../app/plan/reminders';
 import { DEVICE_SETTINGS_KEY, DeviceSettings, parseDeviceSettings } from '../app/services/device-settings';

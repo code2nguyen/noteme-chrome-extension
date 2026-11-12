@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { ActionsSubject, Store } from '@ngrx/store';
-import Fuse from 'fuse.js';
-import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, mergeMap, shareReplay, startWith, take } from 'rxjs/operators';
+import type Fuse from 'fuse.js';
+import { combineLatest, defer, Observable, of } from 'rxjs';
+import { catchError, filter, first, map, mergeMap, shareReplay, startWith, take } from 'rxjs/operators';
 
 import { selectAllItemDatas, selectIsAllLoadedItemDatas, selectItemDatasLoadFailed } from '../store/reducers';
 import { SEARCH_OPTIONS, SearchDocument, toSearchDocument } from './search-index';
@@ -26,7 +26,8 @@ export class SearchService {
   /**
    * The index of every note, once they are all read, kept up to date as notes change. If reading them fails, it is
    * built once from what was read, so a search still answers, and completes there: it follows no changes, and the
-   * next search reads the notes again.
+   * next search reads the notes again. fuse.js is read with the first search: a new tab that searches nothing never
+   * loads it.
    */
   private createIndex(): Observable<Fuse<SearchDocument>> {
     this.store.dispatch(ItemDataActions.getAllItemData());
@@ -34,10 +35,11 @@ export class SearchService {
       this.store.select(selectAllItemDatas),
       this.store.select(selectIsAllLoadedItemDatas),
       this.store.select(selectItemDatasLoadFailed),
+      defer(() => import('fuse.js')),
     ]).pipe(
       filter(([, isAllLoaded, failed]) => isAllLoaded || failed),
       first(),
-      mergeMap(([items, isAllLoaded]) => {
+      mergeMap(([items, isAllLoaded, , { default: Fuse }]) => {
         const fuse = new Fuse(
           items.filter((item) => IndexableItemTypes.includes(item.dataType)).map(toSearchDocument),
           SEARCH_OPTIONS,
@@ -47,6 +49,11 @@ export class SearchService {
           return of(fuse);
         }
         return this.followChanges(fuse);
+      }),
+      // fuse.js not read: this search fails, the next one tries again.
+      catchError((error: unknown) => {
+        this.fuse$ = undefined;
+        throw error;
       }),
     );
   }
